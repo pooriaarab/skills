@@ -30,6 +30,35 @@ netlify status
 
 ---
 
+## Critical: gws Needs Isolated Config Directories
+
+`gws` stores OAuth credentials in a single encrypted file (`~/.config/gws/credentials.enc`) with a single encryption key. Switching accounts by copying files causes key/credential mismatches. **The only reliable approach is isolated config directories + symlink switching:**
+
+```bash
+mkdir -p ~/.config/gws-work ~/.config/gws-personal
+# Each dir gets its own: client_secret.json, credentials.enc, .encryption_key
+
+# In work()/personal() functions — swap the symlink, not individual files:
+rm -f ~/.config/gws && ln -s ~/.config/gws-work ~/.config/gws    # work
+rm -f ~/.config/gws && ln -s ~/.config/gws-personal ~/.config/gws # personal
+```
+
+**Always use file-based keyring** (not OS keyring) so each dir's encryption key is portable:
+```bash
+export GOOGLE_WORKSPACE_CLI_KEYRING_BACKEND=file
+gws auth login   # creates .encryption_key inside the active config dir
+```
+
+**Personal GCP project requirements** for gws personal config:
+1. Create GCP project on personal account: `gcloud projects create my-personal`
+2. Enable APIs: `gcloud services enable drive.googleapis.com sheets.googleapis.com gmail.googleapis.com docs.googleapis.com`
+3. Enable billing (required for quota project): `gcloud billing projects link my-personal --billing-account=<id>`
+4. Create OAuth Desktop client via console (no CLI API for this): **console.cloud.google.com/apis/credentials**
+5. Add your email as OAuth test user: **console.cloud.google.com/apis/credentials/consent**
+6. Download `client_secret.json` → `~/.config/gws-personal/client_secret.json`
+
+---
+
 ## Step 2 — gcloud Configurations
 
 ```bash
@@ -103,6 +132,10 @@ NETLIFY_TOKEN_PERSONAL=""
 
 function work() {
   gcloud config configurations activate work --quiet
+  cp ~/.config/gcloud/adc_work.json ~/.config/gcloud/application_default_credentials.json
+  export GOOGLE_APPLICATION_CREDENTIALS=~/.config/gcloud/adc_work.json
+  rm -f ~/.config/gws && ln -s ~/.config/gws-work ~/.config/gws
+  export GOOGLE_WORKSPACE_CLI_KEYRING_BACKEND=file
   export NETLIFY_AUTH_TOKEN="$NETLIFY_TOKEN_WORK"
   firebase login:use you@company.com 2>/dev/null
   echo "✓ Switched to work (you@company.com)"
@@ -111,6 +144,10 @@ function work() {
 
 function personal() {
   gcloud config configurations activate personal --quiet
+  cp ~/.config/gcloud/adc_personal.json ~/.config/gcloud/application_default_credentials.json
+  export GOOGLE_APPLICATION_CREDENTIALS=~/.config/gcloud/adc_personal.json
+  rm -f ~/.config/gws && ln -s ~/.config/gws-personal ~/.config/gws
+  export GOOGLE_WORKSPACE_CLI_KEYRING_BACKEND=file
   export NETLIFY_AUTH_TOKEN="$NETLIFY_TOKEN_PERSONAL"
   firebase login:use you@gmail.com 2>/dev/null
   echo "✓ Switched to personal (you@gmail.com)"
@@ -168,8 +205,12 @@ direnv allow
 | `gcloud auth` fails non-interactively | Run `! gcloud auth login` (needs browser) |
 | `firebase login:use` fails | Run `firebase login:add` first, then `login:use` |
 | `NETLIFY_AUTH_TOKEN` not persisting | Add `export` to the var, or re-run `work`/`personal` after new shell |
-| gws still uses wrong account | gws inherits gcloud — check `gcloud config get account` |
-| ADC (Application Default Credentials) wrong | Run `gcloud auth application-default login` per account |
+| gws still uses wrong account | gws does NOT inherit gcloud — it needs isolated dirs + symlink swap |
+| gws "Decryption failed" on switch | Do NOT copy credentials files between accounts — use isolated dirs (`~/.config/gws-work/`, `~/.config/gws-personal/`) and symlink swap |
+| gws keyring overwrites on re-login | Use `GOOGLE_WORKSPACE_CLI_KEYRING_BACKEND=file` — each dir gets its own `.encryption_key` |
+| gws personal project 403 forbidden | Enable billing: `gcloud billing projects link <project> --billing-account=<id>` |
+| gws OAuth consent blocked (testing mode) | Add your email as test user at console.cloud.google.com/apis/credentials/consent |
+| ADC (Application Default Credentials) wrong | Save per-account: `cp ~/.config/gcloud/application_default_credentials.json ~/.config/gcloud/adc_work.json`; swap in switcher function |
 | Multiple `default` configs cluttering list | Rename: `gcloud config configurations rename default work` |
 
 ## Cost and Time
