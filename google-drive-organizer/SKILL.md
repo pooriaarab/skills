@@ -307,6 +307,55 @@ def move_rename(file_id, dest_id, src_id, new_name):
 
 ---
 
+## Personal vs Work Drive Structure
+
+Work/product Drives and personal Drives need completely different folder schemes.
+
+**Work/product Drive (e.g. SaaS company):**
+`analytics/`, `decks/`, `engineering/`, `events/`, `finance/`, `marketing/`, `media/`, `outreach-leads/`, `product/`, `strategy/`, `support/`, `testing/`, `users-data/`, `personal/`, `<employer>/` (org-specific), `_inbox/`, `_archive/`
+
+**Personal Drive:**
+`career/` (resumes/, reference-letters/, job-descriptions/, <employer>/), `immigration/` (canada-pr/, work-permit/, family/, dubai/, us-visa/), `university/` (courses/, textbooks/), `<project-a>/` or other-startup/ (events/, grants/, partnerships/, community/), `fitness/` (workout-logs/), `finance/`, `media/` (recordings/, photos/, brand-assets/), `languages/`, `ai-projects/` (notebooks/, image-gen/), `creative/` (content-planning/, brand-assets/, project-name/), `personal/`, `_archive/`, `_inbox/`
+
+Ask the user which type of Drive it is before proposing structure.
+
+---
+
+## Trash Safely — Check File Size First
+
+Before trashing any "empty" file, verify with size check:
+
+```python
+# 0 bytes = definitely empty; 1024 bytes = minimal wrapper (also empty for Docs/Sheets)
+# -1 = non-exportable type (maps, shortcuts, forms) — don't trash blindly
+# >2000 bytes = has real content — classify with OpenAI before deciding
+
+size = int(f.get("size", -1))
+if size in (0, 1024) and "untitled" in name.lower() and mime != "map":
+    trash(file_id)  # safe to delete
+elif size > 2000 and "untitled" in name.lower():
+    classify_with_openai(file_id, name, mime)  # analyze first
+```
+
+Include `size` in your `fields` param: `"fields": "nextPageToken,files(id,name,mimeType,size)"`
+
+---
+
+## Rename Patterns
+
+| Pattern | Action |
+|---------|--------|
+| `Feb 2025 Pooria 5x5 Advanced (aka <workout-template>) \| <source>.com` | → `Feb 2025 Workout Log` |
+| `results-20241123-220704` | Leave as-is inside `bigquery-exports/` sub-folder |
+| `https://blog.example.com/slug-2026-05-05` | → `Blog Performance May 2026` |
+| `Copy of Resume - Jane Doe (Nov 2025).docx` | → `Resume - Jane Doe Nov 2025 v2.docx` |
+| `# Firebase environment configuration` | → `Firebase Environment Configuration` (strip `#`) |
+| `Grandfatehred over invite edits limit` | → `Grandfathered over Invite Edits Limit` (fix typos) |
+| `ecommerce-itinerary (1) (1).pdf` | → `E-Commerce Event Itinerary.pdf` (strip duplicates) |
+| `WM0h3519 - <project>-tracker (2).json` | → `<project>-tracker.json` |
+
+---
+
 ## Gotchas and Learnings
 
 | Problem | Fix |
@@ -317,10 +366,13 @@ def move_rename(file_id, dest_id, src_id, new_name):
 | Root folder ID needed for moves | Read it from `parents[0]` of any root-level file |
 | Pagination | Always handle `nextPageToken` — root can have 400+ items |
 | Rate limits | Sleep 0.12s between API calls; 0.5s after OpenAI calls |
-| Untitled docs with content | Always export+check before classifying; empty = trash |
+| Untitled docs with content | Check size first — 1024 bytes = empty; >2000 bytes = classify |
 | Presentations scattered across folders | Collect all `application/vnd.google-apps.presentation` into `decks/` |
 | Duplicate filenames | Drive allows them — handle with "v2" suffix on rename |
 | `gws drive files update` params | `fileId` goes in `--params`, metadata changes go in `--json` body |
+| Google Maps/shortcuts/forms | Not exportable via Drive API — route by name or move to `personal/` |
+| Duplicate folders (e.g. 3x "Notability") | Query all items, not just `folders` dict — check for dupes by name |
+| Personal Drive has 400+ items at root | Pre-map everything; personal Drives accumulate more junk than work ones |
 
 ---
 
