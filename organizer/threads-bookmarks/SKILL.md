@@ -14,8 +14,9 @@ Process Threads saved posts.
 ## Requirements
 
 - Threads account (Meta).
-- **Browser- or app-driven** — Threads uses Instagram's auth + has limited public API.
-- For account-level data, "Download Your Information" via Meta Account Center is the most reliable bulk source.
+- **`threadsclaw` CLI** — [pooriaarab/threadsclaw](https://github.com/pooriaarab/threadsclaw) (scaffold; needs implementation). Browser-cookie-based scraper in steipete's `*claw` style. Goal: claw saved posts into structured JSON.
+- Logged-in Threads session in a browser (Meta auth — shares cookies with Instagram).
+- Fallback until `threadsclaw` is built: Meta's "Download Your Information" export, or Playwright on the web app.
 
 ## Step 1 — Ask the User First
 
