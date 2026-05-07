@@ -44,7 +44,7 @@ Run [`life-organizer`](life-organizer/SKILL.md) — it surveys your preferences 
 - **Batch approval** — large changes are presented in chunks the user can approve incrementally.
 - **Journal / undo** — where the surface allows it.
 
-See [`_lib/patterns.md`](_lib/patterns.md) for the implementation patterns shared across sub-skills.
+See [`_lib/patterns.md`](_lib/patterns.md) for the implementation patterns shared across sub-skills, and [`_lib/auth-setup.md`](_lib/auth-setup.md) for the one-time CLI auth runbook.
 
 ## Adding a new sub-skill
 
