@@ -20,6 +20,12 @@ Reorganize a chaotic Google Drive into a clean, kebab-case folder hierarchy usin
 - `gcloud` CLI: `brew install --cask google-cloud-sdk`
 - Google account authenticated: `gws auth login`
 
+**Alternative (`gog` CLI — covers entire Google Workspace in one tool):**
+- `brew install steipete/tap/gogcli` (binary is `gog` — [openclaw/gogcli](https://github.com/openclaw/gogcli))
+- Auth: `gog auth` (OAuth flow per Google account)
+- Drive operations: `gog drive list/move/rename/share/delete`. Same coverage as Python client, faster for one-off scripting.
+- Use Python client for sustained programmatic work; use `gog` for ad-hoc commands and shell pipelines.
+
 **Optional:**
 - OpenAI or Anthropic API key (only needed for untitled doc classification)
 

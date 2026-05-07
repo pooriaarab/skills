@@ -13,8 +13,9 @@ Tame a chaotic Google Calendar via the `gws` CLI or Calendar API.
 
 ## Requirements
 
-- `gws` CLI authenticated, or Google Calendar API OAuth credentials.
-- Account selector (`work` / `personal` shell functions — see [`multi-account-cli`](../../multi-account-cli/SKILL.md)).
+- **`gog` CLI** — `brew install steipete/tap/gogcli` (binary is `gog`, formula is `gogcli` — [openclaw/gogcli](https://github.com/openclaw/gogcli)). Covers Gmail/Calendar/Drive/Contacts/Tasks/Keep/Sheets/Docs/Slides/Forms/AppScript/Ads/Groups/Admin in one tool. Auth via `gog auth` once per Google account.
+- Alternatives: `gcalcli` (insanum/gcalcli) for calendar-only, or `gws` CLI.
+- Account selector for multi-account: `gog --account=<email>` or [`multi-account-cli`](../../multi-account-cli/SKILL.md).
 
 ## Step 1 — Ask the User First
 
