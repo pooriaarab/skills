@@ -449,6 +449,24 @@ Default to **archive + label** for everything except:
 
 Refuse to apply if the active gws account doesn't match the plan's `email` field.
 
+### Realistic unsubscribe success rates (from a 90k-msg run)
+
+On a real personal-account run, only **~52%** of newsletter senders had a one-click `List-Unsubscribe-Post` header. Of those, **~74%** of POSTs succeeded; the rest broke down roughly as:
+
+| Outcome | Share | Notes |
+|---|---:|---|
+| 200–399 success | 74% | Worked as advertised |
+| 404 / 410 | 11% | Sender's unsubscribe endpoint is gone (company shut down) |
+| Network errors (DNS, refused, SSL) | 8% | Sender's domain is gone or unreachable |
+| 403 | 4% | Sender refuses programmatic one-click despite advertising it (LinkedIn, Medium, sometimes Beehiiv) |
+| 400 / 405 / 5xx | 3% | Server-side bugs |
+
+Plan around this: bulk one-click cleans up most newsletters, but expect to surface a CSV/TODO list of:
+- The ~48% of senders without one-click — they need manual `mailto:` or HTML-link unsubscribe
+- The ~26% of one-click failures — many are dead, some need manual visits
+
+Sort the TODO by message volume so the user spends their attention where it matters.
+
 ---
 
 ## Step 5 — Apply Phase
@@ -565,7 +583,21 @@ for ev in reversed(events):
 - **Never permanent-delete by default.** The trash category uses `messages.trash` (30-day window), not `messages.delete`. Permanent delete is opt-in per-category and the prompt must say "IRREVERSIBLE".
 - **Never click HTML unsubscribe links automatically.** Only RFC 8058 one-click POST is automated. mailto: and HTML-link unsubscribes are surfaced to the user.
 - **Tag every artifact with the email.** Plan files, journals, and `last_run` are all per-account so cross-account contamination is impossible.
-- **Heuristics first, LLM second.** The LLM classifier (if enabled) runs at most one call per sender domain, never per message. Cap the budget at 200 ambiguous domains per run.
+- **Heuristics first, LLM second.** The LLM classifier (if enabled) runs at most one call per sender domain, never per message. Cap the budget at 200 ambiguous domains per run, or use a cheap model (e.g. `claude-haiku-4-5` with prompt caching) for larger sweeps — sender-classification is a perfect fit for that tier.
+
+---
+
+## Label hygiene (kebab-case + preserve list)
+
+Apply both rules together as a single audit pass after the apply phase:
+
+1. **Kebab-case all user-visible labels.** Lowercase, words joined with `-`, slashes preserved for nesting. `Bee House/Sponsors` → `bee-house/sponsors`. Use `users.labels.update` (the label *ID* stays the same; only the display name changes, so existing message labels stay applied).
+2. **Preserve labels that other tools depend on.** Renaming a label that an external tool (Gmail plugin, filter, integration) reads by name will silently break it. Always preserve:
+   - Anything matching the `GMass*` family (`GMass Reports`, `GMass Reports/Opens`, `GMass Auto Followup`, etc.) — created and read by the GMass plugin.
+   - User-flagged labels referenced in other systems. Ask the user up-front: *"Any labels other tools read by name?"* and add them to the preserve list. Common candidates: `Notes`, `Personal`, anything matching `*Calendar*`, plugin-specific labels.
+3. **Delete redundant empty labels.** If you've created a hierarchical replacement (e.g. `finance/receipts`), the legacy flat label (`Receipts`, 0 msgs) can be deleted. Only delete labels with `messagesTotal == 0`.
+
+System labels (`INBOX`, `SPAM`, `TRASH`, `CATEGORY_*`, etc.) and any label with `type: "system"` must never be renamed or deleted.
 
 ---
 
