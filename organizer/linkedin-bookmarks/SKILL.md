@@ -14,8 +14,9 @@ Process the LinkedIn "Saved Posts" / "Saved Items" queue.
 ## Requirements
 
 - LinkedIn account.
-- **Browser-driven only** — LinkedIn does not offer a public API for personal saves. Use Playwright or chrome-devtools MCP.
-- Authenticated browser session (cookies copied from logged-in browser, or login automated).
+- **`linkedinclaw` CLI** — [pooriaarab/linkedinclaw](https://github.com/pooriaarab/linkedinclaw) (scaffold; needs implementation). Browser-cookie-based scraper in steipete's `*claw` style. Goal: export Saved Posts and My Items into structured JSON, claw-able for agents.
+- Logged-in LinkedIn session in a browser (cookies imported via `sweetcookie`).
+- Alternative until `linkedinclaw` is built: Playwright or chrome-devtools MCP.
 
 ## Step 1 — Ask the User First
 

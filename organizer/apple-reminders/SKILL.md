@@ -14,7 +14,8 @@ Clean up Reminders.app via AppleScript / EventKit.
 ## Requirements
 
 - macOS Reminders.app with iCloud sync enabled.
-- Automation access to Reminders (AppleScript prompt on first call).
+- **`remindctl` CLI** — `brew install steipete/tap/remindctl` ([repo](https://github.com/steipete/remindctl)). List, create, complete, and delete reminders from the terminal via EventKit.
+- Automation access to Reminders (AppleScript prompt on first call) — required for some bulk operations.
 
 ## Step 1 — Ask the User First
 
