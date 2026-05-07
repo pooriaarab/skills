@@ -28,6 +28,7 @@ Multi-select. Common options (default = all of "Personal essentials"):
 - [ ] Contacts.app → `contacts`
 - [ ] Calendars (Google + iCloud) → `gcal`, `icloud-calendar`
 - [ ] Reminders.app → `apple-reminders`
+- [ ] Google Tasks → `gtasks`
 
 **Communication**
 - [ ] iMessage → `imessage`
