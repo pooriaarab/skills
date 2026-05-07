@@ -14,8 +14,9 @@ Clean up the user's Spotify playlist library via the Spotify Web API.
 ## Requirements
 
 - Spotify account (Free or Premium).
-- OAuth client ID + secret for the Spotify Web API.
-- Scopes: `playlist-read-private`, `playlist-read-collaborative`, `playlist-modify-private`, `playlist-modify-public`.
+- **`spogo` CLI** — `brew install steipete/tap/spogo` ([repo](https://github.com/openclaw/spogo)). Uses browser cookies (via `sweetcookie`) instead of OAuth Developer credentials, bypassing Spotify API rate limits.
+- A logged-in Spotify session in Chrome / Safari / Firefox (one-time login at open.spotify.com).
+- Optional alternative: Spotify Web API directly with OAuth client + scopes `playlist-read-private`, `playlist-read-collaborative`, `playlist-modify-private`, `playlist-modify-public`.
 
 ## Step 1 — Ask the User First
 
