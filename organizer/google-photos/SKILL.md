@@ -1,29 +1,30 @@
 ---
 name: google-photos
-description: "Use when the user wants to organize Google Photos — albums, dedupe, tagging, deleting blurry/duplicate shots, building a clean library structure that mirrors their Drive / iCloud taxonomy. The Library API was locked down in March 2025 (third-party apps can only access content they uploaded), so this skill primarily uses Google Takeout exports plus filesystem organization, with optional Apple Photos / browser-automation fallbacks. Triggers: 'organize google photos', 'dedupe my photos', 'clean up photo library', 'sort my photos by year/event'."
+description: "Use when the user wants to organize Google Photos — albums, dedupe, tagging, deleting blurry/duplicate shots, building a clean library structure that mirrors their Drive / iCloud taxonomy. Toggles between Google Takeout (full-library export to filesystem) and the Apple Photos local SQLite library (when iCloud Photos is on). Triggers: 'organize google photos', 'dedupe my photos', 'clean up photo library', 'sort my photos by year/event'."
 ---
 
 # Google Photos Organizer
 
-Organize a Google Photos library into a clean, dedupe'd, hierarchically-structured archive. **Three access paths**, picked based on what the user actually wants to do:
+Organize a Google Photos library into a clean, dedupe'd, hierarchically-structured archive. The skill toggles between two paths — pick the one that matches the user's setup:
 
-| Path | When to use | Coverage | Effort |
-|---|---|---|---|
-| **A — Google Takeout** (recommended) | Full library reorganization, archival, dedupe across years | Everything in the library | High one-time, then easy |
-| **B — Apple Photos local DB** (if iCloud Photos is on) | Real-time access without an export, ongoing maintenance | Whatever's synced to the Mac | Low |
-| **C — Browser automation** (Playwright) | Bulk operations the API can't do (album rename, sharing) | Limited; fragile | Medium |
-| **D — Photos Library API** | Apps that re-upload their own content only | App-created content only | N/A for personal organization |
+| Path | When to use | Coverage |
+|---|---|---|
+| **A — Google Takeout** | Cloud-only library, or user wants a one-time deep clean and a clean filesystem archive | Everything in the cloud library |
+| **B — Apple Photos local DB** | iCloud Photos is on and synced to a Mac | Whatever's synced locally |
 
-> ⚠️ **Library API limitation.** As of **March 31, 2025**, the Google Photos Library API restricts third-party apps to only the photos and videos *they uploaded*. The pre-2025 `photoslibrary.readonly` scope is deprecated. The current scopes (`photoslibrary.readonly.appcreateddata`, `photoslibrary.appendonly`) cannot read a user's existing library. Don't reach for the API expecting to organize an existing photo library — it's not a permission problem, it's a policy change.
+Yes, there is an API. **It is not useful for organizing an existing library.**
 
-This skill defaults to **Path A (Takeout)** because it's the only path that gives complete, owner-approved access to the full library.
+> ⚠️ **Why the Photos Library API isn't an option here.** The API exists (`photoslibrary.googleapis.com`) and works fine for *uploading*. But on **March 31, 2025** Google restricted read access to third-party apps so they can **only see photos and videos they themselves uploaded**. The pre-2025 broad scopes (`photoslibrary.readonly`, `photoslibrary`) are dead. The current scopes (`photoslibrary.readonly.appcreateddata`, `photoslibrary.appendonly`) cannot list a user's existing library. This is a policy change, not a bug or a missing scope — there is no flag to flip. For organizing an existing library, the API path returns nothing useful, so this skill skips it entirely.
+
+The two real-world paths use the user's *own* data, not API-mediated access:
+- **Takeout** is the user exporting their library via google.com/takeout — Google's own escape hatch.
+- **Apple Photos** is the locally-synced copy on the user's Mac, accessible via SQLite + osxphotos.
 
 ## Requirements
 
 - Python 3.9+, with `pillow` (`pip install pillow`) for EXIF/duplicate analysis
 - For Path A: `~/Downloads` with at least 1.5× the library size free (Takeout zips are big)
-- For Path B: macOS with iCloud Photos enabled and synced; Photos.app at least opened once
-- For Path C: `playwright` + a logged-in Chrome/Edge with Google Photos web (`agent-browser` skill is the canonical wrapper here)
+- For Path B: macOS with iCloud Photos enabled and synced; Photos.app at least opened once. Optional: `osxphotos` (`pip install osxphotos`) for mutations
 
 ---
 
@@ -186,42 +187,6 @@ Changes made via osxphotos / AppleScript are local-Mac-only at first; iCloud Pho
 
 ---
 
-## Step 4 — Path C: Browser Automation Fallback
-
-For things neither the API nor osxphotos can do — bulk album renames, share-link management, advanced search-and-delete — drive the Google Photos web UI via Playwright. The `agent-browser` skill is the canonical wrapper for this kind of work.
-
-This path is **slow** (5-10 actions/min sustainable rate) and **fragile** (UI breaks any time Google ships a redesign). Use only when the other paths don't reach.
-
----
-
-## Path D: Photos Library API (limited)
-
-For completeness — the API does still exist, it's just gated to app-created content. Useful only when:
-- The user wants to upload from this skill and re-read what the skill uploaded
-- A pre-approved [Google Photos partner app](https://developers.google.com/photos/partner-program) is involved
-
-```python
-# After enabling Photos Library API + auth with photoslibrary.appendonly
-# This works only for content this OAuth client uploaded.
-from googleapiclient.discovery import build
-from google.oauth2.credentials import Credentials
-
-creds = Credentials.from_authorized_user_file("~/.config/google-photos/token.json",
-    scopes=["https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata",
-            "https://www.googleapis.com/auth/photoslibrary.appendonly"])
-
-# discoveryServiceUrl required — the static discovery doc is no longer published
-svc = build("photoslibrary", "v1", credentials=creds, static_discovery=False,
-    discoveryServiceUrl="https://photoslibrary.googleapis.com/$discovery/rest?version=v1")
-
-# This will return only what THIS app has uploaded — typically empty.
-items = svc.mediaItems().list().execute()
-```
-
-If `mediaItems().list()` returns empty for an active library, that's the policy at work, not a bug.
-
----
-
 ## Defaults and Guardrails
 
 - **Never delete from the source library on the first pass.** Path A reorganizes a *copy*. Path B uses Trash (30-day Photos.app trash window). Original library stays intact until the user explicitly approves cleanup.
@@ -236,11 +201,11 @@ If `mediaItems().list()` returns empty for an active library, that's the policy 
 
 | Symptom | Path | Cause | Fix |
 |---|---|---|---|
-| `mediaItems().list()` returns empty | D | March 2025 policy — API can only see app-uploaded content | Use Takeout (Path A) instead |
 | `database is locked` on Photos.sqlite | B | Photos.app is running | Close Photos.app and retry |
 | Takeout export taking >24h | A | Library is huge (>500GB), or Google is slow | Wait; check email periodically |
+| Takeout zip missing recent photos | A | Photos uploaded after the export was triggered | Re-trigger Takeout when ready for a final pass |
 | Re-uploaded photos missing geo | A | Takeout strips embedded GPS in some formats; sidecar JSON has it though | Re-attach geo from the sidecar before re-upload |
-| `photoslibrary.readonly` scope rejected | A/D | Scope was deprecated March 2025 | Use `photoslibrary.readonly.appcreateddata` (limited) or Takeout |
+| Tempted to call `mediaItems().list()` | — | The API can only see content this OAuth client uploaded (March 2025 policy) | Skip the API entirely; use Takeout |
 
 ---
 
