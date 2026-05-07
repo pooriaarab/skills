@@ -140,6 +140,23 @@ If the active account is correct and scopes are sufficient, proceed.
 
 ---
 
+## Performance & Resilience (read this before Step 3)
+
+Inboxes are routinely much larger than they look. Several real-world findings from running this skill on a 90k-message personal inbox:
+
+- **Don't trust `resultSizeEstimate` from `messages.list`** when called with `maxResults=1` — it is wildly inaccurate (we saw `201` reported for an inbox that actually contained 90,539 messages with the `INBOX` label). Always paginate to get a true count.
+- **Per-user Gmail quota is ~250 quota units/sec.** `messages.get` costs 5 units, so a naive sequential fetch caps near 50/sec, and a too-tight batch loop hits `403 rateLimitExceeded` (note: `403`, not `429`).
+- **Use batch HTTP requests** (`svc.new_batch_http_request(...)`), but **expect individual sub-requests inside a batch to fail with rate-limit errors** even when the outer `batch.execute()` succeeds. The fix is **not** to retry per-ID — that's slow and amplifies the problem. Instead, collect the rate-limited sub-request IDs and re-execute them as a new batch (up to ~2 in-place retries with short backoff), then skip what's left rather than looping forever.
+- **Throttle**: batch size 40, 1.5s sleep between batches has cleared 90k metadata fetches without retries on the personal-account quota tier. Tune up if you have a higher-tier project.
+- **Persist successful fetches to disk as you go.** Write each completed message's metadata as a line of JSONL to `~/.config/gmail-organizer/cache/metadata-<email>-<query-slug>.jsonl`, and check it on startup so a kill/crash/quota-exhaustion never wastes the work already done. Real runs at this scale take 20–45 min; resume support is not optional.
+- **Run unbuffered when backgrounded.** `python3 -u` (or `PYTHONUNBUFFERED=1`) — otherwise stdout is line-buffered when stdout isn't a tty and you'll see no progress until the process exits. This bites particularly hard when piped through `tail`, `grep`, or shell-monitor commands.
+- **`getProfile.messagesTotal` counts every message ever**, including Spam and Trash. `q="in:inbox"` is the right scope for inbox-zero work; full-history sweeps are a follow-up if you need richer cross-sender stats.
+- **Backoff predicate**: treat `429`, `500`, `503`, *and* `403` with body containing `rateLimitExceeded` / `userRateLimitExceeded` as transient. A bare `403` is a scope problem (Step 2), not a quota problem.
+
+The `_execute_batch` / `fetch_metadata` helpers below implement all of this. Don't replace them with a one-shot loop — at this scale you will lose hours.
+
+---
+
 ## Step 3 — Plan Phase (read-only)
 
 The plan phase produces two artifacts under `~/.config/gmail-organizer/plans/`:
@@ -184,6 +201,7 @@ if mode == "maintain" and os.path.exists(LAST_RUN_FILE):
     query = f"after:{last_ts}"
 
 # Step 3a — list all message IDs (cheap; just IDs)
+# NOTE: ignore Gmail's `resultSizeEstimate` — paginate for the true count.
 print("Listing messages...")
 ids = []
 for m in gws_page("gmail users messages list",
@@ -191,7 +209,83 @@ for m in gws_page("gmail users messages list",
     ids.append(m["id"])
 print(f"  {len(ids)} message IDs")
 
-# Step 3b — fetch metadata in batches (headers only — fast)
+# Step 3b — fetch metadata in batches (headers only — fast).
+#
+# Path B (direct Gmail API) implements resilient batch fetch with persistence.
+# Path A (gws CLI, sequential) is simpler but ~20x slower at scale; prefer Path B
+# when the inbox exceeds ~5k messages.
+#
+# Resilience requirements (see "Performance & Resilience" above):
+#   1. Persist each successful fetch to a JSONL cache so a crash doesn't waste
+#      work — and skip cached IDs on resume.
+#   2. When sub-requests inside a batch hit a rate-limit error, re-execute just
+#      those IDs as another batch (≤2 retries, short backoff). Do NOT fall back
+#      to per-ID calls — that's slow and amplifies the rate problem.
+#   3. Treat 429/500/503 *and* 403 with body matching `(user)?rateLimitExceeded`
+#      as transient. Bare 403 is a scope problem (Step 2).
+#
+# Default throttle on a personal-tier project: batch_size=40, sleep_between=1.5s.
+
+CACHE_DIR = os.path.expanduser("~/.config/gmail-organizer/cache")
+os.makedirs(CACHE_DIR, exist_ok=True)
+slug = re.sub(r"[^a-z0-9]+", "_", (query or "all").lower()).strip("_") or "all"
+CACHE_PATH = f"{CACHE_DIR}/metadata-{EMAIL}-{slug}.jsonl"
+
+# Path B (direct Gmail API) — resilient batch fetch with persistence.
+# from googleapiclient.errors import HttpError
+#
+# def is_rate_limited(exc):
+#     if not isinstance(exc, HttpError):
+#         return False
+#     status = getattr(exc.resp, "status", None)
+#     body = (exc.content or b"").decode("utf-8", errors="ignore").lower()
+#     return status in (429, 500, 503) or (
+#         status == 403 and ("ratelimitexceeded" in body or "userratelimitexceeded" in body)
+#     )
+#
+# def execute_batch(svc, batch_ids, headers_wanted, out):
+#     transient = []
+#     def cb(rid, resp, exc):
+#         if exc is None and resp is not None:
+#             out[rid] = resp
+#         elif exc is not None and is_rate_limited(exc):
+#             transient.append(rid)
+#     batch = svc.new_batch_http_request(callback=cb)
+#     for mid in batch_ids:
+#         batch.add(svc.users().messages().get(
+#             userId="me", id=mid, format="metadata", metadataHeaders=headers_wanted),
+#             request_id=mid)
+#     batch.execute()  # wrap in your own backoff for outer-batch transient errors
+#     return transient
+#
+# def fetch_metadata(svc, ids, *, batch_size=40, sleep_between=1.5):
+#     headers_wanted = ["From", "Subject", "Date", "List-Unsubscribe", "List-Unsubscribe-Post"]
+#     out = {}
+#     # Resume from cache
+#     if os.path.exists(CACHE_PATH):
+#         for line in open(CACHE_PATH):
+#             try: rec = json.loads(line); out[rec["id"]] = rec
+#             except: pass
+#     pending = [mid for mid in ids if mid not in out]
+#     with open(CACHE_PATH, "a") as fp:
+#         for i in range(0, len(pending), batch_size):
+#             chunk = pending[i:i+batch_size]
+#             transient = execute_batch(svc, chunk, headers_wanted, out)
+#             for retry in range(2):
+#                 if not transient: break
+#                 time.sleep(2 ** retry)
+#                 transient = execute_batch(svc, transient, headers_wanted, out)
+#             for rid in chunk:
+#                 if rid in out: fp.write(json.dumps(out[rid]) + "\n")
+#             fp.flush()
+#             if i + batch_size < len(pending): time.sleep(sleep_between)
+#     return out
+#
+# msgs = fetch_metadata(svc, ids)
+
+# Path A (gws CLI) — fine for small inboxes (<5k msgs); too slow for deep-clean
+# at 90k+. The same persistence + retry-as-batch logic applies in principle, but
+# gws does not expose a batch endpoint, so each fetch is its own HTTP call.
 def get_metadata(msg_id):
     code, out, _ = gws("gmail users messages get",
                        {"userId": "me", "id": msg_id, "format": "metadata",
@@ -208,7 +302,7 @@ senders = defaultdict(lambda: {
 
 for i, msg_id in enumerate(ids):
     if i % 500 == 0:
-        print(f"  fetched {i}/{len(ids)}")
+        print(f"  fetched {i}/{len(ids)}", flush=True)  # flush=True matters when stdout isn't a tty
     m = get_metadata(msg_id)
     if not m:
         continue
@@ -478,3 +572,8 @@ for ev in reversed(events):
 | `consent screen blocked by administrator` | Workspace OAuth restriction (e.g. Mozilla) | Start with `personal` first; raise IT ticket only after personal-account run is clean |
 | Active account ≠ plan email | `work`/`personal` was switched between plan and apply | Re-run plan, or switch back |
 | Plan shows `(unknown)` domain with high count | Malformed `From` headers (rare) | Surface in the `review` category for manual handling |
+| `403 rateLimitExceeded` mid-fetch | Per-user QPM exceeded (note: 403 not 429) | Retry rate-limited IDs as a new batch (≤2x), then skip; tune `batch_size` / `sleep_between` down |
+| `Quota exceeded ... Queries per minute per user` | Same as above, after a burst | Wait ~60s; the JSONL cache means resumed runs skip what's already done |
+| `resultSizeEstimate` says ~200 but inbox is huge | Estimate is unreliable when called with `maxResults=1` | Always paginate `messages.list` for the true count |
+| No progress lines visible while running in background | Python stdout buffered when not a tty | Run with `python3 -u` (or `PYTHONUNBUFFERED=1`); use `flush=True` on `print()` |
+| Batch sub-requests succeed in some calls, fail in others | Gmail rate-limits *individual* sub-requests inside a batch | Collect failed IDs from the per-request callback and re-`batch.execute()` them — don't fall back to per-ID sequential retry |
