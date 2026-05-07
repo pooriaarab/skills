@@ -1,33 +1,37 @@
 # pooriaarab/skills
 
-Claude Code skills for AI-aware development.
+Claude Code skills for AI-aware development and life organization.
 
 ## Skills
+
+### Life organization (`organizer/`)
+
+A coordinated suite for organizing across every digital surface — files, notes, mail, calendars, contacts, photos, social bookmarks, code. Run [`life-organizer`](organizer/life-organizer/SKILL.md) first to survey preferences and get a recommended sequence. See [`organizer/README.md`](organizer/README.md) for the full catalog (21 sub-skills) and [`organizer/DESIGN.md`](organizer/DESIGN.md) for architecture.
+
+### Standalone
 
 | Skill | Description |
 |-------|-------------|
 | [eco-mode](eco-mode/SKILL.md) | Cut token/CO₂ usage ~65% without quality loss. Caveman-inspired. |
 | [eco-analyze](eco-analyze/SKILL.md) | `/eco-analyze` — calculate your real carbon footprint from Claude Code history |
-| [google-drive-organizer](google-drive-organizer/SKILL.md) | Reorganize a messy Google Drive into a clean folder hierarchy using `gws` CLI + AI classification. Handles untitled docs, renames, sub-folders, and empty file cleanup. |
-| [notion-organizer](notion-organizer/SKILL.md) | Reorganize a chaotic Notion workspace into a clean hierarchy via the Notion MCP. Creates section pages, moves misplaced pages, classifies untitled pages with AI, and archives empties. |
-| [multi-account-cli](multi-account-cli/SKILL.md) | One-command switching between work and personal accounts across gcloud, gws, Firebase, and Netlify. Sets up named profiles and a `work`/`personal` shell switcher. |
+| [multi-account-cli](multi-account-cli/SKILL.md) | One-command switching between work and personal accounts across gcloud, gws, Firebase, and Netlify. |
 
 ## Install
 
 ```bash
-# eco-mode
+# Life organizer suite (parent — installs all sub-skills)
+npx skills add pooriaarab/organizer
+
+# Or individual sub-skills:
+npx skills add pooriaarab/organizer/life-organizer
+npx skills add pooriaarab/organizer/apple-notes
+npx skills add pooriaarab/organizer/notion
+npx skills add pooriaarab/organizer/gmail
+# ... see organizer/README.md for the full list
+
+# Standalone skills
 npx skills add pooriaarab/eco-mode
-
-# eco-analyze  
 npx skills add pooriaarab/eco-analyze
-
-# google-drive-organizer
-npx skills add pooriaarab/google-drive-organizer
-
-# notion-organizer
-npx skills add pooriaarab/notion-organizer
-
-# multi-account-cli
 npx skills add pooriaarab/multi-account-cli
 ```
 
