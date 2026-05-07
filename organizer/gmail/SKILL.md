@@ -13,7 +13,7 @@ Two supported access paths — pick whichever is easier in the user's environmen
 
 **Path A — `gws` CLI (default in this skill's examples)**
 - [`gws` CLI](https://github.com/nicholasgasior/gws) — Google Workspace CLI: `brew install gws`
-- `work` / `personal` shell functions configured (see [`multi-account-cli`](../multi-account-cli/SKILL.md))
+- `work` / `personal` shell functions configured (see [`multi-account-cli`](../../multi-account-cli/SKILL.md))
 - Active gws account authenticated **with mutating Gmail scopes** (see Step 2)
 
 **Path B — Gmail API directly (use when the user already has OAuth creds wired up, e.g. from another project like solo-admin)**
