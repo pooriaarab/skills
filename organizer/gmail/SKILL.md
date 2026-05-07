@@ -21,7 +21,13 @@ Two supported access paths — pick whichever is easier in the user's environmen
 - An existing OAuth client + token with scopes `gmail.modify` and `gmail.labels`
 - All `gws gmail ...` calls below have a 1:1 Gmail API equivalent (`service.users().messages().list(...)`, `.batchModify(...)`, `.trash(...)`, `.labels().create(...)`). Replace the `gws()` helper in Step 2 with a thin wrapper around `googleapiclient.discovery.build("gmail", "v1", credentials=creds)` and the rest of the script is unchanged.
 
-Both paths share the same plan/journal artifacts and the same approval flow — only the API client differs.
+**Path C — `gog` CLI (covers entire Google Workspace in one tool)**
+- `brew install steipete/tap/gogcli` (binary is `gog` — [openclaw/gogcli](https://github.com/openclaw/gogcli))
+- Auth: `gog auth` (OAuth flow per Google account); supports `--account=<email>` for multi-account
+- Gmail ops: `gog gmail list/labels/move/trash/delete/search`. Same coverage as `gws gmail` with broader Workspace integration (Calendar, Drive, Contacts, Tasks all in one CLI).
+- Use this if you also organize Calendar/Contacts/Drive in the same session — single auth, single tool.
+
+All three paths share the same plan/journal artifacts and the same approval flow — only the API client differs.
 
 **Common requirements (both paths):**
 - Python 3.9+

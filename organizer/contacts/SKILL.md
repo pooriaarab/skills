@@ -15,6 +15,7 @@ Clean up Contacts.app via AppleScript. Foundational skill — run before `gmail`
 
 - macOS Contacts.app with iCloud Contacts enabled.
 - Automation access to Contacts (AppleScript prompt on first call).
+- **`gog` CLI** — `brew install steipete/tap/gogcli` (binary `gog` — [openclaw/gogcli](https://github.com/openclaw/gogcli)). For Google Contacts management: `gog contacts list/show/create/update/delete`, plus People API for advanced merging. Use alongside AppleScript: AppleScript handles iCloud-side, `gog` handles Google-side. Reconcile duplicates across both stores.
 
 ## Step 1 — Ask the User First
 

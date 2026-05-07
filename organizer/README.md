@@ -26,6 +26,7 @@ Run [`life-organizer`](life-organizer/SKILL.md) — it surveys your preferences 
 | 🟡 stub | [`gcal`](gcal/SKILL.md) | Google Calendar | "clean up my calendar" |
 | 🟡 stub | [`icloud-calendar`](icloud-calendar/SKILL.md) | iCloud Calendar | "organize iCloud calendars" |
 | 🟡 stub | [`apple-reminders`](apple-reminders/SKILL.md) | Reminders.app | "clean up reminders" |
+| 🟡 stub | [`gtasks`](gtasks/SKILL.md) | Google Tasks | "organize Google Tasks" |
 | 🟡 stub | [`icloud-photos`](icloud-photos/SKILL.md) | iCloud Photos | "organize my photos" |
 | 🟡 stub | [`spotify-playlist`](spotify-playlist/SKILL.md) | Spotify | "clean up my playlists" |
 | 🟡 stub | [`github`](github/SKILL.md) | GitHub (repos, stars, orgs) | "organize my GitHub" |
