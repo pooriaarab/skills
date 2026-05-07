@@ -143,7 +143,7 @@ If `search` works but `library` returns 429, the cookies are partially valid. Ca
    ```
 3. Run OAuth2 flow:
    ```bash
-   xurl auth oauth2 -u <your_x_handle>
+   xurl auth oauth2 <your_x_handle>
    # Browser opens, you authorize, xurl captures the callback automatically
    ```
 4. Verify:
