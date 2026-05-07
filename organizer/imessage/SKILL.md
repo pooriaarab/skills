@@ -14,8 +14,9 @@ Clean up Messages.app on macOS.
 ## Requirements
 
 - macOS Messages.app with iCloud Messages enabled.
-- Read access to `~/Library/Messages/chat.db` (SQLite-backed). May require Full Disk Access for the terminal.
-- AppleScript automation for actions.
+- **`imsg` CLI** — `brew install steipete/tap/imsg` ([repo](https://github.com/steipete/imsg)). Read iMessage history via SQLite, send messages, manage conversations.
+- Full Disk Access for the terminal so `imsg` can read `~/Library/Messages/chat.db`.
+- AppleScript automation for some actions where `imsg` doesn't cover the action.
 
 ## Step 1 — Ask the User First
 

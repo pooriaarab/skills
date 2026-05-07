@@ -14,9 +14,9 @@ Process the X bookmarks queue.
 ## Requirements
 
 - X account.
-- Either:
-  - **Browser-driven**: Playwright / Chrome DevTools MCP to scrape the bookmarks UI (no API access required, but slower).
-  - **API-driven**: X API v2 with the `bookmark.read` scope. Note: X API access is heavily restricted and tier-paywalled.
+- **`birdclaw` CLI** — `brew install steipete/tap/birdclaw` ([repo](https://github.com/steipete/birdclaw)). "Stores all your tweets nicely claw-able for agents" — exports bookmarks, likes, and tweets into structured JSON without paying for the X API.
+- Logged-in X session in a browser (cookies imported via `sweetcookie`).
+- Alternative paths (if `birdclaw` doesn't fit): Playwright scraping or X API v2 (paywalled).
 
 ## Step 1 — Ask the User First
 

@@ -14,7 +14,9 @@ Process Instagram saved posts and collections.
 ## Requirements
 
 - Instagram account.
-- **Browser- or app-driven** — Instagram's API for saved posts is private/internal. Use Playwright on the web app or work from the official Data Download.
+- **`instaclaw` CLI** — [pooriaarab/instaclaw](https://github.com/pooriaarab/instaclaw) (scaffold; needs implementation). Browser-cookie-based scraper in steipete's `*claw` style. Goal: claw saved posts and collections into structured JSON.
+- Logged-in Instagram session in a browser (Meta auth shared with Threads).
+- Fallback until `instaclaw` is built: Meta's "Download Your Information" data export, or Playwright on the web app.
 
 ## Step 1 — Ask the User First
 
