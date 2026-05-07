@@ -132,38 +132,70 @@ If `search` works but `library` returns 429, the cookies are partially valid. Ca
 
 ### Configure xurl with the app
 
-1. Register the app:
+1. Register the app (NAME is positional; flags carry the credentials):
    ```bash
-   xurl auth apps add
-   # Prompts for: name, client_id, client_secret (optional), callback URL
+   xurl auth apps add <app-name> \
+     --client-id <client_id> \
+     --client-secret <client_secret> \
+     --redirect-uri http://127.0.0.1:8080/callback
+   # Example: xurl auth apps add pooriaarab-xurl --client-id SXdx... --client-secret nfpp...
    ```
 2. Set as default:
    ```bash
-   xurl auth default
+   xurl auth default <app-name>
    ```
-3. Run OAuth2 flow:
+3. (Optional) Set the bearer token for app-only reads:
+   ```bash
+   xurl auth app --bearer-token <bearer_token>
+   ```
+4. Run OAuth2 user flow (for user-context endpoints like bookmarks, likes, mentions):
    ```bash
    xurl auth oauth2 <your_x_handle>
-   # Browser opens, you authorize, xurl captures the callback automatically
+   # Username is POSITIONAL — no -u flag. Browser opens, you authorize,
+   # xurl captures the callback automatically.
    ```
-4. Verify:
+5. Verify:
    ```bash
    xurl auth status
    xurl whoami
+   # → should print your X profile JSON
    ```
 
 ### After xurl works, wire it to birdclaw
 
+**Heads-up:** `birdclaw` ships with a pre-seeded "default account" pointing at `@steipete` (the maintainer). If you don't update it, every sync hits a hardcoded user ID that doesn't match your auth and fails with:
+
+> `The id query parameter value [25401953] must be the same as the authenticating user [<yours>]`
+
+Fix with one SQL command after running `birdclaw init`:
+
 ```bash
-birdclaw auth status
-# Should show "xurl available"
-birdclaw sync bookmarks --account <your_x_handle>
+# Get your numeric X user ID from xurl
+USER_ID=$(xurl whoami | python3 -c "import json,sys; print(json.load(sys.stdin)['data']['id'])")
+HANDLE="@your_x_handle"  # with the leading @
+
+sqlite3 ~/.birdclaw/birdclaw.sqlite "UPDATE accounts SET name='<Your Name>', handle='${HANDLE}', external_user_id='${USER_ID}' WHERE id='acct_primary';"
 ```
 
-### Known error: `client_id=&` in browser URL
+Then sync:
 
-If the OAuth screen shows `Something went wrong - You weren't able to give access`:
-- Check the URL bar — if `client_id=` is empty, you skipped `xurl auth apps add` or didn't paste a Client ID. Re-run that step.
+```bash
+birdclaw sync bookmarks --mode xurl --all --max-pages 100
+birdclaw sync likes --mode xurl --limit 200
+sqlite3 ~/.birdclaw/birdclaw.sqlite "SELECT kind, COUNT(*) FROM tweet_collections WHERE account_id='acct_primary' GROUP BY kind;"
+# → bookmarks|<N>
+#   likes|<M>
+```
+
+### Known errors
+
+| Error | Cause | Fix |
+|---|---|---|
+| `client_id=&` in OAuth URL | Skipped `xurl auth apps add` | Re-run `xurl auth apps add NAME --client-id ...` |
+| `Error: unknown shorthand flag: 'u'` on `xurl auth oauth2 -u <handle>` | `-u` is not a flag for this subcommand | Drop the `-u` — username is positional: `xurl auth oauth2 <handle>` |
+| `spawn /Users/.../Projects/bird/bird ENOENT` from birdclaw | `--mode auto` tries the unreleased `bird` tool first | Use `--mode xurl` explicitly |
+| `Error: Unknown account: <handle>` from birdclaw | The default account row still points at @steipete | See SQL fix above |
+| `must be the same as the authenticating user` from birdclaw | Same as above — seed account mismatch | Same SQL fix |
 
 ---
 
@@ -209,6 +241,8 @@ Repeat `gog auth add <email>` for each Google account (e.g. work + personal). Us
 ## 6. X archive (alternative to live xurl) — `birdclaw`
 
 **Status:** initialized at `~/.birdclaw/`. If `xurl` setup is too painful, you can import an archive.
+
+> **Note:** for live sync via xurl (the typical path), see [Section 4 → After xurl works, wire it to birdclaw](#after-xurl-works-wire-it-to-birdclaw) — including the **seed-account SQL fix** (default account row points at @steipete out-of-the-box and must be updated to your handle).
 
 ### Path A — archive import (no API needed)
 
