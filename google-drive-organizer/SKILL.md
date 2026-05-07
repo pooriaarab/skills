@@ -307,17 +307,116 @@ def move_rename(file_id, dest_id, src_id, new_name):
 
 ---
 
-## Personal vs Work Drive Structure
+## Mirror the User's Local Folder Structure
 
-Work/product Drives and personal Drives need completely different folder schemes.
+**Ask the user:** "What does your local Documents folder look like?" Then mirror it.
+
+Example: if local is `~/Documents/pooriaarab/` with `legal/`, `finances/`, `photos/`, `notes/`, `health/` — use the same names in Drive. If local has flat project folders (`~/Documents/<project-a>/`, `~/Documents/solo/`), create a `projects/` hub in Drive.
 
 **Work/product Drive (e.g. SaaS company):**
-`analytics/`, `decks/`, `engineering/`, `events/`, `finance/`, `marketing/`, `media/`, `outreach-leads/`, `product/`, `strategy/`, `support/`, `testing/`, `users-data/`, `personal/`, `<employer>/` (org-specific), `_inbox/`, `_archive/`
+`analytics/`, `decks/`, `engineering/`, `events/`, `finance/`, `marketing/`, `media/`, `outreach-leads/`, `product/`, `strategy/`, `support/`, `testing/`, `users-data/`, `personal/`, `_inbox/`, `_archive/`
 
-**Personal Drive:**
-`career/` (resumes/, reference-letters/, job-descriptions/, <employer>/), `immigration/` (canada-pr/, work-permit/, family/, dubai/, us-visa/), `university/` (courses/, textbooks/), `<project-a>/` or other-startup/ (events/, grants/, partnerships/, community/), `fitness/` (workout-logs/), `finance/`, `media/` (recordings/, photos/, brand-assets/), `languages/`, `ai-projects/` (notebooks/, image-gen/), `creative/` (content-planning/, brand-assets/, project-name/), `personal/`, `_archive/`, `_inbox/`
+**Personal Drive (matching local `pooriaarab/` structure):**
+```
+projects/        <project-a>/, startups/, ai-projects/, creative/
+career/          resume/, reference-letters/, job-descriptions/, cover-letters/, certificates/
+legal/           canada-pr/, family-docs/, work-permit/   ← not "immigration/"
+education/       university/, languages/                  ← merge these
+finances/        budgets/, bank-statements/               ← not "finance/"
+media/           photos/, videos/, streaming/, screenshots/
+personal/        notes/, family/, health/, hobbies/, driving/
+fitness/         workout-logs/, martial-arts/
+_archive/        laptop-backups/, misc-archive/, old-projects/
+_inbox/
+```
 
-Ask the user which type of Drive it is before proposing structure.
+Key naming conventions that match local:
+- `legal/` not `immigration/`
+- `finances/` not `finance/`
+- `resume/` not `resumes/` (singular like local)
+- `videos/` not `recordings/`
+- `education/` merges university + languages
+
+---
+
+## Content-Aware Verification (Critical)
+
+**Never trust filenames alone.** Always export file content to verify placement:
+
+```python
+import urllib.request
+
+TOKEN = subprocess.run(["gcloud", "auth", "print-access-token"],
+                       capture_output=True, text=True).stdout.strip()
+
+def export_text(fid, mime):
+    exportable = {"application/vnd.google-apps.document",
+                  "application/vnd.google-apps.spreadsheet",
+                  "application/vnd.google-apps.presentation"}
+    if mime not in exportable: return ""
+    try:
+        url = f"https://www.googleapis.com/drive/v3/files/{fid}/export?mimeType=text/plain"
+        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {TOKEN}"})
+        with urllib.request.urlopen(req, timeout=8) as r:
+            return r.read().decode("utf-8", errors="ignore").strip()[:1500]
+    except: return ""
+```
+
+**Common content-vs-filename mismatches found in the wild:**
+- Files named "Resume" that are actually cover letters → move to `cover-letters/`
+- Files named "Marketing" in grants/ that are sponsorship proposals → keep in partnerships/
+- Cold email SMTP config lists (`Instantly Bulk 1/2`) in community/ → belong in partnerships/
+- Files named "Financials" in startups/ that are <Project-A> budget sheets → belong in <project-a>/financials/
+- "Copy of AI @ VC Lab" in <project-a>/ — template copy, not <Project-A>-specific → trash
+
+**gws token expiry:** The file-based keyring token expires during long sessions. When agents hit `403 insufficientPermissions`, have the user re-run:
+```bash
+export GOOGLE_WORKSPACE_CLI_KEYRING_BACKEND=file
+gws auth logout && gws auth login
+```
+Save fresh credentials immediately after: `cp ~/.config/gws/credentials.enc ~/.config/gws/credentials_personal.enc`
+
+---
+
+## Multi-Account gws Setup (Work + Personal)
+
+gws does NOT share gcloud's account config — it has its own isolated credentials. Use separate config directories:
+
+```bash
+~/.config/gws-work/      # <your-work>@<work-domain>  — client_secret.json + credentials.enc + .encryption_key
+~/.config/gws-personal/  # <your-personal>@gmail.com — same files, different content
+```
+
+Switch with symlink:
+```bash
+function work()     { rm -f ~/.config/gws && ln -s ~/.config/gws-work ~/.config/gws; ... }
+function personal() { rm -f ~/.config/gws && ln -s ~/.config/gws-personal ~/.config/gws; ... }
+```
+
+Always set: `export GOOGLE_WORKSPACE_CLI_KEYRING_BACKEND=file` (uses `.encryption_key` file, not OS keyring, so credentials are portable across shell sessions).
+
+Personal GCP project requirements: billing enabled, OAuth consent screen with your email as test user.
+
+---
+
+## Parallel Subagent Organization (for large Drives)
+
+For 1,000+ file Drives, dispatch parallel agents per folder domain:
+
+```
+Agent 1 → career/, legal/, education/     (independent domains)
+Agent 2 → projects/<project-a>/, projects/startups/
+Agent 3 → personal/, media/, finances/, fitness/
+Agent 4 → _archive/, _inbox/
+```
+
+Each agent: lists folder, exports file content, verifies placement, fixes naming, reports changes. Run all in parallel — they work on different folders and don't interfere.
+
+**Loop pattern:** After each parallel pass, spawn a fresh audit agent to list the root and all sub-folders one level deep. Flag any remaining issues. Loop until the audit agent finds 0 flags.
+
+---
+
+## Personal vs Work Drive Structure
 
 ---
 
