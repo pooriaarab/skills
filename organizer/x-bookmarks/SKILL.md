@@ -39,7 +39,7 @@ Process the X bookmarks queue.
 
 ## Reference implementation: live-sync to Notion (read-only, idempotent)
 
-This skill describes the contract; the executable script lives in the user's `personal-os` directory at `~/Documents/pooriaarab/code/personal-os/scripts/x-bookmarks-to-notion.py` (eventually a public repo `pooriaarab/personal-os`). Skills describe — they don't ship code.
+This skill describes the contract; the executable script lives in your local `personal-os` directory at `~/Documents/<your-handle>/code/personal-os/scripts/x-bookmarks-to-notion.py` (or a personal repo of your choosing). Skills describe — they don't ship code.
 
 **Pipeline (fits into the daily cron):**
 
@@ -101,7 +101,7 @@ The script is **idempotent on tweet ID** — re-running picks up where it left o
 
 ```bash
 if [ -n "$NOTION_TOKEN" ] && [ -f ~/.config/personal-os/x-bookmarks-notion.json ]; then
-  python3 ~/Documents/pooriaarab/code/personal-os/scripts/x-bookmarks-to-notion.py sync &>/dev/null
+  python3 ~/Documents/<your-handle>/code/personal-os/scripts/x-bookmarks-to-notion.py sync &>/dev/null
 fi
 ```
 
