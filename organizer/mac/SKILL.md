@@ -113,7 +113,7 @@ done
 │   ├── docs/           # strategy, specs
 │   ├── content/        # marketing, social media
 │   └── research/       # competitor recordings, analysis
-├── pooriaarab/         # personal "project" = you
+├── <your-handle>/      # personal "project" = you (replace with your username)
 │   ├── immigration/
 │   │   ├── canada/
 │   │   │   ├── express-entry/
@@ -142,9 +142,9 @@ mv "$D"/Screenshot\ 20*.png "$D/Screenshots/"
 # Screen recordings  
 mv "$D"/Screen\ Recording\ *.mov "$D/Recordings/"
 # Invoices
-mv "$D"/*Invoice*.pdf "$DOC/pooriaarab/finances/invoices/"
+mv "$D"/*Invoice*.pdf "$DOC/<your-handle>/finances/invoices/"
 # Immigration docs
-mv "$D"/IMM*.pdf "$DOC/pooriaarab/immigration/canada/express-entry/"
+mv "$D"/IMM*.pdf "$DOC/<your-handle>/immigration/canada/express-entry/"
 ```
 
 ### Invoice renaming pattern
@@ -205,7 +205,7 @@ def name_image(fp, context):
 ### Apple Intelligence quirks
 
 - **Context window exceeded** (error code 14): retry with shorter text (400 → 200 → 100 chars)
-- **Unsupported language** (error code 20): Persian/Arabic/CJK text not supported
+- **Unsupported language** (error code 20): non-Latin scripts (Arabic, Chinese, etc.) not supported
 - **Content policy refusal**: personal photos of people, legal docs — Apple refuses silently by responding with "I'm sorry..." — always sanitize with rejection regex
 - **Fallback**: if AI can't name a file, use directory context → `beehouse-blog-image-01.jpg`
 

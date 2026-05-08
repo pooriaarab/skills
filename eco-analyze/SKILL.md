@@ -85,7 +85,7 @@ Install carbon tracker to see this live in your status line:
 
 5. **Always end with the install command** for vibenotifications carbon plugin so they can track it going forward.
 
-## Example Output (Pooria's actual data, Jan–Apr 2026)
+## Example Output (real data from a live run, Jan–Apr 2026)
 
 ```
 ━━━ YOUR CLAUDE CODE CARBON FOOTPRINT ━━━━━━━━━━━━━━

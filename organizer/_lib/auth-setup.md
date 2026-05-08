@@ -138,7 +138,7 @@ If `search` works but `library` returns 429, the cookies are partially valid. Ca
      --client-id <client_id> \
      --client-secret <client_secret> \
      --redirect-uri http://127.0.0.1:8080/callback
-   # Example: xurl auth apps add pooriaarab-xurl --client-id SXdx... --client-secret nfpp...
+   # Example: xurl auth apps add <your-app-name> --client-id SXdx... --client-secret nfpp...
    ```
 2. Set as default:
    ```bash
@@ -217,7 +217,7 @@ sqlite3 ~/.birdclaw/birdclaw.sqlite "SELECT kind, COUNT(*) FROM tweet_collection
 Run **in Terminal.app**, not Claude Code (you need the browser to redirect back to a local port that this terminal session is listening on):
 
 ```bash
-gog auth add <personal-account>
+gog auth add your-email@gmail.com
 # Browser opens. Sign in, click through consent screen. Wait for callback.
 ```
 
@@ -228,7 +228,7 @@ If the browser doesn't open automatically, copy the URL printed by the command a
 ```bash
 gog auth list
 gog auth doctor
-gog --account=<personal-account> gmail labels list --plain | head
+gog --account=your-email@gmail.com gmail labels list --plain | head
 # → Should list Gmail labels for that account
 ```
 
