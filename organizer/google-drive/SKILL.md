@@ -418,8 +418,8 @@ for f in files_in_folder:
 - Files named "Resume" that are actually cover letters → move to `cover-letters/`
 - Files named "Marketing" in grants/ that are sponsorship proposals → keep in partnerships/
 - Cold email SMTP config lists (`Instantly Bulk 1/2`) in community/ → belong in partnerships/
-- Files named "Financials" in startups/ that are <Project-A> budget sheets → belong in <project-a>/financials/
-- "Copy of AI @ VC Lab" in <project-a>/ — template copy, not <Project-A>-specific → trash
+- Files named "Financials" in startups/ that are <project-a> budget sheets → belong in <project-a>/financials/
+- "Copy of AI @ VC Lab" in <project-a>/ — template copy, not <project-a>-specific → trash
 - "Teaching Experience" in reference-letters/ → actually a teaching philosophy statement (keep)
 - "Certificates to complete" in certificates/ → TODO list (trash)
 - "Financials" in budgets/ → empty spreadsheet (trash)
