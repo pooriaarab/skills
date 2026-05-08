@@ -140,7 +140,7 @@ if "insufficientPermissions" in (out + err) or "insufficient" in (out + err):
     sys.exit(1)
 ```
 
-**<employer> / Workspace OAuth caveat:** if the active account is `<your-work>@<work-domain>`, the Workspace admin may block third-party apps from acquiring `gmail.modify`. If `gws auth login` fails at the consent screen with a "blocked by your administrator" message, switch to `personal` and run there first. Do not file an IT ticket without checking this skill ran cleanly on the personal account first — the skill itself is what they'll want to vet.
+**Workspace OAuth caveat:** if the active account is on a managed Workspace tenant (any `@<your-employer>` domain), the Workspace admin may block third-party apps from acquiring `gmail.modify`. If `gws auth login` fails at the consent screen with a "blocked by your administrator" message, switch to your personal account and run there first. Do not file an IT ticket without checking this skill ran cleanly on the personal account first — the skill itself is what they'll want to vet.
 
 If the active account is correct and scopes are sufficient, proceed.
 
@@ -340,8 +340,8 @@ def classify_heuristic(domain, s):
         return "github"
     if "calendar.google.com" in domain or any("invitation" in subj.lower() for subj in s["subjects"]):
         return "calendar"
-    if domain.endswith("<work-domain>") or domain.endswith("<work-domain>"):
-        return "mozilla/internal"
+    if domain.endswith("yourcompany.com"):  # replace with the user's work domain(s)
+        return "work/internal"
     if "noreply" in domain or "no-reply" in domain or domain.startswith("notifications@"):
         return "notification"
     if "SPAM" in s["labels"]:

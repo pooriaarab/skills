@@ -369,12 +369,12 @@ def move_rename(file_id, dest_id, src_id, new_name):
 
 **Ask the user:** "What does your local Documents folder look like?" Then mirror it.
 
-Example: if local is `~/Documents/pooriaarab/` with `legal/`, `finances/`, `photos/`, `notes/`, `health/` — use the same names in Drive. If local has flat project folders (`~/Documents/<project-a>/`, `~/Documents/solo/`), create a `projects/` hub in Drive.
+Example: if local is `~/Documents/<your-handle>/` with `legal/`, `finances/`, `photos/`, `notes/`, `health/` — use the same names in Drive. If local has flat project folders (`~/Documents/<project-a>/`, `~/Documents/<project-b>/`), create a `projects/` hub in Drive.
 
 **Work/product Drive (e.g. SaaS company):**
 `analytics/`, `decks/`, `engineering/`, `events/`, `finance/`, `marketing/`, `media/`, `outreach-leads/`, `product/`, `strategy/`, `support/`, `testing/`, `users-data/`, `personal/`, `_inbox/`, `_archive/`
 
-**Personal Drive (matching local `pooriaarab/` structure):**
+**Personal Drive (matching local `<your-handle>/` structure):**
 ```
 projects/        <project-a>/, startups/, ai-projects/, creative/
 career/          resume/, reference-letters/, job-descriptions/, cover-letters/, certificates/
@@ -424,7 +424,7 @@ for f in files_in_folder:
 - "Certificates to complete" in certificates/ → TODO list (trash)
 - "Financials" in budgets/ → empty spreadsheet (trash)
 - "Reference Check Form 2021" in reference-letters/ → request form not a letter (→ job-descriptions/)
-- "<Conference Name> 2025" in certificates/ → slide deck (→ career/mozilla/)
+- "<Conference Name> 2025" in certificates/ → slide deck (→ career/<employer>/)
 - "Instantly Bulk 1/2" in community/ → cold email SMTP lists (→ partnerships/)
 
 ---
@@ -442,8 +442,8 @@ Run `drive-auth.py` once per account, passing the appropriate `client_secret.jso
 gws does NOT share gcloud's account config — it has its own isolated credentials. Use separate config directories:
 
 ```bash
-~/.config/gws-work/      # <your-work>@<work-domain>  — client_secret.json + credentials.enc + .encryption_key
-~/.config/gws-personal/  # <your-personal>@gmail.com — same files, different content
+~/.config/gws-work/      # work account  — client_secret.json + credentials.enc + .encryption_key
+~/.config/gws-personal/  # personal account — same files, different content
 ```
 
 Switch with symlink:
@@ -503,7 +503,7 @@ Include `size` in your `fields` param: `"fields": "nextPageToken,files(id,name,m
 
 | Pattern | Action |
 |---------|--------|
-| `Feb 2025 Pooria 5x5 Advanced (aka <workout-template>) \| <source>.com` | → `Feb 2025 Workout Log` |
+| `Feb 2025 <name> 5x5 Advanced (aka <workout-template>) \| <source>.com` | → `Feb 2025 Workout Log` |
 | `results-20241123-220704` | Leave as-is inside `bigquery-exports/` sub-folder |
 | `https://blog.example.com/slug-2026-05-05` | → `Blog Performance May 2026` |
 | `Copy of Resume - Jane Doe (Nov 2025).docx` | → `Resume - Jane Doe Nov 2025 v2.docx` |
