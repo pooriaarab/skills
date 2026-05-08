@@ -376,14 +376,14 @@ Example: if local is `~/Documents/<your-handle>/` with `legal/`, `finances/`, `p
 
 **Personal Drive (matching local `<your-handle>/` structure):**
 ```
-projects/        beeloud/, startups/, ai-projects/, creative/
+projects/        <project-a>/, startups/, ai-projects/, creative/
 career/          resume/, reference-letters/, job-descriptions/, cover-letters/, certificates/
 legal/           canada-pr/, family-docs/, work-permit/   ← not "immigration/"
 education/       university/, languages/                  ← merge these
 finances/        budgets/, bank-statements/               ← not "finance/"
 media/           photos/, videos/, streaming/, screenshots/
 personal/        notes/, family/, health/, hobbies/, driving/
-fitness/         stronglifts-logs/, martial-arts/
+fitness/         workout-logs/, martial-arts/
 _archive/        laptop-backups/, misc-archive/, old-projects/
 _inbox/
 ```
@@ -418,13 +418,13 @@ for f in files_in_folder:
 - Files named "Resume" that are actually cover letters → move to `cover-letters/`
 - Files named "Marketing" in grants/ that are sponsorship proposals → keep in partnerships/
 - Cold email SMTP config lists (`Instantly Bulk 1/2`) in community/ → belong in partnerships/
-- Files named "Financials" in startups/ that are Beeloud budget sheets → belong in beeloud/financials/
-- "Copy of AI @ VC Lab" in beeloud/ — template copy, not Beeloud-specific → trash
+- Files named "Financials" in startups/ that are <project-a> budget sheets → belong in <project-a>/financials/
+- "Copy of AI @ VC Lab" in <project-a>/ — template copy, not <project-a>-specific → trash
 - "Teaching Experience" in reference-letters/ → actually a teaching philosophy statement (keep)
 - "Certificates to complete" in certificates/ → TODO list (trash)
 - "Financials" in budgets/ → empty spreadsheet (trash)
 - "Reference Check Form 2021" in reference-letters/ → request form not a letter (→ job-descriptions/)
-- "Reforge AI Product Summit 2025" in certificates/ → slide deck (→ career/<employer>/)
+- "<Conference Name> 2025" in certificates/ → slide deck (→ career/<employer>/)
 - "Instantly Bulk 1/2" in community/ → cold email SMTP lists (→ partnerships/)
 
 ---
@@ -464,7 +464,7 @@ For 1,000+ file Drives, dispatch parallel agents per folder domain:
 
 ```
 Agent 1 → career/, legal/, education/     (independent domains)
-Agent 2 → projects/beeloud/, projects/startups/
+Agent 2 → projects/<project-a>/, projects/startups/
 Agent 3 → personal/, media/, finances/, fitness/
 Agent 4 → _archive/, _inbox/
 ```
@@ -503,14 +503,14 @@ Include `size` in your `fields` param: `"fields": "nextPageToken,files(id,name,m
 
 | Pattern | Action |
 |---------|--------|
-| `Feb 2025 <name> 5x5 Advanced (aka StrongLifts) \| LiftVault.com` | → `Feb 2025 Workout Log` |
+| `Feb 2025 <name> 5x5 Advanced (aka <workout-template>) \| <source>.com` | → `Feb 2025 Workout Log` |
 | `results-20241123-220704` | Leave as-is inside `bigquery-exports/` sub-folder |
 | `https://blog.example.com/slug-2026-05-05` | → `Blog Performance May 2026` |
 | `Copy of Resume - Jane Doe (Nov 2025).docx` | → `Resume - Jane Doe Nov 2025 v2.docx` |
 | `# Firebase environment configuration` | → `Firebase Environment Configuration` (strip `#`) |
 | `Grandfatehred over invite edits limit` | → `Grandfathered over Invite Edits Limit` (fix typos) |
 | `ecommerce-itinerary (1) (1).pdf` | → `E-Commerce Event Itinerary.pdf` (strip duplicates) |
-| `WM0h3519 - solo-eng-tracker (2).json` | → `solo-eng-tracker.json` |
+| `WM0h3519 - <project>-tracker (2).json` | → `<project>-tracker.json` |
 
 ---
 
