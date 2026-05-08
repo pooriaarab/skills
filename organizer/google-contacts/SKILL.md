@@ -74,7 +74,7 @@ If `GOG_ACCOUNT_DEFAULT` is unset, source the shell wrappers (`personal` / `work
    - photo
 
 5. Contact groups (Google's labels for people) — auto-derive or use a fixed scheme?
-   a) auto-derive from email domain + interaction frequency (e.g. `mozilla-coworkers`,
+   a) auto-derive from email domain + interaction frequency (e.g. `work-coworkers`,
       `family`, `frequent-2024`)
    b) preserve existing groups; only suggest new ones for ungrouped contacts
    c) fixed scheme: family / friends / coworkers / vendors / acquaintances

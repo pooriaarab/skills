@@ -366,7 +366,7 @@ TAXONOMY = {
     "receipt":         "finance/receipts",
     "github":          "dev/github",
     "calendar":        "calendar",
-    "mozilla/internal":"mozilla/internal",
+    "work/internal":  "work/internal",
     "notification":    "notifications",
     "spam":            "(trash)",  # special: route to trash, not labeled
 }
@@ -539,8 +539,8 @@ Re-run Steps 3–5 with `mode="maintain"`. The plan query becomes `after:<last_r
 
 ```bash
 # convenience: one shell command per account
-work     && python -m gmail_organizer maintain   # mozilla
-personal && python -m gmail_organizer maintain   # gmail
+work     && python -m gmail_organizer maintain   # work account
+personal && python -m gmail_organizer maintain   # personal account
 ```
 
 (Naming the script `gmail_organizer` is suggestive — the actual invocation in this skill is "the assistant runs the embedded Python from Steps 3–5 with `mode='maintain'`.")

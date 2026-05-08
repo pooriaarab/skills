@@ -73,7 +73,7 @@ Do not skip this. Wrong assumptions = wrong structure.
    → Plan a personal/ or private/ folder.
 
 6. Are there files for multiple contexts (e.g., work + personal, or multiple clients)?
-   → Plan top-level folders per context (e.g., solo/, mozilla/, personal/)
+   → Plan top-level folders per context (e.g., `<work-project>/`, `<employer>/`, `personal/`)
 ```
 
 ---
