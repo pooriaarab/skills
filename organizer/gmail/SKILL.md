@@ -366,7 +366,7 @@ TAXONOMY = {
     "receipt":         "finance/receipts",
     "github":          "dev/github",
     "calendar":        "calendar",
-    "work/internal":"work/internal",
+    "work/internal":  "work/internal",
     "notification":    "notifications",
     "spam":            "(trash)",  # special: route to trash, not labeled
 }
