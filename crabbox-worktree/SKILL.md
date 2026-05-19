@@ -189,15 +189,156 @@ Add a `gcloud auth application-default print-access-token >/dev/null 2>&1 || { e
 
 ## Shared warm box cost reduction
 
-Default e2-standard-2 24/7 = ~$35/mo. Tactics:
+Default e2-standard-2 24/7 = ~$57/mo (compute + disk). Tactics:
 
-- **Smaller VM**: `e2-medium` (4 GB RAM) = ~$25/mo. Workable for some dev servers, tight for big TypeScript projects.
-- **Overnight shutdown**: gcloud cron stops the box at 8pm, the warm script re-warms at 8am. ~$15/mo for 8h × 5 days.
-  ```cron
-  0 20 * * * bash /path/to/bin/crabbox-warm-shared.sh --stop
-  0 8  * * * bash /path/to/bin/crabbox-warm-shared.sh
-  ```
+- **Smaller VM**: `e2-medium` (4 GB RAM) ≈ $25/mo. Workable for some dev servers, tight for big TypeScript projects.
+- **Auto-schedule** stop in evening + warm in morning — typically cuts cost ~65% (see next section).
 - **Skip the always-warm box entirely**: stick with Phase 2 (image v2 only, per-worktree cold warmups). TTR ~2.5 min, cost only when you're actively working.
+
+## Auto-schedule the warm box (recommended)
+
+The cheapest realistic config: warm the box at 8am on weekdays, stop it at 8pm every day. Empty time on the meter = empty bill. Typical savings:
+
+| Schedule | Hours/week | Cost/mo |
+|---|---|---|
+| Always on (24/7) | 168 | ~$57 |
+| 8am–8pm weekdays (12h × 5) | 60 | **~$20** |
+| 8am–6pm weekdays (10h × 5) | 50 | ~$17 |
+
+Two implementations below — **launchd for macOS** (preferred on a laptop), **cron for Linux/desktop** (simpler when the machine doesn't sleep).
+
+### macOS — launchd (recommended)
+
+`launchd` catches up on triggers missed while the Mac was asleep. cron silently skips them, which means if your laptop is asleep at 8pm the box keeps running all night.
+
+Create two files under `~/Library/LaunchAgents/`. Replace `<repo-root>` with the absolute path to your repo (e.g. the directory that contains `bin/crabbox-warm-shared.sh`).
+
+**`~/Library/LaunchAgents/sh.crabbox.warm-shared.start.plist`** — warms the box weekday mornings at 08:00:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>sh.crabbox.warm-shared.start</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-lc</string>
+        <string><repo-root>/bin/crabbox-warm-shared.sh</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string><repo-root></string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <string>/Users/<you></string>
+    </dict>
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>0</integer></dict>
+        <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>0</integer></dict>
+        <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>0</integer></dict>
+        <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>0</integer></dict>
+        <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>0</integer></dict>
+    </array>
+    <key>StandardOutPath</key>
+    <string>/Users/<you>/Library/Logs/crabbox-warm-shared.start.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/<you>/Library/Logs/crabbox-warm-shared.start.log</string>
+</dict>
+</plist>
+```
+
+**`~/Library/LaunchAgents/sh.crabbox.warm-shared.stop.plist`** — stops the box every day at 20:00:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>sh.crabbox.warm-shared.stop</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-lc</string>
+        <string><repo-root>/bin/crabbox-warm-shared.sh --stop</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string><repo-root></string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <string>/Users/<you></string>
+    </dict>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key><integer>20</integer>
+        <key>Minute</key><integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/Users/<you>/Library/Logs/crabbox-warm-shared.stop.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/<you>/Library/Logs/crabbox-warm-shared.stop.log</string>
+</dict>
+</plist>
+```
+
+Load both into launchd:
+
+```bash
+mkdir -p ~/Library/Logs
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/sh.crabbox.warm-shared.start.plist
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/sh.crabbox.warm-shared.stop.plist
+launchctl list | grep crabbox    # both should be listed with PID 0 (idle, waiting)
+```
+
+Tail the logs whenever you want to see what fired:
+
+```bash
+tail -F ~/Library/Logs/crabbox-warm-shared.{start,stop}.log
+```
+
+Tear down (uninstall the schedule):
+
+```bash
+launchctl bootout gui/$(id -u)/sh.crabbox.warm-shared.start
+launchctl bootout gui/$(id -u)/sh.crabbox.warm-shared.stop
+rm ~/Library/LaunchAgents/sh.crabbox.warm-shared.{start,stop}.plist
+```
+
+Force-fire either job once to test (will actually warm or stop the box — be intentional):
+
+```bash
+launchctl kickstart gui/$(id -u)/sh.crabbox.warm-shared.start
+launchctl kickstart gui/$(id -u)/sh.crabbox.warm-shared.stop
+```
+
+### Linux / always-on desktop — cron
+
+```cron
+# Stop at 20:00 every day
+0 20 * * *   /bin/bash -lc '<repo-root>/bin/crabbox-warm-shared.sh --stop >> $HOME/.local/state/crabbox-warm-shared.log 2>&1'
+
+# Warm at 08:00 Mon-Fri
+0 8  * * 1-5 /bin/bash -lc '<repo-root>/bin/crabbox-warm-shared.sh         >> $HOME/.local/state/crabbox-warm-shared.log 2>&1'
+```
+
+Install with `crontab -e`. Verify with `crontab -l`. Caveat: cron does not catch up missed runs across reboots/suspend.
+
+### Caveats both schedulers share
+
+1. **ADC reauth on corporate Google Workspace accounts**: every ~16h, gcloud's application-default credentials expire. The 8am warm will fail silently when this happens — the log will show `invalid_grant / invalid_rapt`. Workaround: run `gcloud auth application-default login` in the morning when you notice the box didn't come up. Long-term fix: use a service-account JSON key (not always allowed on corp orgs).
+2. **The Mac/host must be online**: laptop in a bag at 8am = no warm box. launchd will fire the moment the lid opens, but you'll wait ~60s for the boot.
+3. **The marker file gets re-read each time**: if you delete `.crabbox-default-on` the schedules still fire, but `crabbox-warm-shared.sh --stop` is a no-op if there's no slug recorded, and warming is harmless if the box is already up (it short-circuits on inspect). Safe to leave the agents loaded.
+
+Probably want a Slack/email/desktop notification when the morning warm fails (because you'll otherwise discover it only when your first worktree attach times out). Not built in; one-liner in your `crabbox-warm-shared.sh` after a failure → `osascript -e 'display notification "..." with title "..."'` on macOS.
 
 ## Why the per-worktree model is wrong for most solo devs
 
