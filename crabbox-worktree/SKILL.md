@@ -178,14 +178,103 @@ gcloud compute networks create crabbox --project=<project> --subnet-mode=auto --
 
 ### ADC expiration
 
-Corporate Google Workspace accounts enforce reauth every ~16h on Application Default Credentials. The `crabbox warmup` call fails with `invalid_grant / invalid_rapt`. Fix loop:
+Corporate Google Workspace accounts enforce reauth every ~16h on Application Default Credentials. The `crabbox warmup` call fails with `invalid_grant / invalid_rapt`. Two separate tokens both expire:
 
 ```
-gcloud auth application-default login  # ADC for SDK clients
+gcloud auth application-default login  # ADC for SDK clients (crabbox uses this)
 gcloud auth login                       # CLI auth for gcloud commands (separate token)
 ```
 
-Add a `gcloud auth application-default print-access-token >/dev/null 2>&1 || { echo "run gcloud auth application-default login"; exit 1; }` preflight at the top of attach.sh to fail fast with a clear message instead of mid-warmup.
+For **interactive use**, just re-run those when an attach errors. For **automation** (launchd / cron), the user token is the wrong tool — use a service account key instead (next section).
+
+Preflight that fails fast with a clear message instead of mid-warmup:
+
+```bash
+gcloud auth application-default print-access-token >/dev/null 2>&1 \
+  || { echo "run: gcloud auth application-default login"; exit 1; }
+```
+
+### Service account key (durable auth for unattended jobs)
+
+The fix for ADC reauth breaking your 8am cron: give the automation its own service-account credential that never reauths.
+
+**Check first whether your org allows it.** Many corp GCP orgs set `iam.disableServiceAccountKeyCreation` at the org root. If so, the `keys create` step below will fail and you need a different approach (workload identity federation, or impersonation with `gcloud auth application-default login --impersonate-service-account=...`).
+
+**Security tradeoff.** A SA key is a long-lived credential file on the host. If the host is compromised, the attacker gets persistent project access. Mitigations:
+
+- `chmod 600` the key file, store under `~/.config/gcloud/` (not in a synced cloud folder, not in any repo).
+- Grant the minimum role the SA actually needs (here: `roles/compute.admin` + `roles/iam.serviceAccountUser`). Avoid `roles/owner` or `roles/editor`.
+- Rotate or revoke any time with `gcloud iam service-accounts keys delete`.
+- Don't add the SA key path to `GOOGLE_APPLICATION_CREDENTIALS` in your shell `rc` file — that would make every interactive `gcloud` use the SA, defeating user-level audit logging. Set it only inside the launchd plist / cron entry / scoped wrapper.
+
+**Create the SA + key:**
+
+```bash
+PROJECT=<your-project>
+SA_NAME=crabbox-runner
+SA_EMAIL="${SA_NAME}@${PROJECT}.iam.gserviceaccount.com"
+KEY=~/.config/gcloud/crabbox-sa-key.json
+
+gcloud iam service-accounts create "$SA_NAME" \
+  --project="$PROJECT" \
+  --display-name="Crabbox automation runner"
+
+# Newly-created SAs take a few seconds to propagate across IAM. If the
+# next call returns "does not exist", wait 15s and retry.
+sleep 15
+
+# compute.admin: create/delete VMs, firewalls, images, networks
+gcloud projects add-iam-policy-binding "$PROJECT" \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role=roles/compute.admin \
+  --condition=None
+
+# iam.serviceAccountUser: required so the new VMs can have the default
+# compute service account attached at boot. Without this, VM creation
+# fails with a "iam.serviceAccounts.actAs" denied error.
+gcloud projects add-iam-policy-binding "$PROJECT" \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role=roles/iam.serviceAccountUser \
+  --condition=None
+
+# Download the JSON key
+gcloud iam service-accounts keys create "$KEY" \
+  --iam-account="$SA_EMAIL" \
+  --project="$PROJECT"
+
+chmod 600 "$KEY"
+```
+
+**Wire it into launchd** by adding to the `EnvironmentVariables` dict of each plist (under `PATH` and `HOME`):
+
+```xml
+<key>GOOGLE_APPLICATION_CREDENTIALS</key>
+<string>/Users/<you>/.config/gcloud/crabbox-sa-key.json</string>
+```
+
+Then reload: `launchctl bootout` + `launchctl bootstrap` both plists.
+
+**Wire it into cron** by exporting in the command:
+
+```cron
+0 8 * * 1-5 GOOGLE_APPLICATION_CREDENTIALS=$HOME/.config/gcloud/crabbox-sa-key.json /bin/bash -lc '<repo-root>/bin/crabbox-warm-shared.sh'
+```
+
+**Verify it actually works** (without your user ADC mattering):
+
+```bash
+GOOGLE_APPLICATION_CREDENTIALS=$KEY crabbox list --provider gcp
+# should print your active leases without needing `gcloud auth application-default login`
+```
+
+**Revoke** when the SA is no longer needed:
+
+```bash
+gcloud iam service-accounts keys list --iam-account="$SA_EMAIL"
+gcloud iam service-accounts keys delete <KEY_ID> --iam-account="$SA_EMAIL"
+# or remove the SA entirely:
+gcloud iam service-accounts delete "$SA_EMAIL"
+```
 
 ## Shared warm box cost reduction
 
