@@ -33,13 +33,13 @@ Pick the implementer with the right price/capability/access trade-off for your o
 
 | Orchestrator | Implementer | Implementer cost (per M) | Access | Notes |
 |---|---|---|---|---|
-| **Claude Opus 4.7** | **Gemini 3.5 Flash** | $1.50 in / $9 out | Gemini CLI + Vertex AI or AI Studio | Battle-tested in the case study below. Autonomous via `gemini --yolo`. |
+| **Claude Opus 4.7** | **Gemini 3.5 Flash** | $1.50 in / $9 out | Gemini CLI + Vertex AI or AI Studio | Battle-tested in the case study below. Autonomous via `gemini --yolo`. Supports superpowers skill install. |
 | Claude Opus 4.7 | Claude Haiku 4.5 | ~$1 in / ~$5 out | Anthropic API direct | Same family — fewer style mismatches with reviewer feedback. |
-| Claude Opus 4.7 | **Cursor Composer 2.5** | $0.50 in / $2.50 out | **Cursor IDE only — no API** | Kimi-K2.5-based, ~10× cheaper than Opus, 79.8% SWE-Bench Multilingual. **IDE-bound** — see "Variant: IDE-bound implementer" below. |
+| Claude Opus 4.7 | **Cursor Composer 2.5** | $0.50 in / $2.50 out | Cursor SDK (`@cursor/sdk`) — headless TypeScript | Kimi-K2.5-based, ~10× cheaper than Opus, 79.8% SWE-Bench Multilingual (87.2% inside Cursor's harness). Same Cursor "harness" as the desktop app. |
 | GPT-5.5 Pro | GPT-5 mini | ~$0.40 in / ~$3.20 out | OpenAI API | Same family. Cleanest when the orchestrator is in OpenAI's ecosystem. |
 | Claude Sonnet | Gemini 2.5 Flash | $0.30 in / $2.50 out | Gemini CLI | Cheapest viable option, but expect 2-3 review-feedback cycles per PR. |
 
-Composer 2.5 is the lowest-cost-per-quality option for an Opus orchestrator — but its **Cursor-IDE-only** access means it can't run autonomously in the background. Use the IDE-bound variant below if pairing Opus with Composer.
+Composer 2.5 is currently the lowest-cost-per-quality option for an Opus orchestrator. The Cursor SDK exposes it as a headless TypeScript agent — same harness as the desktop app, but spawnable in background mode just like Gemini Flash. The 87.2% SWE-Bench score inside Cursor's harness is the most relevant number: dropping the bare Kimi K2.5 base into another orchestration loses ~25 points, so use the SDK rather than calling the underlying model directly.
 
 ## The pattern (autonomous-implementer variant)
 
@@ -133,63 +133,47 @@ This dramatically reduces the orchestrator's review burden — the implementer f
 
 6. **Repeat** in dependency-correct order. Run 2 implementers in parallel where work is independent — orchestrator becomes the review bottleneck above 3-way.
 
-## Variant: IDE-bound implementer (Cursor Composer 2.5)
+## Setup — Cursor Composer 2.5 via the SDK
 
-Composer 2.5 is dramatically cheap (~10× cheaper than Opus) and matches Opus on coding benchmarks (79.8% SWE-Bench Multilingual within 1pt of Opus 4.7). But it's **only accessible inside the Cursor IDE** — no external API or CLI. This changes the workflow from "background autonomous" to "human-in-the-loop hand-off."
+The Cursor SDK (released alongside Composer 2.5, May 2026) exposes Composer as a headless TypeScript agent — same harness as the desktop app, fully background-spawnable.
 
-### How it works
-
-```
-User asks for feature (in Claude Code, with Opus)
-  └─► Orchestrator writes the plan + commits it to the worktree
-        └─► Orchestrator says: "switch to Cursor, open this worktree, ask
-            Composer 2.5 to execute docs/plans/per-pr/<pr-name>.md"
-              └─► (Human) opens Cursor, pastes the plan path into Composer
-                    └─► Composer ships the PR
-                          └─► (Human) switches back to Claude Code: "PR is open"
-                                └─► Orchestrator final-reviews + merges
+```bash
+npm install @cursor/sdk
 ```
 
-The orchestrator can't background-spawn Composer like Gemini. Instead it issues an explicit hand-off instruction with everything Composer needs in a single message. The human is the courier between IDEs.
+Set `CURSOR_API_KEY` in your shell env (get it from your Cursor integration dashboard):
 
-### Composer 2.5 hand-off template
-
-When the orchestrator is ready to hand off a PR, it produces this:
-
-```
-HAND OFF TO COMPOSER 2.5 — PR <N>: <title>
-
-Worktree: ~/worktrees/feature-pr-N
-Plan: docs/plans/per-pr/<pr-name>.md
-
-In Cursor, with this worktree open:
-1. Tell Composer: "Read docs/plans/per-pr/<pr-name>.md and execute it
-   end-to-end. TDD per file, commit per file pair. Open the PR titled
-   '<exact title>' using gh pr create --body-file. STOP at 'review
-   approved' — do not merge. Report back with the PR number."
-2. When Composer finishes, paste the PR number back here.
+```bash
+export CURSOR_API_KEY="..."
 ```
 
-### Why Composer pairs well with Opus despite no API
+Spawn a one-shot agent per PR (TypeScript):
 
-- Composer's SWE-Bench scores are within ~1 point of Opus 4.7, so per-PR quality is high
-- $0.50/M input is cheap enough that even Cursor's per-seat pricing dominates the marginal cost
-- The forced human-in-the-loop is actually a small benefit — you see what Composer's about to do before it runs (in the Cursor UI), so silent prompt-injection or sandbox escape attempts are harder
-- Long-horizon agentic mode handles 2M-token sessions for ~$2 — comparable to a full Gemini run
+```ts
+// scripts/run-composer.ts
+import { Agent } from "@cursor/sdk";
+import { readFileSync } from "node:fs";
 
-### Trade-offs vs background autonomous
+const plan = readFileSync(process.argv[2], "utf8");
+const agent = new Agent({ apiKey: process.env.CURSOR_API_KEY!, model: "composer-2.5" });
 
-| Aspect | Background autonomous (Gemini/Haiku) | IDE-bound (Composer 2.5) |
-|---|---|---|
-| Parallel PRs | 2-3 spawned at once | 1 at a time (human courier limits) |
-| Wall-clock | Orchestrator does other work while implementer runs | Orchestrator waits for human hand-off |
-| Cost | $0.50-1.50/PR | $2/PR (heavier model + Cursor seat) |
-| Quality | Good with detailed plan | Excellent; matches Opus benchmarks |
-| Visibility | Implementer log in stdout | Live in Cursor UI |
-| Auth fragility | ADC tokens expire; need refresh | Cursor session — much more stable |
-| Skill ecosystem | Install superpowers via `gemini extensions install` | No skill install path; rely on plan detail |
+await agent.run({
+  prompt: plan,
+  workdir: process.cwd(),
+  // Composer's harness handles file ops, terminal, tests autonomously
+});
+```
 
-**Picking between them:** Gemini Flash if you want maximum parallelism + lowest wall-clock. Composer 2.5 if you want highest per-PR quality and don't mind serial throughput.
+Invoke from the orchestrator's per-PR loop:
+
+```bash
+cd ~/worktrees/feature-pr-N
+npx tsx scripts/run-composer.ts docs/plans/per-pr/<pr-name>.md > /tmp/run.log 2>&1 &
+```
+
+The SDK is TypeScript-only at launch (no Python equivalent yet). If you need Python, pair Opus with Gemini Flash or Claude Haiku instead.
+
+**Why the SDK matters**: bare Kimi K2.5 (Composer's base model) scores ~61.5% on SWE-Bench, but inside Cursor's harness it scores ~87.2%. The harness — context management, tool dispatch, retry logic — is the value. Always call Composer via the SDK, never via a third-party Kimi inference endpoint.
 
 ## Critical rules (learned the expensive way)
 
