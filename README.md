@@ -15,6 +15,7 @@ A coordinated suite for organizing across every digital surface — files, notes
 | [eco-mode](eco-mode/SKILL.md) | Cut token/CO₂ usage ~65% without quality loss. Caveman-inspired. |
 | [eco-analyze](eco-analyze/SKILL.md) | `/eco-analyze` — calculate your real carbon footprint from Claude Code history |
 | [multi-account-cli](multi-account-cli/SKILL.md) | One-command switching between work and personal accounts across gcloud, gws, Firebase, and Netlify. |
+| [delegate-implementation](delegate-implementation/SKILL.md) | Orchestrator-implementer pattern for 10+ PR campaigns. Opus plans, Gemini Flash / Haiku / GPT-5 mini / Cursor Composer 2.5 implements. 50-80% cost savings vs all-Opus. |
 
 ## Install
 
@@ -33,6 +34,7 @@ npx skills add pooriaarab/organizer/gmail
 npx skills add pooriaarab/eco-mode
 npx skills add pooriaarab/eco-analyze
 npx skills add pooriaarab/multi-account-cli
+npx skills add pooriaarab/delegate-implementation
 ```
 
 ## Data source
