@@ -1,227 +1,198 @@
 ---
 name: html-prototyper
-description: Generate a high-fidelity static HTML/CSS prototype for a feature in ANY codebase. Analyzes the target codebase (README, design tokens, components, brand assets), extracts the real visual language, optionally cross-checks with live screenshots, and stamps out a `prototypes/<feature>/` folder ready to ship to a static host. Use when the user says "prototype this feature", "build me a mock of X for [repo]", "what would [feature] look like in [our existing product]", or wants a framework-free preview before real implementation.
+description: Generate a 100%-fidelity, framework-free HTML/CSS prototype of a new feature inside an EXISTING product. Reads the target codebase to identify chrome variants, ports design tokens to CSS custom properties, extracts real SVG brand assets, stamps out feature pages on the right chrome, and deploys to a public static URL. Use when the user says "prototype this for [our existing product]", "mock this up in [our app] look", "build a static preview of [feature] before we ship the real one", or wants to evaluate UX with stakeholders before any real implementation. Distinguishes between admin/product-page chrome and canvas-editor chrome and matches existing modal patterns.
 ---
 
 # HTML Prototyper
 
-Turn ANY codebase into a high-fidelity prototype factory. Read the code, port the design system to plain CSS, stamp out static HTML pages that look indistinguishable from the real product, deploy to a live URL.
+Build prototypes that look indistinguishable from the real app. The viewer should not be able to tell your HTML from a screenshot of production.
 
-Built from the recipe that ported the Solo Designer to standalone HTML in one session (see [`Mozilla-Ocho/solo-design`](https://github.com/Mozilla-Ocho/solo-design) `html-clone/`). This skill generalizes it.
+The recipe was forged building Solo Payments (see [Mozilla-Ocho/solo-design](https://github.com/Mozilla-Ocho/solo-design) `html-clone/` for the worked example). This skill generalizes it across codebases.
 
 ## When to use
 
-- User says "let's prototype [feature] for [existing product / repo]"
-- User has a codebase + a new feature idea + wants to see it before building
-- A design exploration that needs to feel native to the existing app
-- Pre-implementation alignment with non-engineering stakeholders
+- User has an existing app + a new feature idea + wants to see it before building
+- Pre-implementation alignment with non-engineering stakeholders (PMs, designers, brand, partners)
+- Design exploration that needs to feel native to the existing app
 
 ## When NOT to use
 
-- Greenfield projects with no existing design language to mimic — use a generic UI kit instead
-- Visual mockups that don't need to match a real product — Figma is faster
-- Quick throwaway sketches — a single `<style>` block in a single HTML file is enough
+- Greenfield projects with no design language to mimic — start in Figma instead
+- Throwaway sketches — a single `<style>`-block HTML is faster
+- Features that are *already implemented* in the real app — that's a screenshot, not a prototype
 
 ## Phase 1 — Discovery
 
-Before writing a single line of HTML, learn the codebase. Set a TaskCreate for each step.
+Before any HTML, learn the codebase. Track with TaskCreate.
 
-### 1a. Locate the project root
+### 1a. Anchor on the repo
 
-Ask the user for the path or repo URL. If a path, `ls` it. If a URL, `gh repo clone` it. Anchor everything below to that root.
+`ls`/`gh repo clone` the target. Anchor everything in `<root>/`.
 
-### 1b. Read the high-signal files
+### 1b. Identify CHROME VARIANTS
 
-- `README.md` — what the product is, who it's for, what the chrome looks like at a high level. Note the deployed URL if mentioned.
-- `package.json` / `pyproject.toml` / `go.mod` / `Cargo.toml` — framework gives away the design system. React + TypeStyle? React + Tailwind + shadcn? Vue + Vuetify? Svelte + SvelteKit? Each implies different token extraction paths.
-- `tailwind.config.js` / `theme.ts` / `tokens.json` / any explicit design-token file — gold. Use as the authoritative source.
-- `CLAUDE.md` / `AGENTS.md` / `CONTRIBUTING.md` — project conventions, sometimes design-system pointers.
-- `docs/design/` or `docs/styleguide/` if present — read every file.
+Most apps have 2–3 chrome variants. **You must pick the right one per page.** Common pattern:
 
-### 1c. Locate the design system
+| Chrome | When used | Where to find |
+|---|---|---|
+| **Marketing** | Public pages: /, /pricing, /docs, /about | `src/views/marketing/`, `src/views/homepage/`, top-level layouts |
+| **Admin/product page** | Logged-in product pages that are NOT canvas editors: /domains, /billing, /invoices, /customers | Look for routes that show lists/forms with a simple top toolbar and content area. The clue: small toolbar + divider + content, no canvas |
+| **Canvas editor** | The flagship editor: /designer, /builder, /editor — has mode buttons + right properties panel + canvas in the middle | `src/views/designer/`, mode-button toolbars, canvas/preview components |
 
-Common patterns (try in order):
+**Critical:** A feature that's a *whole admin tool* (lists, tables, forms across multiple states) goes on the admin/product-page chrome. A feature that's a *setting of an existing site* goes as a row INSIDE the canvas editor's Settings right sidebar (with a modal for the workflow). Don't put admin tools inside the canvas editor's main area — that conflates two chrome types.
 
-1. **Tailwind config** at repo root or `apps/*/tailwind.config.{js,ts,cjs,mjs}` → extract `theme.extend.colors`, `theme.extend.spacing`, `theme.extend.fontFamily`, `theme.extend.boxShadow`, `theme.extend.borderRadius`. These become your `tokens.css` CSS custom properties.
-2. **TypeStyle / CSS-in-JS** under `packages/styles/` or `src/styles/` → look for enum-style files (`Colors.ts`, `Spacing.ts`, `BoxShadowStyles.ts`, `FontSizes.ts`, `BorderStyles.ts`). Mozilla-Ocho/solo follows this pattern. Port enums verbatim to CSS vars.
-3. **CSS custom properties** declared in a global `:root {}` block (`src/styles/globals.css`, `app/global.css`, etc.) → already in the right shape. Just inline-copy with renaming.
-4. **shadcn/ui** detected (look for `components.json` or `components/ui/`) → tokens are in `globals.css`'s `:root` HSL triples. Port directly.
-5. **CSS modules / styled-components / Emotion / vanilla-extract** → grep for `colors`, `spacing`, repeated hex values. Aggregate into a synthesized `tokens.css`.
-6. **No discoverable design system** — screenshot the live app via browser, eyeball the values from the rendered CSS via DevTools. Last resort.
+### 1c. Locate design tokens
 
-### 1d. Locate the chrome / layout
+Try in order:
 
-Find the top-level layout components:
+1. **Tailwind config** → `theme.extend.colors/spacing/fontFamily/boxShadow/borderRadius`
+2. **TypeStyle / CSS-in-JS enum files** under `packages/styles/`, `src/styles/` (`Colors.ts`, `Spacing.ts`, `BoxShadowStyles.ts`, `FontSizes.ts`, `BorderStyles.ts`)
+3. **CSS custom properties** in a global `:root {}` (`globals.css`, `app/global.css`)
+4. **shadcn** (`components.json` + HSL triples in `:root`)
+5. **Visual reverse-engineer via DevTools** — last resort
 
-- React: `App.tsx`, `Layout.tsx`, `RootLayout.tsx`, anything under `views/` or `layouts/` or `pages/_app.tsx`
-- Look for `Header`/`Navbar`/`Topbar`, `Sidebar`/`Nav`, `Footer`, `MainContent`/`Canvas`
-- Identify exact pixel sizes (heights, widths, paddings), the brand mark/logo asset, the typography stack used for chrome (often different from body)
-- For multi-mode apps (like Solo Designer), identify mode buttons and what each mode does
+### 1d. Locate brand assets
 
-Cite source files + line numbers. The user will trust the prototype only if you can prove the values came from real code.
+`public/`, `static/`, `assets/`, `src/resources/img/`. For React icon components, extract the SVG element verbatim (convert `fillRule` → `fill-rule`, `clipRule` → `clip-rule`, `strokeWidth` → `stroke-width`). **Never substitute unicode glyphs** (`◆ ▦ ⊕ →`) for missing icons — those are admit-defeat shortcuts.
 
-### 1e. Locate brand assets
+### 1e. Locate modal patterns
 
-- `public/`, `static/`, `assets/`, `apps/*/public/` for raster + vector logos
-- `src/resources/img/`, `src/assets/icons/`, `src/components/icons/` for icon components (often React/JSX wrapping inline SVG)
-- Extract the actual SVG markup; don't approximate with unicode glyphs or Lucide stand-ins if the real asset exists
+Search for existing dialog/modal components in source. Typically there are two patterns:
 
-### 1f. Capture live ground truth (optional but recommended)
+- **Single-screen form modal** (e.g., `EditBusinessDetailsModal.tsx`) — title + body form + Cancel/Save footer
+- **Multi-step wizard modal** (e.g., `CustomDomainSelectionModal.tsx`) — title + step indicator + body for current step + Back/Next footer
 
-If the user has a deployed instance:
+If your prototype has a workflow (Stripe connection, domain registration, etc.) match the multi-step pattern. If it's a single config form, match the single-screen pattern.
 
-- Use `agent-browser` or `chrome-devtools` MCP to navigate the live app
-- Take full-page screenshots of each major mode/state
-- Save under `prototypes/<feature>/_reference/` for diffing later
-- If auth-gated, ask the user to log in once in the browser session before snapshotting
+### 1f. Capture live ground truth (recommended)
+
+If a deployed instance exists, use `agent-browser` or `chrome-devtools` MCP to navigate logged-in, take full-page screenshots of each major mode/state, save to `_reference/`. Diff against your prototype later.
 
 ## Phase 2 — Port
 
-### 2a. Write `prototypes/<feature>/shared/tokens.css`
+### 2a. `shared/tokens.css`
 
-CSS custom properties for every token you extracted. Naming convention:
+CSS custom properties for every extracted token. Header comment cites source file. Use ONLY these in component CSS — no hardcoded hex/px when a token exists.
 
-```css
-:root {
-  /* Colors — port from <source file>:<line> */
-  --color-brand-primary: #...;
-  --color-brand-accent: #...;
-  --color-text-default: #...;
-  --color-text-muted: #...;
-  --color-surface: #...;
-  --color-border: #...;
-  /* States */
-  --color-success: #...;
-  --color-warning: #...;
-  --color-danger: #...;
-  /* Spacing scale (port verbatim — DO NOT smooth) */
-  --space-1: 4px; --space-2: 8px; /* … */
-  /* Type scale */
-  --font-sans: '<actual brand font>', ...;
-  --fs-h1: ...px; --fs-h2: ...px; --fs-body: 16px;
-  --lh-tight: 1.2; --lh-normal: 1.5;
-  /* Shadows, radii, layout */
-  --shadow-sm: ...; --shadow-md: ...;
-  --radius-sm: ...; --radius-md: ...; --radius-lg: ...; --radius-pill: ...;
-  --topbar-h: ...px; --sidebar-w: ...px;
-}
-```
+### 2b. `shared/fonts.css`
 
-Include a header comment naming the source file(s) so a future reader can re-port.
+`@import` to the actual font CDN the real app uses, or `@font-face` for self-hosted.
 
-### 2b. Write `shared/fonts.css`
+### 2c. `shared/components.css`
 
-Either an `@import` to Google Fonts (or whichever CDN the real app uses) or `@font-face` rules pointing at the local files in `shared/img/fonts/`.
+Reusable primitives: buttons, cards, tables, badges, inputs, alerts, utilities. **All buttons reuse the same classes** as the real app's primary actions (e.g., the topbar Publish button class) — DO NOT invent custom pill variants for page-header buttons. Same class = same visual.
 
-### 2c. Write `shared/components.css`
+### 2d. One stylesheet per chrome variant
 
-Reusable primitives only — buttons, cards, tables, badges, inputs, alerts, utilities. Use `var(--*)` everywhere; never hardcode hex/px when a token exists.
-
-### 2d. Write `shared/chrome.css` (one per distinct chrome the app has)
-
-For each chrome the real app uses (admin chrome, customer-facing chrome, marketing chrome, etc.), write a separate stylesheet with a unique class prefix (e.g., `.app-*`, `.site-*`, `.mkt-*`). Each chrome is independent — don't try to share classes across them.
-
-Source-cite every measurement. If the real `Topbar.tsx` says `height: theme.spacing(8)` and `theme.spacing` is `4px`, your CSS gets `height: 32px` with a comment pointing at the source.
+`shared/<chromename>-chrome.css` for each chrome the app has. Independent class prefixes (e.g., `.dz-*` for designer, `.app-*` for admin, `.mkt-*` for marketing). Cite measurement sources in CSS comments.
 
 ### 2e. Inline real SVG assets
 
-Copy the actual `<svg>` markup from the brand assets into `shared/img/` or inline directly into the chrome HTML. Convert React attribute names (`fillRule` → `fill-rule`, `strokeWidth` → `stroke-width`). DO NOT use placeholder unicode glyphs (`◆`, `◇`, `⊕`, etc.) — those are admit-defeat shortcuts.
+Copy the real `<svg>` markup. Place into `shared/img/` if as standalone files, or inline-paste into HTML for icons. Convert React attribute names. No unicode placeholders.
 
-### 2f. Build a reference shell
+### 2f. Reference shells
 
-One self-contained `shared/_chrome-example.html` per chrome. Open it in a browser. Compare to a live screenshot. Iterate until indistinguishable.
-
-This is the GATE. Do not proceed to phase 3 until the reference shell looks right.
+One self-contained `shared/_<chromename>-example.html` per chrome. Open in browser. Compare to live screenshot. **Iterate until indistinguishable.** This is the GATE — do not proceed to feature pages until your reference shells pass an "I can't tell apart from production" test.
 
 ## Phase 3 — Feature HTML
 
-Now build the feature pages on top of the chrome.
-
-### 3a. Scope confirmation
+### 3a. Confirm scope
 
 AskUserQuestion (3 questions max):
 
-1. **Feature name** (kebab-case for the directory)
-2. **Which sides/areas** to render (e.g., admin/end-user/settings)
-3. **Variations**: V1 only · V1 + V2 (alternative visual direction) · V1 + V2 + V3. Each adds work proportional to the screen count.
+1. **Feature name** — kebab-case directory
+2. **Which sides/areas** — admin/product / customer-facing / canvas-setting / multiple
+3. **Variations** — V1 only / V1+V2 / V1+V2+V3 (alternative visual directions). Default to V1 only unless the user explicitly wants design exploration.
 
-### 3b. Sample data
+### 3b. Pick the chrome per page
 
-Pick a consistent cast. Real-feeling business name, 2-4 named customers, realistic amounts, dates in the current year, photos via `https://loremflickr.com/<w>/<h>/<keyword>` or `https://source.unsplash.com/<w>x<h>/?<keyword>`.
+For each page of your feature, decide which chrome variant fits:
 
-Use the SAME cast across every file — reviewers should compare design, not content.
+- **Admin page** (list/form/dashboard) → product-page chrome with the feature's branded wordmark ("YourApp Invoices", "YourApp Customers")
+- **A setting of an existing thing** → row inside the canvas-editor's Settings right sidebar + modal for the workflow
+- **An in-editor prompt** → callout overlay on the canvas-editor chrome
 
-### 3c. Stamp pages
+### 3c. Critical anti-patterns to avoid
 
-For each screen × state × variation, write one HTML file. Each is self-contained:
+- ❌ **No emojis** as illustrations in empty states. Either inline SVG illustrations from the codebase OR just text. Emojis don't survive print/screenshare/dark-mode well and clash with the real product's visual.
+- ❌ **No breadcrumbs unless source has them.** Features that "live under" Settings appear as ROWS in the Settings sidebar — they're not separate pages.
+- ❌ **No inline `style=` attributes overriding button classes.** If `.btn-primary` doesn't look right, fix the class definition — don't sprinkle inline overrides.
+- ❌ **No mode-button inventions.** If the real canvas editor has 6 mode buttons, your prototype has 6 — don't add a 7th for your feature.
+- ❌ **No hallucinated config rows.** Read the parent settings file (`SettingsProperties.tsx` equivalent) and only include rows that file actually renders.
 
-- Standard `<head>` linking fonts/tokens/components/the appropriate chrome stylesheet
-- The chrome shell (copy from `_chrome-example.html`)
-- The page-specific content slotted into the chrome's main area
-- Inline `<style>` only for one-off keyframes (spinners, etc.) — never for real styling
+### 3d. Sample data
 
-### 3d. Matrix index
+Pick a consistent fictional cast. Reuse across every file. Real-feeling business name + 3 named customers + realistic amounts + 2026 dates + product photos via `https://loremflickr.com/<w>/<h>/<keyword>`. The cast should make the prototype FEEL like a real customer's instance.
 
-`prototypes/<feature>/index.html` — clickable grid: rows = screens × states, columns = variations. Every cell links to its file. Reviewers always want this; build it.
+### 3e. Click-functional mode switching (canvas editors only)
+
+If the canvas editor has mode buttons (Settings/Theme/Sections/etc.), each mode is a **separate HTML file** (e.g., `_designer-shell-example.html` defaults to Settings, `_designer-shell-theme.html` shows Theme active). Mode buttons are `<a href="...">` anchors linking between the files. Result: clicking Settings → loads `_designer-shell-example.html` → sidebar appears. This works in pure HTML/CSS with no JS.
+
+### 3f. Stamp pages
+
+Each HTML file is self-contained:
+- Standard `<head>` linking fonts/tokens/components/appropriate chrome CSS
+- Chrome shell from `_<chrome>-example.html`
+- Page-specific content slotted in
+- Inline `<style>` only for one-off keyframes (spinners). Never for actual styling.
+
+### 3g. Matrix index
+
+`prototypes/<feature>/index.html` — clickable grid grouped by phase. Rows = screens × states, columns = variations. Every cell links to its file. Reviewers always want this.
 
 ## Phase 4 — Deploy + Iterate
 
 ### 4a. Deploy
 
-If the user has the `here-now` skill installed:
+If `here-now` skill installed:
 ```bash
 ~/.claude/skills/here-now/scripts/publish.sh prototypes/<feature> --client claude-code
 ```
-Otherwise: any static host (Vercel, Netlify, Cloudflare Pages, GitHub Pages). The prototype is just static files.
+With saved API key → permanent. Anonymous → 24h expiry, share claim URL.
 
-Share the public URL. Link directly to a representative cell of the matrix, not just the root.
+Otherwise any static host (Vercel/Netlify/Cloudflare Pages/GitHub Pages). Just static files.
 
 ### 4b. Fidelity audit
 
-Open the prototype next to the live app. List concrete diffs:
+Open your prototype next to the live app side-by-side. List concrete diffs:
 
-- Color values off?
-- Spacing wrong by N pixels?
-- Wrong font weight in a heading?
-- Missing/incorrect icon?
-- Right cluster of the topbar missing the user-menu chevron?
+- Wrong color hex?
+- Spacing off by Npx?
+- Wrong border-radius on buttons?
+- Missing/wrong icon?
+- Hallucinated UI element not in source?
 
-Fix the most visually-loud diffs first, then the subtle ones. Re-screenshot, re-compare.
+Fix biggest diffs first. Re-screenshot. Re-compare. The bar: a non-engineering reviewer cannot tell apart from the real app. That's done.
 
 ### 4c. Hand off
 
-The prototype is done when a non-engineering reviewer cannot tell it apart from the real app. That's the bar. Anything less is incomplete.
+Live URL + a one-paragraph fidelity self-audit calling out any known gaps. If you can't verify a particular value against source, flag it explicitly.
 
-## Constraints
+## Lessons learned (from the worked example)
 
-- **Pure HTML + CSS.** No JS framework. No build step. The only `<style>` is `@keyframes`. No bundler config.
-- **No external CSS libraries.** Use your own `components.css`. Tailwind/Bootstrap/Bulma would defeat the point.
-- **Cite sources.** Every measurement should be traceable to a file + line in the target codebase. If the user asks "why 28px radius", you should be able to answer immediately.
-- **Real assets only.** Real SVGs, real fonts, real photos (or realistic placeholder photos). Stock unicode glyphs are not acceptable for production-grade fidelity.
-- **No JS state.** Modals are rendered open as static markup. Each story/state is its own HTML file. No SPA, no client-side routing.
-- **Don't modify the target codebase.** The prototype lives ALONGSIDE the real code (in `prototypes/<feature>/`) and is invisible to its build system.
+These are the corrections that came up iterating on Solo Payments — bake them in from the start:
 
-## Anti-patterns
-
-- **"This is just a sketch, I'll skip the design tokens."** Then it looks like a sketch. Reviewers reject it. The whole point is fidelity.
-- **Hand-eyeballing values.** Once you start tweaking pixels to "look right" instead of porting from source, you've lost the trail. Re-port from source.
-- **Inventing chrome elements.** If the real app's topbar has 6 mode buttons, your prototype has 6 mode buttons. Don't add a 7th for "your feature" — find another way to expose your feature (settings sub-page, contextual button, etc.).
-- **CSS-in-JS in prototypes.** TypeStyle, Emotion, styled-components — all overkill. Plain `<link>` to CSS files is the discipline.
-- **Big monolithic file.** Split per screen, per state, per variation. The matrix is your friend.
+- **Identify the right chrome FIRST.** Putting an admin tool inside the canvas-editor chrome with a breadcrumb feels off. Use the admin/product-page chrome instead.
+- **Settings rows go in the sidebar; workflows go in modals on top.** A "Connect provider" flow is a multi-step modal layered on the canvas+sidebar — not a new page.
+- **Reuse existing button classes verbatim.** Don't write `padding: 8px 18px` when the real button has `padding: 5px 16px`. Find the class, use it, don't override.
+- **No emojis.** Use inline SVG illustrations from the codebase, or just text.
+- **`SettingsProperties.tsx` is the source of truth for what rows exist.** Don't invent "Password Protected" rows.
+- **Mode-button clicks must actually open sidebars.** Use multi-file storybook (one HTML per mode) + anchor links — no JS needed.
+- **Strip site-pills, workspace-switchers, any element you "remember" but can't find in source.**
 
 ## Companions
 
-- **agent-browser / chrome-devtools** — for capturing live ground truth and verifying fidelity
-- **here-now** — for deploying the prototype to a public URL
-- The host project's own design-system docs, if any
+- **agent-browser / chrome-devtools** — live ground truth capture
+- **here-now** — deploy to permanent public URL
+- **brainstorming** (superpowers) — for ill-defined features, before this skill
 
 ## Output format expected
 
-When the skill completes, the user should have:
+When done, user has:
 
-1. A `prototypes/<feature>/` directory with:
-   - `shared/` containing ported tokens + chrome CSS + real SVG assets + reference shell HTML
-   - `v1/` (and optionally v2/, v3/) containing the feature HTML pages
+1. `prototypes/<feature>/` directory containing:
+   - `shared/` (tokens + per-chrome CSS + components + img + reference shells)
+   - feature-area dirs (one per chrome variant the feature uses)
    - `index.html` matrix
-2. A live public URL (deployed)
-3. A one-paragraph audit comparing fidelity to the real app, with any open gaps called out explicitly
+2. A live public URL
+3. A one-paragraph fidelity audit with any known gaps called out explicitly
