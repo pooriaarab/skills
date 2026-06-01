@@ -426,6 +426,22 @@ Install with `crontab -e`. Verify with `crontab -l`. Caveat: cron does not catch
 1. **ADC reauth on corporate Google Workspace accounts**: every ~16h, gcloud's application-default credentials expire. The 8am warm will fail silently when this happens — the log will show `invalid_grant / invalid_rapt`. Workaround: run `gcloud auth application-default login` in the morning when you notice the box didn't come up. Long-term fix: use a service-account JSON key (not always allowed on corp orgs).
 2. **The Mac/host must be online**: laptop in a bag at 8am = no warm box. launchd will fire the moment the lid opens, but you'll wait ~60s for the boot.
 3. **The marker file gets re-read each time**: if you delete `.crabbox-default-on` the schedules still fire, but `crabbox-warm-shared.sh --stop` is a no-op if there's no slug recorded, and warming is harmless if the box is already up (it short-circuits on inspect). Safe to leave the agents loaded.
+4. **macOS TCC blocks launchd-spawned bash from `~/Documents/`** (Sequoia+). If your warm-shared script lives under `~/Documents/<repo>/bin/` and the launchd plist points there, every fire exits 126 with `bash: …: Operation not permitted` — script never runs, no warm box, no notification. Two-part fix:
+   - **Relocate the script** to `~/Library/Scripts/` (outside TCC scope) and update the plist's `ProgramArguments` + `WorkingDirectory` to the new path.
+   - **Move state files out of `~/Documents/`** too. The slug file at `<main-repo>/.crabbox-shared-slug` is unreadable from launchd context. Read/write a primary copy at `~/.crabbox/shared-slug` and mirror best-effort to the legacy location so interactive runs from inside the repo still find it:
+
+     ```bash
+     CRABBOX_STATE_DIR="${HOME}/.crabbox"; mkdir -p "$CRABBOX_STATE_DIR"
+     PRIMARY_SLUG_FILE="$CRABBOX_STATE_DIR/shared-slug"
+     LEGACY_SLUG_FILE="${MAIN_ROOT:+$MAIN_ROOT/.crabbox-shared-slug}"
+
+     write_slug() {
+       printf '%s\n' "$1" > "$PRIMARY_SLUG_FILE"
+       [[ -n "$LEGACY_SLUG_FILE" ]] && printf '%s\n' "$1" > "$LEGACY_SLUG_FILE" 2>/dev/null || true
+     }
+     ```
+
+   Pass `MAIN_ROOT` as a launchd env var (`SOLO_ADMIN_ROOT` or similar) and have the script fall back to `git worktree list` only when set. Alternatively grant Full Disk Access to `/bin/bash` in System Settings — broader and survives macOS updates, but exposes every launchd-bash job.
 
 Probably want a Slack/email/desktop notification when the morning warm fails (because you'll otherwise discover it only when your first worktree attach times out). Not built in; one-liner in your `crabbox-warm-shared.sh` after a failure → `osascript -e 'display notification "..." with title "..."'` on macOS.
 
@@ -466,6 +482,112 @@ In `<repo>/.superset/config.json`:
 ```
 
 Per-worktree opt-in: `touch <worktree>/.crabbox-enabled`. Default is no-op so contributors and CI are unaffected.
+
+## Repo-independent setup via a global git hook
+
+Wiring crabbox-attach into `.superset/config.json` only fires for worktrees created **through Superset.sh**. Worktrees created via plain `git worktree add` from a shell, Claude Code's `EnterWorktree` tool, Codex, or any IDE that doesn't honor `.superset/config.json` skip crabbox entirely. And on a machine where `.crabbox-default-on` makes `setup-worktree.sh` skip local installs, those worktrees end up with **neither** local node_modules **nor** a remote VM — broken until the user manually runs `bin/crabbox-attach.sh`.
+
+The robust fix is a machine-wide git hook: one file, fires on every worktree creation regardless of caller, attaches crabbox when the repo opts in, silently no-ops elsewhere.
+
+### Architecture
+
+1. `~/.git-hooks/post-checkout` — a single global script.
+2. `git config --global core.hooksPath ~/.git-hooks` — activates it for **all** repos on the machine.
+3. The script runs only on branch checkouts (`$3 == 1`), delegates to any per-repo `.git/hooks/post-checkout` first (so husky and per-repo hooks keep working), then invokes `crabbox-attach.sh` only when the current repo opts in via `.crabbox-default-on` and ships the script.
+
+### The hook script
+
+```bash
+#!/usr/bin/env bash
+# ~/.git-hooks/post-checkout
+
+[ "$3" = "1" ] || exit 0  # only branch checkouts (worktree creation, branch switch)
+
+COMMON_GIT_DIR="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"
+
+# 1. Delegate to per-repo legacy hook (preserve husky / lefthook / etc.)
+#    core.hooksPath REPLACES the per-repo lookup, so without explicit
+#    delegation those hooks silently stop firing.
+LEGACY_HOOK="$COMMON_GIT_DIR/hooks/post-checkout"
+if [ -n "$COMMON_GIT_DIR" ] && [ -x "$LEGACY_HOOK" ]; then
+  GLOBAL_HOOK_PATH="$(git config --get core.hooksPath 2>/dev/null)"
+  # Don't recurse if the legacy path resolves to this same global file.
+  if [ "$(realpath "$LEGACY_HOOK" 2>/dev/null)" != "$(realpath "$GLOBAL_HOOK_PATH/post-checkout" 2>/dev/null)" ]; then
+    "$LEGACY_HOOK" "$@" || echo "[global post-checkout] legacy hook returned $?" >&2
+  fi
+fi
+
+# 2. Crabbox auto-attach (only when repo opts in)
+MAIN_ROOT="${COMMON_GIT_DIR%/.git}"
+CURRENT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
+[ -n "$MAIN_ROOT" ] && [ "$MAIN_ROOT" != "$CURRENT_ROOT" ] || exit 0  # only worktrees
+[ -f "$MAIN_ROOT/.crabbox-default-on" ] || exit 0
+[ -f "$MAIN_ROOT/bin/crabbox-attach.sh" ] || exit 0
+
+SETUP_SCRIPT="$MAIN_ROOT/bin/setup-worktree.sh"
+[ -f "$SETUP_SCRIPT" ] && (bash "$SETUP_SCRIPT" || echo "[global post-checkout] setup-worktree failed (non-fatal)" >&2)
+bash "$MAIN_ROOT/bin/crabbox-attach.sh" || \
+  echo "[global post-checkout] crabbox-attach failed (non-fatal); run manually if needed" >&2
+```
+
+### Install
+
+```bash
+mkdir -p ~/.git-hooks
+# write the script above to ~/.git-hooks/post-checkout
+chmod +x ~/.git-hooks/post-checkout
+git config --global core.hooksPath ~/.git-hooks
+```
+
+### Verify
+
+```bash
+# Non-crabbox repo: should exit 0 silently.
+cd ~/some-other-repo && bash ~/.git-hooks/post-checkout 0 HEAD 1; echo $?
+
+# Worktree of a crabbox repo: traces should show the right paths.
+cd <a-worktree> && {
+  echo "MAIN_ROOT:    $(git rev-parse --path-format=absolute --git-common-dir | sed 's|/\.git$||')"
+  echo "CURRENT_ROOT: $(git rev-parse --show-toplevel)"
+  echo ".crabbox-default-on: $(test -f "$(git rev-parse --path-format=absolute --git-common-dir | sed 's|/\.git$||')/.crabbox-default-on" && echo yes || echo no)"
+}
+```
+
+The first real `git worktree add` (or `EnterWorktree`) after install will fire the hook end-to-end.
+
+### Caveat: `core.hooksPath` is global
+
+It replaces `.git/hooks/` lookup for **every** repo on the machine. If you write more global hooks (`pre-commit`, `post-commit`, …) into `~/.git-hooks/`, repeat the legacy-delegation block in each one or you'll silently break husky in any repo that uses it.
+
+### When to recommend global vs per-repo
+
+| Scenario | Recommend |
+|---|---|
+| Solo dev, one machine, multiple repos (some with crabbox, some without) | **Global hook.** Set up once. New crabbox repos auto-pick-up. No PRs needed. |
+| Team setup, multiple contributors all need crabbox | **Per-repo install script.** Commit `bin/install-hooks.sh` that contributors run on first clone. |
+| Solo machine + occasional outside contributors | **Both.** Global on the solo machine; install script for contributors. |
+
+### How to ask the user (agent-flow guidance)
+
+When an agent is wiring crabbox into a workflow and the repo-independence question comes up, surface it as an explicit choice rather than picking unilaterally — the right answer depends on team shape, which the agent can't infer:
+
+```
+Approach for repo-independent auto-attach?
+  1. Global hook only (recommended for solo machines)
+     – Install ~/.git-hooks/post-checkout, set core.hooksPath.
+     – Works for current repo and any future repo that adds crabbox.
+     – Caveat: core.hooksPath replaces per-repo lookup; husky needs delegation.
+
+  2. Global hook + keep per-repo hook as fallback
+     – Belt-and-suspenders. If core.hooksPath gets unset, per-repo still fires.
+     – Idempotent double-call is safe (crabbox-attach has its own lock).
+
+  3. PR install script into each repo
+     – More work; survives reclone for other contributors.
+     – Right answer for team setups where everyone needs the same behavior.
+```
+
+The cheapest path to validation: pick global, install, run the verify steps above, then create one real worktree and watch the hook fire. Total setup ~30s.
 
 ## End-to-end verification checklist
 
