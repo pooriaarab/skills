@@ -16,6 +16,7 @@ A coordinated suite for organizing across every digital surface — files, notes
 | [eco-analyze](eco-analyze/SKILL.md) | `/eco-analyze` — calculate your real carbon footprint from Claude Code history |
 | [multi-account-cli](multi-account-cli/SKILL.md) | One-command switching between work and personal accounts across gcloud, gws, Firebase, and Netlify. |
 | [delegate-implementation](delegate-implementation/SKILL.md) | Orchestrator-implementer pattern for 10+ PR campaigns. Opus plans, Gemini Flash / Haiku / GPT-5 mini / Cursor Composer 2.5 implements. 50-80% cost savings vs all-Opus. |
+| [canada-census](canada-census/SKILL.md) | Complete the Government of Canada Census of Population online via agent-browser — asks you each question in chat, fills the StatCan form, stops for review before submit. Zero PII stored. |
 
 ## Install
 
@@ -35,6 +36,7 @@ npx skills add pooriaarab/eco-mode
 npx skills add pooriaarab/eco-analyze
 npx skills add pooriaarab/multi-account-cli
 npx skills add pooriaarab/delegate-implementation
+npx skills add pooriaarab/canada-census
 ```
 
 ## Data source
