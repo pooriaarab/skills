@@ -22,6 +22,7 @@ A coordinated suite for organizing across every digital surface — files, notes
 | [bug-bash-setup](bug-bash-setup/SKILL.md) | Plan a bug bash — balanced no-overlap test-area assignments + plan/findings-log doc, from a tester roster and time budget. |
 | [bug-bash-triage](bug-bash-triage/SKILL.md) | Triage raw bug-bash findings — reconcile against the test suite, build a consolidated triage doc, then (after approval) create issues. |
 | [storybook-to-design-system](storybook-to-design-system/SKILL.md) | Turn co-located Storybook stories into a live in-app design-system gallery (you pick the route name) AND fan out parallel agents to reach ~100% coverage. Stories are the single source of truth; each renders in an isolated iframe so modals/loops/logs can't hijack the page. |
+| [high-fidelity-ui-image-gen](high-fidelity-ui-image-gen/SKILL.md) | Render near-pixel-faithful UI mockups with an AI image model — the prompt recipe (~94-95/100 on isolated surfaces), grounding in real source, the multi-round eval loop, the honest fidelity ceiling, and when to screenshot real HTML instead. |
 
 ## Install
 
@@ -42,6 +43,7 @@ npx skills add pooriaarab/eco-analyze
 npx skills add pooriaarab/multi-account-cli
 npx skills add pooriaarab/delegate-implementation
 npx skills add pooriaarab/canada-census
+npx skills add pooriaarab/high-fidelity-ui-image-gen
 ```
 
 ## Data source
