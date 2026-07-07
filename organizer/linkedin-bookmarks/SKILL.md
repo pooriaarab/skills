@@ -1,15 +1,11 @@
 ---
 name: linkedin-bookmarks
-description: "Use when the user wants to organize LinkedIn saved posts and articles — exporting to Notion or Notes reference, categorizing by topic, identifying actionable vs reference content, and pruning the saved queue. Triggers: 'organize LinkedIn saved', 'organize LinkedIn bookmarks', 'process my LinkedIn saves'."
+description: "Use when the user wants to organize LinkedIn saved posts and articles — exporting to Notion or Notes reference, categorizing by topic, identifying actionable vs reference content, and pruning the saved queue. Triggers: 'organize LinkedIn bookmarks', 'process my LinkedIn saves'."
 ---
 
 # LinkedIn Bookmarks Organizer
 
 Process the LinkedIn "Saved Posts" / "Saved Items" queue.
-
-## Status
-
-🟡 **Stub** — scaffold only.
 
 ## Requirements
 

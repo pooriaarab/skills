@@ -14,7 +14,7 @@ A coordinated set of skills for organizing a person's digital life across every 
 ```
 organizer/
 ├── DESIGN.md              ← this file
-├── README.md              ← catalog of sub-skills (status, when to use which)
+├── README.md              ← catalog of sub-skills (when to use which)
 ├── _lib/
 │   ├── taxonomy.md        ← the shared lowercase folder/label convention
 │   └── patterns.md        ← common patterns (dry-run, batch-approve, AppleScript, OAuth)
@@ -59,15 +59,13 @@ See [`_lib/taxonomy.md`](_lib/taxonomy.md). The default lowercase single-word ca
 
 ## Master Skill: `life-organizer`
 
-**Flavor: survey + dispatch (option #2 in design discussion).**
+**Flavor: survey + dispatch.**
 
 What it does:
 1. Asks the user a few scoping questions: which surfaces they want organized, work/personal split, taxonomy preference (default lowercase / PARA / Karpathy-flat / custom).
 2. Recommends a sequence based on surface dependencies (e.g. organize Contacts before Gmail so Gmail can label by person).
 3. Outputs a checklist pointing the user at each sub-skill in order, with the chosen taxonomy as a parameter.
 4. Does **not** invoke sub-skills directly — sub-skills evolve, contracts change. The user runs each one and reports back.
-
-This avoids tight coupling and keeps each sub-skill independently maintainable.
 
 ## Sub-skill Contract
 
@@ -87,6 +85,6 @@ Sub-skills should reference each other via relative paths (`../contacts/SKILL.md
 - `apple-notes/` references `notion/` (use Notion for CRM-style structured data, Notes for prose/snippets)
 - `github/` references `mac/` (local repo cleanup is in mac-organizer)
 
-## Status / Maintenance
+## Maintenance
 
-The `README.md` in this directory tracks status of each sub-skill (stub / partial / production). When adding a new surface, follow the contract above and update both `README.md` and the dispatch sequence in `life-organizer/SKILL.md`.
+When adding a new surface, follow the contract above and update both `README.md` and the dispatch sequence in `life-organizer/SKILL.md`.

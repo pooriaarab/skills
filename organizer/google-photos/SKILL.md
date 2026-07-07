@@ -1,6 +1,6 @@
 ---
 name: google-photos
-description: "Use when the user wants to organize Google Photos — albums, dedupe, tagging, deleting blurry/duplicate shots, building a clean library structure that mirrors their Drive / iCloud taxonomy. Toggles between Google Takeout (full-library export to filesystem) and the Apple Photos local SQLite library (when iCloud Photos is on). Triggers: 'organize google photos', 'dedupe my photos', 'clean up photo library', 'sort my photos by year/event'."
+description: "Use when the user wants to organize Google Photos — albums, dedupe, tagging, deleting blurry/duplicate shots, building a clean library structure. Toggles between Google Takeout (full-library export) and the Apple Photos local SQLite library (when iCloud Photos is on). Triggers: 'organize google photos', 'dedupe my photos', 'sort my photos by year/event'."
 ---
 
 # Google Photos Organizer
@@ -206,14 +206,3 @@ Changes made via osxphotos / AppleScript are local-Mac-only at first; iCloud Pho
 | Takeout zip missing recent photos | A | Photos uploaded after the export was triggered | Re-trigger Takeout when ready for a final pass |
 | Re-uploaded photos missing geo | A | Takeout strips embedded GPS in some formats; sidecar JSON has it though | Re-attach geo from the sidecar before re-upload |
 | Tempted to call `mediaItems().list()` | — | The API can only see content this OAuth client uploaded (March 2025 policy) | Skip the API entirely; use Takeout |
-
----
-
-## Future: a `gop` CLI?
-
-There's room for a lightweight `gop` CLI (the photos-equivalent of `gog`) that wraps:
-- Takeout-export-aware parsing (sidecar JSON, album folders)
-- osxphotos for the Apple Photos path
-- The post-2025 Photos Library API
-
-If the user wants that as a separate public package on GitHub (like [openclaw/gogcli](https://github.com/openclaw/gogcli)), it's a worthwhile project — but the embedded scripts in this SKILL.md cover the common cases without that overhead. Defer the standalone CLI until repeated usage justifies it.

@@ -1,6 +1,6 @@
 ---
 name: notion-organizer
-description: "Use when the user wants to organize, restructure, or clean up their Notion workspace — including creating section pages, moving misplaced pages under the right parent, renaming untitled pages by reading content, archiving empty pages, and grouping pages into PARA or topic sections. Triggers: 'organize my Notion', 'clean up Notion', 'restructure my workspace', 'my Notion is a mess', 'organize Notion pages'."
+description: "Use when the user wants to organize, restructure, or clean up their Notion workspace. Triggers: 'organize my Notion', 'clean up Notion', 'restructure my workspace', 'my Notion is a mess', 'organize Notion pages'."
 ---
 
 # Notion Organizer
@@ -26,7 +26,7 @@ Reorganize a chaotic Notion workspace into a clean hierarchy using the Notion MC
 
 ## Step 1 — Ask the User These Questions First
 
-Do not skip this. Wrong assumptions = wrong structure. Notion organization is highly personal.
+Do not skip this. Wrong assumptions = wrong structure.
 
 ```
 1. What is this workspace for? (one product/company, personal life, mixed?)
@@ -330,18 +330,11 @@ After Phase 1 settles, go deeper inside each section. Examples:
 
 ## Personal vs Work Workspace Structure
 
-Personal and work workspaces need very different schemes.
+Personal and work workspaces need very different schemes. Ask the user which type before proposing structure.
 
-**Work / product workspace:**
-`📊 Analytics`, `🎨 Decks`, `🛠️ Engineering`, `📣 Marketing`, `💰 Finance`, `🆘 Support`, `🧪 Testing`, `👥 Team`, `📥 Inbox`, `🗄️ Archive`
-
-**Personal workspace (PARA):**
-`📥 Inbox`, `🚀 Projects` (active goals with deadlines), `🌱 Areas` (health, finances, career, relationships), `📚 Resources` (topics of interest), `🗄️ Archive`
-
-**Mixed (single workspace for life + side projects):**
-Top level: `🏢 Work`, `🏠 Personal`, `🚀 Projects`, `🗄️ Archive`. Inside each, mini-PARA.
-
-Ask the user which type before proposing structure.
+- **Work / product:** the flat topic sections in Step 3.
+- **Personal:** PARA (Step 3).
+- **Mixed (single workspace for life + side projects):** top level `🏢 Work`, `🏠 Personal`, `🚀 Projects`, `🗄️ Archive`; inside each, mini-PARA.
 
 ---
 

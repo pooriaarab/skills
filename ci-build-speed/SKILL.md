@@ -1,18 +1,13 @@
 ---
 name: ci-build-speed
-description: "Make a slow CI pipeline fast — and reliable — for a JS/TS monorepo (Next.js + bun + Turborepo on GitHub Actions, deployed via a separate build like Netlify). Profile FIRST to find the critical path (it's almost always the production build, not lint/test). Then attack it in order: cache everything (pm store + node_modules + framework build cache + task-runner cache), fix build OOM (the memoryBasedWorkersCount-overrides-cpus gotcha, single page-data worker, swap, free disk), build-once dedup, concurrency cancel, merge tiny jobs, shard/affected tests. Includes the hard-won gotchas (OOM kills the runner VM so always() can't save cache; squash-merge is invisible to git branch --merged; vitest --changed polluted by codegen + moving refs; macOS has no timeout; turbo remote cache does NOT speed a build that runs outside turbo) and the honest verdict on what moves wall-clock vs what only saves CI minutes."
+description: "Make a slow CI pipeline fast and reliable for a JS/TS monorepo (Next.js + bun + Turborepo on GitHub Actions, deployed via a separate build like Netlify) — profile to find the critical path (usually the production build, not lint/test), then cache everything, fix build OOM, dedup builds, and shard tests. Use when CI is slow, PR checks take forever, the build OOMs/times out, or before throwing bigger runners / remote cache at CI."
 ---
 
 # ci-build-speed
 
-A methodology for making CI **fast and reliable** on a JS/TS monorepo — the kind built with
-**Next.js + bun + Turborepo**, gated by **GitHub Actions**, and deployed by a **separate build**
-(Netlify/Vercel/etc.). The headline lesson: **profile before you optimize.** Most "CI speedups"
-target jobs that aren't on the critical path and so don't change wall-clock at all. Find the long
-pole first — in a Next monorepo it's almost always the **production build** — and spend there.
-
-**Activate:** "our CI is so slow," "PR checks take forever," "the build keeps OOMing / timing out,"
-"make the build faster," "reduce CI minutes," or before investing in CI infra.
+The headline lesson: **profile before you optimize.** Most "CI speedups" target jobs that aren't on
+the critical path and so don't change wall-clock at all. Find the long pole first — in a Next
+monorepo it's almost always the **production build** — and spend there.
 
 ## When to use this
 

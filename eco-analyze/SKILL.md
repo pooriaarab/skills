@@ -1,20 +1,11 @@
 ---
 name: eco-analyze
-description: "Analyze your Claude Code session history to calculate total CO₂ emissions with friendly real-world comparisons. Shows token usage by model, CO₂ per session, cumulative impact, and how much you could save by switching models."
+description: "Calculate total CO₂ emissions from Claude Code session history, with token usage by model and real-world comparisons. Use when the user asks to analyze carbon usage or how much CO2 they've used."
 ---
 
 # /eco-analyze
 
-Reads your Claude Code usage stats and calculates the real carbon cost of your AI usage — in terms you'll actually feel.
-
 **Activate:** `/eco-analyze` or "analyze my carbon usage" or "how much CO2 have I used"
-
-## What it does
-
-1. Reads `~/.claude/stats-cache.json` (Claude Code's local usage log)
-2. Calculates CO₂ per model using per-token emission rates (Jegham et al. 2025)
-3. Shows your cumulative impact with real-world comparisons
-4. Tells you how much you'd save by switching models for simple tasks
 
 ## CO₂ Rates Used
 

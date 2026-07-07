@@ -6,45 +6,43 @@ A suite of skills for organizing a person's digital life across every surface �
 
 ## Where to start
 
-Run [`life-organizer`](life-organizer/SKILL.md) — it surveys your preferences and recommends which sub-skills to run in what order. Don't try to organize everything at once; the master skill helps you sequence.
+Run [`life-organizer`](life-organizer/SKILL.md) — it surveys your preferences and recommends which sub-skills to run in what order.
 
-## Sub-skills (status)
+## Sub-skills
 
-| Status | Skill | Surface | Trigger phrase examples |
-|---|---|---|---|
-| 🟢 production | [`life-organizer`](life-organizer/SKILL.md) | meta — survey + dispatch | "organize my life", "where do I start" |
-| 🟢 production | [`gmail`](gmail/SKILL.md) | Gmail (gws CLI / Gmail API) | "organize my gmail", "inbox zero" |
-| 🟢 production | [`notion`](notion/SKILL.md) | Notion (MCP) | "organize my Notion", "clean up workspace" |
-| 🟢 production | [`google-drive`](google-drive/SKILL.md) | Google Drive (gws / Drive API) | "organize my Drive" |
-| 🟢 production | [`mac`](mac/SKILL.md) | local macOS (Downloads / Desktop / Documents / caches) | "free up disk", "clean my Mac" |
-| 🟢 production | [`apple-notes`](apple-notes/SKILL.md) | iCloud Notes (AppleScript) | "organize my Notes", "clean up Apple Notes" |
-| 🟡 stub | [`browser-bookmarks`](browser-bookmarks/SKILL.md) | Chrome / Arc / Safari | "organize my bookmarks" |
-| 🟡 stub | [`email-subscriptions`](email-subscriptions/SKILL.md) | Gmail unsubscribe pass | "unsubscribe from newsletters" |
-| 🟡 stub | [`imessage`](imessage/SKILL.md) | iMessage / Messages.app | "clean up iMessage" |
-| 🟡 stub | [`slack-dm`](slack-dm/SKILL.md) | Slack DMs / saved items | "organize Slack DMs" |
-| 🟡 stub | [`contacts`](contacts/SKILL.md) | Contacts.app | "dedupe my contacts", "fix my address book" |
-| 🟡 stub | [`gcal`](gcal/SKILL.md) | Google Calendar | "clean up my calendar" |
-| 🟡 stub | [`icloud-calendar`](icloud-calendar/SKILL.md) | iCloud Calendar | "organize iCloud calendars" |
-| 🟡 stub | [`apple-reminders`](apple-reminders/SKILL.md) | Reminders.app | "clean up reminders" |
-| 🟡 stub | [`gtasks`](gtasks/SKILL.md) | Google Tasks | "organize Google Tasks" |
-| 🟡 stub | [`icloud-photos`](icloud-photos/SKILL.md) | iCloud Photos | "organize my photos" |
-| 🟡 stub | [`spotify-playlist`](spotify-playlist/SKILL.md) | Spotify | "clean up my playlists" |
-| 🟡 stub | [`github`](github/SKILL.md) | GitHub (repos, stars, orgs) | "organize my GitHub" |
-| 🟡 stub | [`x-bookmarks`](x-bookmarks/SKILL.md) | X / Twitter bookmarks | "organize my X bookmarks" |
-| 🟡 stub | [`linkedin-bookmarks`](linkedin-bookmarks/SKILL.md) | LinkedIn saved | "organize LinkedIn saved" |
-| 🟡 stub | [`instagram-saved`](instagram-saved/SKILL.md) | Instagram saved | "organize Instagram saves" |
-| 🟡 stub | [`threads-bookmarks`](threads-bookmarks/SKILL.md) | Threads saved | "organize Threads saves" |
+| Skill | Surface | Trigger phrase examples |
+|---|---|---|
+| [`life-organizer`](life-organizer/SKILL.md) | meta — survey + dispatch | "organize my life", "where do I start" |
+| [`gmail`](gmail/SKILL.md) | Gmail (gws CLI / Gmail API) | "organize my gmail", "inbox zero" |
+| [`notion`](notion/SKILL.md) | Notion (MCP) | "organize my Notion", "clean up workspace" |
+| [`google-drive`](google-drive/SKILL.md) | Google Drive (gws / Drive API) | "organize my Drive" |
+| [`mac`](mac/SKILL.md) | local macOS (Downloads / Desktop / Documents / caches) | "free up disk", "clean my Mac" |
+| [`apple-notes`](apple-notes/SKILL.md) | iCloud Notes (AppleScript) | "organize my Notes", "clean up Apple Notes" |
+| [`browser-bookmarks`](browser-bookmarks/SKILL.md) | Chrome / Arc / Safari | "organize my bookmarks" |
+| [`email-subscriptions`](email-subscriptions/SKILL.md) | Gmail unsubscribe pass | "unsubscribe from newsletters" |
+| [`imessage`](imessage/SKILL.md) | iMessage / Messages.app | "clean up iMessage" |
+| [`slack-dm`](slack-dm/SKILL.md) | Slack DMs / saved items | "organize Slack DMs" |
+| [`slack-later`](slack-later/SKILL.md) | Slack Later / saved-for-later queue | "organize my Slack Later", "process my Slack saved messages" |
+| [`contacts`](contacts/SKILL.md) | Contacts.app | "dedupe my contacts", "fix my address book" |
+| [`gcal`](gcal/SKILL.md) | Google Calendar | "clean up my calendar" |
+| [`icloud-calendar`](icloud-calendar/SKILL.md) | iCloud Calendar | "organize iCloud calendars" |
+| [`apple-reminders`](apple-reminders/SKILL.md) | Reminders.app | "clean up reminders" |
+| [`gtasks`](gtasks/SKILL.md) | Google Tasks | "organize Google Tasks" |
+| [`icloud-photos`](icloud-photos/SKILL.md) | iCloud Photos | "organize my photos" |
+| [`spotify-playlist`](spotify-playlist/SKILL.md) | Spotify | "clean up my playlists" |
+| [`github`](github/SKILL.md) | GitHub (repos, stars, orgs) | "organize my GitHub" |
+| [`x-bookmarks`](x-bookmarks/SKILL.md) | X / Twitter bookmarks | "organize my X bookmarks" |
+| [`linkedin-bookmarks`](linkedin-bookmarks/SKILL.md) | LinkedIn saved | "organize LinkedIn saved" |
+| [`instagram-saved`](instagram-saved/SKILL.md) | Instagram saved | "organize Instagram saves" |
+| [`threads-bookmarks`](threads-bookmarks/SKILL.md) | Threads saved | "organize Threads saves" |
 
-**Legend:** 🟢 production = end-to-end usable · 🟡 stub = scaffold only, needs filling in
 
 ## Conventions
 
-- **Lowercase, single-word** category names where possible (`personal`, `health`, `ideas`, etc.) — see [`_lib/taxonomy.md`](_lib/taxonomy.md).
-- **Dry-run first** — every sub-skill scans and proposes a plan before writing.
-- **Batch approval** — large changes are presented in chunks the user can approve incrementally.
-- **Journal / undo** — where the surface allows it.
+- **Lowercase, single-word** category names where possible (`personal`, `health`, `ideas`, etc.).
+- **Dry-run first → batch approval → journal/undo**, where the surface allows.
 
-See [`_lib/patterns.md`](_lib/patterns.md) for the implementation patterns shared across sub-skills, and [`_lib/auth-setup.md`](_lib/auth-setup.md) for the one-time CLI auth runbook.
+See [`_lib/taxonomy.md`](_lib/taxonomy.md) for the category vocabulary, [`_lib/patterns.md`](_lib/patterns.md) for shared implementation patterns, and [`_lib/auth-setup.md`](_lib/auth-setup.md) for the one-time CLI auth runbook.
 
 ## Adding a new sub-skill
 

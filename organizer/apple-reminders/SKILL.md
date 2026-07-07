@@ -1,15 +1,11 @@
 ---
 name: apple-reminders
-description: "Use when the user wants to organize Apple Reminders — pruning completed lists, archiving stale recurring tasks, consolidating duplicate lists, and aligning categories with the shared organizer taxonomy. Triggers: 'clean up Reminders', 'organize Apple Reminders', 'my reminders are a mess'."
+description: "Use when the user wants to organize Apple Reminders — pruning completed lists, archiving stale recurring tasks, consolidating duplicate lists, aligning with the organizer taxonomy. Triggers: 'clean up Reminders', 'my reminders are a mess'."
 ---
 
 # Apple Reminders Organizer
 
 Clean up Reminders.app via AppleScript / EventKit.
-
-## Status
-
-🟡 **Stub** — scaffold only.
 
 ## Requirements
 
