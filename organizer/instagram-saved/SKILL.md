@@ -1,15 +1,11 @@
 ---
 name: instagram-saved
-description: "Use when the user wants to organize Instagram saved posts and collections — exporting to Notion or Notes reference, restructuring collections, identifying stale saves, and pruning. Triggers: 'organize Instagram saved', 'clean up Instagram bookmarks', 'organize my IG saves'."
+description: "Use when the user wants to organize Instagram saved posts and collections — exporting to Notion or Notes reference, restructuring collections, identifying stale saves, and pruning. Triggers: 'clean up Instagram bookmarks', 'organize my IG saves'."
 ---
 
 # Instagram Saved Organizer
 
 Process Instagram saved posts and collections.
-
-## Status
-
-🟡 **Stub** — scaffold only.
 
 ## Requirements
 

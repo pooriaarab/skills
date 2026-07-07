@@ -1,17 +1,17 @@
 ---
 name: bug-bash-triage
-description: Use when triaging raw bug-bash findings — reconciling notes against the test suite, building a consolidated triage doc, and (after approval) creating issues and routing copy fixes. Triggers include "triage the bug bash", "reconcile the findings", "turn bug bash notes into issues", "what do we do with the bug bash results". Pairs with bug-bash-setup.
+description: Triage raw bug-bash findings — reconcile notes against the test suite, build a consolidated triage doc, and (after approval) create issues and route copy fixes. Triggers include "triage the bug bash", "reconcile the findings", "turn bug bash notes into issues". Pairs with bug-bash-setup.
 ---
 
 # Bug Bash Triage
 
-Turn a messy bug-bash findings log into a clean, reconciled triage doc, then — only after the human triages and approves — create issues and route copy fixes. Pairs with **bug-bash-setup**.
+Turn a messy findings log into a reconciled triage doc, then — only after the human triages and approves — create issues and route copy fixes. Pairs with **bug-bash-setup**.
 
 Linear-flavored (`LINEAR_API_KEY`); adapt the API for another tracker.
 
 ## When to use
 
-- After a bug bash: "triage the findings", "reconcile the notes", "turn findings into issues".
+- After a bug bash, to reconcile findings and turn them into issues.
 - NOT for planning a bash → use **bug-bash-setup**.
 
 ## Inputs
@@ -73,11 +73,3 @@ Wait for the human to fill the **Action** column. Then **build the issue list an
 
 ## Editing shared docs safely
 The human edits these docs between runs. **Never blind-overwrite.** Re-fetch current content, splice surgically (append a column / section), and preserve manual edits (e.g. Action values). When regenerating wholesale, detect and re-apply manual edits first.
-
-## Common mistakes
-- Trusting reporter test numbers literally (off-by-one is common) — match by content.
-- Duplicating test-suite errors into the product table — one finding, one table.
-- Creating issues without showing the list first — always gate.
-- Dropping screenshots — carry all of them; verify the count vs the raw log.
-- Corrupting raw-doc tables when adding the column — verify uniform column counts.
-- Hardcoding stale status/cycle/roster — query live.

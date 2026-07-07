@@ -1,15 +1,11 @@
 ---
 name: x-bookmarks
-description: "Use when the user wants to organize X / Twitter bookmarks — exporting them to a structured destination (Notion, Notes reference), categorizing by topic, identifying actionable vs reference content, and pruning the bookmark queue back to a manageable size. Triggers: 'organize my X bookmarks', 'organize Twitter bookmarks', 'process X saved'."
+description: "Use when the user wants to organize X / Twitter bookmarks — exporting them to a structured destination (Notion, Notes reference), categorizing by topic, identifying actionable vs reference content, and pruning the bookmark queue back to a manageable size. Triggers: 'organize Twitter bookmarks', 'process X saved'."
 ---
 
 # X / Twitter Bookmarks Organizer
 
 Process the X bookmarks queue.
-
-## Status
-
-🟡 **Stub** — scaffold only.
 
 ## Requirements
 

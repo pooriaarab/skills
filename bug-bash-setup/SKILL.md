@@ -1,18 +1,17 @@
 ---
 name: bug-bash-setup
-description: Use when planning a bug bash for a release — turning a tester roster and a time budget into balanced, no-overlap test-area assignments plus a plan and findings-log doc. Triggers include "set up a bug bash", "plan the bug bash", "assign bug bash areas", "who tests what". Pairs with bug-bash-triage.
+description: Plan a bug bash for a release — turn a tester roster and time budget into balanced, no-overlap test-area assignments plus a plan and findings-log doc. Triggers include "set up / plan a bug bash", "assign areas", "who tests what". Pairs with bug-bash-triage.
 ---
 
 # Bug Bash Setup
 
-Turn a tester roster + a time budget into balanced, no-overlap assignments and a ready-to-use plan + findings-log doc. A bug bash is a **smoke pass, not full regression** — run each case's main happy path fast, flag what's broken, leave unreached cases blank. Pairs with **bug-bash-triage**.
+A bug bash is a **smoke pass, not full regression** — run each case's main happy path fast, flag what's broken, leave unreached cases blank. Pairs with **bug-bash-triage**.
 
 Linear-flavored (doc + `LINEAR_API_KEY`); adapt the doc API for another tool.
 
 ## When to use
 
 - Scheduling a bug bash before a release.
-- "Plan the bug bash", "assign areas", "who tests what".
 - NOT for triaging results → use **bug-bash-triage**.
 
 ## Inputs (ask for what's missing)
@@ -59,10 +58,3 @@ Create the doc with: when/where + suite links + "only log bugs"; a **Read first*
 `| Test ID | Area | Type | Severity | What happened vs expected | Reporter | Screenshot/link |`
 
 Don't create issues here — that's triage.
-
-## Common mistakes
-
-- Letting owners test their own area (they miss their own bugs).
-- Framing it as full regression — it's a smoke pass; say so.
-- Forgetting the async track for things that can't be tested live.
-- Over-assigning the highest-churn area to one person.

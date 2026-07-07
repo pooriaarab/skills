@@ -1,15 +1,11 @@
 ---
 name: slack-dm
-description: "Use when the user wants to organize Slack DMs and saved items — archiving stale DM threads, processing the Saved Items queue, identifying conversations to convert into reference notes, and reducing notification clutter. Triggers: 'organize Slack DMs', 'clean up Slack', 'process my Slack saved items'."
+description: "Use when the user wants to organize Slack DMs and saved items — archiving stale DM threads, processing the Saved Items queue, identifying conversations to convert into reference notes, and reducing notification clutter. Triggers: 'clean up Slack', 'process my Slack saved items'."
 ---
 
 # Slack DM Organizer
 
 Triage Slack DMs and the Saved Items queue.
-
-## Status
-
-🟡 **Stub** — scaffold only.
 
 ## Requirements
 

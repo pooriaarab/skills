@@ -1,15 +1,11 @@
 ---
 name: imessage
-description: "Use when the user wants to clean up iMessage / Messages.app on macOS — archiving stale conversations, identifying unread-but-irrelevant threads, exporting important conversations, and reducing clutter. Triggers: 'clean up iMessage', 'organize Messages', 'my Messages is overwhelming'."
+description: "Use when the user wants to clean up iMessage / Messages.app on macOS — archiving stale conversations, identifying unread-but-irrelevant threads, exporting important conversations, and reducing clutter. Triggers: 'organize Messages', 'my Messages is overwhelming'."
 ---
 
 # iMessage Organizer
 
 Clean up Messages.app on macOS.
-
-## Status
-
-🟡 **Stub** — scaffold only.
 
 ## Requirements
 
@@ -39,7 +35,6 @@ Clean up Messages.app on macOS.
 
 ## Surface-specific notes
 
-- **`chat.db` is sandboxed.** Needs Full Disk Access for the terminal to read.
 - Bulk delete of conversations isn't well-supported via AppleScript — many actions require manual UI driving (or `cliclick`).
 - iMessage attachments live in `~/Library/Messages/Attachments/` and can hog disk — separate cleanup target.
 - iCloud Messages: actions sync to all devices.
