@@ -1,15 +1,11 @@
 ---
 name: email-subscriptions
-description: "Use when the user wants to do an unsubscribe pass on email — identifying senders the user no longer reads, mass-unsubscribing via List-Unsubscribe headers and one-click endpoints, and archiving historical mail from those senders. Companion to gmail-organizer. Triggers: 'unsubscribe from newsletters', 'stop email spam', 'clean up email subscriptions', 'inbox unsubscribe pass'."
+description: "Use when the user wants an unsubscribe pass on email — identifying senders the user no longer reads, mass-unsubscribing via List-Unsubscribe headers, archiving historical mail from those senders. Companion to gmail-organizer. Triggers: 'unsubscribe from newsletters', 'stop email spam'."
 ---
 
 # Email Subscriptions Organizer
 
 Mass-unsubscribe pass on Gmail (or any IMAP-accessible mailbox).
-
-## Status
-
-🟡 **Stub** — scaffold only. Another agent is building this.
 
 ## Requirements
 

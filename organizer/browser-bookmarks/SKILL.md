@@ -1,15 +1,11 @@
 ---
 name: browser-bookmarks
-description: "Use when the user wants to organize browser bookmarks across Chrome, Arc, or Safari — folder taxonomy alignment, dead-link detection, exporting research bookmarks to Notion or Notes reference, deduplication, and pruning of stale bookmarks. Triggers: 'organize my bookmarks', 'clean up Chrome bookmarks', 'fix my Arc favorites', 'too many Safari bookmarks'."
+description: "Use when the user wants to organize browser bookmarks across Chrome, Arc, or Safari — folder taxonomy, dead-link detection, exporting research bookmarks to Notion/Notes, deduplication, pruning stale bookmarks. Triggers: 'organize my bookmarks', 'too many Safari bookmarks'."
 ---
 
 # Browser Bookmarks Organizer
 
 Organize bookmarks in Chrome, Arc, or Safari.
-
-## Status
-
-🟡 **Stub** — scaffold only.
 
 ## Requirements
 

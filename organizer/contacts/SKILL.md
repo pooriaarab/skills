@@ -1,15 +1,11 @@
 ---
 name: contacts
-description: "Use when the user wants to organize, dedupe, or clean up Contacts.app on macOS/iOS — including merging duplicate entries (especially phone-format dupes), filling missing fields, grouping into Lists, mirroring Google contact groups, and reconciling cross-store identity with Google Contacts. Triggers: 'dedupe my contacts', 'fix my address book', 'organize Contacts', 'mirror my Google groups to iCloud'."
+description: "Use when the user wants to organize, dedupe, or clean up Contacts.app on macOS/iOS — merging duplicate entries (especially phone-format dupes), filling missing fields, grouping into Lists, mirroring Google contact groups, reconciling cross-store identity with Google Contacts. Triggers: 'dedupe my contacts', 'fix my address book', 'mirror my Google groups to iCloud'."
 ---
 
 # Contacts Organizer
 
 Clean up Contacts.app via AppleScript. Pairs with `organizer/google-contacts/`. Run them as **one coordinated pass** — running them independently is risky because iCloud↔Google sync (Apple "Internet Accounts" → Google) propagates deletions across stores.
-
-## Status
-
-🟢 **Spec'd from a real run.** A live pass on a ~500-contact iCloud + ~470-contact Google account collapsed ~250 duplicates (mostly phone-format variants) and applied ~20 cross-store enrichments with zero data loss.
 
 ## Requirements
 

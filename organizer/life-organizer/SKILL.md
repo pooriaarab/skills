@@ -1,6 +1,6 @@
 ---
 name: life-organizer
-description: "Use when the user wants to organize their entire digital life across multiple surfaces — files, notes, mail, calendars, contacts, photos, social bookmarks, code, etc. Surveys preferences (which surfaces, work/personal split, taxonomy choice), recommends a sequence based on cross-surface dependencies, and points the user at the right sub-skill for each step. Triggers: 'organize my life', 'where do I start', 'I want to clean up everything', 'organize across all my apps', 'set up a personal knowledge graph'."
+description: "Use when the user wants to organize their entire digital life across multiple surfaces at once, or asks where to start. Surveys preferences and recommends which sub-skill to run in what order. Triggers: 'organize my life', 'where do I start', 'clean up everything', 'organize across all my apps', 'set up a personal knowledge graph'."
 ---
 
 # Life Organizer
@@ -33,6 +33,7 @@ Multi-select. Common options (default = all of "Personal essentials"):
 **Communication**
 - [ ] iMessage → `imessage`
 - [ ] Slack DMs → `slack-dm`
+- [ ] Slack Later / saved messages → `slack-later`
 - [ ] Email subscriptions / unsubscribe pass → `email-subscriptions`
 
 **Media**
@@ -100,7 +101,7 @@ Based on the answers, output a checklist with cross-surface dependencies honored
 12. icloud-photos      ← independent, time-consuming
 13. spotify-playlist   ← low priority
 14. x/linkedin/instagram/threads bookmarks  ← review and prune; keep what's actionable, archive the rest
-15. imessage / slack-dm  ← cleanup last; mostly archival
+15. imessage / slack-dm / slack-later  ← cleanup last; slack-later mirrors keepers to notion, then clears the queue
 ```
 
 ### Maintenance sequence
@@ -155,7 +156,6 @@ The sub-skill's Step 1 will re-confirm with the user; that's fine — overlap is
 
 ## What this skill does NOT do
 
-- Does not invoke sub-skills directly. Sub-skills evolve independently; tight coupling would force lock-step releases.
 - Does not maintain global state across sub-skill runs. Each run is self-contained.
 - Does not enforce a specific taxonomy. The user's choice in Q3 propagates as a recommendation; sub-skills may diverge if the surface demands it (e.g. Gmail labels can be more granular than Notes folders).
 
@@ -169,7 +169,7 @@ The sub-skill's Step 1 will re-confirm with the user; that's fine — overlap is
 
 ## See also
 
-- [`../README.md`](../README.md) — full catalog of sub-skills with status
+- [`../README.md`](../README.md) — full catalog of sub-skills
 - [`../DESIGN.md`](../DESIGN.md) — architecture decisions
 - [`../_lib/taxonomy.md`](../_lib/taxonomy.md) — shared default taxonomy
 - [`../_lib/patterns.md`](../_lib/patterns.md) — implementation patterns reused across sub-skills

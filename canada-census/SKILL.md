@@ -1,13 +1,11 @@
 ---
 name: canada-census
-description: "Complete the Government of Canada Census of Population online (census.gc.ca) by gathering the household's answers in chat and auto-filling the questionnaire with agent-browser. Asks the user every question (or where to find the answer), fills the StatCan WET form, handles its quirks (hidden radio inputs, the duplicate invisible Next button, soft 'Attention' warnings, dynamically skipped questions), and ALWAYS stops for human review before submitting. Carries zero personal data — every answer comes from the live chat. Use when someone says 'fill my census', 'complete the Canada census', 'do the StatCan census questionnaire', or has a secure access code for census.gc.ca."
+description: "Fill the Government of Canada Census of Population online (census.gc.ca) with agent-browser, gathering every answer from the user in chat — never invents data, always stops for human review before submitting. Use when someone says 'fill my census', 'complete the Canada census', 'do the StatCan census questionnaire', or has a secure access code for census.gc.ca."
 ---
 
 # canada-census
 
-Drive the **Government of Canada Census of Population** questionnaire (`census.gc.ca`) to completion with [agent-browser](https://github.com/...), gathering answers from the user in chat. Works for both the **short form** (~10 questions, most households) and the **long form** (1-in-4, adds income, work, education, ethnicity, religion, activities of daily living, etc.).
-
-**Activate** when the user wants help filling the Canada census, has a secure access code for `census.gc.ca`, or asks to automate a StatCan census questionnaire.
+Works for both the **short form** (~10 questions, most households) and the **long form** (1-in-4, adds income, work, education, ethnicity, religion, activities of daily living, etc.), driven with [agent-browser](https://github.com/...).
 
 **Not for**: other StatCan surveys (the WET form quirks transfer, but the question flow differs), or filling a census with invented data — every answer must come from the real respondent.
 
@@ -91,9 +89,3 @@ When you reach the **Comments / Submit** page (Step E), STOP. Present a **comple
 ### Step 6 — Submit & capture
 
 On approval, click **`#__btnSubmit`** via `eval`. Capture the **confirmation code** from the "Thank you" page and a screenshot — this is the respondent's proof of submission. Relay the code to the user and tell them to save it.
-
-## What the skill must NOT do
-
-- Must not store the user's answers or access code anywhere as part of running. (If the user separately wants a private record, that's their own follow-up in their own private storage — not this skill's job.)
-- Must not submit without explicit approval.
-- Must not invent demographic data to "fill in" an unanswered field.
