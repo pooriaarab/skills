@@ -1,11 +1,9 @@
 ---
 name: crabbox-worktree
-description: "Offload per-worktree dev work (installs, builds, dev server) to a remote GCP VM via crabbox, so your laptop stays cool. Builds a custom GCP image with package-manager deps + node_modules baked in. Shared warm-box pattern gets time-to-ready from ~5–7 min cold down to ~15–20s warm. Integrates with superset.sh's setup/teardown hooks. Generic across any bun/pnpm/npm repo."
+description: "Offload per-worktree dev work (installs, builds, dev server) to a remote GCP VM via crabbox so your laptop stays cool — bakes a golden GCP image and wires into superset.sh worktree hooks. Use when the user mentions 'crabbox worktree', 'remote dev box', 'offload bun install to cloud', or wiring crabbox into superset.sh hooks for a JS/TS repo."
 ---
 
 # crabbox-worktree
-
-**Activate:** mention "crabbox worktree", "remote dev box", "offload bun install to cloud", or any time you're wiring crabbox into superset.sh worktree hooks for a JavaScript/TypeScript repo.
 
 ## When to use
 

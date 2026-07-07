@@ -1,6 +1,6 @@
 ---
 name: google-contacts
-description: "Use when the user wants to organize Google Contacts (the cloud-side address book that backs Gmail's address autocomplete) — including dedupe, missing-field enrichment, contact group / starred curation, and tagging-by-relationship. Distinct from the iCloud-side `contacts` skill: this one is Google-only via the People API. Triggers: 'organize my google contacts', 'dedupe gmail contacts', 'fix my address book in gmail', 'contact groups in google'."
+description: "Use when the user wants to organize Google Contacts (the cloud-side address book behind Gmail autocomplete) — dedupe, missing-field enrichment, contact group / starred curation, tagging-by-relationship. Distinct from the iCloud-side `contacts` skill: Google-only via the People API. Triggers: 'dedupe gmail contacts', 'contact groups in google'."
 ---
 
 # Google Contacts Organizer
@@ -86,7 +86,7 @@ If `GOG_ACCOUNT_DEFAULT` is unset, source the shell wrappers (`personal` / `work
 
 ## Step 2 — Plan Phase (read-only)
 
-Pull every connection via `people.connections.list` with a wide `personFields` mask. Cache to `~/.config/google-contacts-organizer/cache/people-<email>.jsonl` for resume across sessions. The same persistence pattern that survives Gmail at 90k scale survives Contacts at 5k scale — the cache cost is trivial and the resume value is high.
+Pull every connection via `people.connections.list` with a wide `personFields` mask. Cache to `~/.config/google-contacts-organizer/cache/people-<email>.jsonl` for resume across sessions.
 
 ```python
 import json, subprocess, time, os, datetime, re

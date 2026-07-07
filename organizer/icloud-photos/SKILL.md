@@ -1,15 +1,11 @@
 ---
 name: icloud-photos
-description: "Use when the user wants to organize iCloud Photos — creating event/date-based albums, identifying duplicate or near-duplicate photos for deletion, cleaning up the Recents stream, tagging faces, and reclaiming storage. Triggers: 'organize my photos', 'clean up iCloud Photos', 'find duplicate photos', 'organize iPhone photos'."
+description: "Use when the user wants to organize iCloud Photos — creating event/date-based albums, identifying duplicate or near-duplicate photos for deletion, cleaning up the Recents stream, tagging faces, and reclaiming storage. Triggers: 'clean up iCloud Photos', 'find duplicate photos'."
 ---
 
 # iCloud Photos Organizer
 
 Organize Photos.app library on macOS / iOS.
-
-## Status
-
-🟡 **Stub** — scaffold only.
 
 ## Requirements
 
@@ -42,7 +38,7 @@ Organize Photos.app library on macOS / iOS.
 - Photos.app AppleScript is **slow** for large libraries (10k+ photos). Use `osxphotos` for inventory + `mdls` for metadata.
 - Faces are local-only metadata — actions don't sync via iCloud the same way albums do.
 - Deletes go to "Recently Deleted" for 30 days.
-- Live Photos and Burst Photos can register as duplicates incorrectly — handle carefully.
+- Live Photos and Burst Photos can register as duplicates incorrectly.
 - High-emotion content. Always dry-run first; offer "Review" album rather than direct deletion.
 
 ## See also

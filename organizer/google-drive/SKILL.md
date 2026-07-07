@@ -1,6 +1,6 @@
 ---
 name: google-drive-organizer
-description: "Use when the user wants to organize, restructure, or clean up their Google Drive — including creating folder hierarchies, moving misplaced files, renaming files descriptively, classifying untitled documents with AI, and deleting empty files. Triggers: 'organize my Drive', 'clean up Google Drive', 'restructure Drive folders', 'my Drive is a mess'."
+description: "Use when the user wants to organize, restructure, or clean up Google Drive — creating folder hierarchies, moving misplaced files, renaming files descriptively, classifying untitled documents with AI, deleting empty files. Triggers: 'organize my Drive', 'my Drive is a mess'."
 ---
 
 # Google Drive Organizer
@@ -472,10 +472,6 @@ Agent 4 → _archive/, _inbox/
 Each agent: lists folder, exports file content, verifies placement, fixes naming, reports changes. Run all in parallel — they work on different folders and don't interfere.
 
 **Loop pattern:** After each parallel pass, spawn a fresh audit agent to list the root and all sub-folders one level deep. Flag any remaining issues. Loop until the audit agent finds 0 flags.
-
----
-
-## Personal vs Work Drive Structure
 
 ---
 

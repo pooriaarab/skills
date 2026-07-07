@@ -1,6 +1,6 @@
 ---
 name: gmail-organizer
-description: "Use when the user wants to organize, triage, or clean up Gmail — including auto-labeling messages, archiving newsletters/receipts/notifications, unsubscribing from mailing lists, deleting spam, and reaching inbox zero. Two-phase workflow (plan → approve → apply) with bulk approval per category and a journal-based undo. Triggers: 'organize my gmail', 'inbox zero', 'unsubscribe from newsletters', 'clean up email', 'my inbox is a mess'."
+description: "Use when the user wants to organize, triage, or clean up Gmail, or reach inbox zero. Triggers: 'organize my gmail', 'inbox zero', 'unsubscribe from newsletters', 'clean up email', 'my inbox is a mess'."
 ---
 
 # Gmail Organizer

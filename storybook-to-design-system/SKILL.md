@@ -1,6 +1,6 @@
 ---
 name: storybook-to-design-system
-description: "Turn co-located Storybook stories into a live in-app design-system gallery page (route name is yours to pick — e.g. /design-system, /components, /styleguide), AND drive the codebase to 100% Storybook coverage with a parallel agent fan-out. Stories stay the single source of truth feeding both Storybook and the in-app page via a generated manifest; each story renders in an isolated iframe so modals, overlays, focus traps, render loops, and console noise can't hijack the gallery. Captures hard-won gotchas (lazy imports to avoid build OOM, path-derived domains so parallel PRs never conflict, never default to an error-state story, secret-scanner-history + mock-data, secondary-tsconfig browser-global breakage, auto-format-bot CI retrigger)."
+description: "Turn co-located Storybook stories into a live in-app design-system gallery page (you pick the route), AND drive the codebase to ~100% Storybook coverage with a parallel agent fan-out. Use when turning Storybook into an in-app component gallery, building a /components page from stories, driving a thin-coverage library to full coverage, or a large component library has thin story coverage."
 ---
 
 # storybook-to-design-system
@@ -9,8 +9,6 @@ Two related capabilities:
 
 1. **Build an in-app "design system" gallery** — a single page in your running app that renders every component story, grouped and browsable, generated from the same `*.stories.tsx` files Storybook uses. One source of truth, two surfaces (real Storybook + an in-app page that needs no separate deploy and lives behind your app's auth).
 2. **Reach ~100% Storybook coverage** — a parallel-agent fan-out that authors stories for every component across its states, one autonomous PR per domain.
-
-**Activate:** "turn our Storybook into an in-app design-system page," "make a /components gallery from our stories," "get us to 100% Storybook coverage," or bring it up when a large component library has thin story coverage.
 
 ## Step 0 — ask the user first (do not assume)
 

@@ -5,8 +5,6 @@ description: "Free disk space and organize files on macOS. Finds and removes dev
 
 # Mac Organizer
 
-Use when the user wants to free up disk space, clean up their Mac, reorganize files, or rename files semantically.
-
 ## Triggers
 
 - "free up space", "my disk is full", "clean up my Mac"

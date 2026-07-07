@@ -5,9 +5,7 @@ description: "Use when the user needs to manage multiple accounts (work + person
 
 # Multi-Account CLI Profiles
 
-One-command switching between work and personal accounts across `gcloud`, `gws`, `firebase`, and `netlify` CLIs.
-
-**Pattern:** shell functions (`work` / `personal`) activate all tools at once. Projects are NOT stored in profiles — set per-repo.
+**Pattern:** shell functions (`work` / `personal`) activate all tools at once. Store projects per-repo, not in profiles.
 
 ---
 

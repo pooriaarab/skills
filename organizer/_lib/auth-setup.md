@@ -2,8 +2,6 @@
 
 Step-by-step auth for every organizer-suite CLI. Run each section in **your own terminal** (not inside Claude Code) so you can see browser prompts and keychain dialogs.
 
-After all auths are done, any session can run the organizer skills cleanly.
-
 ---
 
 ## Quick status check

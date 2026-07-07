@@ -1,15 +1,11 @@
 ---
 name: gcal
-description: "Use when the user wants to organize Google Calendar — pruning unused calendars, fixing color-coding, declining stale recurring events, archiving past events, and aligning with the shared organizer taxonomy. Triggers: 'clean up my Google Calendar', 'organize gcal', 'too many calendars', 'fix calendar color chaos'."
+description: "Use when the user wants to organize Google Calendar — pruning unused calendars, fixing color-coding, declining stale recurring events, archiving past events, aligning with the organizer taxonomy. Triggers: 'clean up my Google Calendar', 'too many calendars', 'fix calendar color chaos'."
 ---
 
 # Google Calendar Organizer
 
 Tame a chaotic Google Calendar via the `gws` CLI or Calendar API.
-
-## Status
-
-🟡 **Stub** — scaffold only.
 
 ## Requirements
 
