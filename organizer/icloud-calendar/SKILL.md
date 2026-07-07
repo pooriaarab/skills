@@ -1,15 +1,11 @@
 ---
 name: icloud-calendar
-description: "Use when the user wants to organize iCloud Calendar — pruning calendars, fixing color-coding, archiving past events, removing duplicate calendars synced from old devices. Triggers: 'organize iCloud calendar', 'clean up my Apple Calendar', 'too many calendars on iPhone'."
+description: "Use when the user wants to organize iCloud Calendar — pruning calendars, fixing color-coding, archiving past events, removing duplicate calendars synced from old devices. Triggers: 'clean up my Apple Calendar', 'too many calendars on iPhone'."
 ---
 
 # iCloud Calendar Organizer
 
 Clean up Calendar.app / iCloud Calendar via AppleScript or EventKit.
-
-## Status
-
-🟡 **Stub** — scaffold only.
 
 ## Requirements
 

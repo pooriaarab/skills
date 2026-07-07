@@ -5,7 +5,7 @@ description: Use when turning a thin or messy Linear issue into a complete, impl
 
 # Spec Issue
 
-Write specs an engineer can execute without a follow-up meeting. Be direct, no filler, and **size the spec to the actual work**. Every architectural claim must point at a real file or function — no speculation.
+Write specs an engineer can execute without a follow-up meeting. **Size the spec to the actual work**; every architectural claim must point at a real file or function.
 
 This skill is **Linear-flavored** (GraphQL + `LINEAR_API_KEY`) but the method is tracker-agnostic. Supply your tracker's workspace/team as inputs; swap the API calls if you use GitHub Issues/Jira.
 

@@ -1,13 +1,11 @@
 ---
 name: delegate-implementation
-description: "Orchestrator-implementer pattern for shipping 10+ PR feature campaigns at 50-80% lower inference cost. Smart-and-expensive model writes per-PR plans and runs final pre-merge review; cheap-and-capable model does the per-PR file-by-file implementation in autonomous yolo mode. Captures hard-won lessons from a 32-commit, 23-feature-PR campaign that cost ~$145-215 instead of the all-Opus counterfactual of $390-800. Includes pairings for Gemini Flash, Claude Haiku, GPT-5 mini, and Cursor Composer 2.5."
+description: "Orchestrator-implementer pattern for shipping 10+ PR feature campaigns at ~50-80% lower inference cost — a smart model plans and does final pre-merge review; a cheap model implements each PR autonomously. Use when the user says 'delegate this campaign', 'orchestrator-implementer', 'split this between Opus and Flash', or a multi-PR campaign starts."
 ---
 
 # delegate-implementation
 
-A workflow for delivering large feature campaigns (10+ PRs) at ~20-50% of the cost of running it all on the expensive orchestrator model. The orchestrator writes detailed per-PR plans and runs final pre-merge review; a cheaper implementer ships each PR autonomously.
-
-**Activate:** "delegate this campaign," "orchestrator-implementer," "split this between Opus and Flash" — or just bring it up when a multi-PR campaign starts.
+Deliver large feature campaigns (10+ PRs) at ~20-50% of the all-orchestrator cost. The orchestrator writes detailed per-PR plans and runs final pre-merge review; a cheaper implementer ships each PR autonomously.
 
 ## When to use this
 
@@ -39,7 +37,7 @@ Pick the implementer with the right price/capability/access trade-off for your o
 | GPT-5.5 Pro | GPT-5 mini | ~$0.40 in / ~$3.20 out | OpenAI API | Same family. Cleanest when the orchestrator is in OpenAI's ecosystem. |
 | Claude Sonnet | Gemini 2.5 Flash | $0.30 in / $2.50 out | Gemini CLI | Cheapest viable option, but expect 2-3 review-feedback cycles per PR. |
 
-Composer 2.5 is currently the lowest-cost-per-quality option for an Opus orchestrator. The Cursor SDK exposes it as a headless TypeScript agent — same harness as the desktop app, but spawnable in background mode just like Gemini Flash. The 87.2% SWE-Bench score inside Cursor's harness is the most relevant number: dropping the bare Kimi K2.5 base into another orchestration loses ~25 points, so use the SDK rather than calling the underlying model directly.
+Composer 2.5 is currently the lowest-cost-per-quality option for an Opus orchestrator.
 
 ## The pattern (autonomous-implementer variant)
 
@@ -291,18 +289,5 @@ A 32-commit feature campaign delivered end-to-end voice interview functionality 
 Every campaign run with this skill should end with:
 
 1. **Cost report** committed to the repo as `docs/plans/<date>-cost-breakdown.md` — your real spend + counterfactual + lessons.
-2. **Skill updates** — extend this file's "Critical rules" with anything new that bit you. Anti-patterns are the highest-value section.
+2. **Skill updates** — extend this file's "Critical rules" with anything new that bit you.
 3. **Per-PR implementer reports** preserved in `docs/plans/per-pr/` — the implementer should write one at the end of each run; they're useful audit trails when something later breaks.
-
-## Anti-patterns (don't do this)
-
-- **Putting the plan in `/tmp/`.** Implementer can't read it. Always commit it.
-- **Letting the implementer merge.** You lose the orchestrator's final-check gate. Critical bugs ship.
-- **Single-commit-per-PR on the implementer.** Mid-stream errors lose hours of work.
-- **Trusting "review bot approved" as final.** Bots catch convention violations and common bugs but miss architectural issues like URL-token leaks, iframe src injection, SSRF, predictable storage paths.
-- **Spawning >3 implementers in parallel.** The orchestrator becomes the bottleneck.
-- **Skipping the cost report.** You won't know if the pattern is paying off without a baseline.
-- **Trying to background-spawn Cursor Composer.** It's IDE-only. Use the hand-off variant.
-- **Re-using auth tokens past their TTL.** ADC tokens expire — pre-flight check every spawn.
-- **Bundling many tasks per implementer commit.** Per-file-pair is the minimum granularity.
-- **Letting auto-merge fire without the orchestrator's pre-merge check.** Configure for explicit orchestrator approval, or disable `--auto` entirely on these PRs.

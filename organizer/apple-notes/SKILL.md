@@ -1,6 +1,6 @@
 ---
 name: apple-notes
-description: "Use when the user wants to organize, restructure, or clean up Apple Notes (iCloud Notes) — including moving notes into topical folders, renaming notes for accuracy by reading bodies, splitting mixed-topic notes, deleting empty/junk notes, and applying a consistent lowercase folder taxonomy. Works via AppleScript on macOS. Triggers: 'organize my Notes', 'clean up Apple Notes', 'organize iCloud Notes', 'my Notes app is a mess'."
+description: "Use when the user wants to organize, restructure, or clean up Apple Notes (iCloud Notes). Works via AppleScript on macOS. Triggers: 'organize my Notes', 'clean up Apple Notes', 'organize iCloud Notes', 'my Notes app is a mess'."
 ---
 
 # Apple Notes Organizer

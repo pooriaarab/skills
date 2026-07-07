@@ -1,15 +1,11 @@
 ---
 name: spotify-playlist
-description: "Use when the user wants to organize Spotify playlists — consolidating duplicates, sorting tracks within playlists, identifying playlists with no plays in N months, deleting empty/redundant playlists, and aligning naming conventions. Triggers: 'organize my Spotify playlists', 'clean up Spotify', 'too many playlists'."
+description: "Use when the user wants to organize Spotify playlists — consolidating duplicates, sorting tracks within playlists, identifying playlists with no plays in N months, deleting empty/redundant playlists, and aligning naming conventions. Triggers: 'clean up Spotify', 'too many playlists'."
 ---
 
 # Spotify Playlist Organizer
 
 Clean up the user's Spotify playlist library via the Spotify Web API.
-
-## Status
-
-🟡 **Stub** — scaffold only.
 
 ## Requirements
 

@@ -1,15 +1,11 @@
 ---
 name: github
-description: "Use when the user wants to organize GitHub — auditing personal repos (active/stale/archive), pruning excessive stars, leaving inactive organizations, fixing repo descriptions/READMEs, and applying consistent topics across repos. Triggers: 'organize my GitHub', 'clean up GitHub repos', 'archive old repos', 'prune GitHub stars'."
+description: "Use when the user wants to organize GitHub — auditing personal repos (active/stale/archive), pruning excessive stars, leaving inactive organizations, fixing repo descriptions/READMEs, applying consistent topics. Triggers: 'organize my GitHub', 'archive old repos', 'prune GitHub stars'."
 ---
 
 # GitHub Organizer
 
 Organize personal GitHub presence via `gh` CLI.
-
-## Status
-
-🟡 **Stub** — scaffold only.
 
 ## Requirements
 

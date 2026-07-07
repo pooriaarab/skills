@@ -1,15 +1,11 @@
 ---
 name: threads-bookmarks
-description: "Use when the user wants to organize Threads saved posts — exporting to Notion or Notes reference, categorizing, and pruning the saved queue. Triggers: 'organize Threads saved', 'clean up Threads bookmarks'."
+description: "Use when the user wants to organize Threads saved posts — exporting to Notion or Notes reference, categorizing, and pruning the saved queue. Triggers: 'clean up Threads bookmarks'."
 ---
 
 # Threads Saved Organizer
 
 Process Threads saved posts.
-
-## Status
-
-🟡 **Stub** — scaffold only.
 
 ## Requirements
 
@@ -39,7 +35,6 @@ Process Threads saved posts.
 ## Surface-specific notes
 
 - Threads is newer than X / Instagram; tooling is thinner. Browser scraping is the practical path.
-- Auth is shared with Instagram; cookies overlap.
 - Volume tends to be lower than X bookmarks; most users have hundreds, not thousands.
 
 ## See also

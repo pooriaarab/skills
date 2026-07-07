@@ -1,7 +1,5 @@
 # Shared Patterns
 
-Implementation patterns reused across organizer sub-skills.
-
 ## 1. Plan → Approve → Apply
 
 Every destructive operation follows this contract:
@@ -80,7 +78,7 @@ Before any sub-skill touches anything, ask the user:
 3. **Aggressiveness** — dry-run only / move-only / move + flag deletes / move + auto-delete obvious junk?
 4. **Exclusions** — any folders, labels, or types that are off-limits?
 
-Wrong assumptions = wrong structure. The cost of asking is low; the cost of un-doing a bulk move is high.
+Wrong assumptions = wrong structure.
 
 ## 10. Stop on Ambiguity
 

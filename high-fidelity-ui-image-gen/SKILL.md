@@ -1,15 +1,11 @@
 ---
 name: high-fidelity-ui-image-gen
-description: "Produce near-pixel-faithful UI and product-prototype mockups with an AI image model. Covers the prompt recipe that pushes isolated surfaces to ~94-95/100 fidelity, how to ground prompts in real component source, the multi-round eval loop to push quality, the honest fidelity ceiling (element-density drift, hallucinated logos), and when to abandon image-gen for a real headless-browser screenshot. Model-agnostic; validated over many eval rounds against real product UI."
+description: "Produce near-pixel-faithful UI and product-prototype mockups with an AI image model. Use when you need a believable UI mockup, a product-prototype screenshot, marketing/pitch shots of a single surface, or a placeholder render before the real UI exists. Model-agnostic."
 ---
 
 # high-fidelity-ui-image-gen
 
-How to make an AI image model render UI mockups that are hard to tell apart from the real thing — and how to know when image-gen is the wrong tool and you should screenshot real HTML instead.
-
-This is empirical. The numbers and limits below come from many eval rounds comparing AI renders against actual rendered product UI. Works with any capable image model (Gemini image models are used here as an example).
-
-**Use when:** you need a believable UI mockup, a product-prototype screenshot, a "here's what this screen would look like" image, marketing/pitch shots of a single surface, or a placeholder render before the real UI exists.
+The numbers and limits below are empirical — from many eval rounds comparing AI renders against actual rendered product UI. Works with any capable image model (Gemini image models are the example here).
 
 ## 1. Image-gen vs. a real screenshot — pick the path first
 

@@ -1,6 +1,6 @@
 ---
 name: eco-mode
-description: "Reduce token and CO₂ usage without compromising output quality. Compresses Claude's output, batches tool calls, and suggests cheaper model tiers for simple tasks. Inspired by caveman skill (~75% fewer output tokens, 0% quality loss)."
+description: "Reduce token/CO₂ usage without quality loss by compressing output, batching tool calls, and suggesting cheaper model tiers. Use when the user says 'eco mode' or runs /eco."
 ---
 
 # Eco Mode
@@ -8,10 +8,6 @@ description: "Reduce token and CO₂ usage without compromising output quality. 
 **Activate:** `/eco` or "eco mode" or "enable eco mode"
 
 **Deactivate:** "stop eco mode" or "normal mode"
-
-## What it does
-
-Compresses Claude's output and batches tool calls to reduce token usage (and therefore CO₂) without losing technical accuracy. Same brain, smaller mouth.
 
 Based on Jegham et al. (arXiv:2505.09598, 2025): Claude Sonnet 4.6 emits **0.85g CO₂ per 1,000 tokens**. Claude Haiku 4.5 emits **0.10g CO₂ per 1,000 tokens** — 8.5× less.
 

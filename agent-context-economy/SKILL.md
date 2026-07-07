@@ -1,18 +1,12 @@
 ---
 name: agent-context-economy
-description: "Cut the token cost (and sharpen the accuracy) of a vertical agent you're building, without losing quality. Treats the agent's context as a CPU-style L1/L2/L3 cache and attacks the hot path: cache the static tool-definition prefix (often the single biggest win — a measured ~45% end-to-end cost cut, lossless), compress large tool RESULTS at insertion time, lint write-tool outputs, and right-size tool count. Every change ships off-by-default and is promoted only through a before/after A/B eval that proves no regression. Includes the A/B-hygiene gotchas (prompt-cache contamination, model pinning) and the counterintuitive lessons (don't DEFER tools — CACHE them; negative results are wins too)."
+description: "Cut the token cost and sharpen the accuracy of a vertical agent you build and operate — treat its context as an L1/L2/L3 cache and attack the hot path (cache the tool-definition prefix, compress tool RESULTS at insertion, lint write outputs, right-size tool count), promoting each change only through a gated before/after A/B. Use when an agent is expensive/slow, tool schemas bloat every request, or before pushing a high-traffic agent."
 ---
 
 # agent-context-economy
 
-A methodology for making a vertical agent (one you build and operate, with tools/skills/system
-prompt under your control) **cheaper and more accurate at the same time**, by treating its context
-as a memory hierarchy and optimizing the hot path — then proving each change with a gated A/B
-instead of shipping on vibes.
-
-**Activate:** "our agent is expensive / slow," "reduce token cost without hurting quality," "the
-tool schemas are bloating every request," "optimize the system prompt / tool results," or before a
-push to make a high-traffic agent more efficient.
+Make a vertical agent **cheaper and more accurate at once** by treating its context as a memory
+hierarchy and optimizing the hot path — proving each change with a gated A/B, not vibes.
 
 ## When to use this
 

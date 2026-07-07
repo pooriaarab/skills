@@ -1,15 +1,11 @@
 ---
 name: gtasks
-description: "Use when the user wants to organize Google Tasks — pruning completed items, consolidating task lists, surfacing stale recurring tasks, and aligning categories with the shared organizer taxonomy. Triggers: 'organize Google Tasks', 'clean up Google Tasks', 'my Google Tasks is a mess'."
+description: "Use when the user wants to organize Google Tasks — pruning completed items, consolidating task lists, surfacing stale recurring tasks, aligning with the organizer taxonomy. Triggers: 'organize Google Tasks', 'my Google Tasks is a mess'."
 ---
 
 # Google Tasks Organizer
 
 Clean up Google Tasks via `gog` CLI.
-
-## Status
-
-🟡 **Stub** — scaffold only.
 
 ## Requirements
 

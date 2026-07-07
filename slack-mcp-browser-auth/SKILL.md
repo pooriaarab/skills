@@ -1,6 +1,6 @@
 ---
 name: slack-mcp-browser-auth
-description: "Install a no-app Slack MCP server (korotovsky/slack-mcp-server) using browser session tokens (xoxc + xoxd cookie) extracted with a browser-automation CLI, including the Enterprise Grid `invalid_auth` fix. Use when the user wants to connect Claude/Codex to Slack without creating a Slack app or getting admin approval, when a Slack MCP returns `invalid_auth` despite valid tokens, when Slack is on Enterprise Grid, or when extracting xoxc/xoxd tokens. Triggers: 'install slack mcp', 'connect slack to claude', 'slack mcp invalid_auth', 'slack enterprise grid mcp', 'slack browser token mcp'."
+description: "Install a no-app Slack MCP server using browser session tokens (xoxc + xoxd cookie), including the Enterprise Grid `invalid_auth` fix. Use when the user wants to connect Claude/Codex to Slack without a Slack app or admin approval, when a Slack MCP returns `invalid_auth`, when Slack is on Enterprise Grid, or when extracting xoxc/xoxd tokens."
 ---
 
 # Slack MCP via Browser Session Tokens
