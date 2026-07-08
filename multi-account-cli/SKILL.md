@@ -1,11 +1,67 @@
 ---
 name: multi-account-cli
-description: "Use when the user needs to manage multiple accounts (work + personal) across CLI tools like gcloud, gws, Firebase, or Netlify — including setting up named profiles, switching between accounts with one command, and testing that the switch worked. Triggers: 'switch accounts', 'multiple gcloud profiles', 'work vs personal CLI', 'how do I use two Google accounts in terminal'."
+description: "Use when the user needs to manage multiple accounts (work + personal) across CLI tools — cloud tools (gcloud, gws, Firebase, Netlify) AND AI coding CLIs (Claude Code, Codex, Gemini) — including setting up named profiles or per-tool config-dir isolation, switching accounts with one command, keeping skills/instructions shared while accounts/billing/MCP stay separate, and testing the switch. Triggers: 'switch accounts', 'multiple gcloud profiles', 'work vs personal CLI', 'separate work and personal Claude/Codex/Gemini', 'two ChatGPT/Claude subscriptions in terminal', 'how do I use two Google accounts in terminal'."
 ---
 
 # Multi-Account CLI Profiles
 
 **Pattern:** shell functions (`work` / `personal`) activate all tools at once. Store projects per-repo, not in profiles.
+
+Two tool classes, two mechanisms:
+- **Cloud CLIs** (gcloud, gws, Firebase, Netlify) — one `work`/`personal` switcher flips them all. Steps 1–6 below.
+- **AI coding CLIs** (Claude Code, Codex, Gemini) — each keeps its own config dir; isolate per account with a config-dir env var. Section right below.
+
+---
+
+## AI Coding CLIs (Claude Code, Codex, Gemini)
+
+Each CLI stores login + config + MCP servers in a home dir and exposes an env var to relocate it. Give each account its **own dir** → separate login, keys, and MCP; symlink the parts you want shared (skills, instructions). Bare command stays = primary (work); add explicit `-work` / `-personal`.
+
+| CLI | Config-dir env var | Default dir | Notes |
+|-----|--------------------|-------------|-------|
+| Claude Code | `CLAUDE_CONFIG_DIR` | `~/.claude` | Relocates `.claude.json` (MCP) too. Credentials are OS-keychain entries namespaced per config dir, so two logins coexist — no eviction. |
+| Codex | `CODEX_HOME` | `~/.codex` | Relocates `auth.json` + `config.toml` + MCP. **Dir must exist first** (`mkdir -p`). |
+| Gemini | `GEMINI_CLI_HOME` | `~/.gemini` (config lands in `$DIR/.gemini`) | Auth is driven by `settings.json` (`security.auth.selectedType`), **not** by env — setting an API-key env alone does NOT override a cached login. Isolate the whole dir. |
+
+```bash
+# Claude Code
+claude-work()     { CLAUDE_CONFIG_DIR="$HOME/.claude"          claude "$@"; }
+claude-personal() { CLAUDE_CONFIG_DIR="$HOME/.claude-personal" claude "$@"; }
+
+# Codex   (run once: mkdir -p ~/.codex-personal)
+codex-work()     { CODEX_HOME="$HOME/.codex"          command codex "$@"; }
+codex-personal() { CODEX_HOME="$HOME/.codex-personal" command codex "$@"; }
+
+# Gemini
+gemini-personal() { GEMINI_CLI_HOME="$HOME/.gemini-personal" command gemini "$@"; }
+```
+
+First run of any `-personal` command triggers that CLI's own login flow — sign in with the personal account (subscription login, or API key). The work dir is never touched.
+
+**Share skills + instructions, keep accounts/MCP separate.** Symlink from personal → primary so learnings and skills live in one place:
+```bash
+ln -s ~/.claude/skills   ~/.claude-personal/skills
+ln -s ~/.codex/AGENTS.md ~/.codex-personal/AGENTS.md
+mkdir -p ~/.gemini-personal/.gemini
+ln -s ~/.gemini/GEMINI.md ~/.gemini-personal/.gemini/GEMINI.md
+```
+Stay separate: credentials, MCP servers, session history. Some CLIs read agent skills from a shared global dir (e.g. `~/.agents/skills`) — check before symlinking; those are already shared.
+
+**Billing-only variant** (keep ONE config dir, switch only billing subscription→API): don't relocate the dir — inject an API key per command, from the OS keychain, never plaintext:
+```bash
+work-ai() { ANTHROPIC_API_KEY="$(security find-generic-password -s my-work-key -w)" claude "$@"; }
+```
+Never `export` the key globally, or **every** session bills to the API.
+
+**Gotchas (AI CLIs):**
+
+| Problem | Fix |
+|---------|-----|
+| Personal login evicts work login | One OAuth slot per config dir — give each account its own dir |
+| `CODEX_HOME points to ... does not exist` | `mkdir -p` the dir before first use |
+| Gemini ignores API-key env, reuses old login | Auth is settings-driven; isolate with `GEMINI_CLI_HOME` and log in fresh there |
+| API key leaks into personal/other sessions | Don't `export` it; inject per command only |
+| A launcher/wrapper shadows the real CLI on PATH | Env vars pass through `exec` — set them before the command; the shim inherits them |
 
 ---
 
