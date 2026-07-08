@@ -181,28 +181,72 @@ import applefoundationmodels as fm
 from apple_vision_utils.utils import image_to_text
 import pdfplumber, os, re
 
-session = fm.Session()
+# Reject Apple refusals, prompt echoes, and UNFILLED placeholders (yyyy-mm etc.)
+REJECT = re.compile(r"i'?m\s|sorry|apolog|cannot|unable|as\s+an|error|context|"
+                    r"please|i\s+must|here'?s|reply|filename", re.I)
+BANNED = {'text','what','invoice','receipt','document','filename','slug','vendor',
+          'merchant','company','date','unknown','none','yyyy','mm','dd'}
 
-def name_image(fp, context):
-    items = image_to_text(fp)
-    text = ' '.join(x['text'] for x in items if x.get('confidence', 0) > 0.5)
-    r = session.generate(
-        f"Context: {context}\nContent: {text[:400]}\n"
-        "3-5 word filename slug, hyphens only. Reply ONLY the slug."
-    )
-    raw = r.content.strip()
-    # Reject Apple refusals / error messages
-    if re.search(r"i'?m\s|sorry|apolog|cannot|as\s+an\s+llm|error.?code|"
-                 r"context.?window|please\s+note|i\s+must|provide\s+a", raw, re.I):
-        return None
-    if len(raw.split()) > 8: return None
-    slug = re.sub(r'[^a-z0-9-]', '-', raw.lower())
-    return re.sub(r'-+', '-', slug).strip('-')[:70]
+def slugify(raw):
+    raw = raw.strip().strip('.:"\' ')
+    if not raw or REJECT.search(raw): return None
+    s = re.sub(r'-+', '-', re.sub(r'[^a-z0-9-]', '-', raw.lower())).strip('-')
+    parts = s.split('-')
+    if not s or len(parts) > 6: return None
+    if any(p in BANNED for p in parts): return None            # kills 'yyyy-mm', echoes
+    if not [p for p in parts if p not in BANNED and not p.isdigit()]: return None
+    return s[:70]
+
+def name_file(text, context):
+    # CRITICAL: a FRESH Session() per file. Reusing one session bleeds context —
+    # every file drifts toward the previous answer (all become the same vendor/date).
+    for n in (1600, 600, 250):                                 # retry shorter on ctx-window
+        try:
+            s = fm.Session()
+            r = s.generate(f"Context: {context}\nContent: {text[:n]}\n"
+                           "3-5 word filename slug, hyphens only. Reply ONLY the slug.")
+            sl = slugify(r.content)
+            if sl: return sl
+        except Exception:
+            continue
+    return None
+
+def img_text(fp):
+    return ' '.join(x['text'] for x in image_to_text(fp) if x.get('confidence', 0) > 0.5)
 ```
+
+### Structured docs (invoices/receipts): regex BEFORE the LLM
+
+Stripe-style invoices carry the answer in plain text (`Date of issue April 10, 2025`,
+`Invoice <Vendor> Invoice number …`). The LLM reads these **unreliably** — it hallucinates
+dates and repeats the last vendor. For structured docs, extract deterministically and skip
+the model entirely (100% accurate dates):
+
+```python
+MON = {m: f"{i:02d}" for i, m in enumerate(
+    "january february march april may june july august september october november december".split(), 1)}
+
+def ym(t):  # -> 'YYYY-MM'
+    m = (re.search(r'Date of issue\s+([A-Za-z]+)\s+\d{1,2},?\s+(\d{4})', t)
+         or re.search(r'\b([A-Za-z]+)\s+\d{1,2},\s+(\d{4})', t))
+    return f"{m.group(2)}-{MON[m.group(1).lower()]}" if m and m.group(1).lower() in MON else None
+
+def vendor(t):
+    m = (re.search(r'^Invoice\s+(.+?)\s+Invoice number', t)
+         or re.search(r'\b([A-Z][A-Za-z0-9&.\- ]{2,40}?(?:GmbH|Inc|LLC|Ltd|Corp))\b', t))
+    return re.sub(r'[^a-z0-9]+', '-', m.group(1).lower()).strip('-')[:30] if m else None
+
+# name = f"{vendor}-{ym}"  else  f"invoice-{ym}-{stripe_id}"  else keep original
+```
+
+Always **DRY-run first** (print `old -> new`), then rename. Never delete originals; on
+collision append `-1`, `-2`.
 
 ### Apple Intelligence quirks
 
-- **Context window exceeded** (error code 14): retry with shorter text (400 → 200 → 100 chars)
+- **Context bleed (the big one)**: a single reused `fm.Session()` makes every file drift to the *previous* file's answer — a folder of distinct invoices all collapse to one vendor+date. Use a **fresh `Session()` per file** (see `name_file` above). For structured docs, prefer regex and skip the model.
+- **Unfilled placeholders**: the model sometimes returns the literal template (`companyname-yyyy-mm`) — reject slugs containing `yyyy`/`mm` or the generic tokens in `BANNED`.
+- **Context window exceeded** (error code 14): retry with shorter text (1600 → 600 → 250 chars)
 - **Unsupported language** (error code 20): non-Latin scripts (Arabic, Chinese, etc.) not supported
 - **Content policy refusal**: personal photos of people, legal docs — Apple refuses silently by responding with "I'm sorry..." — always sanitize with rejection regex
 - **Fallback**: if AI can't name a file, use directory context → `beehouse-blog-image-01.jpg`
