@@ -73,3 +73,8 @@ If a shot's whole point rests on legible text or an exact logo (a CLI command be
 ## 6. Cost discipline
 
 A ~30s, 6-shot video with per-shot native audio and a separate music bed lands in the **$5-10 total** range on wavespeed (text-to-image ~$0.04-0.09/shot, image-to-video ~$0.56-0.84/5s depending on audio, image-edit ~$0.04/edit, music generation a few dollars flat). Cheap enough to iterate, expensive enough that "just retry it" isn't free — verify the actual API schema before submitting (§2) and confirm the storyboard/creative direction before generating (§1), rather than discovering a wrong assumption after several paid calls.
+
+Two cheap steps before spending on real generation:
+
+- **Wireframe the storyboard as static HTML first.** Before any paid API call, mock up each shot as a placeholder card (icon/color-block standing in for the real visual, plus the shot's purpose/prompt/audio text) in a single self-contained HTML file. Reviewing 4 tonal variations (e.g. punchy/controversial/funny/viral) this way costs nothing and catches a wrong creative direction before it costs anything.
+- **Generate drafts at lower resolution/duration first.** Most models' pricing scales with resolution (e.g. 1080p at ~5x the base 480p rate) — run the composition/scene-transition review pass at the cheapest tier the model offers, and only re-run the final chosen shots at full quality once the concept and transitions are confirmed to work.
