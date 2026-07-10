@@ -28,6 +28,7 @@ A coordinated suite for organizing across every digital surface — files, notes
 | [storybook-to-design-system](storybook-to-design-system/SKILL.md) | Turn co-located Storybook stories into a live in-app design-system gallery (you pick the route name) AND fan out parallel agents to reach ~100% coverage. Stories are the single source of truth; each renders in an isolated iframe so modals/loops/logs can't hijack the page. |
 | [high-fidelity-ui-image-gen](high-fidelity-ui-image-gen/SKILL.md) | Render near-pixel-faithful UI mockups with an AI image model — the prompt recipe (~94-95/100 on isolated surfaces), grounding in real source, the multi-round eval loop, the honest fidelity ceiling, and when to screenshot real HTML instead. |
 | [ci-build-speed](ci-build-speed/SKILL.md) | Make CI fast AND reliable for a Next.js + bun + Turborepo monorepo on GitHub Actions — profile to find the critical path (it's the build), cache everything, fix the build OOM (the `memoryBasedWorkersCount`-overrides-`cpus` gotcha + swap + free disk), build-once dedup, concurrency cancel, with the honest verdict on what moves wall-clock vs only CI minutes. |
+| [launch-video-generation](launch-video-generation/SKILL.md) | Plan and generate a short AI-assisted launch video — storyboard framework, wavespeed.ai API facts, and the hard-won fix for scene transitions (image-to-video models anchor the scene to the input image, prompt only steers motion) and on-screen text/logos (composite real assets, don't generate them). |
 
 ## Install
 
@@ -50,6 +51,7 @@ npx skills add pooriaarab/delegate-implementation
 npx skills add pooriaarab/canada-census
 npx skills add pooriaarab/high-fidelity-ui-image-gen
 npx skills add pooriaarab/ci-build-speed
+npx skills add pooriaarab/launch-video-generation
 ```
 
 ## Data source
