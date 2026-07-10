@@ -117,14 +117,22 @@ The **same zip** works — Chrome reads `manifest_version`, `background.service_
 
 1. One-time developer registration at the Chrome Web Store Developer Dashboard (**US$5**, once, covers all your items). Sign in with the Google account you want to own the listing.
 2. Dashboard → **Add a new item** → **Select file** → upload the zip. **This creates a private draft — it does NOT publish.** Publishing is a separate *Submit for review* click after the listing is complete, so uploading is safe.
-3. **Store listing tab** — description, category, language, and **screenshots/graphics are required** (at least one 1280×800 or 640×400 screenshot; AMO lets you skip these, Chrome does not).
-4. **Privacy tab** (stricter than AMO, and the usual rejection cause):
-   - A **single-purpose description** (one sentence — Chrome enforces the single-purpose policy).
-   - A **justification for every permission** and every `host_permissions` match — write one line each; unjustified or over-broad permissions stall review. Request the minimum.
-   - **Data-use disclosures** — declare what user data you collect/handle (for a fully on-device extension: none) and certify compliance. A privacy-policy URL is required if you handle any personal/sensitive data.
-5. **Submit for review.** Chrome review is usually faster than AMO but rejects over-broad permissions and vague single-purpose statements. It does not "sign" like AMO — approved items just go live in the store.
+3. **Store listing tab** — title + summary auto-fill from the manifest. Fill **Description**, **Category**, **Language**, and upload the **Store icon** (128×128) + **Screenshots** (≥1 at exactly **1280×800** or 640×400; AMO lets you skip screenshots, Chrome does not). Promo tiles (small 440×280, marquee 1400×560) are optional.
+4. **Privacy tab** (stricter than AMO, and the usual rejection cause). Every field here is required:
+   - **Single-purpose description** — one sentence (Chrome enforces the single-purpose policy).
+   - **Per-permission justification** — a separate box for *each* permission **and** for host permissions; write one line each. Unjustified/over-broad permissions stall review.
+   - **"Are you using remote code?"** — **No** if you vendor everything and run no `eval`/remote `<script>`/external module (wasm bundled in the package is *not* remote code). Answering Yes forces an extra justification.
+   - **Data usage** — leave every data-type box unchecked if you collect nothing, but you **must still tick the three certification checkboxes** (no-sell, single-purpose-use, no-creditworthiness).
+   - **Privacy policy URL — required even when you collect no data.** Host a short policy (a `PRIVACY.md` in a public repo works — use its github.com blob URL) and paste it.
+5. **Submit for review.** Chrome doesn't "sign" like AMO — approved items just go live. Use *"Why can't I submit?"* to list remaining required fields.
 
-*Automation note:* the CWS dashboard is a Google-auth SPA — uploading a package trips "publish to a public registry" guards even though it only makes a draft. Get explicit user go-ahead for the upload, and let the user handle the Google login and the $5 payment.
+### Real-run quirks (cost hours; automate around them)
+
+- **Material dropdowns resist synthetic clicks.** Category/Language are Angular Material selects — clicking the overlay option often doesn't register. **Keyboard typeahead works:** focus the trigger, type the option's first letter(s), `Enter`. For a variant (e.g. "English (United States)") type the letter then `ArrowDown` to the variant before `Enter`. Radios/checkboxes: use a semantic `check` action, not a coordinate click.
+- **Icon input is static and targetable; screenshot/promo drop-zones are NOT.** The store-icon `<input type=file>` exists in the DOM (`upload` / `setInputFiles` works). The screenshot & promo zones spawn their file input **only on click, via a native file chooser** — a plain `setInputFiles`-on-a-static-input tool can't reach them. To automate screenshots you need a real **file-chooser handler** (`page.waitForEvent('filechooser')` around the click, then `setFiles`) over a **TCP** CDP connection — or a human drags the files. A multi-file upload aimed at the single-file icon input silently stalls at "0%".
+- **agent-browser can't do the screenshot upload.** It drives a bundled *Chrome for Testing over a unix socket* (not `--remote-debugging-port`), so `chromium.connectOverCDP('http://localhost:9222')` fails ("not a DevTools server"), and it exposes no file-chooser or JS-eval command. Either launch your own Chrome with a real TCP debug port + a Playwright filechooser script, or hand the drag to the user and just click Submit afterward.
+- **Wrong-Google-account trap.** The listing is owned by one Google account. In a multi-account/SSO Chrome (e.g. a work + personal setup) the console silently resolves to the wrong account and **redirects to `/devconsole/register`** — that redirect means "not the owner account," not "not registered." `?authuser=` switching is unreliable; the fix is selecting the right account/profile in the browser. Managed (work) accounts can't own a personal listing.
+- Uploading the package trips "publish to a public registry" guards in agentic setups even though it only creates a private draft — get explicit user go-ahead; let the user do the Google login and $5 payment.
 
 ---
 
