@@ -113,10 +113,18 @@ It's a multi-step wizard. In order:
 
 ## 7. Submit to Chrome (Chrome Web Store)
 
-1. One-time developer registration (**US$5**, once, covers all your items).
-2. Developer Dashboard → **Add new item** → upload the **same zip**.
-3. Fill listing (description, category, screenshots, privacy). Chrome's data-use disclosures are stricter — declare exactly what you access.
-4. Submit for review. Chrome review is typically faster but rejects over-broad `permissions`/`host_permissions` — request the minimum.
+The **same zip** works — Chrome reads `manifest_version`, `background.service_worker`, `content_security_policy.extension_pages`, `permissions`, `icons`, and **ignores the Firefox-only keys** (`browser_specific_settings`, `background.scripts`). No separate Chrome package needed.
+
+1. One-time developer registration at the Chrome Web Store Developer Dashboard (**US$5**, once, covers all your items). Sign in with the Google account you want to own the listing.
+2. Dashboard → **Add a new item** → **Select file** → upload the zip. **This creates a private draft — it does NOT publish.** Publishing is a separate *Submit for review* click after the listing is complete, so uploading is safe.
+3. **Store listing tab** — description, category, language, and **screenshots/graphics are required** (at least one 1280×800 or 640×400 screenshot; AMO lets you skip these, Chrome does not).
+4. **Privacy tab** (stricter than AMO, and the usual rejection cause):
+   - A **single-purpose description** (one sentence — Chrome enforces the single-purpose policy).
+   - A **justification for every permission** and every `host_permissions` match — write one line each; unjustified or over-broad permissions stall review. Request the minimum.
+   - **Data-use disclosures** — declare what user data you collect/handle (for a fully on-device extension: none) and certify compliance. A privacy-policy URL is required if you handle any personal/sensitive data.
+5. **Submit for review.** Chrome review is usually faster than AMO but rejects over-broad permissions and vague single-purpose statements. It does not "sign" like AMO — approved items just go live in the store.
+
+*Automation note:* the CWS dashboard is a Google-auth SPA — uploading a package trips "publish to a public registry" guards even though it only makes a draft. Get explicit user go-ahead for the upload, and let the user handle the Google login and the $5 payment.
 
 ---
 
@@ -128,4 +136,4 @@ It's a multi-step wizard. In order:
 - [ ] Local-AI path (if any) probes capability and degrades to a working floor; model output validated, never `eval`'d.
 - [ ] `web-ext lint` clean (dual-background warning expected); built package verified as loaded add-on, not just `web-ext run`.
 - [ ] AMO: 2FA set up (human), agreement accepted, listed/unlisted confirmed, reviewer notes cover network + licenses.
-- [ ] Chrome: $5 registration done, minimal permissions, same zip uploaded.
+- [ ] Chrome: $5 registration done, same zip uploaded as a draft, screenshots added, single-purpose + per-permission justifications + data-use disclosure filled, then Submit for review.
