@@ -91,18 +91,23 @@ web-ext run     --source-dir src   # scratch Firefox with the extension loaded (
 
 ## 6. Submit to Firefox (AMO — addons.mozilla.org)
 
+It's a multi-step wizard. In order:
+
 1. **Create a Firefox add-on developer account** at addons.mozilla.org.
 2. **2FA is mandatory to submit.** AMO submission requires an `AAL2` (two-factor) session. If the account has no 2FA, Mozilla forces `inline_totp_setup` mid-flow: scan the QR with an authenticator app, enter the 6-digit code, and **save the recovery codes** before continuing. There is no way around this gate — an automation agent cannot complete it for the user; the human must do the TOTP step.
-3. Developer Hub → **Submit a New Add-on** → accept the developer agreement.
+3. **Distribution agreement** — Developer Hub → *Submit a New Add-on* → tick both agreement checkboxes → Accept.
 4. **Listed vs unlisted** — a genuine fork in the road, confirm with the user before committing:
    - *Listed* — public on AMO, discoverable, Mozilla reviews it.
-   - *Unlisted* — Mozilla only signs it; you self-distribute the signed file. Still installs/auto-updates cleanly.
-5. Upload `web-ext-artifacts/<name>-<version>.zip`.
-6. Fill the listing: category, summary, screenshots, and the **privacy/data section** (if all processing is on-device, say so plainly — it eases review).
-7. **Reviewer notes** — disclose anything a reviewer will otherwise flag: any runtime network access and why (e.g. no-key tile/API host, sending no user data), vendored third-party libraries **with their licenses** (e.g. BSD/MIT), and that there's no build step / the source is as shipped. Honesty here is the difference between a fast approval and a round-trip.
-8. Mozilla reviews and **signs**. Signed add-ons install in one click and auto-update.
+   - *Unlisted* — Mozilla only signs it; you self-distribute the signed file (needs `update_url` in the manifest for auto-updates). Still installs cleanly.
+5. **Upload** `web-ext-artifacts/<name>-<version>.zip`. AMO auto-runs validation. **"Validated with no errors and N warnings" is fine to proceed** — warnings don't block. The dual-background (`service_worker is not supported`) and "Unsafe assignment to innerHTML" warnings are expected; they're flagged as "issues that can lead to rejections" but the reviewer-notes disclosure (step 8) covers them.
+6. **Compatibility** — tick the target apps (Firefox desktop; add *Firefox for Android* only if it actually works there — WebGL/experimental-API extensions usually don't).
+7. **"Do you need to submit source code?"** — answer **No** if you use no minifier / bundler (webpack) / template engine / transpiler. Hand-written, as-shipped source = No. (AMO asks this both before *and* after the details form — answer consistently.)
+8. **Details form** — name and summary are pre-filled from the manifest `name`/`description`. Add a longer description, pick **category** (e.g. Games & Entertainment), choose a **license** (an OSS license, or *All Rights Reserved* for a closed/private codebase — changeable later), optional privacy policy, and **Notes to Reviewer**. In the notes disclose everything a reviewer would otherwise flag: runtime network access and why (no-key host, no user data), vendored libraries **with licenses** (BSD/MIT), no build step, an explanation for each validation warning, any dangerous-looking permission (e.g. `tabs`) and its safety model, and how to test any gated feature (e.g. on-device AI needs Nightly + a pref; otherwise it falls back). Honesty here is the difference between fast approval and a round-trip.
+9. **Submit Version** → the second source-code question → **Finish**. You land on "Version Submitted ✨". Publication takes up to ~24h, longer if selected for manual review; a confirmation email follows. Mozilla **signs** it — signed add-ons install in one click and auto-update.
 
-**Pause before the final public submit** if you're driving this via automation — let the user do auth/2FA and approve the listed-vs-unlisted choice and the final button.
+**Pause before "Submit Version"** if driving via automation — that's the irreversible public step. Let the user do auth/2FA, approve listed-vs-unlisted, and okay the final button.
+
+*Automation note:* AMO's radio inputs (distribution, source-code, license) are custom-styled — a coordinate/ref click often won't register; use a semantic `check`/label action, and click the wizard's `Continue`/`Submit` buttons via a role locator (scroll into view first). Verify each `checked=true` before advancing.
 
 ---
 
