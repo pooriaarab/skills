@@ -114,6 +114,36 @@ so the write sequence matters more than the pricing math.
    again, explicitly, before the production write, even if nothing in the table changed between
    the two runs. The two environments have different blast radii; the approval should reflect that.
 
+## 5. `currency_options` amounts are immutable per currency — and most apps can't hot-swap price IDs
+
+Once a currency has a `unit_amount` set in `currency_options`, Stripe will not let you update
+it — the write returns an "immutable field" error. This mirrors how base Price amounts work:
+you don't edit a Price's amount, you create a new Price. The same rule applies per-currency
+inside `currency_options`.
+
+That's a bigger deal than it sounds, because most apps don't resolve which Price to charge
+dynamically — they bake a specific Price ID into an env var at build/deploy time (e.g.
+`STRIPE_PRICE_PRO_MONTHLY`, compiled into a generated secrets file by a build script).
+Correcting a wrong currency amount later means creating a brand-new Price object, which means
+a new Price ID, which means an engineer has to update that env var and ship a deploy — not a
+quick follow-up API call. **Get the numbers right before the first write.** If a currency's
+data is shaky (stale FX, an unconfirmed source), leave that currency out of the first write
+rather than setting a placeholder you'll want to fix later — the fix costs a deploy, the
+omission costs nothing.
+
+If the app can be changed to resolve prices by `lookup_key` instead of a hardcoded ID, raise
+that as a prerequisite before the rollout, especially if some currencies are expected to need
+revision later (stale FX, a floor value pending confirmation). A `lookup_key` can be reassigned
+to a new Price with `transfer_lookup_key`, so a future correction becomes a Stripe-side change
+again instead of a deploy.
+
+Also: never mint a new Price object as a scratch/throwaway way to test the mechanism in a
+sandbox that happens to lack the exact Price you need. If the sandbox's product doesn't have a
+Price at the amount you want to verify against, that mismatch is real information — find out
+which Price ID the app's env var actually points to (grep the codebase for the env var name, or
+ask), and test against that one. A fixture Price that nothing in the app's config points to
+doesn't validate anything, and it's one more object someone has to notice and clean up later.
+
 ## Related but separate gotcha: `tax_behavior` is one-way
 
 While in the Price object, note `tax_behavior` (`inclusive` / `exclusive` / `unspecified`):
@@ -131,8 +161,11 @@ never folded into a currency-pricing change where it could get nodded through as
 3. Derive percentages from World Bank/IMF PPP data, sanity-checked against the Big Mac Index and
    published SaaS PPP guides; surface divergences instead of averaging them away.
 4. Verify the test account's `livemode` explicitly via a call that actually returns the field.
-5. Present the full per-currency price table (tier %, minor-unit amount, FX source + date) for
-   sign-off before any write.
-6. Write to test/sandbox, read back with `expand: ['currency_options']` to confirm.
-7. Get a **separate** explicit go-ahead, then repeat against production; read back again.
-8. Leave `tax_behavior` alone unless it was asked for and approved as its own, separate change.
+5. Confirm which exact Price ID the app's env var/config actually resolves at runtime — never
+   test against a fixture Price you minted yourself if it isn't what the app points to.
+6. Present the full per-currency price table (tier %, minor-unit amount, FX source + date) for
+   sign-off before any write. Drop any currency whose data isn't solid yet rather than writing
+   a placeholder — a wrong amount can't be corrected without a new Price ID and a deploy.
+7. Write to test/sandbox, read back with `expand: ['currency_options']` to confirm.
+8. Get a **separate** explicit go-ahead, then repeat against production; read back again.
+9. Leave `tax_behavior` alone unless it was asked for and approved as its own, separate change.
