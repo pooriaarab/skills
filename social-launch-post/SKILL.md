@@ -64,3 +64,8 @@ A launch video built at 1:1 (square) — the natural choice if the storyboard/ge
 
 - **Crop/pad to 9:16 with a blurred background fill** (`ffmpeg` `gblur` on an upscaled+cropped copy of the same footage as background, original square centered on top): technically fills the frame edge-to-edge, but the blurred top/bottom bands read as visually noisy and can look worse than the plain original, not better.
 - **Just keep it square.** A 1:1 video posts natively without modification on X/Threads/Bluesky/LinkedIn feeds; pillarboxing on vertical-only surfaces (e.g. a Stories/Reels-style placement) is a smaller cost than an unwanted blur treatment. Prefer this unless the target surface is *specifically* vertical-only.
+
+## See also
+
+- [`../launch-seo/SKILL.md`](../launch-seo/SKILL.md) — run this before posting: without Open Graph/Twitter Card meta on the linked site, the posts this skill drafts will unfurl bare (no title, description, or image) across every platform.
+- [`../ship-a-product/SKILL.md`](../ship-a-product/SKILL.md) — orchestrator this stage belongs to.
