@@ -62,3 +62,8 @@ If a commit message, file, or reference needs to be removed from history that's 
 2. This changes every downstream commit's SHA, including on branches you haven't touched. Any other branch/PR based on the old history will show as "diverged" afterward — expect to recreate rather than fast-forward them.
 3. The actual force-push is where local safety hooks (if any) and GitHub branch protection (§3) both explicitly gate — you'll likely need to temporarily relax branch protection, and a local git-safety hook may require the human to run the push themselves rather than an agent doing it, by design.
 4. Verify with a full grep sweep afterward — across working-tree files, `git log --all --grep`, and every open/closed/merged PR's stored description (GitHub keeps a PR's body text separately from git history; rewriting commits doesn't touch it — edit via `gh api --method PATCH repos/.../pulls/<n> -f body="..."` if a PR description also needs scrubbing).
+
+## See also
+
+- [`../launch-seo/SKILL.md`](../launch-seo/SKILL.md) — this skill gets the repo ready for public visibility; that one covers the deployed site being discoverable (sitemap, robots.txt, Google Search Console), if the project has a hosted site.
+- [`../ship-a-product/SKILL.md`](../ship-a-product/SKILL.md) — orchestrator this stage belongs to.

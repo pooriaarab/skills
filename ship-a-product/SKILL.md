@@ -1,6 +1,6 @@
 ---
 name: ship-a-product
-description: "Orchestrator: sequence idea -> working code -> open-source-ready repo -> launch video -> published announcement. Points at the 4 stage skills rather than duplicating them -- use this to decide which stage you're in and which skill to invoke next, not as a rigid must-do-all-4-in-order pipeline."
+description: "Orchestrator: sequence idea -> working code -> open-source-ready repo -> discoverable live site -> launch video -> published announcement. Points at the 5 stage skills rather than duplicating them -- use this to decide which stage you're in and which skill to invoke next, not as a rigid must-do-all-5-in-order pipeline."
 ---
 
 # ship-a-product
@@ -11,8 +11,9 @@ The stages, in order, each with its own dedicated skill. Not every project needs
 1. build-from-template     idea -> a running scaffold (web-app-shaped ideas only; skip for CLIs/libraries/extensions)
 2. (your own build process) scaffold -> real working product (brainstorm/plan/implement/test -- not a single skill, it's the actual engineering work)
 3. open-source-repo-prep   working code -> a repo ready for public visibility (LICENSE, CI, branch protection, README)
-4. launch-video-generation storyboard -> a real launch/announcement video
-5. social-launch-post      video + copy -> a draft ready to publish across X/LinkedIn/Threads/Bluesky/Mastodon
+4. launch-seo              live site -> discoverable by search + shareable (sitemap, robots.txt, OG/Twitter meta, Google Search Console) -- only if there's a hosted site; skip for CLI-only/library-only projects with no deployed site
+5. launch-video-generation storyboard -> a real launch/announcement video
+6. social-launch-post      video + copy -> a draft ready to publish across X/LinkedIn/Threads/Bluesky/Mastodon
 ```
 
 ## Deciding where to enter
@@ -20,7 +21,9 @@ The stages, in order, each with its own dedicated skill. Not every project needs
 - **Have an idea, no code yet, and it's web-app-shaped?** Start at `build-from-template`.
 - **Have an idea that isn't a web app, or already know the shape doesn't fit a template?** Skip straight to building it (brainstorm → plan → implement, following whatever process/skills the codebase and toolchain call for), then rejoin at stage 3.
 - **Already have working code, just need to go public?** Start at `open-source-repo-prep`.
-- **Repo's already public, need to announce it?** Start at `launch-video-generation`.
+- **Repo's public and there's a hosted site (docs/marketing/product)?** Run `launch-seo` before announcing it — a search-invisible, bare-link-preview launch undercuts the announcement.
+- **No hosted site (CLI/library only)?** Skip `launch-seo`, go straight to `launch-video-generation`.
+- **Site's discoverable already, need to announce it?** Start at `launch-video-generation`.
 - **Have a video already, just need the post?** Start at `social-launch-post`.
 
 ## What this skill does NOT replace
