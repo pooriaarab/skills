@@ -117,14 +117,60 @@ The **same zip** works — Chrome reads `manifest_version`, `background.service_
 
 1. One-time developer registration at the Chrome Web Store Developer Dashboard (**US$5**, once, covers all your items). Sign in with the Google account you want to own the listing.
 2. Dashboard → **Add a new item** → **Select file** → upload the zip. **This creates a private draft — it does NOT publish.** Publishing is a separate *Submit for review* click after the listing is complete, so uploading is safe.
-3. **Store listing tab** — description, category, language, and **screenshots/graphics are required** (at least one 1280×800 or 640×400 screenshot; AMO lets you skip these, Chrome does not).
-4. **Privacy tab** (stricter than AMO, and the usual rejection cause):
-   - A **single-purpose description** (one sentence — Chrome enforces the single-purpose policy).
-   - A **justification for every permission** and every `host_permissions` match — write one line each; unjustified or over-broad permissions stall review. Request the minimum.
-   - **Data-use disclosures** — declare what user data you collect/handle (for a fully on-device extension: none) and certify compliance. A privacy-policy URL is required if you handle any personal/sensitive data.
-5. **Submit for review.** Chrome review is usually faster than AMO but rejects over-broad permissions and vague single-purpose statements. It does not "sign" like AMO — approved items just go live in the store.
+3. **Store listing tab** — title + summary auto-fill from the manifest. Fill **Description**, **Category**, **Language**, and upload the **Store icon** (128×128) + **Screenshots** (≥1 at exactly **1280×800** or 640×400; AMO lets you skip screenshots, Chrome does not). Promo tiles (small 440×280, marquee 1400×560) are optional.
+4. **Privacy tab** (stricter than AMO, and the usual rejection cause). Every field here is required:
+   - **Single-purpose description** — one sentence (Chrome enforces the single-purpose policy).
+   - **Per-permission justification** — a separate box for *each* permission **and** for host permissions; write one line each. Unjustified/over-broad permissions stall review.
+   - **"Are you using remote code?"** — **No** if you vendor everything and run no `eval`/remote `<script>`/external module (wasm bundled in the package is *not* remote code). Answering Yes forces an extra justification.
+   - **Data usage** — leave every data-type box unchecked if you collect nothing, but you **must still tick the three certification checkboxes** (no-sell, single-purpose-use, no-creditworthiness).
+   - **Privacy policy URL — required even when you collect no data.** Host a short policy (a `PRIVACY.md` in a public repo works — use its github.com blob URL) and paste it.
+5. **Submit for review.** Chrome doesn't "sign" like AMO — approved items just go live. Use *"Why can't I submit?"* to list remaining required fields.
 
-*Automation note:* the CWS dashboard is a Google-auth SPA — uploading a package trips "publish to a public registry" guards even though it only makes a draft. Get explicit user go-ahead for the upload, and let the user handle the Google login and the $5 payment.
+### Real-run quirks (cost hours; automate around them)
+
+- **Material dropdowns resist synthetic clicks.** Category/Language are Angular Material selects — clicking the overlay option often doesn't register. **Keyboard typeahead works:** focus the trigger, type the option's first letter(s), `Enter`. For a variant (e.g. "English (United States)") type the letter then `ArrowDown` to the variant before `Enter`. Radios/checkboxes: use a semantic `check` action, not a coordinate click.
+- **Icon input is static and targetable; screenshot/promo drop-zones are NOT.** The store-icon `<input type=file>` exists in the DOM (`upload` / `setInputFiles` works). The screenshot & promo zones spawn their file input **only on click, via a native file chooser** — a plain `setInputFiles`-on-a-static-input tool can't reach them. To automate screenshots you need a real **file-chooser handler** (`page.waitForEvent('filechooser')` around the click, then `setFiles`) over a **TCP** CDP connection — or a human drags the files. A multi-file upload aimed at the single-file icon input silently stalls at "0%".
+- **Screenshot upload resists CLI automation; the human drag is the practical path.** Clicking the screenshots drop-zone *does* materialize the file inputs (a `get count "input[type=file]"` jumps 0→N), but a one-shot `upload`/`setInputFiles` hits a **detach race** — Angular re-renders the input between resolve and set-files (`Object id doesn't reference a Node`). Only the *static* icon input uploads cleanly this way. A robust Playwright **Locator** `setInputFiles` (auto-waits through the detach) needs a **TCP** CDP endpoint — but **Chrome 136+ ignores `--remote-debugging-port` on the default/logged-in profile** (only a custom `--user-data-dir` gets a port), and agent-browser connects over a pipe with no file-chooser command. Net: have the user drag the screenshots in, then the agent clicks **Submit for review**. (The Submit button un-disables and the "Why can't I submit?" link disappears once all required fields — incl. ≥1 screenshot — are set.)
+- **Wrong-Google-account trap.** The listing is owned by one Google account. In a multi-account/SSO Chrome (e.g. a work + personal setup) the console silently resolves to the wrong account and **redirects to `/devconsole/register`** — that redirect means "not the owner account," not "not registered." `?authuser=` switching is unreliable; the fix is selecting the right account/profile in the browser. Managed (work) accounts can't own a personal listing.
+- Uploading the package trips "publish to a public registry" guards in agentic setups even though it only creates a private draft — get explicit user go-ahead; let the user do the Google login and $5 payment.
+
+---
+
+## 8. Pass review the first time (pre-submission audit)
+
+Run this audit **before** uploading. It separates the warnings that are fine from the ones that get you rejected.
+
+### Your own code (grep it — these are the real blockers)
+
+```
+git grep -nE "eval\(|new Function|document\.write|innerHTML|<script|importScripts|https?://(?!localhost)" -- src ':(exclude)src/vendor/*'
+```
+- **No `eval` / `new Function` / `document.write`** — hard rejection on both stores.
+- **`innerHTML` only with static or sanitized strings.** Dynamic `innerHTML` is an AMO warning and a Chrome risk. Prefer `textContent` / `createElement` / DOM APIs; for SVG/vector rendering build nodes, don't string-concat user/model data into markup.
+- **No remote code.** No CDN `<script>`, no `import` from a URL, no `fetch()`-then-`eval`. Every `fetch` must target an **extension-local** asset or a **declared** `host_permissions` origin. Chrome's "Are you using remote code?" is **No** only if this holds (bundled wasm is *not* remote code).
+
+### Third-party libraries (the usual Chrome snag)
+
+- **Ship readable source, not obfuscated.** Chrome bans obfuscated code and reviewers flag heavily-**minified** vendored files (a 700 KB, 6-line `*.min.js`). Minified *public* libraries are usually accepted, but to be bulletproof **vendor the library's non-minified build** (or a CSP/ESM build that ships readable) and keep its `LICENSE`. A readable `three.module.js` passes without question; a one-line minified blob invites "please provide unminified source."
+- List every vendored lib + license in the reviewer notes (AMO) / justifications (Chrome).
+
+### AMO (`web-ext lint`) — which warnings are benign
+
+- `"/background/service_worker" is unsupported and ignored on Firefox` — **expected** (the dual-background cross-browser trick). Ignore.
+- `Unsafe assignment to innerHTML` **inside a vendored lib** (e.g. MapLibre) — a warning, not an error; AMO passes with it. The same warning **in your own code** — fix it.
+- Target **0 errors**; warnings don't block submission but each one a *human* reviewer sees is a chance to look closer, so minimize them.
+
+### Chrome Web Store policy gates (beyond the linter)
+
+- **Single purpose** — one narrow, honestly-stated purpose. Feature sprawl that needs broad permissions gets rejected.
+- **Minimal permissions**, each justified; prefer `activeTab` + `optional_permissions` over broad host access. Unused permission in the manifest = rejection.
+- **CSP** — `'wasm-unsafe-eval'` is allowed; `'unsafe-eval'` is not. No remote `script-src`.
+- **Data honesty** — the data-use disclosures must match what the code actually does; a privacy-policy URL is required even at zero data.
+- **Assets present** — 128×128 icon + ≥1 screenshot at exactly 1280×800.
+
+### Common rejection causes (both stores)
+
+Obfuscated/minified-only code · remote code execution · permissions with no user-visible feature · privacy policy missing/contradicting behavior · single-purpose violation · screenshots that don't show the real product.
 
 ---
 
@@ -137,3 +183,4 @@ The **same zip** works — Chrome reads `manifest_version`, `background.service_
 - [ ] `web-ext lint` clean (dual-background warning expected); built package verified as loaded add-on, not just `web-ext run`.
 - [ ] AMO: 2FA set up (human), agreement accepted, listed/unlisted confirmed, reviewer notes cover network + licenses.
 - [ ] Chrome: $5 registration done, same zip uploaded as a draft, screenshots added, single-purpose + per-permission justifications + data-use disclosure filled, then Submit for review.
+- [ ] Pre-submission audit (§8): own code free of `eval`/dynamic-`innerHTML`/remote code; vendored libs shipped **unminified** + licensed; `web-ext lint` 0 errors; minimal justified permissions; privacy policy URL live.
