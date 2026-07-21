@@ -262,7 +262,7 @@ The orchestrator stays in its own session, never inside an implementer's worktre
 
 ## Case study — AI Interview Mode (May 2026)
 
-A 32-commit feature campaign delivered end-to-end voice interview functionality on a Mozilla blog platform. MVP + V1 + V2 in one continuous session.
+A 32-commit feature campaign delivered end-to-end voice interview functionality on a production blog platform. MVP + V1 + V2 in one continuous session.
 
 **Scope shipped:**
 - 11 MVP PRs (M0-M10): share-link CRUD, interview lifecycle API, Claude writer worker, in-call experience with WebRTC + voice orb + canvas tabs, public guest flow with consent + magic links, role-based publish gating, e2e tests
