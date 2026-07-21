@@ -145,6 +145,18 @@ budget line worth agonizing over. This means locale coverage should be limited b
 *maintenance/QA bandwidth* (who reviews a new locale before it goes live, RTL/CJK
 layout audit completeness) — not by translation cost.
 
+**A handful of low-resource locales will need retries, not a model swap.** Running the
+full ISO 639-1 set (~180+ codes) through a cheap draft model, a small tail (in one real
+run: 6 of 183) degenerates into repetition-loop garbage or truncated/malformed JSON —
+some genuinely low-resource (Akan, Bislama, Luba-Katanga), but also a few
+well-resourced languages (Thai, Yoruba, Sundanese) that just hit a transient
+truncation. Don't treat this as a pipeline bug or escalate to a stronger (more
+expensive) draft model for the whole run — `--continue-on-error` lets the other 95%+
+finish, then retry just the failed locale codes with `--force`; most clear on a second
+or third attempt. Budget for this tail to take noticeably longer than the rest of the
+run, and don't block downstream work (PR/merge) on it — ship the completed majority and
+retry stragglers as a follow-up.
+
 ## 6. RTL and CJK: staged, and don't flip the global switch early
 
 Add a `dir="rtl"` attribute to the root layout, driven by a single `RTL_LOCALES`
