@@ -16,7 +16,7 @@ Two supported access paths — pick whichever is easier in the user's environmen
 - `work` / `personal` shell functions configured (see [`multi-account-cli`](../../multi-account-cli/SKILL.md))
 - Active gws account authenticated **with mutating Gmail scopes** (see Step 2)
 
-**Path B — Gmail API directly (use when the user already has OAuth creds wired up, e.g. from another project like solo-admin)**
+**Path B — Gmail API directly (use when the user already has OAuth creds wired up from another project)**
 - Python `google-api-python-client` + `google-auth-oauthlib` (`pip install google-api-python-client google-auth-oauthlib`)
 - An existing OAuth client + token with scopes `gmail.modify` and `gmail.labels`
 - All `gws gmail ...` calls below have a 1:1 Gmail API equivalent (`service.users().messages().list(...)`, `.batchModify(...)`, `.trash(...)`, `.labels().create(...)`). Replace the `gws()` helper in Step 2 with a thin wrapper around `googleapiclient.discovery.build("gmail", "v1", credentials=creds)` and the rest of the script is unchanged.
