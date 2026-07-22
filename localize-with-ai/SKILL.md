@@ -42,30 +42,55 @@ to ISO 639-1 codes as the single source of truth, and write a normalization func
 for legacy values on read — don't require a data migration. The UI dropdown can still
 *display* a human-readable name; only the *stored value* needs to be the code.
 
-## 3. Message catalogs: one file per namespace, explicit static imports
+## 3. Message catalogs: one file per namespace — and how you load them decides whether you can deploy
 
 `src/messages/<locale>/<namespace>.json` — one JSON file per feature area per locale,
 not one giant file per locale. This keeps review diffs small and lets a translation
 pipeline track freshness per file instead of per locale (see §5).
 
-Next.js's bundler (webpack/turbopack) can't do a runtime directory glob, so the
-request-time loader has to **explicitly enumerate every namespace file** and merge
-them into one messages object:
+How you load those files matters more than it looks, and the obvious way has a trap
+that only shows up once you have a lot of locales.
+
+**The trap: a variable dynamic import bundles _every_ locale into your server bundle.**
+The natural loader enumerates each namespace with a dynamic import whose path contains
+the locale:
 
 ```ts
-const [common, marketing, /* ...every namespace... */] = await Promise.all([
-  loadNs(() => import(`../messages/${locale}/common.json`)),
-  loadNs(() => import(`../messages/${locale}/marketing.json`)),
-  // ...
-]);
+loadNs(() => import(`../messages/${locale}/common.json`)); // locale is a variable
 ```
 
-Wrap each import so a missing namespace file degrades to `{}` instead of throwing —
-that lets a partially-translated locale still boot, falling back to the default
-locale's catalog only when *every* namespace comes back empty. **Every worker or PR
-that adds a new namespace needs to add one import line here** — this is a predictable
-merge-conflict point when multiple string-extraction passes land close together
-(resolve by merging both namespace lists, not picking one side).
+Because `locale` isn't known at build time, the bundler (webpack, turbopack, esbuild)
+can't pick one file, so it emits a *context module* that pulls in **every file matching
+the pattern** — all locales, all namespaces — into the server bundle. With a handful of
+languages nobody notices. Run the full ISO 639-1 set (§5) and it's ~180 catalogs: in one
+real case 19.7 MB raw / ~3.5 MB gzipped, baked into the deployed artifact. On a
+size-limited runtime that stops the deploy cold — Cloudflare Workers rejects any script
+over 10 MiB gzipped (`error 10027`), and Lambda and other edge runtimes have their own
+ceilings. Code-splitting doesn't rescue you: every split chunk still ships inside the one
+uploaded artifact, so splitting changes *when* a chunk loads, not *whether* it counts
+against the size limit.
+
+**The fix: serve catalogs as static assets and fetch only the negotiated locale at
+request time.** Put the catalogs in a static-asset directory (`public/messages/…` in
+Next) so the platform serves them as plain files and the bundler never touches them. In
+the request-time i18n config, fetch just the active locale's namespace files — through
+the platform's asset binding in production (Cloudflare's `env.ASSETS.fetch(...)`, or a
+CDN/origin URL elsewhere), with a same-origin `fetch` fallback for local dev where no
+binding exists — then cache the merged result per-isolate so each locale's files are
+fetched at most once per worker, not once per request. The bundle drops back to its
+pre-i18n size and stays flat however many locales you add. Keep wrapping each fetch so a
+missing namespace degrades to `{}` — a partially-translated locale still boots, falling
+back to the default locale's catalog only when *every* namespace comes back empty.
+
+Either way, maintain the namespace list in one place (the import array, or a
+`NAMESPACES` array the loader iterates). **Every PR that adds a namespace edits that one
+list** — a predictable merge-conflict point when several string-extraction passes land
+together; resolve by merging both lists, not picking one side.
+
+Staying with bundled imports is fine *only* when the locale set is small and fixed and
+you have size headroom to spare. The moment you're generating the full ISO 639-1 set,
+assume you need the asset-fetch loader from the start — retrofitting it after the deploy
+breaks is a mid-incident scramble, not a planned change.
 
 ## 4. String extraction: never touch domain content, only chrome
 
