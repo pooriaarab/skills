@@ -67,10 +67,14 @@ Content-Type: application/json
 ```
 
 - `event_at` is epoch **milliseconds**.
-- `click_id` is the `rdt_cid` query param value captured at ad-click time — capture it first-touch (don't overwrite on a later visit) and carry it through to checkout, e.g. as hidden form state, a cookie, or server-side session metadata.
+- `click_id` is the `rdt_cid` query param from the ad click. **Reddit's own `_rdt_uuid` cookie does NOT store it** — `rdt_cid` only lands on the entry URL, so persist it to first-party storage (localStorage or a cookie) on landing or it's gone by checkout and CAPI has no click to match. Capture first-touch; don't overwrite on a later visit.
 - `email` must be SHA-256 hashed after trimming and lowercasing — never send a raw email.
 - `tracking_type` for other standard events: `LEAD`, `SIGNUP`, `ADD_TO_CART`, `VIEW_CONTENT`, etc. — match whichever conversion action you configured in Events Manager.
 - This call should never be allowed to break the request that triggers it (e.g. a payment webhook). Catch and log failures; don't let a Reddit API error fail an unrelated critical path.
+
+## Don't gate the CAPI call on the click id
+
+Fire the server event whenever you have a **hashed email** (`user.email`) — not only when `click_id`/`rdt_cid` is present. Reddit matches on email alone, so gating on the click id silently drops every organic, direct, and email-driven purchase (usually most of them). Include `click_id` only when you actually have it; never make it a precondition for firing.
 
 ## Dedup: client pixel + server CAPI, same key
 
@@ -85,6 +89,15 @@ Firing both a client pixel event and a server CAPI event for the *same* conversi
 
 Some app setups bake environment variables into a generated module at **build time** rather than reading `process.env` directly at runtime (common on serverless/edge platforms where the runtime environment isn't guaranteed to match the build environment). If your pixel/token reads come back empty in production despite being set somewhere in your deploy config, check whether your app has a build-time secret-generation step (grep for wherever your other, working analytics secrets — e.g. a GA4 API secret — are imported from) and match that pattern, rather than assuming a direct `process.env.YOUR_VAR` read will work. This exact mismatch silently no-ops a CAPI integration with no error — the code runs, the `if (!token) return` guard just always takes the empty-token branch.
 
+## Verification (server-side truth, not "the pixel is on the page")
+
+Reddit has no Meta-style pixel `stats` API, so verify at the edges:
+
+- Inspect the live beacon to `alb.reddit.com/rp.gif` in the browser network tab — confirm the `event` and that `value`/`currency`/`conversion_id`/`external_id` are populated (empty on a plain `PageVisit` is fine; empty on a purchase is the bug).
+- **Ground truth:** cross-check recorded conversions against your payment provider's actual succeeded-charge count. Real charges > 0 with Reddit conversions = 0 means tracking is broken, full stop.
+- **Timing:** a conversion count of 0 over a window that predates the tracking deploy is expected, not a bug — check the deploy date before debugging.
+- **Silent failure is the norm:** these integrations fail by sending nothing (an unset token early-returns, a click-id gate never matches organic traffic), not by throwing.
+
 ## Common pitfalls
 
 - Grabbing an OAuth Developer Portal token instead of a Conversion Access Token — more setup, expires, unnecessary for server-to-server CAPI.
@@ -92,3 +105,5 @@ Some app setups bake environment variables into a generated module at **build ti
 - Mismatched casing between the client `conversionId` and server `conversion_id` — same key, different casing, don't typo one to match the other's casing.
 - Reconstructing timestamps instead of preserving the original click time where the platform's own cookie/click-id encodes it (check whether your click-id format embeds a timestamp before assuming "now" is correct).
 - Letting a CAPI call's failure or latency affect the critical path (payment webhook, checkout redirect) it's attached to — always fire-and-log, never fire-and-block, and if your runtime can tear down background work after a response is sent (common on serverless functions), `await` the call rather than firing it detached.
+- Assuming `rdt_cid` survives to checkout on its own — it only lands on the entry URL and Reddit's cookie doesn't store it; persist it first-party on landing or Reddit CAPI matches almost nothing.
+- Gating the CAPI call on `rdt_cid` — organic/direct purchases then never report; fire on hashed email and attach the click id only when present.
