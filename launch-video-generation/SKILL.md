@@ -1,6 +1,6 @@
 ---
 name: launch-video-generation
-description: "Plan and generate a short (15-60s) launch/announcement video from a real product: a storyboard framework, wavespeed.ai API facts (submit-then-poll, image-to-video model behavior, pricing), the hard-won fix for scene transitions and on-screen text/logos, and a zero-generation-spend path (HyperFrames HTML/CSS/GSAP) for whole-video native-app-mimicry concepts (a note, a chat thread) used as a self-aware ad framing device. Also covers multi-video suites (one film genre per video), wavespeed text-to-music, cinematic-still pipelines with character-consistent frame chains, and rendering hand-built animated HTML to mp4 via puppeteer screencast + ffmpeg. Model-agnostic where possible, wavespeed.ai/HyperFrames-specific where noted."
+description: "Plan and generate a short (15-60s) launch/announcement video from a real product: a storyboard framework, wavespeed.ai API facts (submit-then-poll, image-to-video model behavior, pricing), the hard-won fix for scene transitions and on-screen text/logos, and a zero-generation-spend path (HyperFrames HTML/CSS/GSAP) for whole-video native-app-mimicry concepts (a note, a chat thread) used as a self-aware ad framing device. Also covers multi-video suites (one film genre per video), wavespeed text-to-music, cinematic-still pipelines with character-consistent frame chains, and rendering hand-built animated HTML to mp4 via puppeteer screencast + ffmpeg. Model-agnostic where possible, wavespeed.ai/HyperFrames-specific where noted. Includes an iterative creative loop for multi-video suites: multiple variations per stage (vibe/genre/twist → storyboard stills → cheap draft video → full render) with human sign-off between stages, genre+twist assignment per video, character/wardrobe consistency anchoring for frame-chained edits, and TTS voice casting (minimax/speech-2.6-hd) with ffmpeg voice effects."
 ---
 
 # launch-video-generation
@@ -137,3 +137,21 @@ For an animated-HTML "video" authored by hand (not HyperFrames, which renders it
 
    (`-pix_fmt yuv420p` keeps picky players happy; `-shortest` trims any audio tail past the video.)
 3. **Render each aspect ratio you ship — 16:9 (1920x1080) AND 9:16 (1080x1920) — as separate screencast runs at that viewport**, not one render cropped later: layout-driven animation does not survive a crop.
+
+## 12. The iterative creative loop (generate variations, let the human pick)
+
+From a real session building a whole suite of launch videos: one prompt → finished video is not how this goes. Nail it in stages, cheapest first, and at **each** stage generate **multiple variations** so the human picks fast instead of you guessing — with explicit human sign-off between stages:
+
+1. **Vibe/feel + genre + hook/twist** — pitch a few concepts (a couple of lines each), human picks.
+2. **Storyboard stills** — generate stills for the approved concept, human approves the look.
+3. **SFD (cheap draft video)** — image-to-video lite animating the approved stills, human approves pacing/motion.
+4. **Full render** — only now spend real money.
+
+This is §6's fidelity ladder turned outward: the point of the cheap rungs isn't just catching mistakes early, it's giving the human cheap decision points. A human picking from 3 variations in two minutes beats you iterating solo for an hour on a guess.
+
+- **Genre + twist per video.** For a suite, assign each video its own distinct genre + film framework + a twist — e.g. a radio host who sounds like he's calling a football game but is actually narrating a Claude terminal session: misdirection that pays off when the reveal lands. Keep the copy ELI5, no jargon, universal emotion (§1).
+- **A good spot is a story, not a static character.** Action + varied camera angles + a setting change: girl cooking → retro radio narrates → she reacts → wipes her hands → walks to her laptop. More cuts, shorter shots (~1.5-2s), and **hard cuts, not mushy crossfades** — `xfade` often looks un-seamless on generated footage.
+- **Character/wardrobe consistency is the #1 failure mode.** Frame-chaining (a flux-kontext edit of the previous frame) **drifts** across a cut or a subject change — after an insert shot of an object, the person comes back in a different outfit. Fixes: re-state the exact character + wardrobe in **every** edit prompt ("the same woman in the SAME colorful teal-and-pink 80s crop top, same face"), and when it drifts anyway, re-anchor — upload a known-good frame and chain fresh from that one instead of the drifted output.
+- **Voice: cast it like a character.** `minimax/speech-2.6-hd` on wavespeed requires a `voice_id` and supports emotion + speed. Generate several voice_ids for the human to pick (`Sweet_Girl`, `Determined_Man`, etc.) rather than committing to one. Then shape it with ffmpeg filters for effect — an old-AM-radio / war-era sound: `highpass=f=350,lowpass=f=3200,acompressor,volume=4dB,aecho=0.6:0.4:5:0.25`.
+- **Music is often unnecessary, or should move.** Fade it in only at the payoff; never a flat bed under the whole video.
+- **Model picks (wavespeed):** stills `bytedance/seedream-v4`; character-consistency edits `wavespeed-ai/flux-kontext-max`; cheap draft motion `seedance-v1-lite-i2v-480p` (~5s clips); better motion `seedance-v1-pro-i2v-480p`; finals Kling; TTS `minimax/speech-2.6-hd`. Upload local stills via `POST /api/v3/media/upload/binary` (§2) with `curl -F` to get the image URL i2v/edit calls need — Node FormData drops sockets against this endpoint, curl doesn't.
