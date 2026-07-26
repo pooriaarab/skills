@@ -73,10 +73,13 @@ Bare names are usually taken. Check `npm view <name>` and `npm view @scope/<name
 
 ## 6. Gotchas (each cost a cycle)
 
+- **CRITICAL — a tsup-built ESM CLI silently no-ops under `npx` / global install.** The standard main-module guard `if (import.meta.url === pathToFileURL(process.argv[1]).href) main()` works via `node dist/cli.js` but exits 0 with zero output when run through the installed bin: npm links the bin as a **symlink**, so `process.argv[1]` is the symlink path while `import.meta.url` resolves to the real path — they never compare equal and `main()` never runs. Fix: resolve the symlink first — `import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href` (`realpathSync` from `node:fs`). Do NOT "fix" it by calling `main()` unconditionally — that runs `main()` when tests import `cli.ts`, and its `process.exit` crashes vitest ("process.exit unexpectedly called"). After the change: run the tests before republishing, and verify the real failure mode by symlinking `dist/cli.js` into `/tmp` and executing the symlink — plain `node dist/cli.js` never reproduces it.
 - **Registry read-side lags the publish** by minutes on a brand-new scope. The Actions log showing `+ @scope/name@x.y.z` means it published; a 404 right after is propagation, not failure. Poll the registry, don't re-publish.
 - **A pre-push guard that blocks pushing to `main`** evaluates the *current* branch before your command runs — `git checkout -b feat` and `git push` in one shell line still trips it. Branch in one step, push in the next. Create the long-lived `release` branch via the host API (`gh api .../git/refs`), not a local push.
 - **Scoped packages need `--access public`** or they publish private and fail on a free account.
 - **A worker that writes the files but never commits** (some headless CLIs don't exit cleanly): if the output builds + tests green, take over — commit it yourself; don't wait on a hung process.
+- **npm typosquat protection blocks hyphen-only variants** (403 "too similar to existing package"). If the bare name is taken, a mere hyphen variant (`viberadio` → `vibe-radio`) is still refused — the registry normalizes both to the same string. Only a real distinguishing suffix clears it (`viberadio-fm`, `vibeshare-live`); `-cli` works too.
+- **`npm unpublish` requires a 2FA OTP even with an automation token** — `npm publish` does not. There is no non-interactive way to delete a published package; `npm deprecate <name>@<version> "<message>"` is the token-only fallback.
 
 ## 7. Then
 
