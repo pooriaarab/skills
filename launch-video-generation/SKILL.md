@@ -1,6 +1,6 @@
 ---
 name: launch-video-generation
-description: "Plan and generate a short (15-60s) launch/announcement video from a real product: a storyboard framework, wavespeed.ai API facts (submit-then-poll, image-to-video model behavior, pricing), the hard-won fix for scene transitions and on-screen text/logos, and a zero-generation-spend path (HyperFrames HTML/CSS/GSAP) for whole-video native-app-mimicry concepts (a note, a chat thread) used as a self-aware ad framing device. Model-agnostic where possible, wavespeed.ai/HyperFrames-specific where noted."
+description: "Plan and generate a short (15-60s) launch/announcement video from a real product: a storyboard framework, wavespeed.ai API facts (submit-then-poll, image-to-video model behavior, pricing), the hard-won fix for scene transitions and on-screen text/logos, and a zero-generation-spend path (HyperFrames HTML/CSS/GSAP) for whole-video native-app-mimicry concepts (a note, a chat thread) used as a self-aware ad framing device. Also covers multi-video suites (one film genre per video), wavespeed text-to-music, cinematic-still pipelines with character-consistent frame chains, and rendering hand-built animated HTML to mp4 via puppeteer screencast + ffmpeg. Model-agnostic where possible, wavespeed.ai/HyperFrames-specific where noted."
 ---
 
 # launch-video-generation
@@ -19,7 +19,9 @@ Don't jump to generating clips. Structure the video as a shot list before writin
 - **A shared Visual Theme block, written before any shot**: color palette, lighting style, lens/film character, motion language. Every shot's prompt must restate this. This is what makes six separately-generated clips read as one intentional piece instead of six disconnected clips — visual consistency across shots matters more than any single shot being gorgeous.
 - **Style-shifts are fine if deliberate**: a cold-open in a different visual register (e.g. a meta screen-recording hook) cutting into a stylized body is a real technique, not an inconsistency, as long as each register is internally consistent.
 - **When generating multiple narrative/tone variations (punchy vs. funny vs. controversial, etc.), lock the visual world explicitly in the brief.** A delegate given "write N tonal variations, match the reference storyboard's format" will readily vary the *visual concept* along with the tone — new settings, new metaphors, a completely different look per variation — because nothing told it the visual language was fixed. State it as a hard constraint: "every variation reuses the exact same Visual Theme block(s), varies only the narrative/joke/angle within them." Otherwise you get N unrelated ideas, not N takes on one idea.
+- **For a SUITE of videos (e.g. one per product in a multi-launch), give each video its own distinct genre + film framework** — drama, epic trailer, heist/crime, mystery/thriller, horror, romance — so the set reads as a range, not six of the same video. The Visual Theme lock applies *within* a video; *across* videos you want deliberate contrast. Keep the copy ELI5: no product jargon, universal movie-arc emotion — each video should land with a viewer who has zero context on what the tool does.
 - Per shot, write: composition/camera framing, lighting, subject, action, and a complete 40-80 word cinematic prompt ending in a technical spec line (duration, aspect ratio, "cinematic 1080p, synchronized audio" or equivalent).
+- **Reference frame libraries for shot design**: write composition/lighting lines from real film frames instead of inventing them — ShotDeck (hand-tagged, 30+ categories), Shot.Cafe (RGB parades), Film-Grab, Frameset.
 - Close the storyboard doc with a post-production checklist (stitch order, transition types, audio layering, export spec) and a "why this works" rationale — both keep you honest about whether the plan actually holds together before you spend money executing it.
 
 ## 2. wavespeed.ai API shape (submit-then-poll, universal)
@@ -111,3 +113,27 @@ Some launch videos don't need any generated imagery at all — the entire concep
 **Workflow**: `lint` (fast, structural) → `check` (full: runtime errors, layout, motion, WCAG contrast — catches things lint can't, like actual illegible text) → `render --output <name>.mp4` → `snapshot . --at <comma-separated-seconds>` to pull a contact sheet of key frames for visual review before calling it done (`--describe` needs `GEMINI_API_KEY` for an AI critique pass; skip if unset, just eyeball the contact sheet yourself). `npx hyperframes doctor` up front confirms Chrome/ffmpeg are ready; `whisper-cpp`/local-TTS/local-music/Docker are optional and unneeded for a silent or simple-SFX cut.
 
 A 15s square (1080×1080) composition with ~9 timed elements rendered in under 20 seconds locally — cheap enough to iterate on copy/timing directly rather than storyboard-then-generate.
+
+## 9. Cinematic stills, and chaining stills for character consistency
+
+`bytedance/seedream-v4` (text-to-image) works well for cinematic frames — pass the dimensions as `size: "1920*1080"` (a `*` separator, not `x`).
+
+For **character/palette consistency across shots**, chain at the still level: feed a shot's output image URL into an image-EDIT model — `wavespeed-ai/flux-kontext-max`, body `{"prompt": "<next shot>", "image": "<previous shot's image url>"}` — and the edit produces the next shot with the same character and palette in the new composition. This is the still-image half of the §3 two-step pipeline: the edit model owns content/continuity, then image-to-video animates each still as usual. Far cheaper to iterate at the still level than to discover inconsistency after paying for motion.
+
+## 10. Text-to-music: minimax/music-2.6 gotchas
+
+- **`lyrics` is REQUIRED even for instrumental tracks** — pass `lyrics: "[instrumental]"` together with `is_instrumental: true`, or the request fails.
+- **There is no duration parameter** — length is steered by the prompt text ("a 30-second ..."), not by a field.
+- **Generating a batch (e.g. 6 tracks): write each submitted prediction `id` to a file keyed by track name immediately on submit.** A bash assoc-array bug (a reused/mutated key) can make every poll/download hit the same id — you get 6 identical files with no error anywhere. After download, verify with `md5` that the hashes are all distinct; identical hashes mean you downloaded one track N times, not that the model coincidentally repeated itself.
+
+## 11. Rendering hand-built animated HTML to mp4 (puppeteer + ffmpeg)
+
+For an animated-HTML "video" authored by hand (not HyperFrames, which renders itself — §8):
+
+1. Record the animation with puppeteer: `page.screencast({ path: 'shot.webm' })`, let the timeline play for the N seconds the shot runs, then stop.
+2. Mux in a music track, trimmed to the shot with a fade-out and a slight duck:
+
+   `ffmpeg -y -i shot.webm -i music.mp3 -t 20 -af "afade=t=out:st=18:d=2,volume=0.8" -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest out.mp4`
+
+   (`-pix_fmt yuv420p` keeps picky players happy; `-shortest` trims any audio tail past the video.)
+3. **Render each aspect ratio you ship — 16:9 (1920x1080) AND 9:16 (1080x1920) — as separate screencast runs at that viewport**, not one render cropped later: layout-driven animation does not survive a crop.
