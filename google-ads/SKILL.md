@@ -1,6 +1,6 @@
 ---
 name: google-ads
-description: "Wire up Google Ads + GA4 conversion tracking for a web app — the three layers (GA4 client gtag, GA4 server-side Measurement Protocol, Google Ads conversion import from GA4), the Measurement Protocol api_secret that silently no-ops a server purchase when unset, importing/enabling/marking-Primary a GA4 conversion action in Google Ads, Google Ads API launch nuances (containsEuPoliticalAdvertising, text-only search ads, OAuth-project enablement), and server-side verification via the GA4 Data API and GAQL. Use when setting up Google Ads purchase tracking, debugging 0 conversions, or validating an MP secret without waiting."
+description: "Wire up Google Ads + GA4 conversion tracking for a web app — the three layers (GA4 client gtag, GA4 server-side Measurement Protocol, Google Ads conversion import from GA4), the Measurement Protocol api_secret that silently no-ops a server purchase when unset, importing/enabling/marking-Primary a GA4 conversion action in Google Ads, Google Ads API launch nuances (containsEuPoliticalAdvertising, text-only search ads, OAuth-project enablement), and server-side verification via the GA4 Data API and GAQL. Also covers small-budget Search campaign setup — the defaults that burn budget (Display Network/Search partners on by default, All-languages targeting, missing negative keywords), bid-strategy choice when you have no conversion history (Manual CPC / Maximize Clicks vs a Smart Bidding learning phase), long-tail vs unaffordable head terms, and a pre-spend search-volume check. Use when setting up a Google Ads search campaign, launching a small paid test, setting up Google Ads purchase tracking, debugging 0 conversions, or validating an MP secret without waiting."
 ---
 
 # google-ads
@@ -67,6 +67,21 @@ In Google Ads → **Goals → Conversions → New conversion action → Import �
 ## Click id
 
 Google's GA4-import path attributes on the **GA4 `client_id` / `gclid`**, so you generally do **not** need to capture `gclid` yourself when using conversion import. Capturing `gclid` (from the landing-page query param, first-touch) is only needed if you later switch to offline/enhanced conversions that key on it. Optional for the import flow.
+
+## Campaign setup (search): defaults that quietly burn a small budget
+
+Learned launching a live small-budget ($50-scale) search test. A new Search campaign's defaults are tuned for spend, not for a clean signal — fix these *before* you turn it on:
+
+- **Display Network + Search partners default ON.** A new "Search" campaign is created targeting Google Search **plus Search partners plus the Display Network** by default, so a search-intent budget bleeds onto junk Display placements. Set it to **Google Search only** (`targetContentNetwork=false`, `targetSearchNetwork=false` on the campaign's `NetworkSettings`) unless you deliberately want partners/Display.
+- **Language defaults to "All languages"** → you serve users who can't read the ad. Restrict targeting to your target market's language.
+- **Add negative keywords up front.** PHRASE/BROAD match will match junk ("free …", "jobs", "how to …", "reviews", "hire a …", off-topic and competitor terms) and eat the budget before you can read any signal. Put a campaign negative-keyword list in place *at launch*, not after you've spent.
+- **Bid strategy on a tiny budget with no conversion history: Manual CPC** (full control) **or Maximize Clicks** (volume, to fill the top of the funnel so you can read clicks → signups). **Smart Bidding** (Maximize Conversions / tCPA / tROAS) needs a conversion action wired up **and roughly 15-30 conversions to exit the learning phase** — a small test won't produce that, so it can't optimize. Switch to Smart Bidding only once conversions have accumulated.
+- **Set the campaign conversion goal explicitly.** Don't leave it on "account default: no goals" — point it at the action you care about (e.g. signup) so bidding optimizes toward it once you do move to Smart Bidding.
+- **Value rules** apply only to value-based / tROAS bidding — skip them for a signup- or clicks-based test.
+- **Head terms are unaffordable on a small budget** — broad category terms get bid up by large advertisers (think tens of dollars per click). Ride **long-tail, vertical, high-intent** phrases instead.
+- **Check search volume before you spend.** Pull exact-match monthly volume (Keyword Planner, or the API's `generateKeywordHistoricalMetrics`) — a hyper-long-tail term in a tiny geo can have too little volume to spend even a small budget in your window, which starves the test of a read. Confirm there's enough volume to actually spend before you launch.
+
+Then run tightly-scoped experiments on top of this setup — see the `ad-experiments` skill for the methodology (hypothesis → narrow audience×geo×creative → cheapest conversion first → server-side verification).
 
 ## Google Ads API launch nuances (generic)
 

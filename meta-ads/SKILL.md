@@ -101,6 +101,11 @@ Fire the server event on **hashed-email match (`em`)**, not on the presence of `
 
 Some automation/headless browsers (and privacy tooling) **block `fbevents.js`**, so the Pixel looks dead in your test tooling while working fine in real browsers. Don't conclude the Pixel is broken from a headless run — **always cross-check server-side** via `/stats`.
 
+## Small-budget campaign setup (cross-platform)
+
+- On a small test budget with **no conversion history, don't pick a conversion-optimized objective yet** — Meta's delivery has a **learning phase** that needs a steady flow of conversions to optimize, which a small budget won't produce, so it never learns. Start with a traffic/click objective to fill the funnel, and move to conversion optimization once real conversions accumulate. (Same trap as Google Smart Bidding's learning phase.)
+- Run **one narrow audience × geo × creative per experiment**, prove the **cheapest conversion (free signup) first**, and judge results on server-side truth (`/stats` + payment provider), not the dashboard. See the `ad-experiments` skill for the full methodology.
+
 ## Cross-cutting lessons (the ones that actually bite)
 
 - **Timing:** a Purchase count of **0 over a window that predates the tracking deploy** is expected, not a bug. Check the deploy date before debugging — there are no events from before the Pixel existed.
