@@ -1,6 +1,6 @@
 ---
 name: launch-video-generation
-description: "Plan and generate a short (15-60s) launch/announcement video from a real product: a storyboard framework, wavespeed.ai API facts (submit-then-poll, image-to-video model behavior, pricing), the hard-won fix for scene transitions and on-screen text/logos, and a zero-generation-spend path (HyperFrames HTML/CSS/GSAP) for whole-video native-app-mimicry concepts (a note, a chat thread) used as a self-aware ad framing device. Also covers multi-video suites (one film genre per video), wavespeed text-to-music, cinematic-still pipelines with character-consistent frame chains, and rendering hand-built animated HTML to mp4 via puppeteer screencast + ffmpeg. Model-agnostic where possible, wavespeed.ai/HyperFrames-specific where noted. Includes an iterative creative loop for multi-video suites: multiple variations per stage (vibe/genre/twist → storyboard stills → cheap draft video → full render) with human sign-off between stages, genre+twist assignment per video, character/wardrobe consistency anchoring for frame-chained edits, and TTS voice casting (minimax/speech-2.6-hd) with ffmpeg voice effects."
+description: "Plan and generate a short (15-60s) launch/announcement video from a real product: a storyboard framework, wavespeed.ai API facts (submit-then-poll, image-to-video model behavior, pricing), the hard-won fix for scene transitions and on-screen text/logos, and a zero-generation-spend path (HyperFrames HTML/CSS/GSAP) for whole-video native-app-mimicry concepts (a note, a chat thread) used as a self-aware ad framing device. Also covers multi-video suites (one film genre per video), wavespeed text-to-music, cinematic-still pipelines with hero-anchor character consistency, and rendering hand-built animated HTML to mp4 via puppeteer screencast + ffmpeg. Model-agnostic where possible, wavespeed.ai/HyperFrames-specific where noted. Includes an iterative creative loop for multi-video suites: multiple variations per stage (vibe/genre/twist → storyboard stills → cheap draft video → full render) with human sign-off between stages, genre+twist assignment per video, hero-anchor character consistency (one hero reference image; every shot an edit of THAT image — frame-chaining drifts by shot 3), and TTS voice casting (minimax/speech-2.6-hd) with ffmpeg voice effects. Also: Veo 3 via Vertex AI (ADC auth, predictLongRunning -> fetchPredictOperation, inline base64 image-conditioning, fixed 8s clips), fast-cut pacing (12-15 x ~2s hard cuts per 30s spot), movie-style variation grids for fast human picks, and the constraint-sandwich prompt structure (subject anchor > action+camera > optics+lighting) with a locked style-anchor string."
 ---
 
 # launch-video-generation
@@ -11,7 +11,7 @@ Empirical, from building a real launch video (slackclaw) end to end: storyboard 
 
 Don't jump to generating clips. Structure the video as a shot list before writing a single generation prompt:
 
-- **Duration → shot count**: ~5s per shot is the sweet spot most image-to-video models render at. A 30s video is ~6 shots.
+- **Duration → shot count**: generation length and cut length are different numbers. Image-to-video models render ~5-8s clips (Veo 3: fixed 8s), but a fast-cut 30s spot wants ~2s on screen per shot = **~12-15 shots** — generate the full clip per shot, then keep only its best ~2s beat and scrap the rest. Letting six 5s clips play out whole reads slow and same-y; hard-cutting twelve-plus best-beats reads like a real spot.
 - **Narrative arc — use a real copywriting framework, not a vague tone label.** "Make it punchy" or "make it funny" describes a *feel*, not a *structure*, and a structure is what actually gets built correctly on the first pass. Two frameworks that map directly onto a shot list:
   - **PAS (Problem → Agitate → Solution)**: 1-2 shots stating the real problem, 2-3 shots making its cost vivid/painful, 2-3 shots resolving it with the actual product and real proof (numbers, not adjectives). Label each shot with its stage so the structure is checkable at a glance.
   - **JTBD (Jobs To Be Done)**: ground the "problem" stage in the actual job the audience is hiring the product to do, stated as a real observed pain, not a category description. A product with more than one real user (e.g. a human user *and* an AI agent consuming the same tool) can have two parallel JTBD angles worth blending in the same PROBLEM shot — this reads as sharper and more specific than either alone.
@@ -21,7 +21,7 @@ Don't jump to generating clips. Structure the video as a shot list before writin
 - **When generating multiple narrative/tone variations (punchy vs. funny vs. controversial, etc.), lock the visual world explicitly in the brief.** A delegate given "write N tonal variations, match the reference storyboard's format" will readily vary the *visual concept* along with the tone — new settings, new metaphors, a completely different look per variation — because nothing told it the visual language was fixed. State it as a hard constraint: "every variation reuses the exact same Visual Theme block(s), varies only the narrative/joke/angle within them." Otherwise you get N unrelated ideas, not N takes on one idea.
 - **For a SUITE of videos (e.g. one per product in a multi-launch), give each video its own distinct genre + film framework** — drama, epic trailer, heist/crime, mystery/thriller, horror, romance — so the set reads as a range, not six of the same video. The Visual Theme lock applies *within* a video; *across* videos you want deliberate contrast. Keep the copy ELI5: no product jargon, universal movie-arc emotion — each video should land with a viewer who has zero context on what the tool does.
 - Per shot, write: composition/camera framing, lighting, subject, action, and a complete 40-80 word cinematic prompt ending in a technical spec line (duration, aspect ratio, "cinematic 1080p, synchronized audio" or equivalent).
-- **Reference frame libraries for shot design**: write composition/lighting lines from real film frames instead of inventing them — ShotDeck (hand-tagged, 30+ categories), Shot.Cafe (RGB parades), Film-Grab, Frameset.
+- **Reference frame libraries for shot design**: study framing, lighting, and lens choices from real film frames instead of inventing them — film-grab.com, shot.cafe (RGB parades), shotdeck.com (hand-tagged, 30+ categories), frameset.app.
 - Close the storyboard doc with a post-production checklist (stitch order, transition types, audio layering, export spec) and a "why this works" rationale — both keep you honest about whether the plan actually holds together before you spend money executing it.
 
 ## 2. wavespeed.ai API shape (submit-then-poll, universal)
@@ -59,6 +59,8 @@ seed frame (last frame of prior shot)
 `wavespeed-ai/flux-kontext-pro` is the image-edit half of this pipeline ($0.04/run, documented "robust consistency... minimal visual drift" across successive edits, plus real typography support). This gave both the continuity feel and actual scene progression on the first real attempt, after the single-step chained approach produced four visually-static "the same shot with minor variation" clips.
 
 If continuity between genuinely different scenes doesn't matter to you, the simpler and cheaper alternative is: skip frame-chaining entirely, generate each shot independently from its own fresh text-to-image prompt, and rely on the shared Visual Theme language (§1) plus cut editing for the sense of flow. Frame-chaining is a deliberate choice with a real cost (an extra edit-model call per chained shot), not a default to reach for.
+
+**Later-session caveat**: even the edit-model version of chaining drifts the *character* over successive edits — face, age, and outfit are visibly different by the third edit, worse after an insert shot of an object. For character consistency across a whole video the §9 hero anchor (every shot edited from ONE reference image, never from the previous shot) replaced chaining as the default. Chaining remains the right tool only for pixel-continuity inside one continuous scene.
 
 ## 4. On-screen text and brand logos: do not generate them, composite them
 
@@ -114,11 +116,17 @@ Some launch videos don't need any generated imagery at all — the entire concep
 
 A 15s square (1080×1080) composition with ~9 timed elements rendered in under 20 seconds locally — cheap enough to iterate on copy/timing directly rather than storyboard-then-generate.
 
-## 9. Cinematic stills, and chaining stills for character consistency
+## 9. Cinematic stills, and character consistency: the hero anchor
 
 `bytedance/seedream-v4` (text-to-image) works well for cinematic frames — pass the dimensions as `size: "1920*1080"` (a `*` separator, not `x`).
 
-For **character/palette consistency across shots**, chain at the still level: feed a shot's output image URL into an image-EDIT model — `wavespeed-ai/flux-kontext-max`, body `{"prompt": "<next shot>", "image": "<previous shot's image url>"}` — and the edit produces the next shot with the same character and palette in the new composition. This is the still-image half of the §3 two-step pipeline: the edit model owns content/continuity, then image-to-video animates each still as usual. Far cheaper to iterate at the still level than to discover inconsistency after paying for motion.
+For **character/palette consistency across shots**, do NOT frame-chain at the still level (edit shot N from shot N-1's output) — it **drifts**: face, age, and outfit are visibly different by shot 3, worse after an insert shot of an object. The fix that actually holds is a **hero anchor** — star topology instead of a chain:
+
+1. Generate ONE hero character reference image, plain text-to-image: the character nailed down (face, hair, outfit, age) in a clean, neutral composition.
+2. Generate EVERY shot as an image-conditioned EDIT of that SAME hero image — `wavespeed-ai/flux-kontext-max`, body `{"prompt": "<edit prompt>", "image": "<hero image url>"}` — never from the previous shot's output.
+3. The edit prompt leads with an identity lock, then states only the delta: `the EXACT same woman from the reference image (identical face, hair, outfit, age), only change pose/action/camera: <new shot description>`.
+
+Every shot references the hero directly, so there's no chain for drift to accumulate along. This is the still-image half of the §3 two-step pipeline: the edit model owns content/continuity, then image-to-video animates each still as usual. Far cheaper to iterate at the still level than to discover inconsistency after paying for motion.
 
 ## 10. Text-to-music: minimax/music-2.6 gotchas
 
@@ -150,8 +158,72 @@ From a real session building a whole suite of launch videos: one prompt → fini
 This is §6's fidelity ladder turned outward: the point of the cheap rungs isn't just catching mistakes early, it's giving the human cheap decision points. A human picking from 3 variations in two minutes beats you iterating solo for an hour on a guess.
 
 - **Genre + twist per video.** For a suite, assign each video its own distinct genre + film framework + a twist — e.g. a radio host who sounds like he's calling a football game but is actually narrating a Claude terminal session: misdirection that pays off when the reveal lands. Keep the copy ELI5, no jargon, universal emotion (§1).
-- **A good spot is a story, not a static character.** Action + varied camera angles + a setting change: girl cooking → retro radio narrates → she reacts → wipes her hands → walks to her laptop. More cuts, shorter shots (~1.5-2s), and **hard cuts, not mushy crossfades** — `xfade` often looks un-seamless on generated footage.
-- **Character/wardrobe consistency is the #1 failure mode.** Frame-chaining (a flux-kontext edit of the previous frame) **drifts** across a cut or a subject change — after an insert shot of an object, the person comes back in a different outfit. Fixes: re-state the exact character + wardrobe in **every** edit prompt ("the same woman in the SAME colorful teal-and-pink 80s crop top, same face"), and when it drifts anyway, re-anchor — upload a known-good frame and chain fresh from that one instead of the drifted output.
+- **Anchor each variation on a POPULAR MOVIE's style, not on adjectives.** "Cinematic" or "moody" gives the model (and the human) nothing real to aim at. Copy a film instead — e.g. Stranger Things cozy-80s / Flashdance dance / Drive neon-noir / Amélie whimsical — each variation with its own storyline, each produced as a hero + ~4 shots, all shown in ONE HTML grid. The human picks a vibe in one glance instead of you guessing and re-guessing.
+- **A good spot is a story, not a static character.** Real ACTION in every shot — dancing, tasting a spoon, opening the fridge — not a character standing in frame, plus a setting change: girl cooking → retro radio narrates → she reacts → wipes her hands → walks to her laptop. **Every shot a DIFFERENT camera angle**: wide/establishing, over-the-shoulder, top-down insert, low hero angle, profile, tracking, medium, close-up — avoid repetitive eyes-only super-closeups. More cuts, shorter shots (~2s each; a 30s spot is ~12-15 of them — §1), and **hard cuts, not fades/xfades** — they look un-seamless on generated footage. Per shot, generate the full-length clip (8s on Veo) and cut only its best ~2s beat; the rest is scrap by design.
+- **Character/wardrobe consistency is the #1 failure mode.** Frame-chaining (a flux-kontext edit of the previous frame) **drifts** — face/age/outfit visibly change by shot 3, worse after an insert shot of an object. The fix that actually holds is the §9 hero anchor: ONE hero reference image, every shot an edit of THAT SAME image, identity lock in every prompt. Re-stating the exact wardrobe in each edit prompt ("the same woman in the SAME colorful teal-and-pink 80s crop top, same face") still helps as a second layer, but the anchor topology, not the wording, is what stops the drift.
 - **Voice: cast it like a character.** `minimax/speech-2.6-hd` on wavespeed requires a `voice_id` and supports emotion + speed. Generate several voice_ids for the human to pick (`Sweet_Girl`, `Determined_Man`, etc.) rather than committing to one. Then shape it with ffmpeg filters for effect — an old-AM-radio / war-era sound: `highpass=f=350,lowpass=f=3200,acompressor,volume=4dB,aecho=0.6:0.4:5:0.25`.
 - **Music is often unnecessary, or should move.** Fade it in only at the payoff; never a flat bed under the whole video.
-- **Model picks (wavespeed):** stills `bytedance/seedream-v4`; character-consistency edits `wavespeed-ai/flux-kontext-max`; cheap draft motion `seedance-v1-lite-i2v-480p` (~5s clips); better motion `seedance-v1-pro-i2v-480p`; finals Kling; TTS `minimax/speech-2.6-hd`. Upload local stills via `POST /api/v3/media/upload/binary` (§2) with `curl -F` to get the image URL i2v/edit calls need — Node FormData drops sockets against this endpoint, curl doesn't.
+- **Model picks (wavespeed):** stills `bytedance/seedream-v4`; character-consistency edits `wavespeed-ai/flux-kontext-max`; cheap draft motion `seedance-v1-lite-i2v-480p` (~5s clips); better motion `seedance-v1-pro-i2v-480p`; finals Kling or Veo 3 (§13); TTS `minimax/speech-2.6-hd`. Upload local stills via `POST /api/v3/media/upload/binary` (§2) with `curl -F` to get the image URL i2v/edit calls need — Node FormData drops sockets against this endpoint, curl doesn't.
+
+## 13. Veo 3 via Vertex AI (Google native, synced audio)
+
+Veo 3 is Google's own model — best quality of the lot, with **native synchronized audio** (SFX/dialogue generated with the picture). Access is through **Vertex AI on a personal GCP project**, not wavespeed.
+
+- **Auth = ADC**: `GOOGLE_APPLICATION_CREDENTIALS` pointing at a personal application-default-credentials json; mint a token per call with `gcloud auth application-default print-access-token`.
+- **Submit** — a long-running operation, so operation-name polling instead of wavespeed's prediction-id pattern (§2):
+
+```
+POST https://us-central1-aiplatform.googleapis.com/v1/projects/<PROJECT>/locations/us-central1/publishers/google/models/veo-3.0-fast-generate-001:predictLongRunning
+{
+  "instances": [{
+    "prompt": "...",
+    "image": { "bytesBase64Encoded": "...", "mimeType": "image/png" }
+  }],
+  "parameters": { "aspectRatio": "16:9", "durationSeconds": 8, "sampleCount": 1, "generateAudio": true }
+}
+-> returns an operation name
+```
+
+- **Poll**: POST the same model URL with `:fetchPredictOperation` and body `{"operationName": "<name>"}` until `done` is true; the video comes back inline at `response.videos[0].bytesBase64Encoded` — base64 mp4, decode to file. Clips are a fixed 8s.
+
+**Always image-condition Veo.** Text-prompt-only Veo invents a random character per clip, throwing away the whole §9 hero anchor. Pass the nailed still as the `image` on every instance (note: inline base64 here, not a URL like wavespeed). Same anchoring rule as §3, applied at the video-model step: nail the storyboard and stills FIRST, then animate — never animate from text alone.
+
+## 14. Prompt structure: the constraint sandwich
+
+Video models want a **technical call sheet, not vibes** (practitioner consensus from r/generativeAI, confirmed in this session's iterations). Order each prompt as a sandwich:
+
+1. **Subject Anchor** — who/what; with the identity lock when it's the recurring character (§9).
+2. **Action + Camera** — exact framing plus movement vectors ("she crosses frame left-to-right, camera dollies back to wide"), not "dynamic camera".
+3. **Optics + Lighting** — lens, film character, light direction and quality.
+
+Per-model variations:
+
+- **Kling** is physics-aware and wants Subject > Movement > Scene > Camera > Lighting.
+- **Seedance** takes the start frame (and last frame, when the end pose matters) — keep the text prompt for pacing/sound only.
+
+Two multipliers:
+
+- **Lock a STYLE ANCHOR string**: one fixed sentence (palette, lens, lighting, grain) appended verbatim to EVERY prompt in the video, so independently-generated shots don't drift apart in look. This is the prompt-level enforcement of the §1 Visual Theme block.
+- **Reverse-engineer looks you like with video-to-prompt tools**: feed a reference clip or frame in, get a structured prompt back, adapt it — faster and more faithful than describing a look from scratch.
+
+## Cinematography control vocabulary (prompt EVERY shot with these)
+
+Vibe words don't render; controls do. For each still and each Veo shot, specify explicit values across these axes (taxonomy from filmvibes.io) so text-to-image (hero), image-to-image (shots), and image-to-video (Veo) all get a real call sheet:
+
+- **Shot size:** extreme close-up · close-up · medium · wide · extreme wide
+- **Angle:** low angle · eye level · high angle · overhead
+- **Camera move / transition:** static · roll L/R · truck L/R · arc L/R · track · dolly in/out · zoom in/out · pedestal up/down · tilt up/down · pan L/R · oner · teleport
+- **Time of day:** day · night · golden hour · blue hour
+- **Interior / exterior**
+- **Look / additional:** cinematic shot · beauty commercial · film grain · natural light
+- **Visual effect:** fisheye · double exposure · collage · pixel art · psychedelic
+- **Media register:** commercial · music video · movie · **era** (23–25 / 20–22 / 16–19 / <16)
+
+Per-shot prompt template: `{shot size} shot, {angle}, {camera move}: {subject + action}. {time of day}, {int/ext}, {look}. {STYLE ANCHOR}`. Vary the shot size + angle + move EVERY shot (no two the same in a row; avoid repetitive eyes-only ECUs).
+
+## Reverse-engineer a reference with Gemini (video → style .md)
+
+To match a real film/commercial look, don't guess — analyze it. Gemini 2.5 Flash reads video. Via Vertex on the personal project (ADC token as in the Veo section):
+`POST https://us-central1-aiplatform.googleapis.com/v1/projects/PROJECT/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent`
+body: `{contents:[{role:"user",parts:[{inlineData:{mimeType:"video/mp4",data:<base64, <~15MB inline>}},{text:"As a cinematographer, output structured markdown: vibe/tone, genre + reference films, color palette + grade, lighting, lens/DOF/format, shot list (type+angle+movement per beat), edit pacing, sound/music, emotional arc — specific enough to recreate."}]}]}`
+Feed the resulting `.md` into the shot prompts + style anchor. Reference-still libraries to pull looks from: **filmvibes.io**, film-grab.com, shot.cafe, shotdeck.com, frameset.app.
