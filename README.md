@@ -38,6 +38,7 @@ A coordinated suite for organizing across every digital surface — files, notes
 | [reddit-ads](reddit-ads/SKILL.md) | Set up Reddit Ads pixel tracking and server-side Conversions API (CAPI) purchase attribution — Developer Portal app creation, the Conversion Access Token vs OAuth token distinction, the CAPI v3 endpoint shape, and client/server event dedup. |
 | [google-ads](google-ads/SKILL.md) | Wire up Google Ads + GA4 conversion tracking — the three layers (GA4 client gtag, server-side Measurement Protocol, Ads conversion import from GA4), the MP `api_secret` that silently no-ops a server purchase when unset (distinct from the `G-XXXX` measurement id), importing/enabling/marking-Primary the GA4 conversion action, Google Ads API launch nuances (`containsEuPoliticalAdvertising` now required, text-only search ads, OAuth-project enablement), and server-side verification via the GA4 Data API + GAQL + the MP `/debug/mp/collect` endpoint. |
 | [meta-ads](meta-ads/SKILL.md) | Set up Meta (Facebook) Pixel + server-side Conversions API (CAPI) purchase tracking — client Pixel and server CAPI shipped together with a shared `event_id` dedup key, the CAPI access token that silently no-ops when unset, why you fire on hashed-email match (not on `fbclid`) so organic purchases still report, advanced matching for match quality, the app-capability 400s (Advanced Access for `ads_management`, promotable Page), and server-side verification via the Graph `stats`/`last_fired_time` endpoints. |
+| [ad-experiments](ad-experiments/SKILL.md) | Run paid-ad experiments on a small budget so you learn *which* variable drives signups and *why* — hyper-specific one-audience×geo×creative experiments from a written hypothesis, proving the cheapest conversion (free signup) before the expensive one, and judging on server-side truth reconciled against payment-provider ground truth, not dashboard vanity. Platform-agnostic; pairs with `google-ads`/`meta-ads`/`reddit-ads`. |
 | [localize-with-ai](localize-with-ai/SKILL.md) | Fully localize a codebase with next-intl + an LLM translation pipeline — locale-prefixed routing, per-namespace catalogs, a two-pass draft/QA-flag MT pipeline with real ICU validation, staged RTL/CJK layout work, and the non-obvious gotchas (French-source-content-hiding-as-English, per-file not per-locale freshness, auth error-code preservation). |
 
 ## Install
@@ -67,6 +68,7 @@ npx skills add pooriaarab/build-from-template
 npx skills add pooriaarab/open-source-repo-prep
 npx skills add pooriaarab/launch-seo
 npx skills add pooriaarab/social-launch-post
+npx skills add pooriaarab/ad-experiments
 ```
 
 ## Data source

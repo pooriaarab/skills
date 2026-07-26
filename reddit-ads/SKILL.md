@@ -89,6 +89,11 @@ Firing both a client pixel event and a server CAPI event for the *same* conversi
 
 Some app setups bake environment variables into a generated module at **build time** rather than reading `process.env` directly at runtime (common on serverless/edge platforms where the runtime environment isn't guaranteed to match the build environment). If your pixel/token reads come back empty in production despite being set somewhere in your deploy config, check whether your app has a build-time secret-generation step (grep for wherever your other, working analytics secrets — e.g. a GA4 API secret — are imported from) and match that pattern, rather than assuming a direct `process.env.YOUR_VAR` read will work. This exact mismatch silently no-ops a CAPI integration with no error — the code runs, the `if (!token) return` guard just always takes the empty-token branch.
 
+## Small-budget campaign setup (cross-platform)
+
+- On a small test budget, **don't optimize delivery toward a conversion you can't yet produce in volume.** Like Google Smart Bidding and Meta's learning phase, Reddit's conversion-optimized delivery needs conversions to learn from — start with a clicks/traffic objective to fill the funnel, then switch to conversion optimization once conversions accumulate.
+- Run **one narrow audience × geo × creative per experiment**, prove the **cheapest conversion (free signup) first**, and verify against server-side truth (the `rp.gif` beacon + payment provider), not the dashboard. See the `ad-experiments` skill for the full methodology.
+
 ## Verification (server-side truth, not "the pixel is on the page")
 
 Reddit has no Meta-style pixel `stats` API, so verify at the edges:
