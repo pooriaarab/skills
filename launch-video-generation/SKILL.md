@@ -286,3 +286,45 @@ Use figure **archetypes** (a hoodie founder on a keynote stage, a suit CEO) — 
 
 ### QC
 Gemini-2.5-flash critique is great for the single-character pieces, but it wrongly dings a **montage** for "no continuity / disconnected clips" — that IS the montage style. Judge montages on energy/rhythm/gag, not continuity.
+
+## Creative workflow (the loop that actually works)
+
+Don't try to nail a 30s video in one shot — you'll burn money on a blind miss. Iterate cheap → expensive, showing the human at each gate:
+
+1. **Vibe / brief.** Pick a video-type archetype + a genre. One or two sentences of intent.
+2. **Storyboard variations FIRST (cheapest gate).** Generate **3 distinct style/story variations** as still-only grids (hero + 3–5 shots each, one `seedream` call per shot, ~$1 total), write a tiny HTML grid, open it. The human picks a direction (or blends two) in seconds. This is the highest-leverage step — never skip to animation before the look is chosen. Regenerate variations freely; stills are cheap.
+3. **Lock the keyframes.** For the chosen look, build the real keyframe set (the first/last frames of every clip). Show these too if the human wants — they're the skeleton.
+4. **Animate** (Kling first+last chain for a consistent lead, or seedance short clips for a montage).
+5. **Audio** as its own pass (swap voice/music/SFX without re-rendering video).
+6. **Gemini QC**, then iterate on *specific* notes. Stop at subjective ("hire a voice actor").
+7. **Upscale** only the approved final.
+
+Expect ~5–9 rounds for a hero video. Change ONE variable per round when debugging (model, or lighting, or story) — changing several at once hides which fix worked. Keep every stage a separate script so you can re-run just the broken stage.
+
+## Sample prompts (patterns that held up)
+
+**Style anchor** (prepend to every image prompt for a consistent look):
+`1980s cinematic, warm tungsten key with magenta/cyan neon rim, 35mm anamorphic, film grain, shallow depth of field, glamorous`
+
+**Hero (text-to-image, defines look + wardrobe):**
+`{STYLE}. Full reference of {a specific, distinctive character — age, hair, simple bold wardrobe}, in {the one set}.`
+
+**Face reference (separate T2I, for the swap):** `{STYLE}. Clean sharp front-facing headshot of {character}, evenly lit, crisp focus on the face.` — a lit frontal headshot swaps far better than a full-body frame.
+
+**LOCK string (prepend to every keyframe edit so identity + set persist):**
+`the EXACT same {character} from the reference image (identical face, hair, wardrobe), same {set}, only change pose, action and camera. Looking at the task, not the lens. Keep whole body in frame — NO close-up of hands.`
+
+**Keyframe (image-to-image on the hero), one per beat, vary the grammar:**
+`{LOCK}. {shot size} shot, {angle}, {camera move}: {subject + action}. {STYLE}` — cycle shot size (ECU/CU/medium/wide/EWide), angle (low/eye/high/overhead/OTS/dutch), move (static/dolly/truck/arc/pan/track).
+
+**Kling first+last clip:** `image`=keyframe N, `last_image`=keyframe N+1, `prompt`={the motion between them}, `negative_prompt`=`close-up of hands, fingers, cartoon, cgi, plastic skin, morphing, warping, distorted face, extra fingers, changing outfit, duplicated objects, ghosting`.
+
+**Voice (ElevenLabs V3), emotion tags inline:** `[shouting] GREEN! Green across the board!` / `[low, deadpan] It was just a git push.` — `stability:0.3–0.4` for dynamic delivery.
+
+**Instrumental music (minimax), lyrics = wordless vocables only:** `lyrics:"Ooooh, aaaah, ooh oh oh"`, `prompt:"epic cinematic orchestral choir, building, instrumental, no words"`. (Descriptor words in `lyrics` get SUNG.)
+
+**Montage shot entry** (drives a data-driven montage builder): `[still_prompt, motion_prompt, seconds(0.3–0.5), style_tag, sfx_type]` — e.g. `["a news anchor slamming the desk shouting, BREAKING", "she slams and shouts", 0.5, "photoreal", "boom"]`. Style tags let you genre-hop (50s cartoon / anime / claymation / VHS / silent-film) shot to shot.
+
+## Variety / variations
+
+Generate variations at EVERY expensive fork, not just once: multiple style boards up front, and (optionally) 2–4 hero candidates before locking the character. Present them as an HTML grid and let the human pick — picking from options is faster and better than describing changes in words. On flat-rate/cheap image models the marginal cost of an extra variation is ~zero; spend it.
