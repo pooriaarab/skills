@@ -253,3 +253,36 @@ This is the recipe that survived ~9 iterations to reach "so much better, great w
 - *Prop continuity* — track props across beats (a plate she plates food onto shouldn't reappear at the laptop). Design the beat list so props are resolved before the scene changes.
 - *Character stares into the lens / stands idle* — prompt eyeline on-task and an action verb every keyframe.
 - *GPT-image-2 (via codex) or Gemini omni* are worth reaching for when a shot needs *legible text/UI* (a laptop screen, a CTA card) — flux/seedream fumble letters.
+
+## Per-product style guide + hard tool ceilings (vibe-suite, 2026-07-26)
+
+Each product gets its OWN genre so the launch videos don't blur together. Locked so far:
+
+- **viberadio** — 1980s neon retro **comedy**. A girl in a warm kitchen; a retro radio play-by-plays her Claude session like a sportscaster; twist reveal. Warm tungsten + magenta/cyan neon, film grain. Voice: ElevenLabs V3 sportscaster. Works because it's bright, simple outfit, one setting, no hand close-ups.
+- **vibemovie** — **Requiem-for-a-Dream fast-cut montage**. Dramatize shipping a tiny commit as world-shaking chaos (breaking-news anchor, hurricane, tsunami, explosions, riots, rage-thrown laptops, SF bridge blowing up) intercut with mundane dev beats (`npx`, TAB autocomplete, "Working…" spinner, `What can I do for you?`, TESTS PASSED, green check, ENTER slam), escalating to a frenzy, then a HARD DROP to black + deadpan punchline: *"it was just a git push."* Genre-hop the styles (50s cartoon, anime, claymation, VHS, silent film) for chaos.
+
+### The character-consistency ceiling (learned the hard way, ~6 noir attempts)
+
+A single photoreal human held across many shots is the hardest thing for these tools. It ONLY holds when ALL of these are true:
+- **Faces are LIT.** Dark low-key/noir lighting starves `video-face-swap` — it can't lock a shadowed face → drift. Keep a motivated key on her face even in moody scenes.
+- **NO hand / finger close-ups.** Fingers-on-keyboard morph every time ("unsalvageable"). Show faces/bodies/wide action, not fine hand work.
+- **Simple, distinctive wardrobe** (a bold crop top locks; an intricate sparkly dress drifts).
+- Pipeline is the proven one: one hero → flux-kontext keyframes (image-conditioned) → **Kling first+last chaining** → **face-swap**. Independent per-clip generation (incl. Grok reference-to-video) drifts — the shared boundary frames of first+last chaining are what buy continuity.
+
+**If the concept needs dark/hands/heavy-action → don't fight it: use a MONTAGE.** A rapid-cut montage of many DIFFERENT scenes has no single character to hold, so consistency stops mattering. This is why vibemovie became a Requiem montage. Montage recipe: ~30 short (0.3–0.5s) `seedance-v1-lite-i2v-480p` clips from `seedream` stills, **hard jump cuts** (no zoompan/Ken-Burns corner zoom — reads cheap), escalating pace, mixed film styles, cue-timed boom/whoosh SFX, and a hard silence-drop into the punchline.
+
+### Model notes (which to reach for)
+- **seedream-v4 + flux-kontext-max** = the reliable photoreal + consistent base. Default.
+- **Chroma** (`wavespeed-ai/chroma`) = uncensored (spicy wording OK) but **cartoonish/stylized** — do NOT use when you need photoreal.
+- **Grok** (`x-ai/grok-2-image`, `x-ai/grok-imagine-video/reference-to-video`) = photoreal + permissive, but reference-to-video makes INDEPENDENT clips → identity drifts across cuts; also may skew older/uninteresting. Not a consistency solution.
+- Spicier-but-photoreal without a permissive model: describe revealing WARDROBE ("plunging neckline, high slit, bare shoulders") rather than trigger words ("sexy/revealing"), which seedream refuses. Civitai LoRA via `flux-dev-lora-ultra-fast` is the next lever if needed.
+- **Upscale** final with `wavespeed-ai/video-upscaler` ($0.025) — the base i2v is soft; upscale is the crispness pass (do it LAST, only on an approved cut).
+
+### Audio gotcha
+`minimax/music-2.6` **sings whatever is in the `lyrics` field** — putting style descriptors there makes it literally sing "hip hop montage escalating tension." For an instrumental bed, put descriptors in `prompt` and set `lyrics` to wordless vocables (e.g. an epic choir "Ooooh, aaaah") — which also gives a nice choral energy — never real descriptor words.
+
+### Ethics
+Use figure **archetypes** (a hoodie founder on a keynote stage, a suit CEO) — never fabricate a NAMED real person (e.g. a specific CEO) doing something. That's a deepfake/impersonation; same vibe achievable with an unnamed archetype.
+
+### QC
+Gemini-2.5-flash critique is great for the single-character pieces, but it wrongly dings a **montage** for "no continuity / disconnected clips" — that IS the montage style. Judge montages on energy/rhythm/gag, not continuity.
