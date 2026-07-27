@@ -328,3 +328,48 @@ Expect ~5–9 rounds for a hero video. Change ONE variable per round when debugg
 ## Variety / variations
 
 Generate variations at EVERY expensive fork, not just once: multiple style boards up front, and (optionally) 2–4 hero candidates before locking the character. Present them as an HTML grid and let the human pick — picking from options is faster and better than describing changes in words. On flat-rate/cheap image models the marginal cost of an extra variation is ~zero; spend it.
+
+## Shot library + beat-sync + QA rubric (adapted from video-shotcraft)
+
+Ideas folded in from the video-shotcraft repo (a shot-card + template promo library), translated to our wavespeed + ffmpeg stack. None of this replaces the validated pipeline — it sharpens how beats are planned, timed to music, and self-reviewed.
+
+### Tag every beat by narrative role
+
+Label each storyboard beat with its functional role before writing prompts. The role dictates purpose, energy and duration, and makes "six of the same shot" visible at a glance:
+
+| Role | Purpose | Energy | Duration | Known pitfall |
+|---|---|---|---|---|
+| hook | Stop the scroll in the first second | High (or intriguing contrast) | ~1–2s | Opening slow or over-stuffed — one subject, one idea |
+| establish | Orient: who, where, what's at stake | Low–mid | ~2–3s | Lingering — the least-scrutinised shot reads slow |
+| reveal | First sight of the product/answer | Rising | ~2s | Revealing before the problem has landed |
+| feature | One capability or action per shot | Alternate mid/high | ~2s each | Same move or angle as the previous shot |
+| transition | Connective tissue between segments | Matches its neighbours | ~0.3–0.5s | Stacking effects at a seam — one device per cut (§12: hard cuts beat fades on generated footage) |
+| hero | The money shot: one subject, one complete action arc | Highest quality, slowest pace | ~3s | A crowd of subjects kills it; idle poses read boring — keep them mid-action |
+| text-card | Breathing beat / caption between segments | Low (rest) | ~1–1.5s | Text under ~5% of frame height is illegible on a phone; never repeat the closing tagline here |
+| close | Logo + tagline + URL; energy peak, then settle | Peak, then still | ~2–3s | Cutting away too fast — hold the lockup a full second |
+
+A 30s spot is roughly `hook → establish/reveal → 4–8 alternating feature beats (text-card rests between) → close`, energy climbing low → mid → peak.
+
+### Beat-sync cuts to the music
+
+With a beat-driven track, put every cut and SFX hit ON the beat — a cut a few frames off reads as sloppy even when the viewer can't say why.
+
+1. **Get the beat grid.** BPM known: `T = 60/BPM` seconds per beat, cuts at `t0 + n·T` (t0 = first downbeat). BPM unknown: measure it with a one-off script (e.g. `uv run --with librosa --with scipy python ...`), then **least-squares fit a uniform grid `t_i = t0 + i·T` to the detected beat times** — a tracker's raw tempo scalar can be off 2%+, but its beat-time series is good. Max residual ≤ ~15ms means the grid is trustworthy; larger residuals mean tempo changes, so fit per section.
+2. **Write every cut as a beat number, not a raw timestamp.** Shot lengths of 4/8 beats (half- or quarter-beats in the fast-cut build-up); snap ffmpeg trim times with `t0 + round(n)·T`. Change the track later and only two constants move.
+3. **Spend the 2–3 biggest slams** (open, climax, logo land) on the strongest measured beats — in drum-heavy tracks accents sit on integer beats, so don't guess half-beats by ear.
+4. **Verify after assembly.** Pull the audio back out of the rendered mp4 (`ffmpeg -i out.mp4 -vn out.wav`), re-fit the grid against the render (catches encoder/mux offsets too), and check each cut against its nearest beat: error ≤3 frames passes (the perception threshold), anything larger gets re-trimmed.
+
+### Pre-render QA rubric (self-review, ~2 minutes)
+
+Walk the storyboard or rough cut against these before spending on the final render:
+
+1. **Breathing room** — key info (headline, logo) holds still ≥1s after landing; batch-motion shots rest ~0.5s before the cut. First cuts are almost always too fast, never too slow.
+2. **One idea per shot** — every shot introduces new information; no camera/move device stars twice. Repeats get cut.
+3. **Text has two states only** — "to be read" (≥~5% of frame height measured in rendered pixels, with contrast or a scrim) or deliberately blurred background texture. Nothing in between; the closing URL is the last line that should ever be small.
+4. **Motion has acceleration** — entrances ease with overshoot, never constant linear speed (reads as cheap slides); the camera is steady unless shake is the point.
+5. **Effects restraint** — count glints/glows: at most one, on the hero element, clipped inside its bounds. Batch entrances are carried by the motion itself.
+6. **Sound pinned to picture** — every SFX sits on a visible action and ends with it; the music bed ducks under the voice. If a timeline edit moved shots, re-check every SFX position — the top post-edit regression.
+
+### Template-first, knobs-second
+
+Keep ONE pipeline validated end to end (the "Validated pipeline" recipe) as the fixed template: change the content (product, character, script, music), not the structure. Expose only deliberate knobs — duration (shot count × beat length), pacing (cuts per 30s, beat grid), style (style-anchor string, genre framework), cast (hero reference image). Any parameter that exists to fix a specific past failure (the negative-prompt entries, the face-swap step, hold durations) is load-bearing: don't downgrade or skip it without recording why, and never rewrite a tuned step from memory — the written recipe, not a recollection of it, is the source of truth.
