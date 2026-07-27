@@ -228,9 +228,9 @@ To match a real film/commercial look, don't guess — analyze it. Gemini 2.5 Fla
 body: `{contents:[{role:"user",parts:[{inlineData:{mimeType:"video/mp4",data:<base64, <~15MB inline>}},{text:"As a cinematographer, output structured markdown: vibe/tone, genre + reference films, color palette + grade, lighting, lens/DOF/format, shot list (type+angle+movement per beat), edit pacing, sound/music, emotional arc — specific enough to recreate."}]}]}`
 Feed the resulting `.md` into the shot prompts + style anchor. Reference-still libraries to pull looks from: **filmvibes.io**, film-grab.com, shot.cafe, shotdeck.com, frameset.app.
 
-## Validated pipeline: cinematic character video (viberadio build, 2026-07-26)
+## Validated pipeline: cinematic character video
 
-This is the recipe that survived ~9 iterations to reach "so much better, great work." Every step earns its place by fixing a specific failure a naive approach hits. Build it in this order.
+This recipe survived ~9 iterations of real feedback before it held. Every step earns its place by fixing a specific failure a naive approach hits. Build it in this order.
 
 **Architecture (per ~28s video, ~$2.4, ~7-8 min built parallel):**
 
@@ -244,7 +244,7 @@ This is the recipe that survived ~9 iterations to reach "so much better, great w
 
 **QC gate — critique with Gemini before shipping.** Feed the finished mp4 (base64 inline, <~15MB) to `gemini-2.5-flash:generateContent` on the personal Vertex project and ask a brutal editor for continuity / consistency / audio / motion notes. It reliably catches face drift, teleport cuts, out-of-sync VO, and prop-continuity errors a self-review misses. Iterate against it — but stop when the remaining notes are subjective ("hire a voice actor") rather than defects.
 
-**Parallelize everything within a stage** (`Promise.all` over keyframes, clips, TTS lines). wavespeed runs jobs server-side, so submit-all-then-poll-all collapses wall-clock to the slowest single job. The Kling render (~3-4 min/clip) is the floor; real speedups past that trade quality (fewer beats, cheaper i2v, or dropping the face-swap all regress the result). To make many videos, run each product's whole pipeline as a concurrent process.
+**Parallelize everything within a stage** (`Promise.all` over keyframes, clips, TTS lines). wavespeed runs jobs server-side, so submit-all-then-poll-all collapses wall-clock to the slowest single job. The Kling render (~3-4 min/clip) is the floor; real speedups past that trade quality (fewer beats, cheaper i2v, or dropping the face-swap all regress the result). To make many videos, run each video's whole pipeline as a concurrent process.
 
 **Cost tiers, cheapest first:** all-`seedance-lite` i2v (~$2, softer, more drift) · **Kling first+last chain + face-swap (~$2.4, the sweet spot)** · all-Veo3-fast (~$42, native audio but per-clip audio clashes across cuts and it still drifts within a shot). The premium tier is not worth it here.
 
@@ -254,12 +254,12 @@ This is the recipe that survived ~9 iterations to reach "so much better, great w
 - *Character stares into the lens / stands idle* — prompt eyeline on-task and an action verb every keyframe.
 - *GPT-image-2 (via codex) or Gemini omni* are worth reaching for when a shot needs *legible text/UI* (a laptop screen, a CTA card) — flux/seedream fumble letters.
 
-## Per-product style guide + hard tool ceilings (vibe-suite, 2026-07-26)
+## Video-type style archetypes + hard tool ceilings
 
-Each product gets its OWN genre so the launch videos don't blur together. Locked so far:
+Give each launch video its OWN genre so a set of them doesn't blur together. Two archetypes that tested well:
 
-- **viberadio** — 1980s neon retro **comedy**. A girl in a warm kitchen; a retro radio play-by-plays her Claude session like a sportscaster; twist reveal. Warm tungsten + magenta/cyan neon, film grain. Voice: ElevenLabs V3 sportscaster. Works because it's bright, simple outfit, one setting, no hand close-ups.
-- **vibemovie** — **Requiem-for-a-Dream fast-cut montage**. Dramatize shipping a tiny commit as world-shaking chaos (breaking-news anchor, hurricane, tsunami, explosions, riots, rage-thrown laptops, SF bridge blowing up) intercut with mundane dev beats (`npx`, TAB autocomplete, "Working…" spinner, `What can I do for you?`, TESTS PASSED, green check, ENTER slam), escalating to a frenzy, then a HARD DROP to black + deadpan punchline: *"it was just a git push."* Genre-hop the styles (50s cartoon, anime, claymation, VHS, silent film) for chaos.
+- **Comedy / character-narration.** A single character in a warm, well-lit setting; an in-world device (a radio, a screen) narrates the user's session in an unexpected register (e.g. a sportscaster calling their work), building to a twist reveal. Warm practical lighting, film grain, one setting, simple wardrobe, expressive but not fine-motor action. Voice: an expressive TTS in-character. Holds together because it plays to the tools' strengths (see the consistency ceiling below).
+- **Fast-cut montage (Requiem-for-a-Dream style).** Dramatize a tiny, mundane action as world-shaking chaos (breaking-news anchor, hurricane, explosions, riots, disasters) intercut with the real mundane beats of the task, escalating to a frenzy, then a HARD DROP to black + a deadpan punchline that reveals how small the thing actually was. Genre-hop the styles (50s cartoon, anime, claymation, VHS, silent film) for chaotic energy. Cheap and robust — see why below.
 
 ### The character-consistency ceiling (learned the hard way, ~6 noir attempts)
 
@@ -269,7 +269,7 @@ A single photoreal human held across many shots is the hardest thing for these t
 - **Simple, distinctive wardrobe** (a bold crop top locks; an intricate sparkly dress drifts).
 - Pipeline is the proven one: one hero → flux-kontext keyframes (image-conditioned) → **Kling first+last chaining** → **face-swap**. Independent per-clip generation (incl. Grok reference-to-video) drifts — the shared boundary frames of first+last chaining are what buy continuity.
 
-**If the concept needs dark/hands/heavy-action → don't fight it: use a MONTAGE.** A rapid-cut montage of many DIFFERENT scenes has no single character to hold, so consistency stops mattering. This is why vibemovie became a Requiem montage. Montage recipe: ~30 short (0.3–0.5s) `seedance-v1-lite-i2v-480p` clips from `seedream` stills, **hard jump cuts** (no zoompan/Ken-Burns corner zoom — reads cheap), escalating pace, mixed film styles, cue-timed boom/whoosh SFX, and a hard silence-drop into the punchline.
+**If the concept needs dark/hands/heavy-action → don't fight it: use a MONTAGE.** A rapid-cut montage of many DIFFERENT scenes has no single character to hold, so consistency stops mattering — a chaotic/action concept should become a montage rather than fighting the tools for a consistent lead. Montage recipe: ~30 short (0.3–0.5s) `seedance-v1-lite-i2v-480p` clips from `seedream` stills, **hard jump cuts** (no zoompan/Ken-Burns corner zoom — reads cheap), escalating pace, mixed film styles, cue-timed boom/whoosh SFX, and a hard silence-drop into the punchline.
 
 ### Model notes (which to reach for)
 - **seedream-v4 + flux-kontext-max** = the reliable photoreal + consistent base. Default.
