@@ -227,3 +227,29 @@ To match a real film/commercial look, don't guess — analyze it. Gemini 2.5 Fla
 `POST https://us-central1-aiplatform.googleapis.com/v1/projects/PROJECT/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent`
 body: `{contents:[{role:"user",parts:[{inlineData:{mimeType:"video/mp4",data:<base64, <~15MB inline>}},{text:"As a cinematographer, output structured markdown: vibe/tone, genre + reference films, color palette + grade, lighting, lens/DOF/format, shot list (type+angle+movement per beat), edit pacing, sound/music, emotional arc — specific enough to recreate."}]}]}`
 Feed the resulting `.md` into the shot prompts + style anchor. Reference-still libraries to pull looks from: **filmvibes.io**, film-grab.com, shot.cafe, shotdeck.com, frameset.app.
+
+## Validated pipeline: cinematic character video (viberadio build, 2026-07-26)
+
+This is the recipe that survived ~9 iterations to reach "so much better, great work." Every step earns its place by fixing a specific failure a naive approach hits. Build it in this order.
+
+**Architecture (per ~28s video, ~$2.4, ~7-8 min built parallel):**
+
+1. **Hero + face reference (two `seedream-v4` text-to-image calls, parallel).** One wide hero for look/wardrobe; one *crisp front-facing headshot* used only as the face-swap reference later. The headshot is a much stronger identity anchor than a full-body frame.
+2. **6 keyframes (`flux-kontext-max`, image-conditioned on the hero, parallel).** Each keyframe pins the character + set with a LOCK string and varies the camera: overhead insert, side dolly, three-quarter, profile CU, dutch wide, low OTS. Keep her eyeline *on her task, not the lens*, and keep her *mid-action* every frame (idle poses read as boring).
+3. **5 chained clips (`kwaivgi/kling-v2.5-turbo-pro/image-to-video`, parallel).** Pass `image` = keyframe N and `last_image` = keyframe N+1 — Kling interpolates between the two. Because clip N's last frame **is** clip N+1's first frame, cuts are seamless with no teleport. `duration:5`, and a strong `negative_prompt` (see failure modes). This is the single biggest continuity fix.
+4. **Identity lock (`wavespeed-ai/video-face-swap`, $0.01/s).** Swap the headshot face onto the finished silent cut in one pass. This is what finally kills the "morphs into different people" problem that keyframe-only locking cannot. Run it on the silent base video, *then* add audio.
+5. **One unified color grade (ffmpeg `eq` + `colorbalance`)** across the whole video. Generated clips drift in color temperature; a single grade removes the "different room each shot" feel.
+6. **Voice: `elevenlabs/eleven-v3`, NOT minimax.** minimax TTS reads as robotic and was the last "screams AI" tell. Eleven V3 with a named voice (e.g. `George`), `stability:0.3` for dynamic delivery, `use_speaker_boost:true`, and inline emotion tags (`[shouting]`, `[excited]`, `[warmly]`) for real energy. Generate one clip per beat and place each at its cut for narration sync.
+7. **Audio bed: NO music.** A single continuous, near-silent room-tone (band-limited pink noise) under the voice reads as ambience; a synthwave track fights the voice and reads as two disjoint tracks. Mix with `amix=duration=longest` (using `duration=first` truncates the whole mix to line 1 — a real bug we hit).
+
+**QC gate — critique with Gemini before shipping.** Feed the finished mp4 (base64 inline, <~15MB) to `gemini-2.5-flash:generateContent` on the personal Vertex project and ask a brutal editor for continuity / consistency / audio / motion notes. It reliably catches face drift, teleport cuts, out-of-sync VO, and prop-continuity errors a self-review misses. Iterate against it — but stop when the remaining notes are subjective ("hire a voice actor") rather than defects.
+
+**Parallelize everything within a stage** (`Promise.all` over keyframes, clips, TTS lines). wavespeed runs jobs server-side, so submit-all-then-poll-all collapses wall-clock to the slowest single job. The Kling render (~3-4 min/clip) is the floor; real speedups past that trade quality (fewer beats, cheaper i2v, or dropping the face-swap all regress the result). To make many videos, run each product's whole pipeline as a concurrent process.
+
+**Cost tiers, cheapest first:** all-`seedance-lite` i2v (~$2, softer, more drift) · **Kling first+last chain + face-swap (~$2.4, the sweet spot)** · all-Veo3-fast (~$42, native audio but per-clip audio clashes across cuts and it still drifts within a shot). The premium tier is not worth it here.
+
+**Failure modes we hit:**
+- *Duplicated stove/furniture mid-clip* = adjacent keyframes shot from opposite sides; Kling invents duplicates to bridge a big camera rotation. Keep the camera delta between adjacent keyframes small, and add `duplicated objects, ghosting, double image, cloned furniture` to `negative_prompt`.
+- *Prop continuity* — track props across beats (a plate she plates food onto shouldn't reappear at the laptop). Design the beat list so props are resolved before the scene changes.
+- *Character stares into the lens / stands idle* — prompt eyeline on-task and an action verb every keyframe.
+- *GPT-image-2 (via codex) or Gemini omni* are worth reaching for when a shot needs *legible text/UI* (a laptop screen, a CTA card) — flux/seedream fumble letters.
