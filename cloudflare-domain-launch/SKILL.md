@@ -29,3 +29,9 @@ Live immediately at `<name>.pages.dev`. Then attach the custom domain:
 - **Pages does NOT always auto-create the DNS records for a custom domain.** If the apex/www attachments stay `pending`, create the records yourself in the zone: `CNAME` for both the apex (`@`) and `www`, target `<name>.pages.dev`, **proxied** (orange cloud). The attachment activates once the records exist.
 - **`.dev` is HSTS-preloaded (HTTPS-only, baked into every browser)** — the site is dark (`curl` reports `000`) until the edge cert for the hostname issues. That window is normal, not a failure; wait for the cert before tearing anything down.
 - **A local `curl 000` can also be your own machine's stale NEGATIVE DNS cache** — if you (or anything on the machine) queried the name before the record existed, the NXDOMAIN got cached locally. Before assuming it's broken, verify from a resolver that never saw the negative answer: `dig @1.1.1.1 example.dev`, or bypass local DNS entirely with `curl --resolve example.dev:443:<cf-ip>`. If either works, the site is fine and the bug is your cache.
+
+---
+
+## Security — domain registration spends real money
+
+`POST …/registrar/registrations` is a **real financial transaction** — it charges the Cloudflare account and registers a domain. Always run `domain-check` first, surface the exact domain + price to the user, and get **explicit human confirmation before the registration call**. Never auto-register in a loop. The API token is a secret: source it from an env var, never hardcode or log it.

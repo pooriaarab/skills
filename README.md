@@ -41,35 +41,31 @@ A coordinated suite for organizing across every digital surface — files, notes
 | [meta-ads](meta-ads/SKILL.md) | Set up Meta (Facebook) Pixel + server-side Conversions API (CAPI) purchase tracking — client Pixel and server CAPI shipped together with a shared `event_id` dedup key, the CAPI access token that silently no-ops when unset, why you fire on hashed-email match (not on `fbclid`) so organic purchases still report, advanced matching for match quality, the app-capability 400s (Advanced Access for `ads_management`, promotable Page), and server-side verification via the Graph `stats`/`last_fired_time` endpoints. |
 | [ad-experiments](ad-experiments/SKILL.md) | Run paid-ad experiments on a small budget so you learn *which* variable drives signups and *why* — hyper-specific one-audience×geo×creative experiments from a written hypothesis, proving the cheapest conversion (free signup) before the expensive one, and judging on server-side truth reconciled against payment-provider ground truth, not dashboard vanity. Platform-agnostic; pairs with `google-ads`/`meta-ads`/`reddit-ads`. |
 | [localize-with-ai](localize-with-ai/SKILL.md) | Fully localize a codebase with next-intl + an LLM translation pipeline — locale-prefixed routing, per-namespace catalogs, a two-pass draft/QA-flag MT pipeline with real ICU validation, staged RTL/CJK layout work, and the non-obvious gotchas (French-source-content-hiding-as-English, per-file not per-locale freshness, auth error-code preservation). |
+| [agentic-cli-npm-package](agentic-cli-npm-package/SKILL.md) | Scaffold and ship a companion tool for agentic coding CLIs as one package with three faces — a CLI, an npm library, and an MCP server — sharing a model-preference cascade core, auto-publishing to npm on a release branch. |
+| [cloudflare-domain-launch](cloudflare-domain-launch/SKILL.md) | Buy a domain and host a static site end-to-end from the CLI/API — Cloudflare Registrar registration, wrangler Pages deploy, custom-domain attachment, and the DNS/cert gotchas (Pages not auto-creating records, .dev HSTS preload, stale certs). |
+| [regional-pricing-stripe](regional-pricing-stripe/SKILL.md) | Set up regional / PPP-adjusted pricing on Stripe — `currency_options` over coupons for a pre-checkout localized-price display, discount tiers per currency (not per country), percentages sourced from real PPP data. |
+| [slack-mcp-browser-auth](slack-mcp-browser-auth/SKILL.md) | Install a no-app Slack MCP server using browser session tokens (xoxc + xoxd cookie), including the Enterprise Grid `invalid_auth` fix — no Slack app or admin approval needed. |
+| [crabbox-worktree](crabbox-worktree/SKILL.md) | Offload per-worktree dev work (installs, builds, dev server) to a remote GCP VM via crabbox so your laptop stays cool — bakes a golden image and wires into worktree hooks. |
+| [schengen-visa-application](schengen-visa-application/SKILL.md) | Prep a short-stay Schengen (type C) visa application from Canada — finds the right per-country handler, builds the document set from your own local folders, fills the EU form, stops before in-person submission. Zero PII stored. |
 
 ## Install
 
+Via the [skills CLI](https://skills.sh). Skills live in this monorepo, so paths are `pooriaarab/skills/<skill>`.
+
 ```bash
+# Everything in this repo
+npx skills add pooriaarab/skills
+
 # Life organizer suite (parent — installs all sub-skills)
-npx skills add pooriaarab/organizer
+npx skills add pooriaarab/skills/organizer
 
-# Or individual sub-skills:
-npx skills add pooriaarab/organizer/life-organizer
-npx skills add pooriaarab/organizer/apple-notes
-npx skills add pooriaarab/organizer/notion
-npx skills add pooriaarab/organizer/gmail
-# ... see organizer/README.md for the full list
+# An individual organizer sub-skill (see organizer/README.md for the full list)
+npx skills add pooriaarab/skills/organizer/apple-notes
 
-# Standalone skills
-npx skills add pooriaarab/eco-mode
-npx skills add pooriaarab/eco-analyze
-npx skills add pooriaarab/multi-account-cli
-npx skills add pooriaarab/delegate-implementation
-npx skills add pooriaarab/canada-census
-npx skills add pooriaarab/high-fidelity-ui-image-gen
-npx skills add pooriaarab/ci-build-speed
-npx skills add pooriaarab/launch-video-generation
-npx skills add pooriaarab/ship-a-product
-npx skills add pooriaarab/build-from-template
-npx skills add pooriaarab/open-source-repo-prep
-npx skills add pooriaarab/launch-seo
-npx skills add pooriaarab/social-launch-post
-npx skills add pooriaarab/ad-experiments
+# An individual standalone skill — swap in any name from the table above
+npx skills add pooriaarab/skills/eco-mode
+npx skills add pooriaarab/skills/canada-census
+npx skills add pooriaarab/skills/schengen-visa-application
 ```
 
 ## Data source

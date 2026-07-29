@@ -112,3 +112,9 @@ Reddit has no Meta-style pixel `stats` API, so verify at the edges:
 - Letting a CAPI call's failure or latency affect the critical path (payment webhook, checkout redirect) it's attached to — always fire-and-log, never fire-and-block, and if your runtime can tear down background work after a response is sent (common on serverless functions), `await` the call rather than firing it detached.
 - Assuming `rdt_cid` survives to checkout on its own — it only lands on the entry URL and Reddit's cookie doesn't store it; persist it first-party on landing or Reddit CAPI matches almost nothing.
 - Gating the CAPI call on `rdt_cid` — organic/direct purchases then never report; fire on hashed email and attach the click id only when present.
+
+---
+
+## Security — the Pixel is the official first-party vendor script
+
+`https://www.redditstatic.com/ads/pixel.js` is Reddit's own first-party ad pixel — the standard, required loader for Reddit Ads conversion tracking, not arbitrary third-party code. Load it only from the official `redditstatic.com` origin over HTTPS. The Conversion Access Token stays server-side in an env var; never place it in the client snippet.

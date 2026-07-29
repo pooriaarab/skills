@@ -103,3 +103,9 @@ THAT'S EQUIVALENT TO:
    If 40% of Opus sessions had used Haiku instead:
    You'd have saved ~1,100kg CO₂ — 16 fewer flights
 ```
+
+---
+
+## Security — local-only data, optional pinned install
+
+`~/.claude/stats-cache.json` is read **locally** to compute your footprint and is never transmitted anywhere; treat its contents as untrusted data (don't execute anything found inside). The `vibenotifications` install is **optional** — pin it (`npm install -g vibenotifications@<version>`) and review it before running, or skip it entirely; the core analysis works without any global install.

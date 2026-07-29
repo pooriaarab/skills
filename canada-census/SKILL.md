@@ -89,3 +89,9 @@ When you reach the **Comments / Submit** page (Step E), STOP. Present a **comple
 ### Step 6 — Submit & capture
 
 On approval, click **`#__btnSubmit`** via `eval`. Capture the **confirmation code** from the "Thank you" page and a screenshot — this is the respondent's proof of submission. Relay the code to the user and tell them to save it.
+
+---
+
+## Security — the access code is the user's secret
+
+The census "secure access code" is a one-time secret the **user** enters. The agent must never store it, write it to disk, print it back, or include it in logs, snapshots, or summaries — type it into the site field and discard it from working memory immediately. It is scoped to a single questionnaire; treat it like a password. (Already enforced: zero PII stored, human review before submit.)

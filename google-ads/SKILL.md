@@ -125,3 +125,9 @@ If you drive campaign creation through the Google Ads API rather than the UI:
 - Debugging "0 conversions" that's actually just "no ad clicks yet" — check `all_conversions` and whether any campaign is live before assuming the tag is broken.
 - Generating a fresh `client_id` server-side instead of reusing the browser's `_ga` value — fragments the user and can break attribution.
 - Campaign-create 400s from the Google Ads API because `containsEuPoliticalAdvertising` wasn't declared, or the API isn't enabled on the OAuth project.
+
+---
+
+## Security — secret handling
+
+The GA4 `api_secret` is a server-side secret. Source it from an environment variable (e.g. `$GA4_API_SECRET`) — never hardcode, commit, or log it, and never echo its value back to the user. It appears in the Measurement Protocol query string because Google's `/mp/collect` and `/debug/mp/collect` endpoints require it there; always send over HTTPS and redact it from any captured request logs. The placeholders in this doc (`<API_SECRET>`, `...`) are not real values.
