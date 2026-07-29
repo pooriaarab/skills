@@ -122,3 +122,9 @@ Some automation/headless browsers (and privacy tooling) **block `fbevents.js`**,
 - Sending raw (unhashed) email or user id in `user_data` — always SHA-256, lowercased + trimmed.
 - Concluding the Pixel is dead from a headless/automation browser that blocks `fbevents.js` — cross-check `/stats` server-side.
 - `(#3) capability` 400s on `/adimages` or ad creation because the app lacks Advanced Access for `ads_management`, or no promotable Page is attached.
+
+---
+
+## Security — the Pixel is the official first-party vendor script
+
+`https://connect.facebook.net/en_US/fbevents.js` is Meta's own first-party Pixel bootstrap — the standard, required loader every Meta advertiser embeds, not arbitrary third-party code. Load it only from the official `connect.facebook.net` origin over HTTPS (never a mirror or CDN copy). The CAPI access token stays server-side in an env var — no secret is placed in the client snippet.

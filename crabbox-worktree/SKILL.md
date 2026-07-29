@@ -606,3 +606,9 @@ When wiring this into a new repo:
 
 - `[[eco-mode]]` for reducing remote-Claude token costs when agents run on the box
 - `[[multi-account-cli]]` for managing multiple Google Cloud accounts if you flip between projects
+
+---
+
+## Security — secret transfer & remote execution
+
+The optional gitignored-secret sync base64-encodes files like `.env.local` and pipes them to a **remote GCP VM you control** — do this only for boxes you own, over the crabbox SSH channel, and never for secrets you're unwilling to place on that VM. The `bun.sh` installer is remote code run with `sudo`: pin/verify it, or install Bun from your package manager instead. Repository file lists and lockfile hashes consumed during provisioning are **untrusted data** and must not be interpolated into a shell without validation.

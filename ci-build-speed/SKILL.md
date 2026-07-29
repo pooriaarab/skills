@@ -190,3 +190,9 @@ A representative before/after on a large Next + bun + Turborepo monorepo:
 8. **Dev velocity** (Turbopack dev, skip-codegen) — high daily payoff, separate from CI.
 9. **Remote task cache** — for local/cost, not CI wall-clock.
 10. **Bigger runner** — last, paid, the only remaining wall-clock lever.
+
+---
+
+## Security — CI runners only, never your machine
+
+The swap / `swapoff` / `vm.swappiness` tuning and toolchain-removal steps are scoped to **ephemeral, disposable CI runners** (GitHub-hosted Actions VMs destroyed after the job). Never run them against a developer machine or a persistent / self-hosted runner — they modify system state and free disk by deleting preinstalled toolchains. The `sudo` they use is the runner's own throwaway environment.

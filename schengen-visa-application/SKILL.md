@@ -1,6 +1,6 @@
 ---
 name: schengen-visa-application
-description: Use when preparing a short-stay Schengen (type C) visa application from Canada for a traveller whose passport is not Schengen visa-exempt — for a work offsite, conference, or tourism. Finds the correct handler for the destination country (there is no single "EU visa company"), builds the document set from the user's own local folders, drafts the employer visa-support-letter request, fills the EU application form, and stops before any in-person submission. Triggers: "apply for a Schengen visa", "Spain/France/Germany visa for the offsite", "prep my Schengen application". Zero PII stored in this skill.
+description: "Use when preparing a short-stay Schengen (type C) visa application from Canada for a traveller whose passport is not Schengen visa-exempt — for a work offsite, conference, or tourism. Finds the correct handler for the destination country (there is no single \"EU visa company\"), builds the document set from the user's own local folders, drafts the employer visa-support-letter request, fills the EU application form, and stops before any in-person submission. Triggers: \"apply for a Schengen visa\", \"Spain/France/Germany visa for the offsite\", \"prep my Schengen application\". Zero PII stored in this skill."
 ---
 
 # Schengen visa application (from Canada)
