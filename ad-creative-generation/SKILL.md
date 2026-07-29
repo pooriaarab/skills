@@ -102,9 +102,22 @@ Generating ad creative is a batch job, not a one-off:
 - [ ] Deterministic filenames; prompt+refs stored as sidecar metadata; `raw/` → `passed/` → `shipped/` separated.
 - [ ] Human review before spend; feed winners into the next batch.
 
+## 8. Match the platform's aspect ratio + the brand, exactly
+
+- **Recreate at the reference ad's NATIVE aspect ratio, not a default square.** A 9:16 story ad recreated as 1:1 reads instantly as off/amateur. Map to the model's nearest size: portrait ≈ story/reels (e.g. 1024×1536), square = feed (1024×1024), landscape (1536×1024). Detect the source ratio (or decide the placement) *before* generating.
+- **Put the exact brand hexes in the prompt.** Left unspecified, the model drifts to generic palettes. Name them ("brand violet #7542E4 / #9059FF, coral #FF4F5E accent — use for text highlights, buttons, accents"). Consistent color across a batch is what makes it look like one brand, not stock.
+- **Recreate the STYLE, never the CLAIM.** Borrow a competitor ad's composition/energy/shot-type, but keep YOUR truthful headline and offer. Never reproduce their feature claim, their discount ("70% off"), or a benefit your product can't deliver — that's how a style-swipe turns into a false ad. (See `ad-experiments` truthfulness gate.)
+- **New, different people.** Instruct "invent entirely new people who do not resemble the reference" — style-transfer models will otherwise echo the source person's face/pose.
+
+### Practical: QA request bodies go in a FILE, not a CLI arg
+Passing a base64 image inline as a shell arg (e.g. `curl -d "$(...)"`) blows up with **`Argument list too long`** — a 1 MB image is ~1.4 MB of argv, past `ARG_MAX`. Write the JSON body to a temp file and `curl -d @body.json`. Same for any base64 you feed the vision-QA call.
+
 ## Anti-patterns
 
 - **Asking the generator for correct headlines, logos, stars, or a review card.** It garbles them. Template those.
+- **Recreating a vertical ad as a square** — or any ratio that doesn't match the placement. Match the native ratio.
+- **Leaving brand colors to the model.** Off-brand palette every time. Name the hexes.
+- **Swiping the competitor's claim, not just their style.** Style yes, claim no — keep your own truthful offer.
 - **Cloning a competitor's logo, copy, or the people in their ad.** Style-reference means style — recreate, never reproduce marks or faces.
 - **Trusting a gen'd logo because you passed a reference.** Still unreliable. Verify in QA or composite the real logo.
 - **Shipping a batch without vision-QA.** Warped hands and garbled text go live and burn spend.
