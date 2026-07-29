@@ -1,6 +1,6 @@
 ---
 name: google-ads
-description: "Wire up Google Ads + GA4 conversion tracking for a web app — the three layers (GA4 client gtag, GA4 server-side Measurement Protocol, Google Ads conversion import from GA4), the Measurement Protocol api_secret that silently no-ops a server purchase when unset, importing/enabling/marking-Primary a GA4 conversion action in Google Ads, Google Ads API launch nuances (containsEuPoliticalAdvertising, text-only search ads, OAuth-project enablement), and server-side verification via the GA4 Data API and GAQL. Also covers small-budget Search campaign setup — the defaults that burn budget (Display Network/Search partners on by default, All-languages targeting, missing negative keywords), bid-strategy choice when you have no conversion history (Manual CPC / Maximize Clicks vs a Smart Bidding learning phase), long-tail vs unaffordable head terms, and a pre-spend search-volume check. Use when setting up a Google Ads search campaign, launching a small paid test, setting up Google Ads purchase tracking, debugging 0 conversions, or validating an MP secret without waiting."
+description: "Wire up Google Ads + GA4 conversion tracking for a web app — the three layers (GA4 client gtag, GA4 server-side Measurement Protocol, Google Ads conversion import from GA4), the Measurement Protocol api_secret that silently no-ops a server purchase when unset, importing/enabling/marking-Primary a GA4 conversion action in Google Ads, Google Ads API launch nuances (containsEuPoliticalAdvertising, text-only search ads, OAuth-project enablement), and server-side verification via the GA4 Data API and GAQL. Also covers audience expansion via Customer Match (crm_based_user_list + OfflineUserDataJob, since classic similar-audiences was deprecated, ~1,000-member serve floor), a gtag page_view ordering bug that silently zeroes GA4 pageviews, and small-budget Search campaign setup — the defaults that burn budget (Display Network/Search partners on by default, All-languages targeting, missing negative keywords), bid-strategy choice when you have no conversion history (Manual CPC / Maximize Clicks vs a Smart Bidding learning phase), long-tail vs unaffordable head terms, and a pre-spend search-volume check. Use when setting up a Google Ads search campaign, launching a small paid test, setting up Google Ads purchase tracking, debugging 0 conversions, or validating an MP secret without waiting."
 ---
 
 # google-ads
@@ -28,6 +28,7 @@ gtag('event', 'purchase', {
 
 - `transaction_id` is your dedup key — GA4 de-duplicates a `purchase` by `transaction_id`, so send the *same* value from client and server (below).
 - `value` + `currency` are what Smart Bidding optimizes toward; always send both.
+- **Sequence `gtag('js')` → `gtag('config')` → any manual `page_view` in one effect.** If a `page_view` is queued from a *different* effect/hook than the `js`/`config` init, it can execute before `config` lands and gtag **silently drops it** — GA4 then shows sessions but **0 pageviews**. Same-effect ordering fixes it.
 
 ## GA4 server-side Measurement Protocol
 
@@ -67,6 +68,14 @@ In Google Ads → **Goals → Conversions → New conversion action → Import �
 ## Click id
 
 Google's GA4-import path attributes on the **GA4 `client_id` / `gclid`**, so you generally do **not** need to capture `gclid` yourself when using conversion import. Capturing `gclid` (from the landing-page query param, first-touch) is only needed if you later switch to offline/enhanced conversions that key on it. Optional for the import flow.
+
+## Customer Match (audience expansion — there is no lookalike object)
+
+Google's classic **"similar audiences" was deprecated (Aug 2023)** — you can't create a lookalike *object*. To reach people similar to your users:
+
+- Upload a **Customer Match** list: a `crm_based_user_list`, populated via an `OfflineUserDataJob` with `hashedEmail` members (emails normalized trim + lowercase, then SHA-256).
+- Let **optimized targeting** and value-based **Smart Bidding** expand from that list — the "lookalike" behavior is a bidding/targeting property, not a separate audience.
+- **A Customer Match list needs ~1,000 members to serve.** A tiny seed won't activate — a high-intent signup segment beats a tiny paying-customer-only seed. Seed-sizing and the PII-export authorization boundary are in `ad-experiments`.
 
 ## Campaign setup (search): defaults that quietly burn a small budget
 
