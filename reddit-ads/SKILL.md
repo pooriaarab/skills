@@ -106,6 +106,9 @@ Some app setups bake environment variables into a generated module at **build ti
 ## Auth
 
 - The OAuth token is **~24h and auto-refreshes on the next request** (with `duration=permanent` you get a lasting refresh token). When it **401s**, re-auth is an **interactive browser OAuth login** (`auth login`) — there's no non-interactive `refresh` subcommand. The Developer-Portal app's redirect URI can be any placeholder HTTPS URL (you complete the flow in a browser once).
+## No email-match audience product (no lookalike here)
+
+Reddit's custom audiences are **retargeting / device-id (MAID) based — there's no hashed-email upload**, so you can't seed a lookalike from your own user list the way Meta (Custom Audience → Lookalike) or Google (Customer Match) let you. Don't mistake the custom-audience endpoints for an email-match product — for lookalike/seed-audience experiments, use Meta or Google and skip Reddit. See `ad-experiments`.
 
 ## Verification (server-side truth, not "the pixel is on the page")
 
