@@ -169,3 +169,9 @@ never folded into a currency-pricing change where it could get nodded through as
 7. Write to test/sandbox, read back with `expand: ['currency_options']` to confirm.
 8. Get a **separate** explicit go-ahead, then repeat against production; read back again.
 9. Leave `tax_behavior` alone unless it was asked for and approved as its own, separate change.
+
+---
+
+## Security — writes to a live payment gateway
+
+This skill writes Stripe `Price` / `currency_options` objects. It never moves funds, but it changes what customers are charged. **Run every change against the Stripe test/sandbox account first, verify, then require explicit human confirmation before repeating against live** (`livemode: true`). The Stripe secret key stays in an env var — never hardcode, commit, log, or echo it.
