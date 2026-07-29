@@ -11,7 +11,7 @@ A local/stdio MCP server — the kind most agentic-CLI companion tools ship, lau
 
 | Needs | Directories |
 |---|---|
-| **Local/stdio OK, no hosting** | Official registry, Smithery, Glama, PulseMCP, mcpservers.org, cursor.directory, mcp.so, Cline marketplace, mcp-get, awesome-mcp-servers lists |
+| **Local/stdio OK, no hosting** | Official registry, Glama, PulseMCP, awesome-mcp-servers, cursor.directory, mcp.so, Cline marketplace, Smithery (via MCPB bundle) |
 | **Hosted/remote endpoint required** — skip if local-only | OpenAI Apps SDK / ChatGPT app directory, Anthropic Connectors Directory (`platform.claude.com` — OAuth + hosted URL). Claude Code plugin directory is a different product (a Claude Code *plugin bundle*, not a bare MCP package) — only relevant if you wrap the server as one. |
 
 Publish to the official registry **first** — PulseMCP and several others auto-ingest from it on a crawl cadence, so one publish propagates outward.
@@ -73,58 +73,66 @@ This is **not** in the generic server.json JSON Schema, so `mcp-publisher valida
 
 **Command-shape gotcha**: don't assume `npx <pkg>` alone launches the MCP server. If the package exposes MCP via a subcommand (`<pkg> mcp`) rather than a dedicated same-named bin, encode that subcommand as a `packageArguments` positional (as in the example above) — check the package's actual documented/working MCP client config (e.g. an existing `mcpServers` entry in `~/.claude.json` or the README) rather than guessing from `package.json`'s `bin` map alone; packages sometimes ship a dedicated `<pkg>-mcp` bin that's stale/unused in favor of a `mcp` subcommand on the main bin, or vice versa.
 
-## 2. PR-based catalogs
+## 2. awesome-mcp-servers (punkpeye/awesome-mcp-servers)
 
-Same shape for all four: fork, add one entry to a list/JSON file, open a PR against the upstream repo.
+A README list, ~90k stars, crawled by Glama/PulseMCP so one PR has secondary reach. Fork, add one Markdown line per server under the right category header, open a PR. Verify the current entry format and category anchors from the live README before writing — both drift.
 
-- **mcpservers.org** ("Awesome MCP Servers") — add entry to `mcp_server_market.json`: unique key, `command`+`args`, `env` with `<PLACEHOLDER>` values for secrets.
-- **Cline MCP Marketplace** — PR to `cline/mcp-marketplace`. Accepts npx/stdio (Cline's normal install path).
-- **mcp-get** — PR to `michaellatman/mcp-get`.
-- **awesome-mcp-servers** lists (`punkpeye/appcypher` etc. on GitHub) — README entry, PR. Several crawlers (Glama, PulseMCP) also scan these lists, so one PR here has secondary reach.
+Current entry format (one line per server):
+
+```
+- [owner/repo](github-url) 📇 🏠 🍎 🪟 🐧 - Description. Install: `npx -y <pkg> mcp`.
+```
+
+Legend emoji: `📇` TypeScript/JS, `🏠` runs locally, `🍎 🪟 🐧` per-OS, `☁️` cloud-hosted (omit for local-only), `🎖️` official vendor (omit unless you are one). Insert each entry at the end of its category section; add a blank line before the next `### ` heading if your insert would glue against it (Markdown needs it). Category section names are `### ` headings with a `<a name="...">` anchor — pick the closest fit (e.g. Communication, Multimedia Process, Social Media, Developer Tools).
 
 ## 3. Smithery.ai
 
-Link the GitHub repo; Smithery auto-detects `smithery.yaml` at the root:
+**The old `smithery.yaml` with `commandFunction` is gone.** Current publish flow (smithery.ai/docs/build/publish):
 
-```yaml
-startCommand:
-  type: stdio
-  configSchema:
-    type: object
-    properties:
-      apiKey:
-        type: string
-        description: Optional API key
-  commandFunction: |
-    (config) => ({
-      command: "npx",
-      args: ["-y", "<npm-package-name>", "mcp"]
-    })
-```
+- **URL method** — for servers you already host over Streamable HTTP. Enter the public HTTPS URL at `smithery.ai/new`; Smithery's Gateway proxies to it and scans for metadata. Not applicable to a local-only server.
+- **Local (MCPB bundle)** — the only local-server path. Build an `.mcpb` bundle (Anthropic's desktop-extension format: a zip with `manifest.json` + the server code — see the MCPB spec at `github.com/modelcontextprotocol/mcpb`), then `smithery mcp publish ./server.mcpb -n <org>/<server>` (needs the Smithery CLI + login) or upload via the web flow.
 
-Hosted deploy on Smithery is an optional upsell, not a submission gate. Local/stdio servers are distributed as "Local".
+So Smithery for a local stdio server now costs an MCPB build step per package plus a Smithery login — heavier than a manifest commit. Defer it unless you want the listing badly.
 
 ## 4. Glama.ai (glama.ai/mcp/servers)
 
-Mostly auto-crawls public GitHub repos with recognizable MCP server code (indexes tools/schemas/annotations directly) — a manual submission form exists too (name, description, repo URL, install snippet, transport, tool count). No paywall. Favors a real README with an install/config snippet over a bare repo.
+Mostly auto-crawls public GitHub repos with recognizable MCP server code (indexes tools/schemas/annotations directly). A manual submission form also exists (name, description, repo URL, install snippet, transport, tool count). No paywall. Favours a real README with an install/config snippet over a bare repo.
 
 ## 5. PulseMCP (pulsemcp.com)
 
 Manual form at `pulsemcp.com/submit`. Also auto-ingests from the official registry on its own cadence, so publishing there first often gets you listed here for free — check before manually submitting to avoid a duplicate entry.
 
-## 6. cursor.directory / mcp.so
+## 6. cursor.directory
 
-Community directories — submit via PR (cursor.directory: `pontusab/directories` repo) or the site's own link-submission form (mcp.so). No hosting requirement, no manifest beyond the repo + a working `command`/`args` pair shown in the entry.
+Not a PR — content is submitted through the website. Add a root `.mcp.json` to your server's own repo (standard open-plugins / Cursor config shape), then paste the repo URL at `cursor.directory/plugins/new` (sign-in required) and the backend crawls it. Local/stdio supported.
+
+```json
+{ "mcpServers": { "<pkg>": { "command": "npx", "args": ["-y", "<pkg>", "mcp"] } } }
+```
+
+## 7. mcp.so and Cline MCP Marketplace — GitHub-issue submissions
+
+Both take a GitHub **issue**, not a PR, and both accept local/stdio:
+
+- **mcp.so** — the site's "Submit" button opens a new issue on `chatmcp/mcp-directory`. Fill the template: server name, description/features, repo URL, and the install/config JSON block users paste into their client config.
+- **Cline MCP Marketplace** — open an issue on `cline/mcp-marketplace` (`mcp-server-submission.yml` template) with the repo URL, a **400×400 PNG logo**, and a reason. Manual review, quality-gated on GitHub traction and maintainer credibility, so brand-new low-star packages may be deferred. Confirm Cline can set the server up from your README alone before submitting.
+
+## Dead / dropped
+
+- **mcp-get** (`michaellatman/mcp-get`) — archived, no longer accepting packages; its own README redirects to Smithery. Don't submit.
+- **mcpservers.org / chatmcp** — SQL/auto-index backend, no clean per-server PR path; skip in favour of mcp.so's issue flow (same chatmcp org).
 
 ## Order of operations for a batch of packages
+
+Cheapest, highest-reach first:
 
 1. Confirm each package is already live on npm at the version you're about to reference.
 2. Add `mcpName` to each package's `package.json` if missing, bump patch version, publish to npm, verify with `npm view <pkg> version`.
 3. Write `server.json` per repo (validate locally, but expect the 100-char description trap regardless).
-4. `mcp-publisher login github` → `publish` per repo — re-login if the JWT expires mid-batch.
-5. Add `smithery.yaml` per repo (same npx command shape as step 3's `packageArguments`).
-6. Batch the PR-based catalogs (mcpservers.org, Cline, mcp-get, awesome-mcp-servers) — one PR per catalog, can bundle multiple of your own packages into a single PR per catalog if the catalog's entry format allows it.
-7. Leave Glama/PulseMCP to auto-ingest for a few days before manually form-submitting, to avoid duplicate listings.
+4. `mcp-publisher login github` → `publish` per repo — re-login if the JWT expires mid-batch. **This is the big one**: PulseMCP and Glama auto-ingest from the official registry, so this single step propagates outward over the next few days with no extra work.
+5. **awesome-mcp-servers** — one PR, all your servers, placed by category. Pure Markdown, no per-package tooling.
+6. Leave Glama/PulseMCP to auto-ingest for a few days before manually form-submitting, to avoid duplicate listings.
+7. Per-directory manual steps as appetite allows: cursor.directory (commit `.mcp.json`, then web submit), mcp.so (issue), Cline (issue + 400×400 logo), Smithery (MCPB build + login). Each needs a browser sign-in, a GitHub issue, a design asset, or a build step — none are pure batch automation, so they don't parallelise the way steps 4–5 do.
 
 ## Skip list (and why)
 
