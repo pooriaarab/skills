@@ -94,6 +94,19 @@ Some app setups bake environment variables into a generated module at **build ti
 - On a small test budget, **don't optimize delivery toward a conversion you can't yet produce in volume.** Like Google Smart Bidding and Meta's learning phase, Reddit's conversion-optimized delivery needs conversions to learn from — start with a clicks/traffic objective to fill the funnel, then switch to conversion optimization once conversions accumulate.
 - Run **one narrow audience × geo × creative per experiment**, prove the **cheapest conversion (free signup) first**, and verify against server-side truth (the `rp.gif` beacon + payment provider), not the dashboard. See the `ad-experiments` skill for the full methodology.
 
+## Campaign API mechanics (the ones that bite)
+
+- **Budget cap belongs on the AD GROUP, not the campaign.** The campaign `spend_cap` has a **high minimum (≈$100)**; for a smaller screening budget, leave the campaign uncapped and cap each **ad group** instead.
+- **The ad-group budget field is `goal_value`** (microcurrency: `33000000` = $33) with `goal_type: LIFETIME_SPEND`. It is **not** `lifetime_budget` — sending that returns **400 "Additional fields not permitted"**. (Discover the field by GETting an existing ad group and reading its keys, not by guessing.)
+- **Bidding:** for small screening budgets, **`bid_strategy: MAXIMIZE_VOLUME` + `bid_type: CPC` + a CPC bid cap** works well.
+- **Create ads ACTIVE at birth** (`configured_status: ACTIVE`). Creating them PAUSED and then PATCHing to ACTIVE **corrupted ads to DELETED** — don't do the two-step.
+- **Update bodies must be wrapped `{"data": {...}}`** and sent via **stdin**, not inline — an inline `--data` string gets wrapped as a string and rejected.
+- **Split targeting into separate ad groups to compare:** community targeting vs interest targeting vs a creative-variation arm — one lever each.
+
+## Auth
+
+- The OAuth token is **~24h and auto-refreshes on the next request** (with `duration=permanent` you get a lasting refresh token). When it **401s**, re-auth is an **interactive browser OAuth login** (`auth login`) — there's no non-interactive `refresh` subcommand. The Developer-Portal app's redirect URI can be any placeholder HTTPS URL (you complete the flow in a browser once).
+
 ## Verification (server-side truth, not "the pixel is on the page")
 
 Reddit has no Meta-style pixel `stats` API, so verify at the edges:
