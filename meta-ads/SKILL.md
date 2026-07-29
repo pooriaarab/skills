@@ -1,6 +1,6 @@
 ---
 name: meta-ads
-description: "Set up Meta (Facebook) Pixel + server-side Conversions API (CAPI) purchase tracking for a web app — the client Pixel (fbq base + Purchase) and server CAPI (Graph /{pixel-id}/events) shipped together with a shared event_id dedup key, the CAPI access token that silently no-ops a server event when unset, why you fire on hashed-email match (not on fbclid) so organic purchases still report, advanced matching for match quality, the app-capability 400s (Advanced Access for ads_management, promotable Page), and server-side verification via the Graph stats/last_fired_time endpoints. Use when wiring up Meta ad conversion tracking, debugging 0 Purchase events, or when the pixel looks dead in a headless browser."
+description: "Set up Meta (Facebook) Pixel + server-side Conversions API (CAPI) purchase tracking for a web app — the client Pixel (fbq base + Purchase) and server CAPI (Graph /{pixel-id}/events) shipped together with a shared event_id dedup key, the CAPI access token that silently no-ops a server event when unset, why you fire on hashed-email match (not on fbclid) so organic purchases still report, advanced matching for match quality, the app-capability 400s (Advanced Access for ads_management, promotable Page), seeding a Lookalike from a hashed-email Custom Audience (USER_PROVIDED_ONLY / EMAIL_SHA256, ≥100 matched-user floor), why a Purchase that misfires on a free signup is usually the Automatic Events console setting rather than code, and server-side verification via the Graph stats/last_fired_time endpoints. Use when wiring up Meta ad conversion tracking, building a Custom Audience / Lookalike, debugging 0 (or phantom) Purchase events, or when the pixel looks dead in a headless browser."
 ---
 
 # meta-ads
@@ -107,6 +107,18 @@ Fire the server event on **hashed-email match (`em`)**, not on the presence of `
 - **The image-upload endpoint may be un-rolled-out for an account** → skip it and pass **`image_url`** to creative-create; Meta server-fetches the image.
 - **Payment method must be on the AD ACCOUNT**, not just the business portfolio — otherwise delivery fails with **"No Payment Method" (subcode 1359188)** even though a card is "on the account" at the portfolio level.
 - **Geo "unpublished edits" red herring:** opening a *published* ad set in the editor can spawn an unpublished-edits **draft** that re-flags a location-targeting error (`#1870194`). The published ad set is fine and delivering — **discard the draft, don't publish it.** Passing `location_types:["home"]` explicitly on create avoids the flag; a bare `{countries:["US"]}` gets auto-migrated and triggers it.
+
+## Custom Audience → Lookalike (seeding from your own users)
+
+To target people similar to your users, upload a **Custom Audience** of hashed emails, then build a **Lookalike** from it:
+
+- **Custom Audience:** `customer_file_source = USER_PROVIDED_ONLY`, schema `EMAIL_SHA256`, members = emails normalized (trim + lowercase) then SHA-256 hex.
+- **Lookalike:** `subtype = LOOKALIKE`, `origin_audience_id = <the custom audience>`, and a `lookalike_spec` with country + ratio (`0.01` = top 1%, the closest match).
+- **A lookalike needs ≥100 *matched* users in the seed to serve.** After a ~50-70% match rate, a raw seed near 100 fails the size floor — size the seed above it. Catch the under-size rejection per-segment; don't let one small seed abort a multi-segment run. Seed-sizing strategy and the PII-export authorization boundary are in `ad-experiments`.
+
+## A "Purchase on free signup" is usually a console setting, not your code
+
+Before hunting for a stray `fbq('track','Purchase')`: a real CAPI Purchase only fires on a confirmed paid charge. A Purchase that misfires on a *free* signup almost always comes from Meta's **Automatic Events / Advanced Matching** setting (Events Manager → dataset → Settings) synthesizing a Purchase from price text on the page — not from your code. **Check that console toggle first;** turning off automatic-event detection stops the phantom Purchase with no code change.
 
 ## Verification (server-side truth, not "the pixel is on the page")
 
