@@ -90,6 +90,23 @@ Fire the server event on **hashed-email match (`em`)**, not on the presence of `
 
 - Uploading ad images (`POST /act_{ad-account-id}/adimages`) and creating ads can **400 with "(#3) Application does not have the capability"** until your app has **Advanced Access for `ads_management`** — or you run the calls as a user who has a role on the ad account (Standard/dev-mode access only covers app-role users). Request Advanced Access in the App Review flow, or test as an app-role user first.
 - A **promotable Facebook Page must be attached to the ad account** — ad creation fails without one.
+- **Escape hatch — use the official hosted ads MCP.** A self-built app on the **Limited** Marketing API tier keeps hitting `(#3)` on campaign/ad create, and getting **Advanced Access requires App Review + Business Verification** (days, frequently stalls). Meta's **official hosted ads MCP endpoint** uses standard Business-account OAuth and **bypasses the app-review/capability gate entirely** — you create and manage campaigns without owning a reviewed app. If you're blocked on `(#3)`, stop fighting App Review and drive the official MCP instead.
+
+## Campaign + audience setup (lookalike, small budget)
+
+- **Lookalike:** create a custom audience seeded off your **highest-value users**, then a **1%-of-country lookalike** from it. Set **`targeting_automation.advantage_audience = 0`** to keep it a *hard* lookalike — otherwise Meta quietly broadens delivery beyond the lookalike.
+- **Budget hard-stop:** a campaign-level **`spend_cap`** (with CBO) is a **native hard stop** — no external budget-reaper cron needed. Two gotchas: (1) you **can't lower `spend_cap` below already-pending charges** (the error quotes the current floor, often a few dollars above your target); (2) **editing `spend_cap` auto-pauses the campaign** — you must re-activate it after the edit.
+- **Creatives are immutable.** To swap an ad's image/copy you **create a new creative + new ad**, activate it, and pause the old — there is no in-place edit. Do the swap while spend is ~0 to avoid losing a read.
+- **`ads_create_ad` takes no status arg** — it's born PAUSED; activate as a separate call.
+- **`ads_update_entity` cannot delete** — it force-pauses (returns `status_forced_to_paused`). A true delete needs the Ads Manager UI.
+
+## More API/launch gotchas (each one bites)
+
+- **`LANDING_PAGE_VIEWS` optimization under `OUTCOME_TRAFFIC` rejects `promoted_object{pixel_id}`** ("Promoted Object Invalid") — omit `promoted_object` for that combo.
+- **CTA `GET_STARTED` is rejected for some Pages** → `SIGN_UP` works.
+- **The image-upload endpoint may be un-rolled-out for an account** → skip it and pass **`image_url`** to creative-create; Meta server-fetches the image.
+- **Payment method must be on the AD ACCOUNT**, not just the business portfolio — otherwise delivery fails with **"No Payment Method" (subcode 1359188)** even though a card is "on the account" at the portfolio level.
+- **Geo "unpublished edits" red herring:** opening a *published* ad set in the editor can spawn an unpublished-edits **draft** that re-flags a location-targeting error (`#1870194`). The published ad set is fine and delivering — **discard the draft, don't publish it.** Passing `location_types:["home"]` explicitly on create avoids the flag; a bare `{countries:["US"]}` gets auto-migrated and triggers it.
 
 ## Verification (server-side truth, not "the pixel is on the page")
 

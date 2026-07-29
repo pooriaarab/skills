@@ -91,6 +91,21 @@ If you drive campaign creation through the Google Ads API rather than the UI:
 - **Search ads are text-only.** A responsive search ad takes headlines + descriptions; there is no image asset on a search ad. Don't try to attach an image to one.
 - **The API must be enabled on the OAuth client's GCP project** — the project behind your OAuth credentials needs the Google Ads API enabled *and* a developer token, or calls fail before they reach your account.
 
+## Customer Match audience upload (the trap)
+
+Uploading a first-party customer list for lookalike/retargeting is the single most failure-prone part of Google Ads automation. Expect a multi-step yak-shave:
+
+- **The classic Ads API `OfflineUserDataJob` path may be blocked** — `CUSTOMER_NOT_ALLOWLISTED` if the dev token / account isn't approved for Customer Match. Teams then pivot to the **Data Manager API** (`datamanager.googleapis.com`, `audienceMembers:ingest`) with **SHA-256-hashed `CONTACT_INFO`**.
+- **Batch the ingest** — chunk to roughly **≤10k members per request**, sequentially. One oversized POST **silently truncates** (only the first slice lands) with no error surfaced — an undocumented per-request member ceiling.
+- **NEVER trust the ingest success response as proof of membership.** A `200` + returned request IDs can still leave the list **effectively empty**. Always follow with a **size-verification query** against the destination `user_list` (`size_for_display`, `size_range_for_display`) before treating the upload as done. Silent partial/zero success is a real, common failure mode here — not hypothetical.
+- **The empty-list trap:** a Customer Match list can report a **non-zero `match_rate_percentage`** yet `size_for_display = 0` / `LESS_THAN_FIVE_HUNDRED`, and never serve. `match_rate` alone does **not** prove a servable, populated list. Things to check when a list stays empty:
+  - members not landing in the **Ads-queryable `user_list` at all** — the ingest may be populating a Data-Manager audience surface distinct from the targetable Ads `user_list` (verify which resource actually holds membership before assuming success);
+  - the account isn't **approved/eligible for Customer Match** (a policy/spend-history gate);
+  - missing **consent fields** on ingest (`ad_user_data` / `ad_personalization`) dropping members from the servable pool;
+  - size sometimes only **computes once a live campaign targets the list** — the truest verification is to **point a tiny campaign at it and see if it serves**, not to stare at the size field.
+- **A "5,000-email list matched at 82%" that shows size 0 is broken, not warming up.** Waiting 24–48h does not fix a structural ingest/eligibility problem — verify size, and if it's still 0 after a full day, it's not timing.
+- **Bring-your-own analytics ≠ native dashboard.** Some site builders only offer a *connect-your-own-GA4-tag* setup, not native visitor analytics — a fact worth respecting in ad copy (don't promise a dashboard the product doesn't have; see the `ad-experiments` truthfulness gate).
+
 ## Verification (server-side truth, not "the tag is on the page")
 
 - **GA4 Data API `runReport`** — confirm GA4 actually recorded purchases. Requires: (a) a service account added as a **Viewer on the GA4 property**, (b) the **Analytics Data API enabled** on its project, and (c) the **numeric property id** (found in GA4 Admin → Property Settings), *not* the `G-XXXXXXX` measurement id. Query the `conversions` / `eventCount` metrics for `eventName == purchase`.
