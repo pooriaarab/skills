@@ -1,6 +1,6 @@
 ---
 name: ad-experiments
-description: "Run paid-ad experiments on a small budget so you learn WHICH variable drives signups and WHY — hyper-specific one-audience×one-geo×one-creative experiments driven by a written hypothesis, proving the cheapest measurable conversion (free signup) before the expensive one (paid), and judging results on server-side truth reconciled against payment-provider ground truth rather than dashboard vanity metrics. Platform-agnostic methodology that pairs with the google-ads, meta-ads, and reddit-ads tracking/setup skills. Use when planning a paid-ad test, structuring ad experiments, or deciding what to measure and how to read the result."
+description: "Run paid-ad experiments on a small budget so you learn WHICH variable drives signups and WHY — hyper-specific one-audience×one-geo×one-creative experiments driven by a written hypothesis, proving the cheapest measurable conversion (free signup) before the expensive one (paid), and judging results on server-side truth reconciled against payment-provider ground truth rather than dashboard vanity metrics. Also covers sizing the budget to the metric you can actually read (a $50 test reads CPC/CTR, not a conversion rate), a controlled UTM taxonomy for landing-page attribution, seeding platform lookalikes from your own hashed-email user list (minimum sizes, match-loss, graceful under-size handling), and the human-authorization boundary around exporting user PII to an ad network. Platform-agnostic methodology that pairs with the google-ads, meta-ads, and reddit-ads tracking/setup skills. Use when planning a paid-ad test, structuring ad experiments, sizing a budget, building a lookalike/seed audience, or deciding what to measure and how to read the result."
 ---
 
 # ad-experiments
@@ -54,5 +54,34 @@ Most wasted ad spend comes from tuning the stage you already solved. Diagnose wh
 - **Set hard per-platform caps.** Where a platform's *campaign* budget floor is high, cap at the *ad-group* level instead (see `reddit-ads`).
 - **Scale the winner, not the average.** Once one angle/arm wins, put budget there — don't keep spending equally across the losers to "be fair" to them.
 - **Kill-gate:** pause an ad/arm when **(spend ≥ threshold) AND (CTR < floor)** (e.g. spent ≥ $30 and CTR < 0.5%). Wire it into a monitor, don't eyeball it.
+## Size the budget to the metric you're actually reading
+
+- A small ($50-scale) test buys a **CPC/CTR read, not a conversion rate.** A readable conversion/signup rate needs ~**25-30 conversion events** — often **$300-750 per arm** depending on CPC. Budgeting $50 and expecting a signup-rate answer is the most common way a test produces nothing readable: size the budget to the metric you're trying to read.
+- Add **kill-gates**: cut an arm at ~50% of its planned spend if its CPC/CTR is ~2x worse than the best arm — don't let a clear loser burn its full budget before you react.
+
+## UTM taxonomy for landing-page attribution
+
+A controlled vocabulary so every lead is machine-parseable and experiments stay comparable:
+
+- `utm_source` = platform, `utm_medium` = channel, `utm_campaign` = `{exp}_{platform}_{vertical}_{geo}`, `utm_content` = `{creative}_{angle}_{format}`, `utm_term` = `{targeting}`.
+- Also capture the platform click ids (`gclid` / `fbclid` / `rdt_cid`) and an `lp_variant` param.
+- **Store both the raw query string and the parsed fields on the lead** — raw is your audit trail when the taxonomy changes underneath you.
+- **Move one dimension per experiment against a baseline.** Never grid-search the whole combinatorial space — you can't afford the arms and can't attribute the win.
+
+## Seed lookalikes from your own users
+
+You can't build a platform "lookalike" from nothing — you upload a seed list of your own users (hashed emails) and the platform finds similar people.
+
+- **Meta** = Custom Audience → Lookalike. **Google** = Customer Match list + optimized targeting / value-based Smart Bidding (Google's classic "similar audiences" was deprecated, so there is no lookalike *object* — expansion is a bidding behavior). **Reddit has no usable email-match audience product — skip it for lookalikes.** Per-platform wiring lives in `meta-ads` / `google-ads`; the methodology is here.
+- **Hash every email identically before upload: trim → lowercase → SHA-256 hex.** Mismatched normalization silently tanks the match rate.
+- **Minimum sizes gate serving, and match loss shrinks your seed below its raw count.** Meta needs ≥100 *matched* users (a raw seed near 100 usually fails after a ~50-70% match rate); Google Customer Match needs ~1,000 members to serve. A tiny high-value seed (paying customers only) is often too small to serve at all — a larger high-intent segment (signups, trials) is the better practical seed. Size the seed to clear the floor *after* match loss.
+- **Handle under-size per-segment, never abort the run.** Create the audience anyway, catch the lookalike/serve rejection as a per-segment warning, and keep going — one small segment must not abort a multi-segment upload.
+
+## Exporting user PII to an ad network is a human-authorization boundary
+
+Seeding a lookalike sends your customers' (hashed) emails to a third party, and it may require opening a data path in prod. Treat that as a human decision, not an automated one:
+
+- **Build the machinery inert** — an empty seed produces zero outbound calls — and expose a **human-run one-off trigger script** for the actual export. Never wire the export into an endpoint, cron, or startup path.
+- If the ad-ops service must read your product's user warehouse to build the seed, grant **least-privilege and cross-project**: dataset-level READER on the source warehouse + a job-runner role on the consumer's *own* project. A project-wide grant is more access than the job needs.
 
 See the per-platform skills for wiring up that server-side tracking and campaign setup: `google-ads`, `meta-ads`, `reddit-ads`.
