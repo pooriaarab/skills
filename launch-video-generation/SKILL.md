@@ -420,3 +420,22 @@ A later round of learnings, mostly about escaping the glossy AI look and keeping
 - **ICP-diversity montage for products that serve many kinds of people.** Show wildly different people in wildly different settings, unified by the product — it conveys reach, and it sidesteps the character-consistency ceiling entirely: a montage of distinct people never needs a single-character lock.
 - **UI/HUD in post, never in-prompt.** Game-style HUDs, token counters and captions go on with ffmpeg `drawtext`/`drawbox` over the rendered video. Baked into the image prompt they look composited and glossy, and they morph under image-to-video — the §4 text/logo rule, applied to overlays.
 - **Two-person scenes are at the tool ceiling.** The keyframe + face-swap pipeline holds ONE character; two people in frame drift, and per-face face-swap is unreliable for two. Work around it: split-screen with each half a single character, and silhouettes for any physical contact.
+
+## 12. Candid handheld "old iPhone" look, and VO-timing/text gotchas
+
+**Candid/seductive lo-fi camera-phone recipe (t2i + i2v), for a register deliberately opposite a crisp screen-recording half.** Generate the still with the grain/blur already implied in the prompt (`grainy low-resolution old camera-phone footage, handheld candid amateur night video, slightly blurry and noisy, warm tungsten tones, film grain`), then push it further in post so the video model's inherent smoothing doesn't erase it:
+```
+scale=iw*0.42:-2,scale=<W>:<H>:flags=neighbor,
+eq=saturation=0.82:contrast=1.08:brightness=0.02,
+noise=alls=20:allf=t+u,
+vignette=PI/4.2,unsharp=3:3:0.25
+```
+Downscale-then-upscale with `flags=neighbor` (nearest-neighbor) is what actually reads as "low-resolution old phone" — a straight `noise`/`eq` pass on a crisp 4K generation still looks like a clean modern shot with a grain filter over it, not like the source itself was ever low-res.
+
+**Character continuity for a talking-head/reaction sequence: one master image, chain every clip from it (or from the previous clip's real last frame), never regenerate independently per beat.** Generate ONE reference still (her, the room, the pose), then feed that same image into the image-to-video model for every beat with a different motion prompt — same woman, same bedroom, guaranteed, because it's pixel-identically the same source. For continuous motion across a hard cut (so a head-turn appears to keep turning instead of resetting), extract the actual last frame of clip N (`ffmpeg -sseof -0.12 -i clipN.mp4 -frames:v 1 frameN.jpg`) and feed *that* frame — not the original master — into the video model for clip N+1.
+
+**A hard-cut video timeline built on fixed per-beat durations will silently overlap voiceover if the VO is longer than the beat.** A 2.6s-per-beat cut with VO lines that run 3.3–5.7s each means beat 2's narration is still playing under beat 3's — audible as "two audio streams" or a voice suddenly doubling partway through. `ffprobe -show_entries format=duration` each VO file BEFORE laying out the timeline, size every beat's duration to `max(floor, vo_duration + pad)`, and schedule each VO start at the cumulative sum of prior beat durations (not a fixed grid). If the picture is shorter than its VO, freeze/loop the visual (`-stream_loop -1` on a video source, or just extend a still's `-t`) rather than shortening the audio.
+
+**`eleven-v3` bracket-tag delivery cues (`[gasps]`, `[deep gravelly]`) can bake in ambient sound design, not just vocal performance** — a dramatic enough tag occasionally renders with a faint bed/room-tone layered under the voice. If a track sounds like it has a second quiet audio underneath (distinct from an intentional music bed), regenerate that one line with plainer wording and no bracket tag before assuming the mux is broken — check the `ffprobe channels` isn't the issue (mono/stereo won't show it) and listen to the raw file in isolation.
+
+**`ffmpeg drawtext text='...'` breaks silently (or with an opaque exit 234) on an apostrophe in the literal text**, even after backslash-escaping the quote character in JS — the filtergraph's own quote-nesting rules don't accept a bare `\'` inside a `'`-delimited `text=` value the way the shell would. Fastest fix: rewrite the copy to avoid the apostrophe ("Here's" → "Here is") rather than fighting the escaping. If the apostrophe must stay, use `textfile=` pointing at a real file instead of an inline `text=` value — file content isn't subject to the same filtergraph quoting.
