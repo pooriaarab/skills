@@ -1,6 +1,6 @@
 ---
 name: browser-extension
-description: "Use when building a cross-browser (Firefox + Chrome) Manifest V3 web extension from scratch and/or submitting it to the stores. Covers the one-manifest-two-browsers layout, the CSP rules that break WebAssembly and web workers (and the same-origin-worker fix), on-device AI via Firefox `browser.trial.ml` and Chrome's built-in Prompt API, `web-ext` build/lint, and the full store-submission flow per browser — AMO (addons.mozilla.org) including the mandatory 2FA/AAL2 gate, and the Chrome Web Store. Triggers: 'build a browser/Firefox/Chrome extension', 'MV3 extension', 'submit to AMO', 'publish to Chrome Web Store', 'web-ext', 'sign my add-on', 'extension CSP blocks my worker/wasm', 'local AI in an extension'."
+description: "Use when building a cross-browser (Firefox + Chrome) Manifest V3 web extension from scratch and/or submitting it to the stores. Covers the one-manifest-two-browsers layout, the CSP rules that break WebAssembly and web workers (and the same-origin-worker fix), on-device AI via Firefox `browser.trial.ml` and Chrome's built-in Prompt API, `web-ext` build/lint, and the full store-submission flow per browser — AMO (addons.mozilla.org) including the mandatory 2FA/AAL2 gate, and the Chrome Web Store. Triggers: 'build a browser/Firefox/Chrome extension', 'MV3 extension', 'submit to AMO', 'publish to Chrome Web Store', 'web-ext', 'sign my add-on', 'extension CSP blocks my worker/wasm', 'local AI in an extension'. Also covers, once built: inserting text into a rich-text composer from a content script (Draft.js/Quill/Lexical) when the post/send button stays disabled, storing per-device auth/session state (storage.local vs sync, self-heal, sign-up races), and QA'ing a loaded unpacked extension via browser automation. Triggers: 'reply/post button disabled after inserting text', 'execCommand insertText', 'content script into X/LinkedIn composer', 'chrome.storage.sync keeps restoring old token', 'test/QA a loaded extension', 'drive extension with browser automation', 'chrome ignores --load-extension'."
 ---
 
 # Cross-Browser Web Extension: Build & Ship
@@ -174,6 +174,40 @@ Obfuscated/minified-only code · remote code execution · permissions with no us
 
 ---
 
+## 9. Content-script insertion into rich editors (the disabled-button trap)
+
+Social composers are React-controlled contenteditables (X = Draft.js, LinkedIn = Quill, many apps = Lexical). Setting `el.textContent = text` mutates the DOM *behind* the editor's model: the text **shows** but the editor's internal state stays empty, so the Post/Send button stays **disabled** and nothing can be submitted. The insertion looks like it worked and silently isn't postable.
+
+Fix — activate, then insert with a **trusted** edit command:
+
+1. **Click the composer to activate/focus it.** These editors only start tracking input once the field is active.
+2. Insert via `document.execCommand('insertText', false, text)`. This fires a *trusted* `beforeinput`/`input` event the editor processes to update its model → the button enables. To clear existing content first, use `execCommand('selectAll')` + `execCommand('delete')` — **never** `textContent = ''`.
+
+A synthetic `el.dispatchEvent(new InputEvent('beforeinput', …))` alone does **not** insert text (untrusted events don't perform the edit). `execCommand` is deprecated but remains the reliable cross-editor path for programmatic insertion into a contenteditable the page controls.
+
+---
+
+## 10. Per-device session state: `storage.local`, not `storage.sync`
+
+Auth tokens and per-device session ids belong in `chrome.storage.local`. `chrome.storage.sync` replicates to the user's account cloud and keeps **restoring** whatever is there — so a corrupted or mismatched value becomes permanently stuck across reloads and reinstalls, and a self-heal can never persist.
+
+- A common corruption source: a **race** where several content-script instances (one per injected post/widget) each auto-sign-up on first page load, and two different sign-ups interleave their writes (token from A, workspace/id from B) → a mismatched pair that 401/403s forever.
+- De-dupe concurrent sign-ups with a single shared **in-flight promise**: check-and-set the promise with **no `await` between the check and the assignment** so it's atomic on the single-threaded event loop; all callers await the same request.
+- Add a **self-heal**: on a 401/403 from an authed call, clear the cached session and re-auth once. This only sticks if the session lives in `storage.local` (see above).
+
+---
+
+## 11. QA a loaded (unpacked) extension via browser automation
+
+- **Recent Chrome ignores `--load-extension`** on a normal profile (anti-abuse). Load once via `chrome://extensions` → Developer mode → Load unpacked; it persists across restarts. To pick up a rebuild without GUI, **quit + relaunch** the browser — the unpacked registration persists.
+- A DOM-automation tool that connects **through an installed helper extension** can drive content injected into normal web pages, but usually **cannot open `chrome://` or `chrome-extension://`** pages (the extension's own popup/side panel). Drive those with screen automation, or design the test to avoid them.
+- Screen-automation focus is unreliable when several terminal/agent windows compete for foreground (clicks/keystrokes land in the wrong window). **Activate the target app deterministically via the OS scripting layer first** (macOS: `osascript -e 'tell application "Google Chrome" to activate'`, then open the URL), and confirm the intended window is frontmost before acting.
+- **Fastest way to seed a known-good session into a content script for a test:** create a valid session against the API, then set the token/id into the **page origin's `localStorage`** (content scripts read page `localStorage`, and a well-written client uses it as a fallback) — sidesteps the extension's `chrome://`-only storage UI entirely.
+- **Coordinate scaling:** a DOM tool's screenshot is often a fixed fraction of CSS-viewport pixels. Measure the ratio once (a known element's `getBoundingClientRect` vs its position in the screenshot) and scale click coordinates by it, or clicks miss.
+- **Scripted HTTP clients get bot-blocked** by some CDNs (e.g. a Cloudflare `1010`). Send a real browser `User-Agent` and the site's expected `Origin` header.
+
+---
+
 ## Checklist
 
 - [ ] `src/manifest.json` MV3; dual `background` (service_worker + scripts); `gecko.id` + `strict_min_version` + `data_collection_permissions`.
@@ -184,3 +218,6 @@ Obfuscated/minified-only code · remote code execution · permissions with no us
 - [ ] AMO: 2FA set up (human), agreement accepted, listed/unlisted confirmed, reviewer notes cover network + licenses.
 - [ ] Chrome: $5 registration done, same zip uploaded as a draft, screenshots added, single-purpose + per-permission justifications + data-use disclosure filled, then Submit for review.
 - [ ] Pre-submission audit (§8): own code free of `eval`/dynamic-`innerHTML`/remote code; vendored libs shipped **unminified** + licensed; `web-ext lint` 0 errors; minimal justified permissions; privacy policy URL live.
+- [ ] Content-script insertion (§9): activate the field, insert via `execCommand('insertText')` (not `textContent`), and confirm the target's Post/Send button actually **enables**.
+- [ ] Session state (§10): tokens in `storage.local` not `sync`; concurrent auto-sign-ups de-duped via one in-flight promise; self-heal (clear + re-auth) on 401/403.
+- [ ] QA (§11): loaded via `chrome://extensions` (not `--load-extension`); target app activated deterministically before automation; screenshot→click coordinates scaled; test HTTP calls send a browser UA + `Origin`.
