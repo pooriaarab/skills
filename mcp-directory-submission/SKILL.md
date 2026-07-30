@@ -1,6 +1,6 @@
 ---
 name: mcp-directory-submission
-description: "Use when the user has a working MCP server (local/stdio, npx-launched, or remote) and wants it listed on public MCP directories — the official registry, Smithery, Glama, PulseMCP, cursor.directory, mcpservers.org, mcp.so, Cline marketplace, mcp-get, or awesome-mcp-servers lists. Covers which directories accept local-only stdio servers with no hosted endpoint (most of them), the exact server.json schema and mcp-publisher CLI flow for the official registry, the smithery.yaml shape, PR-based catalogs vs auto-crawl vs manual forms, and the gotchas that produce silent rejections (100-char description limit, missing mcpName ownership field, npx multi-bin resolution, short-lived publish JWT). Triggers: 'submit my MCP server', 'list on MCP registry', 'get my MCP on Smithery/Glama/PulseMCP', 'MCP directory submission', 'publish to modelcontextprotocol registry'."
+description: "Use when the user has a working MCP server (local/stdio, npx-launched, or remote) and wants it listed on public MCP directories — the official registry, Smithery, Glama, PulseMCP, cursor.directory, mcp.so, Cline marketplace, or awesome-mcp-servers lists. Covers which directories accept local-only stdio servers with no hosted endpoint (most of them), the exact server.json schema + mcp-publisher CLI flow for the official registry, the MCPB-bundle recipe for Smithery (the old smithery.yaml is gone), the awesome-mcp-servers entry format, cursor.directory's .mcp.json web flow, the mcp.so/Cline GitHub-issue submissions, how to verify a server actually starts before submitting (catches no-mcp-subcommand / symlink-guard / tsup-barrel breakage), the audit-before-going-public step when repos are private, the per-CLI login/auth quirks (short-lived JWT, device-code timeout, WorkOS OAuth, namespace ≠ GitHub handle), and the gotchas that produce silent rejections (100-char description limit, missing mcpName ownership field, npx multi-bin resolution). Triggers: 'submit my MCP server', 'list on MCP registry', 'get my MCP on Smithery/Glama/PulseMCP/Cline/cursor.directory', 'MCP directory submission', 'publish to modelcontextprotocol registry', 'build an MCPB bundle'."
 ---
 
 # MCP directory submission
@@ -85,14 +85,56 @@ Current entry format (one line per server):
 
 Legend emoji: `📇` TypeScript/JS, `🏠` runs locally, `🍎 🪟 🐧` per-OS, `☁️` cloud-hosted (omit for local-only), `🎖️` official vendor (omit unless you are one). Insert each entry at the end of its category section; add a blank line before the next `### ` heading if your insert would glue against it (Markdown needs it). Category section names are `### ` headings with a `<a name="...">` anchor — pick the closest fit (e.g. Communication, Multimedia Process, Social Media, Developer Tools).
 
-## 3. Smithery.ai
+## 3. Smithery.ai — via MCPB bundle (local servers)
 
-**The old `smithery.yaml` with `commandFunction` is gone.** Current publish flow (smithery.ai/docs/build/publish):
+**The old `smithery.yaml` with `commandFunction` is gone.** A local stdio server now publishes as an **MCPB bundle** (`.mcpb` = a zip of `manifest.json` + the server code, Anthropic's desktop-extension format). The URL method (`smithery.ai/new`) is only for servers you already host over Streamable HTTP.
 
-- **URL method** — for servers you already host over Streamable HTTP. Enter the public HTTPS URL at `smithery.ai/new`; Smithery's Gateway proxies to it and scans for metadata. Not applicable to a local-only server.
-- **Local (MCPB bundle)** — the only local-server path. Build an `.mcpb` bundle (Anthropic's desktop-extension format: a zip with `manifest.json` + the server code — see the MCPB spec at `github.com/modelcontextprotocol/mcpb`), then `smithery mcp publish ./server.mcpb -n <org>/<server>` (needs the Smithery CLI + login) or upload via the web flow.
+Proven end-to-end recipe (self-contained bundle, npm package inside):
 
-So Smithery for a local stdio server now costs an MCPB build step per package plus a Smithery login — heavier than a manifest commit. Defer it unless you want the listing badly.
+```bash
+mkdir bundle && cd bundle
+npm init -y
+npm install <pkg>@latest --no-audit --no-fund   # vendors the server + deps into node_modules
+```
+
+Write `manifest.json` (all fields below are required except homepage/display_name). `entry_point` and the `mcp_config` args point at the installed CLI; `${__dirname}` is substituted at run time:
+
+```jsonc
+{
+  "manifest_version": "0.2",
+  "name": "<pkg>",
+  "display_name": "<pkg>",
+  "version": "<same as npm>",
+  "description": "One line.",
+  "author": { "name": "<you>", "url": "https://github.com/<you>" },
+  "homepage": "https://github.com/<you>/<repo>",
+  "server": {
+    "type": "node",
+    "entry_point": "node_modules/<pkg>/dist/cli.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/node_modules/<pkg>/dist/cli.js", "mcp"]
+    }
+  }
+}
+```
+
+Then validate, pack, publish:
+
+```bash
+npx -y @anthropic-ai/mcpb validate manifest.json   # schema check
+npx -y @anthropic-ai/mcpb pack . ../<pkg>.mcpb      # zips dir incl. node_modules
+smithery login                                      # browser (WorkOS) OAuth, one-time
+npx -y @smithery/cli publish ./<pkg>.mcpb -n <org>/<pkg>
+```
+
+Gotchas:
+- **The CLI stdio-MCPB deploy is currently broken.** `smithery publish ./x.mcpb -n <ns>/<name>` creates the server *record* ("✓ Created server …") then fails the bundle-attach with `400 {"error":"No values to set"}`, and retries repeat it. `--config-schema` is rejected ("can only be used when publishing a URL"), so there's no CLI flag around it. Fallback: upload the `.mcpb` through the **web** flow at `smithery.ai/new` (Local / MCPB). Verified reproducible across a batch — don't burn attempts retrying the CLI.
+- **Your Smithery namespace may not equal your GitHub handle.** After `smithery login` it prints `Namespace: …` (e.g. a WorkOS org gives `pooria-arab`, not `pooriaarab`). Use that namespace in `-n <namespace>/<name>`, not your GitHub org.
+- **`smithery whoami` can print a token that is already invalid** — publish then 401s "Invalid API key or session token". Re-run `smithery login` (browser WorkOS OAuth). The session lives in shared CLI config, so once logged in, all publishes reuse it.
+- Bundle size = your whole `node_modules`. A P2P/crypto-heavy server (hyperswarm etc.) packs to ~13–14 MB; a lean one ~3 MB. `mcpb clean <file>` trims dev cruft if it matters.
+- `mcpb pack` bundles the *directory*, so keep the bundle dir to just `package.json` + `node_modules` + `manifest.json` — don't build it inside your repo.
+- If every package launches its MCP the same way (`<pkg>/dist/cli.js mcp`), the manifest is identical bar name/version/description — script the batch.
 
 ## 4. Glama.ai (glama.ai/mcp/servers)
 
@@ -121,6 +163,34 @@ Both take a GitHub **issue**, not a PR, and both accept local/stdio:
 
 - **mcp-get** (`michaellatman/mcp-get`) — archived, no longer accepting packages; its own README redirects to Smithery. Don't submit.
 - **mcpservers.org / chatmcp** — SQL/auto-index backend, no clean per-server PR path; skip in favour of mcp.so's issue flow (same chatmcp org).
+
+## Verify the server actually runs before you submit anything
+
+Directory listings are worthless — or actively broken — if the launch command doesn't start a working server. Before publishing to *any* directory, drive a real MCP handshake against the exact command the listing will advertise (`npx -y <pkg> mcp` or the bundled bin): send `initialize`, then `notifications/initialized`, then `tools/list`, and confirm you get a `serverInfo` back and a non-empty tool list.
+
+This catches breakage nothing else does — the npm package installs, the build passes, unit tests pass (they import functions, not the bin), and the server still never starts. Real failures found this way:
+- A CLI with **no `mcp` subcommand at all** — the arg parser silently falls through to a different command (e.g. a "start" default), so `<pkg> mcp` does the wrong thing.
+- The **symlink main-check bug**: `import.meta.url === new URL('file://'+process.argv[1]).href` is *false* under an npx/global symlinked bin (argv[1] is the symlink, `import.meta.url` is the realpath), so the entry guard never fires and the process exits 0 with no output. Fix with `pathToFileURL(realpathSync(process.argv[1]))`, or better, a dedicated bin entry that calls the server unconditionally.
+- **tsup barrel split**: when a multi-entry build has one entry importing another, tsup code-splits shared code into a chunk and the bin becomes a re-export barrel with no runnable guard. Give the MCP bin its own tiny entry file that calls the start function directly.
+- **Cold-npx false negatives**: an un-cached package's first `npx` run spends seconds downloading; a 4-second handshake timeout expires before the server is ready. Pre-warm (`npm view <pkg>`) or use a generous timeout, and re-test failures before believing them.
+
+Set the timeout generously (the server may `transport.listen()` before reading stdin) and check `serverInfo` in stdout, not just exit code.
+
+## Going public first — private repos break every listing
+
+Directories link to the GitHub repo and (Cline) fetch a raw logo URL. If the repo is **private**, every public-facing listing has dead links: the awesome-mcp-servers PR and mcp.so/Cline issues get rejected, cursor.directory can't crawl, and the registry's "view source" link 404s (npm is still public, so the server *installs* — only the links break). Symptom: a `raw.githubusercontent.com` logo URL 404s while the same path via `gh api contents … --jq .download_url` returns a `?token=…` URL (the token means private).
+
+If you must flip repos public to list them, **audit before flipping — going public is irreversible and exposes all branches + full history:**
+- Scan history (not just HEAD) for secrets: `sk-…`, `wsk_…`, `ghp_…`, `xox[bp]-…`, `AKIA…`, `AIza…`, `-----BEGIN … PRIVATE KEY`, and `.env` / `.pem` / `.key` / `auth.json` in `git log --all --name-only`.
+- Scan for PII and for **internal codenames / project names** that shouldn't be public (a scan for your own internal terms — e.g. an internal defense codename, an internal repo name). Scrub these to generic wording. A HEAD scrub cleans current code; history still holds them (full purge = `git filter-repo` + force-push across all branches, usually disproportionate for a comment codename — decide per sensitivity).
+- Then `gh repo edit <org>/<repo> --visibility public --accept-visibility-change-consequences`.
+
+## Auth is the slow part — every registry CLI wants a fresh login
+
+Each directory CLI has its own login, and they expire fast. Plan for it:
+- **`mcp-publisher` (official registry)**: `mcp-publisher login github` is a GitHub **device flow** (visit URL, enter code, approve). The issued JWT is **short-lived (well under an hour)** — a multi-repo batch will hit `401 "token is expired"` partway; just re-run `login`. The device code itself also expires in ~5 minutes, so if a human isn't approving promptly, it times out (`expired_token` / `device code authorization timed out`). If you're an agent kicking this off for a human, the round-trip often outlives the code — better to hand the human the two commands (`login` then `publish`) to run themselves so the approve happens immediately.
+- **`smithery login`**: browser **WorkOS OAuth** (opens `smithery.ai/auth/cli?s=…`). Prints the active `Namespace` on success — use it (see Smithery gotchas). Session persists in shared CLI config.
+- General: an agent can *start* these and open the URL, but must not enter passwords or complete OAuth itself — that's the human's step. Only the mechanical publish/commit after a valid session is the agent's.
 
 ## Order of operations for a batch of packages
 
