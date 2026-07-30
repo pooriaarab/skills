@@ -95,10 +95,20 @@ Fire the server event on **hashed-email match (`em`)**, not on the presence of `
 ## Campaign + audience setup (lookalike, small budget)
 
 - **Lookalike:** create a custom audience seeded off your **highest-value users**, then a **1%-of-country lookalike** from it. Set **`targeting_automation.advantage_audience = 0`** to keep it a *hard* lookalike — otherwise Meta quietly broadens delivery beyond the lookalike.
-- **Budget hard-stop:** a campaign-level **`spend_cap`** (with CBO) is a **native hard stop** — no external budget-reaper cron needed. Two gotchas: (1) you **can't lower `spend_cap` below already-pending charges** (the error quotes the current floor, often a few dollars above your target); (2) **editing `spend_cap` auto-pauses the campaign** — you must re-activate it after the edit.
+- **Budget hard-stop:** a campaign-level **`spend_cap`** (with CBO) is a **native hard stop** — no external budget-reaper cron needed. Two gotchas: (1) you **can't lower `spend_cap` below already-pending charges** (the error quotes the current floor, often a few dollars above your target); (2) **editing `spend_cap` / budget / targeting auto-pauses the campaign/ad set** — you must re-activate it after any such edit.
 - **Creatives are immutable.** To swap an ad's image/copy you **create a new creative + new ad**, activate it, and pause the old — there is no in-place edit. Do the swap while spend is ~0 to avoid losing a read.
 - **`ads_create_ad` takes no status arg** — it's born PAUSED; activate as a separate call.
 - **`ads_update_entity` cannot delete** — it force-pauses (returns `status_forced_to_paused`). A true delete needs the Ads Manager UI.
+
+## Bake tracking + dynamic macros into the creative at create time
+
+A creative's **link, `url_tags`, media, copy, and CTA are immutable** — creative-update only changes name/status/labels. To change any of them you create a **new creative**, which **resets the ad's learning phase**. So get tracking right up front: put UTMs and **dynamic URL macros** in `url_tags` when creating the creative, e.g.
+
+```
+utm_source=meta&utm_medium=paid_social&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}&utm_placement={{placement}}&src={{site_source_name}}
+```
+
+Meta expands the `{{...}}` macros on every click — auto-tagging each ad and capturing **placement** (feed / reels / stories), attribution you're otherwise blind to. (This is the tracking counterpart to "creatives are immutable" above: swap the whole creative to fix a bad tag, so don't ship a bad tag.)
 
 ## More API/launch gotchas (each one bites)
 
@@ -106,7 +116,7 @@ Fire the server event on **hashed-email match (`em`)**, not on the presence of `
 - **CTA `GET_STARTED` is rejected for some Pages** → `SIGN_UP` works.
 - **The image-upload endpoint may be un-rolled-out for an account** → skip it and pass **`image_url`** to creative-create; Meta server-fetches the image.
 - **Payment method must be on the AD ACCOUNT**, not just the business portfolio — otherwise delivery fails with **"No Payment Method" (subcode 1359188)** even though a card is "on the account" at the portfolio level.
-- **Geo "unpublished edits" red herring:** opening a *published* ad set in the editor can spawn an unpublished-edits **draft** that re-flags a location-targeting error (`#1870194`). The published ad set is fine and delivering — **discard the draft, don't publish it.** Passing `location_types:["home"]` explicitly on create avoids the flag; a bare `{countries:["US"]}` gets auto-migrated and triggers it.
+- **`location_types` is deprecated (2026) — the geo "unpublished edits" red herring.** Specifying `home` / `recent` / `traveling_in` in `geo_locations.location_types` trips a soft **draft-validation** error (Meta code `#1870194`, surfaced as "Unpublished edits" when you open the ad-set editor). It is **NOT delivery-blocking** — the errors endpoint returns empty and the ad set keeps serving; the editor just spawns a draft that re-flags it. **Fix:** set `geo_locations` with `countries` only and **OMIT `location_types`** (Meta applies its current single default). Partial values like `["home","recent"]` don't clear it — `recent` is also a removed option.
 
 ## Custom Audience → Lookalike (seeding from your own users)
 
@@ -119,6 +129,10 @@ To target people similar to your users, upload a **Custom Audience** of hashed e
 ## A "Purchase on free signup" is usually a console setting, not your code
 
 Before hunting for a stray `fbq('track','Purchase')`: a real CAPI Purchase only fires on a confirmed paid charge. A Purchase that misfires on a *free* signup almost always comes from Meta's **Automatic Events / Advanced Matching** setting (Events Manager → dataset → Settings) synthesizing a Purchase from price text on the page — not from your code. **Check that console toggle first;** turning off automatic-event detection stops the phantom Purchase with no code change.
+
+## Detecting delivery-blocking errors (don't trust the entity read)
+
+The standard ad-entity read returns `effective_status` (e.g. `ACTIVE`) plus the targeting object but does **NOT** surface review/validation warnings — an ad set can read `ACTIVE` + valid targeting while the UI shows a publish/review error. To catch real blockers, query the dedicated **errors endpoint** (`ads_get_errors` / the entity's `issues_info` / `recommendations`), not just the entity fields. Poll it in any delivery monitor. An **empty** errors response = no real blocker — e.g. the `location_types` draft-validation nag above reads as an editor warning but never appears here.
 
 ## Verification (server-side truth, not "the pixel is on the page")
 
@@ -151,6 +165,9 @@ Some automation/headless browsers (and privacy tooling) **block `fbevents.js`**,
 - Sending raw (unhashed) email or user id in `user_data` — always SHA-256, lowercased + trimmed.
 - Concluding the Pixel is dead from a headless/automation browser that blocks `fbevents.js` — cross-check `/stats` server-side.
 - `(#3) capability` 400s on `/adimages` or ad creation because the app lacks Advanced Access for `ads_management`, or no promotable Page is attached.
+- Trusting `effective_status: ACTIVE` from the entity read — it hides review/validation warnings; poll the errors endpoint (`ads_get_errors` / `issues_info` / `recommendations`) for real blockers.
+- `location_types: [home/recent/...]` → `#1870194` "Unpublished edits" draft nag (deprecated in 2026, **not** delivery-blocking); set `geo_locations.countries` only and omit `location_types`.
+- Editing a creative's link / `url_tags` / media / copy / CTA in place — those fields are immutable (update only touches name/status/labels); you must make a new creative, which resets learning. Bake UTMs + `{{...}}` macros into `url_tags` at create.
 
 ---
 
