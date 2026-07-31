@@ -1,6 +1,6 @@
 ---
 name: ship-a-product
-description: "Orchestrator: sequence idea -> working code -> open-source-ready repo -> discoverable live site -> launch video -> published announcement. Points at the 5 stage skills rather than duplicating them -- use this to decide which stage you're in and which skill to invoke next, not as a rigid must-do-all-5-in-order pipeline."
+description: "Orchestrator: sequence idea -> working code -> open-source-ready repo -> discoverable live site -> launch video -> published announcement, with optional Product Hunt launch. Points at the stage skills rather than duplicating them -- use this to decide which stage you're in and which skill to invoke next, not as a rigid must-do-all-in-order pipeline."
 ---
 
 # ship-a-product
@@ -14,6 +14,7 @@ The stages, in order, each with its own dedicated skill. Not every project needs
 4. launch-seo              live site -> discoverable by search + shareable (sitemap, robots.txt, OG/Twitter meta, Google Search Console) -- only if there's a hosted site; skip for CLI-only/library-only projects with no deployed site
 5. launch-video-generation storyboard -> a real launch/announcement video
 6. social-launch-post      video + copy -> a draft ready to publish across X/LinkedIn/Threads/Bluesky/Mastodon
+7. product-hunt-launch     significant release -> reviewed Product Hunt draft, assets, launch-day runbook, recap
 ```
 
 ## Deciding where to enter
@@ -25,11 +26,12 @@ The stages, in order, each with its own dedicated skill. Not every project needs
 - **No hosted site (CLI/library only)?** Skip `launch-seo`, go straight to `launch-video-generation`.
 - **Site's discoverable already, need to announce it?** Start at `launch-video-generation`.
 - **Have a video already, just need the post?** Start at `social-launch-post`.
+- **Need a Product Hunt launch or relaunch?** Use `product-hunt-launch` after the release is real and the Product Hunt theme is significant enough to justify a launch.
 
 ## What this skill does NOT replace
 
 Stage 2 — actually building the product — is real engineering work, not a template-fill exercise. Use the project's normal process for that (brainstorming, TDD, code review, whatever the codebase's own conventions are). This orchestrator exists to make sure the *surrounding* stages (repo hygiene, announcement, distribution) don't get skipped or reinvented each time, not to compress the actual build into a checklist.
 
-## Cost/delegation shape across all 5 stages
+## Cost/delegation shape across all stages
 
-Every stage below benefits from the same pattern: judgment (architecture decisions, creative direction, what to say in the announcement) stays with the highest-tier model available; mechanical execution (writing boilerplate config files, running generation scripts, extracting content into structured data) delegates to a cheaper model. `launch-video-generation`'s fidelity-ladder idea (§6 there — free wireframe review before any paid step) generalizes: don't spend real time or money on a later stage until the earlier one is actually approved. Confirm the repo's OSS-ready before spending on a launch video; confirm the video's approved before spending on cross-platform posting.
+Every stage below benefits from the same pattern: judgment (architecture decisions, creative direction, what to say in the announcement) stays with the highest-tier model available; mechanical execution (writing boilerplate config files, running generation scripts, extracting content into structured data) delegates to a cheaper model. `launch-video-generation`'s fidelity-ladder idea (§6 there — free wireframe review before any paid step) generalizes: don't spend real time or money on a later stage until the earlier one is actually approved. Confirm the repo's OSS-ready before spending on a launch video; confirm the video's approved before spending on cross-platform posting; confirm a Product Hunt theme is significant and policy-compliant before creating a launch draft.
