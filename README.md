@@ -36,6 +36,7 @@ A coordinated suite for organizing across every digital surface — files, notes
 | [build-from-template](build-from-template/SKILL.md) | Bootstrap a web-app-shaped idea from `master-template-cloudflare` (Next.js on Workers/OpenNext, D1, R2, KV, Queues, Cron, Better Auth) instead of starting from scratch. |
 | [open-source-repo-prep](open-source-repo-prep/SKILL.md) | Prepare a repo for real open-source use — LICENSE/CODE_OF_CONDUCT/CONTRIBUTING/CODEOWNERS/CI, GitHub branch protection that actually restricts merges (the `gh api` JSON-payload gotcha, the `allow_force_pushes` blocks-admins-too gotcha), and how to scrub something from already-public history if needed. |
 | [social-launch-post](social-launch-post/SKILL.md) | Draft and cross-post a launch announcement with video across X/LinkedIn/Threads/Bluesky/Mastodon via the Typefully API — the presigned-upload header trap, per-platform post-shape differences (LinkedIn = single post only), and why X blocks automated publishing of link-containing posts (don't try to route around it). |
+| [product-hunt-launch](product-hunt-launch/SKILL.md) | Prepare a Product Hunt launch or relaunch package — eligibility checks, submission copy, maker handles, review docs, real-UI assets, browser-assisted draft entry, launch-day monitoring, and recap. |
 | [reddit-ads](reddit-ads/SKILL.md) | Set up Reddit Ads pixel tracking and server-side Conversions API (CAPI) purchase attribution — Developer Portal app creation, the Conversion Access Token vs OAuth token distinction, the CAPI v3 endpoint shape, and client/server event dedup. |
 | [google-ads](google-ads/SKILL.md) | Wire up Google Ads + GA4 conversion tracking — the three layers (GA4 client gtag, server-side Measurement Protocol, Ads conversion import from GA4), the MP `api_secret` that silently no-ops a server purchase when unset (distinct from the `G-XXXX` measurement id), importing/enabling/marking-Primary the GA4 conversion action, Google Ads API launch nuances (`containsEuPoliticalAdvertising` now required, text-only search ads, OAuth-project enablement), and server-side verification via the GA4 Data API + GAQL + the MP `/debug/mp/collect` endpoint. |
 | [meta-ads](meta-ads/SKILL.md) | Set up Meta (Facebook) Pixel + server-side Conversions API (CAPI) purchase tracking — client Pixel and server CAPI shipped together with a shared `event_id` dedup key, the CAPI access token that silently no-ops when unset, why you fire on hashed-email match (not on `fbclid`) so organic purchases still report, advanced matching for match quality, the app-capability 400s (Advanced Access for `ads_management`, promotable Page), and server-side verification via the Graph `stats`/`last_fired_time` endpoints. |
@@ -70,6 +71,7 @@ npx skills add pooriaarab/skills/organizer/apple-notes
 npx skills add pooriaarab/skills/eco-mode
 npx skills add pooriaarab/skills/canada-census
 npx skills add pooriaarab/skills/schengen-visa-application
+npx skills add pooriaarab/skills/product-hunt-launch
 ```
 
 ## Data source
