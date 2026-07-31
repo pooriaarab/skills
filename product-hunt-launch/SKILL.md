@@ -24,12 +24,64 @@ As of 2026-07, the constraints to enforce are:
 | Account | A personal account posts; company accounts cannot hunt/post. Newly created accounts must complete onboarding first. |
 | Relaunch | Same product/company/root domain generally needs a six-month gap plus a significant update; shorter relaunches require a relaunch request and may not be featured. |
 | Staggering | A two-to-four-week cadence is usually social/content cadence, not repeated Product Hunt launches for the same product. Combine small releases. |
-| Timing | 12:01am Pacific gives the full daily cycle only if the team can staff it. Schedule up to one month ahead. |
+| Timing | 12:01am Pacific gives the full daily cycle only if the team can staff it. Schedule within the next 30 days. |
 | Submission state | Prefer Create Draft for collaboration, then Schedule after approval. Do not assume a "Launch Now" button exists. |
 | Promotion | Ask for feedback, comments, and shares. Do not ask for upvotes, reviews-for-rewards, or engagement manipulation. |
 | Assets | Thumbnail 240x240 under 3MB. Gallery images 1270x760, at least two, under 3MB. YouTube videos need full non-private URLs. |
 
 If the user's requested cadence conflicts with current Product Hunt policy, say so plainly and convert extra drops into social launch posts, email updates, blog/support content, or a relaunch-request plan.
+
+## Live Submission UI Map
+
+Last verified in the logged-in Product Hunt web UI on 2026-07-31. Re-check the UI before every launch because Product Hunt changes this flow.
+
+### Entry and Relaunch Gate
+
+Open `https://www.producthunt.com/posts/new/submission` or click the header **Submit** button. If Product Hunt blocks access, complete account onboarding/verification first. In July 2026, account settings showed work email, GitHub profile, and LinkedIn profile as recommended verification items before the submit flow was usable.
+
+The initial submit screen asks for **Link to the product**. Product Hunt may auto-prefix `https://`, so paste either the bare domain or check the resulting URL carefully before continuing.
+
+When the URL belongs to an existing Product Page, Product Hunt shows a relaunch/update gate:
+
+- `Is this a new launch for <Product>?`
+- `Yes! Attach this launch to <Product>'s page when it goes live.`
+- `No, it's a different product`
+- `Your existing in progress posts: Launch In Progress`
+- Primary button: `Create an update for <Product>`
+
+For relaunches, prefer opening the existing `Launch In Progress` draft if one exists. Do not create another draft unless the human confirms the old draft is disposable or unrelated.
+
+### Draft Sections and Fields
+
+The 2026 draft editor uses a left rail with these steps:
+
+| Section | Live fields and checks |
+| --- | --- |
+| Edit Product Page | Shows whether this is the 2nd+ launch for an existing Product Page. Warns that Product Page edits apply immediately even if the launch is scheduled later. Preview includes product name, tagline, description, categories, and links. |
+| Main info | `Name of the launch` with `0/40`; `Tagline` with `0/60`; `Links to the launch`; `+ Add more links` for App Store/Google Play/Steam/Amazon/etc.; `Is this an open source project?`; `X account of the launch` with `x.com/` prefix; `Description of the launch` with `0/500` and prompt text asking what is new/different and which features stand out; `Launch tags` with `Select up to three launch tags`; `Write the first comment` text area with no visible counter. Required-error box lists name, tagline, description, and launch tag until those fields are filled. |
+| Images and media | Thumbnail preview; `Add a separate thumbnail for this launch`; note that animated images only play on hover; gallery uses first image as social preview; recommends 3+ images; upload area supports file browse or paste URL; upload text says at least one image and `1270x760px or higher recommended`. Product Hunt docs still say the gallery needs 2+ images before it is viewable, so prepare at least two and usually 3-4. |
+| Makers | `Did you work on this launch?` with `I worked on this product` (listed as Hunter and Maker) or `I didn't work on this product` (listed as Hunter only); add makers by Product Hunt username or email. |
+| Extras | Pricing is optional but visible, with `Free`, `Paid`, and `Paid (with a free trial or plan)` options. Promo code fields are `What is the offer?`, `Promo code`, and `Expiration Date`; all promo fields must be complete for a valid promo offer. |
+| Launch checklist | Required: product name, product tagline, description, thumbnail, add images to gallery, launch tags. Strongly recommended: additional makers, first comment, Video/Loom. Bottom actions are Schedule Launch and Create Draft; stop here for human approval. |
+
+Keep a screenshot set of the live flow in the review doc or PR artifacts. At minimum capture: relaunch gate, Edit Product Page, Main info, Images and media, Makers, Extras, and Launch checklist.
+
+### Browser Exploration Tips
+
+When the human has already logged in through their normal Chrome profile, prefer the existing session. `agent-browser --auto-connect` only works if that visible Chrome exposes a Chrome DevTools Protocol endpoint. If it does not, do not start a temporary browser profile unless the human approves that tradeoff. Use visual browser control instead, and record that the live UI was inspected visually.
+
+For Product Hunt drafts, use this exploration order:
+
+1. Open the existing `Launch In Progress` draft from the relaunch gate.
+2. Click each left-rail section: Edit Product Page, Main info, Images and media, Makers, Extras, Launch checklist.
+3. Capture one screenshot per section before filling data.
+4. On Main info, scroll to the lower half and inspect description, launch tags, first comment, and the required-error box. These fields are easy to miss.
+5. Open dropdowns/search pickers only to inspect them. Do not select tags, makers, pricing, dates, or schedule actions unless the review doc has been approved.
+6. Use the Launch checklist as the final source of truth for missing required fields, because it can expose requirements that are hidden in earlier sections.
+
+Treat launch tags as a controlled picker, not free text. Record the intended tags in the review doc, then verify them in the Product Hunt UI at fill time.
+
+Note the difference between Product Hunt's generic posting docs and the relaunch draft UI: the generic product description docs state 260 characters, while the July 2026 relaunch draft UI labels `Description of the launch` as `0/500`. For an existing Product Page launch, draft both if needed: the Product Page description at 260 characters and the launch-specific description at 500 characters.
 
 ## Workflow
 
@@ -167,13 +219,14 @@ For video, use `launch-video-generation`. For store-style or framed screenshots,
 Use browser automation as assisted data entry, not as autonomous launch authority:
 
 1. Open Product Hunt in an approved logged-in personal account.
-2. If login/SSO/MFA is needed, hand control to the human.
-3. Create Draft first unless the human explicitly approves scheduling.
-4. Fill fields from the approved review doc.
-5. Upload approved assets only.
-6. Add makers by verified Product Hunt username.
-7. Capture screenshots of the draft preview.
-8. Stop for human review before Schedule.
+2. If login/SSO/MFA/account verification is needed, hand control to the human.
+3. If using `agent-browser --auto-connect`, confirm the visible Chrome is debuggable through CDP. If the user's signed-in default Chrome profile does not expose a CDP endpoint, do not launch a temporary profile unless the human approves it. Use the existing signed-in Chrome with a visual-control tool such as Peekaboo or the Claude browser extension instead.
+4. Create or open a draft first unless the human explicitly approves scheduling.
+5. Fill fields from the approved review doc.
+6. Upload approved assets only.
+7. Add makers by verified Product Hunt username or email.
+8. Capture screenshots of every draft section and preview.
+9. Stop for human review before Schedule.
 
 Do not automate account creation, upvotes, comments, reviews, contests, or bulk outreach. Do not scrape people for unsolicited promotion.
 
