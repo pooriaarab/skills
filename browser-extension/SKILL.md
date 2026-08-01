@@ -134,6 +134,23 @@ The **same zip** works — Chrome reads `manifest_version`, `background.service_
 - **Wrong-Google-account trap.** The listing is owned by one Google account. In a multi-account/SSO Chrome (e.g. a work + personal setup) the console silently resolves to the wrong account and **redirects to `/devconsole/register`** — that redirect means "not the owner account," not "not registered." `?authuser=` switching is unreliable; the fix is selecting the right account/profile in the browser. Managed (work) accounts can't own a personal listing.
 - Uploading the package trips "publish to a public registry" guards in agentic setups even though it only creates a private draft — get explicit user go-ahead; let the user do the Google login and $5 payment.
 
+### Resubmission after a permissions rejection
+
+- **Check whether the fix already landed before rebuilding.** A merged-but-unshipped fix branch plus a stale submitted zip is a common state — the rejection may cite permissions already removed in git. Audit before cutting anything: `grep -rn "chrome.<api>" src/` per permission (`chrome.scripting`, `chrome.system`, …), and re-audit every remaining permission as the rectification notice demands.
+- **Bump the version.** CWS rejects an upload whose version is ≤ any previously uploaded version, *including rejected drafts* (1.0 rejected → upload 1.0.1). Rebuild so the packaged `manifest.json` carries both the new version and the narrowed permissions; verify with `unzip -p pkg.zip manifest.json`.
+- **The Privacy tab regenerates from the new manifest.** Per-permission justification boxes for removed permissions vanish on their own — no manual cleanup. But any box left at `0/1,000` keeps **Submit for review** disabled (a previously-empty `sidePanel` box is the usual culprit). Fill the textarea (native value setter + `input`/`change` events), click **Save draft**, and only then does Submit un-disable.
+- **Don't re-upload while a draft is pending review** unless you mean to — the new package replaces the version under review and restarts the queue.
+
+### Driving the CWS dashboard without CDP (macOS: AppleScript + in-page JS)
+
+When agent-browser `--auto-connect` reports "No running Chrome instance found" (Chrome wasn't launched with `--remote-debugging-port`, and Chrome 136+ ignores that flag on the default/logged-in profile):
+
+- **Clicking "Allow" on Chrome's "Allow remote debugging?" dialog does NOT fix `--auto-connect`** — it still finds no instance. Dismiss the dialogs (each connection attempt spawns one) and take a different path.
+- **AppleScript is the fast path.** GUI-AX automation (click-by-element-id tools) runs ~1 min/action on large Chrome windows; `osascript` is instant: enumerate `windows` and `URL of active tab of window id N`, open pages with `make new tab at end of tabs with properties {URL:"…"}`, and run page JS via `execute active tab of window id N javascript "…"` (requires View → Developer → **Allow JavaScript from Apple Events**). With in-page JS you drive the Angular console directly: click buttons matched by `textContent`, read `btn.disabled`, fill textareas via the native setter + events.
+- **Profile selection without guessing:** the devconsole URL opens in the *last-active* profile — often the wrong one (see the account trap above). Instead find the window whose tabs prove the right Google session (e.g. an open Gmail tab for the owner account) and `make new tab` *in that window*; a clean load (no `/register` redirect) confirms the owner account.
+- **Zip upload without the native file chooser.** The chooser is painful to automate, and `fetch('http://localhost:…')` from the page trips Chrome's local-network permission prompt ("wants to access other apps and services on this device"). Skip the network entirely: `base64` the zip, inject it into `window.__b64` in ~200 KB chunks via repeated `execute javascript`, then in-page: `atob → Uint8Array → new File([bytes], name, {type:'application/zip'}) → DataTransfer → input.files = dt.files → dispatchEvent(new Event('change',{bubbles:true}))` targeting `input[type=file][accept*=".zip"]`. Angular may **clear `input.files` as it consumes them**, so `files[0]` can be undefined immediately after — that's success, not failure. Verify on the **Package** tab that the draft shows the new version + permissions.
+- **Confirm submission on the Status tab** ("This draft is pending review") — the header badge lags behind the actual state.
+
 ---
 
 ## 8. Pass review the first time (pre-submission audit)
