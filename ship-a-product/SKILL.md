@@ -12,9 +12,10 @@ The stages, in order, each with its own dedicated skill. Not every project needs
 2. (your own build process) scaffold -> real working product (brainstorm/plan/implement/test -- not a single skill, it's the actual engineering work)
 3. open-source-repo-prep   working code -> a repo ready for public visibility (LICENSE, CI, branch protection, README)
 4. launch-seo              live site -> discoverable by search + shareable (sitemap, robots.txt, OG/Twitter meta, Google Search Console) -- only if there's a hosted site; skip for CLI-only/library-only projects with no deployed site
-5. launch-video-generation storyboard -> a real launch/announcement video
-6. social-launch-post      video + copy -> a draft ready to publish across X/LinkedIn/Threads/Bluesky/Mastodon
-7. product-hunt-launch     significant release -> reviewed Product Hunt draft, assets, launch-day runbook, recap
+5. launch-analytics        live site -> measurable (GA4 client + server, Microsoft Clarity; enforces the GA4 + Clarity + Search Console rule for any domain) -- only if there's a hosted site
+6. launch-video-generation storyboard -> a real launch/announcement video
+7. social-launch-post      video + copy -> a draft ready to publish across X/LinkedIn/Threads/Bluesky/Mastodon
+8. product-hunt-launch     significant release -> reviewed Product Hunt draft, assets, launch-day runbook, recap
 ```
 
 ## Deciding where to enter
@@ -22,8 +23,8 @@ The stages, in order, each with its own dedicated skill. Not every project needs
 - **Have an idea, no code yet, and it's web-app-shaped?** Start at `build-from-template`.
 - **Have an idea that isn't a web app, or already know the shape doesn't fit a template?** Skip straight to building it (brainstorm → plan → implement, following whatever process/skills the codebase and toolchain call for), then rejoin at stage 3.
 - **Already have working code, just need to go public?** Start at `open-source-repo-prep`.
-- **Repo's public and there's a hosted site (docs/marketing/product)?** Run `launch-seo` before announcing it — a search-invisible, bare-link-preview launch undercuts the announcement.
-- **No hosted site (CLI/library only)?** Skip `launch-seo`, go straight to `launch-video-generation`.
+- **Repo's public and there's a hosted site (docs/marketing/product)?** Run `launch-seo` then `launch-analytics` before announcing it — a search-invisible, bare-link-preview, un-measured launch undercuts the announcement and leaves you blind to whether it worked.
+- **No hosted site (CLI/library only)?** Skip `launch-seo` and `launch-analytics`, go straight to `launch-video-generation`.
 - **Site's discoverable already, need to announce it?** Start at `launch-video-generation`.
 - **Have a video already, just need the post?** Start at `social-launch-post`.
 - **Need a Product Hunt launch or relaunch?** Use `product-hunt-launch` after the release is real and the Product Hunt theme is significant enough to justify a launch.
