@@ -1,6 +1,6 @@
 ---
 name: launch-seo
-description: Make a newly-live docs/marketing/product site discoverable by search engines and shareable on social — sitemap.xml, a real robots.txt (not whatever your host injects by default), canonical/Open Graph/Twitter Card meta, a favicon, and submitting the sitemap in Google Search Console. Use when a site just went live for the first time, before or right after "launch-video-generation"/"social-launch-post" in the ship-a-product pipeline, or whenever someone asks "is this SEO-set-up", "add a sitemap", "submit to Google Search Console", "why does my link preview look bare when I share it".
+description: Make a newly-live docs/marketing/product site discoverable by search engines and shareable on social — sitemap.xml, a real robots.txt (not whatever your host injects by default), canonical/Open Graph/Twitter Card meta, a favicon, and submitting the sitemap to Google Search Console, Bing Webmaster Tools, and Yandex Webmaster. Use when a site just went live for the first time, before or right after "launch-video-generation"/"social-launch-post" in the ship-a-product pipeline, or whenever someone asks "is this SEO-set-up", "add a sitemap", "submit to Google Search Console", "why does my link preview look bare when I share it".
 ---
 
 # launch-seo
@@ -100,12 +100,22 @@ curl -s https://your-domain.com/ | grep 'og:title'   # meta present
 
 Edge caches can lag a few seconds right after a fresh deploy — a `404`/missing-meta result immediately post-deploy isn't necessarily broken, recheck once before debugging.
 
-## 6. Submit to Google Search Console
+## 6. Submit to search engines — Google, Bing, and Yandex
 
-1. https://search.google.com/search-console — add the property using the root domain URL (`https://your-domain.com/`), not a specific page.
-2. Verify ownership (DNS TXT record is the usual path if you already control DNS; HTML file/meta-tag verification also works).
-3. Sitemaps → submit `https://your-domain.com/sitemap.xml`.
-4. GSC's crawl/index status is not instant — allow days, not minutes, before checking indexing results.
+Don't stop at Google. Bing Webmaster Tools feeds Bing, DuckDuckGo, Yahoo, and Ecosia from one submission, and Yandex Webmaster covers Yandex's own index. All three are free, and all three verify ownership the same three ways (DNS record, HTML meta tag, or uploaded file — DNS is the usual path if you already control DNS).
+
+1. **Google Search Console** — https://search.google.com/search-console
+   - Add the property using the root domain URL (`https://your-domain.com/`), not a specific page.
+   - Verify ownership.
+   - Sitemaps → submit `https://your-domain.com/sitemap.xml`.
+2. **Bing Webmaster Tools** — https://www.bing.com/webmasters
+   - Fastest path: **"Import from Google Search Console"** — it pulls in the verified property and its sitemaps in one step. Otherwise: add the site manually, verify, Sitemaps → submit the same `sitemap.xml` URL.
+3. **Yandex Webmaster** — https://webmaster.yandex.com
+   - Add site → verify ownership → Indexing → Sitemap files → submit the same `sitemap.xml` URL.
+
+Optional accelerator: **IndexNow** — Bing and Yandex (not Google) support instant URL pinging instead of waiting for a recrawl: host a random key at `https://your-domain.com/{key}.txt`, then `GET https://api.indexnow.org/indexnow?url=<page-url>&key=<key>` whenever a page ships or changes. Worth wiring up for a frequently-published site (blog/docs/changelog); overkill for a mostly-static marketing page.
+
+Crawl/index status is not instant in any of them — allow days, not minutes, before checking indexing results. A `site:your-domain.com` query in each engine is the quick "am I indexed yet" check.
 
 ## Checklist
 
@@ -115,11 +125,11 @@ Edge caches can lag a few seconds right after a fresh deploy — a `404`/missing
 - [ ] Staging/preview hostnames get `Disallow: /` if they share a bundle with production.
 - [ ] Every page: canonical link, favicon, OG + Twitter Card meta (title/description matching the page's own, no fabricated `og:image`).
 - [ ] Verified live post-deploy with `curl`, not just "the PR merged".
-- [ ] Submitted to Google Search Console: property added, ownership verified, sitemap submitted.
+- [ ] Sitemap submitted to all three consoles — Google Search Console, Bing Webmaster Tools (GSC import shortcut), Yandex Webmaster — property verified in each.
 
 ## See also
 
 - [`../open-source-repo-prep/SKILL.md`](../open-source-repo-prep/SKILL.md) — repo-level public-readiness; this skill is the deployed-site-level counterpart.
 - [`../social-launch-post/SKILL.md`](../social-launch-post/SKILL.md) — the OG/Twitter meta here is what makes that skill's cross-posted links render with a real preview instead of a bare URL.
-- [`../launch-analytics/SKILL.md`](../launch-analytics/SKILL.md) — the measurement counterpart: GA4 + Microsoft Clarity. Together with the Search Console step above (§6), these are the three things every domain project needs.
+- [`../launch-analytics/SKILL.md`](../launch-analytics/SKILL.md) — the measurement counterpart: GA4 + Microsoft Clarity. Together with the search-engine submissions above (§6), these are the things every domain project needs.
 - [`../ship-a-product/SKILL.md`](../ship-a-product/SKILL.md) — orchestrator; this is the discoverability stage, done once the site is live and before announcing it.

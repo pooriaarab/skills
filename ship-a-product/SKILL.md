@@ -11,7 +11,7 @@ The stages, in order, each with its own dedicated skill. Not every project needs
 1. build-from-template     idea -> a running scaffold (web-app-shaped ideas only; skip for CLIs/libraries/extensions)
 2. (your own build process) scaffold -> real working product (brainstorm/plan/implement/test -- not a single skill, it's the actual engineering work)
 3. open-source-repo-prep   working code -> a repo ready for public visibility (LICENSE, CI, branch protection, README)
-4. launch-seo              live site -> discoverable by search + shareable (sitemap, robots.txt, OG/Twitter meta, Google Search Console) -- only if there's a hosted site; skip for CLI-only/library-only projects with no deployed site
+4. launch-seo              live site -> discoverable by search + shareable (sitemap, robots.txt, OG/Twitter meta, sitemap submission to Google Search Console + Bing + Yandex) -- only if there's a hosted site; skip for CLI-only/library-only projects with no deployed site
 5. launch-analytics        live site -> measurable (GA4 client + server, Microsoft Clarity; enforces the GA4 + Clarity + Search Console rule for any domain) -- only if there's a hosted site
 6. launch-video-generation storyboard -> a real launch/announcement video
 7. social-launch-post      video + copy -> a draft ready to publish across X/LinkedIn/Threads/Bluesky/Mastodon
