@@ -121,4 +121,5 @@ Edge caches can lag a few seconds right after a fresh deploy — a `404`/missing
 
 - [`../open-source-repo-prep/SKILL.md`](../open-source-repo-prep/SKILL.md) — repo-level public-readiness; this skill is the deployed-site-level counterpart.
 - [`../social-launch-post/SKILL.md`](../social-launch-post/SKILL.md) — the OG/Twitter meta here is what makes that skill's cross-posted links render with a real preview instead of a bare URL.
+- [`../launch-analytics/SKILL.md`](../launch-analytics/SKILL.md) — the measurement counterpart: GA4 + Microsoft Clarity. Together with the Search Console step above (§6), these are the three things every domain project needs.
 - [`../ship-a-product/SKILL.md`](../ship-a-product/SKILL.md) — orchestrator; this is the discoverability stage, done once the site is live and before announcing it.
