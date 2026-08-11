@@ -1,6 +1,6 @@
 ---
 name: meta-ads
-description: "Set up Meta (Facebook) Pixel + server-side Conversions API (CAPI) purchase tracking for a web app — the client Pixel (fbq base + Purchase) and server CAPI (Graph /{pixel-id}/events) shipped together with a shared event_id dedup key, the CAPI access token that silently no-ops a server event when unset, why you fire on hashed-email match (not on fbclid) so organic purchases still report, advanced matching for match quality, the app-capability 400s (Advanced Access for ads_management, promotable Page), seeding a Lookalike from a hashed-email Custom Audience (USER_PROVIDED_ONLY / EMAIL_SHA256, ≥100 matched-user floor), why a Purchase that misfires on a free signup is usually the Automatic Events console setting rather than code, and server-side verification via the Graph stats/last_fired_time endpoints. Use when wiring up Meta ad conversion tracking, building a Custom Audience / Lookalike, debugging 0 (or phantom) Purchase events, or when the pixel looks dead in a headless browser."
+description: "Set up Meta (Facebook) Pixel + server-side Conversions API (CAPI) purchase tracking for a web app — the client Pixel (fbq base + Purchase) and server CAPI (Graph /{pixel-id}/events) shipped together with a shared event_id dedup key, the CAPI access token that silently no-ops a server event when unset, why you fire on hashed-email match (not on fbclid) so organic purchases still report, advanced matching for match quality, the app-capability 400s (Advanced Access for ads_management, promotable Page), seeding a Lookalike from a hashed-email Custom Audience (USER_PROVIDED_ONLY / EMAIL_SHA256, ≥100 matched-user floor), why a Purchase that misfires on a free signup is usually the Automatic Events console setting rather than code, and server-side verification via the Graph stats/last_fired_time endpoints. Also covers running the Meta Ads MCP in the Claude Code CLI: the official hosted MCP (mcp.facebook.com/ads) OAuth fails in the CLI with 'URL Blocked / redirect_uris not registered' (localhost-loopback redirect isn't whitelisted; works only on claude.ai web / Desktop), the token-based MCP fix (pipeboard-co/meta-ads-mcp + META_ACCESS_TOKEN), and the exact Business Settings clickpath to mint a non-expiring System User token (app-role → scopes+SMS-2FA → ad-account assignment three-layer chain). Use when wiring up Meta ad conversion tracking, building a Custom Audience / Lookalike, debugging 0 (or phantom) Purchase events, when the pixel looks dead in a headless browser, or when the Meta Ads MCP won't authenticate / a Meta access token returns an empty adaccounts list."
 ---
 
 # meta-ads
@@ -90,7 +90,44 @@ Fire the server event on **hashed-email match (`em`)**, not on the presence of `
 
 - Uploading ad images (`POST /act_{ad-account-id}/adimages`) and creating ads can **400 with "(#3) Application does not have the capability"** until your app has **Advanced Access for `ads_management`** — or you run the calls as a user who has a role on the ad account (Standard/dev-mode access only covers app-role users). Request Advanced Access in the App Review flow, or test as an app-role user first.
 - A **promotable Facebook Page must be attached to the ad account** — ad creation fails without one.
-- **Escape hatch — use the official hosted ads MCP.** A self-built app on the **Limited** Marketing API tier keeps hitting `(#3)` on campaign/ad create, and getting **Advanced Access requires App Review + Business Verification** (days, frequently stalls). Meta's **official hosted ads MCP endpoint** uses standard Business-account OAuth and **bypasses the app-review/capability gate entirely** — you create and manage campaigns without owning a reviewed app. If you're blocked on `(#3)`, stop fighting App Review and drive the official MCP instead.
+- **Escape hatch — use the official hosted ads MCP.** A self-built app on the **Limited** Marketing API tier keeps hitting `(#3)` on campaign/ad create, and getting **Advanced Access requires App Review + Business Verification** (days, frequently stalls). Meta's **official hosted ads MCP endpoint** uses standard Business-account OAuth and **bypasses the app-review/capability gate entirely** — you create and manage campaigns without owning a reviewed app. If you're blocked on `(#3)`, stop fighting App Review and drive the official MCP instead. **BUT in Claude Code CLI the official MCP's OAuth is broken** — see the next section; use a token-based MCP there.
+
+## Meta Ads MCP in Claude Code — token auth, not OAuth
+
+The **official hosted MCP** (`https://mcp.facebook.com/ads`) authenticates fine from **claude.ai web** and **Claude Desktop** but **fails from the Claude Code CLI**. The CLI uses Dynamic Client Registration (RFC 7591) with a **localhost loopback redirect** (`http://localhost:<port>/callback`); Meta's OAuth client only whitelists the fixed claude.ai / Desktop redirect URIs. The handshake dies before login with **"URL Blocked … redirect URI is not whitelisted"** (a.k.a. `redirect_uris are not registered for this client`). It is server-side (Meta's app config) — no CLI flag fixes it. Confirmed open in many claude-code issues.
+
+**Fix for the CLI: run a token-based MCP that talks straight to the Graph API** — no OAuth redirect, so no whitelist to fail. `pipeboard-co/meta-ads-mcp` reads `META_ACCESS_TOKEN` with highest precedence and, when set, **bypasses Pipeboard's proxy** and hits Meta directly (verify: `auth.py` checks the env var first). `byadsco/meta-ads-mcp` (Node, `npx @byadsco/meta-ads-mcp --transport stdio`) is an equivalent. Global config in `~/.claude.json` → applies to every worktree; use an absolute interpreter path (Claude Code gives spawned MCP servers a minimal PATH):
+
+```json
+"meta-ads": {
+  "type": "stdio",
+  "command": "/opt/homebrew/bin/pipx",
+  "args": ["run", "meta-ads-mcp"],
+  "env": { "META_ACCESS_TOKEN": "${META_ACCESS_TOKEN}" }
+}
+```
+
+`${META_ACCESS_TOKEN}` expands from Claude Code's **own process env** at MCP launch — so `export` it in `~/.zshrc` and **fully restart Claude Code** (a running session won't see a zshrc edit). Never hardcode a work-account token into `~/.claude.json` if you can export it instead.
+
+### Mint a non-expiring System User token (Business Settings clickpath)
+
+A System User token never expires and is the right credential for a headless MCP. Meta gates it behind a **three-layer chain — each is a prerequisite for the next**, and the token-generation wizard blocks at layer 1 with **"No permissions available — Assign an app role to the system user"** if you skip it:
+
+1. **App role on the system user.** Business Settings → **Accounts → Apps** → your app → **Assign people** → check the **system user** → toggle **Manage app (Full control)** → **Assign**. (The picker lists system users alongside people. Assigning *yourself* to the app does nothing for the system user — this is the common trap.) This is what unlocks the token wizard at all.
+2. **Token scopes.** Back on **Users → System users** → select the system user → **Generate token** → pick the app → expiration **Never** → **Assign permissions**: check `ads_read` + `ads_management` (+ `business_management` for account-level). → **Generate token**. Meta then demands an **SMS 2FA code** to the account phone before it mints the token — a human must enter it; this step can't be automated. Copy the token immediately (shown once).
+3. **Ad-account assignment.** Accounts → **Ad accounts** → the account → **Assign people** → check the system user → **Manage ad accounts (Full access)** → **Assign**. Without this, `me/adaccounts` returns `{"data":[]}` — the token generates fine but every ads call sees no account.
+
+`account_id` visibility is layer 3, *not* layer 2 — a valid token that returns an empty `adaccounts` list means the ad account isn't assigned yet, not that the token is bad.
+
+### Verify the token end-to-end (Graph, before trusting the MCP)
+
+```
+GET /v21.0/me?fields=id,name                          → {"id":"…","name":"<system user name>"}   (token valid)
+GET /v21.0/me/adaccounts?fields=name,account_id,account_status,currency
+                                                       → data[] populated with account_status:1  (layer 3 done)
+```
+
+If `me` works but `adaccounts` is `[]`, go back and do layer 3. Store the token in `~/.zshrc` (for the MCP) and any app's gitignored `.env.local` (as a labelled stash) — never commit it.
 
 ## Campaign + audience setup (lookalike, small budget)
 
