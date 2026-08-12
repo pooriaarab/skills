@@ -211,3 +211,17 @@ Some automation/headless browsers (and privacy tooling) **block `fbevents.js`**,
 ## Security — the Pixel is the official first-party vendor script
 
 `https://connect.facebook.net/en_US/fbevents.js` is Meta's own first-party Pixel bootstrap — the standard, required loader every Meta advertiser embeds, not arbitrary third-party code. Load it only from the official `connect.facebook.net` origin over HTTPS (never a mirror or CDN copy). The CAPI access token stays server-side in an env var — no secret is placed in the client snippet.
+
+## Hub conventions and official references
+
+Use the shared conversion-hub contract: emit one canonical event, use a stable
+`event_id`, send the event after the payment provider confirms the charge, and
+make an absent `META_PIXEL_ID` or `META_CAPI_TOKEN` a logged no-op. Keep the
+platform adapter product-agnostic. See `ad-conversion-hub` and `ad-experiments`
+for canonical events, consent, hashing, seed sizing, and ground-truth checks.
+
+Official references checked 2026-08-11:
+
+- [Meta Conversions API](https://developers.facebook.com/docs/marketing-api/conversions-api/)
+- [Meta Pixel](https://developers.facebook.com/docs/meta-pixel/)
+- [Custom Audiences](https://developers.facebook.com/docs/marketing-api/audiences-api/custom-audiences/)
