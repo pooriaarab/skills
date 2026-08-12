@@ -134,3 +134,16 @@ Reddit has no Meta-style pixel `stats` API, so verify at the edges:
 ## Security — the Pixel is the official first-party vendor script
 
 `https://www.redditstatic.com/ads/pixel.js` is Reddit's own first-party ad pixel — the standard, required loader for Reddit Ads conversion tracking, not arbitrary third-party code. Load it only from the official `redditstatic.com` origin over HTTPS. The Conversion Access Token stays server-side in an env var; never place it in the client snippet.
+
+## Hub conventions and official references
+
+Use the shared conversion-hub contract: map the canonical event to Reddit's
+`tracking_type`, reuse the payment transaction as `conversion_id`, and make an
+absent `REDDIT_PIXEL_ID` or `REDDIT_CAPI_TOKEN` a logged no-op. See
+`ad-conversion-hub` and `ad-experiments` for consent, hashing, seed sizing, and
+payment-provider reconciliation.
+
+Official references checked 2026-08-11:
+
+- [Reddit Conversions API](https://ads-api.reddit.com/docs/v3/)
+- [Reddit Ads pixel](https://business.reddithelp.com/s/article/Install-the-Reddit-Pixel)
