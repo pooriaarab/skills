@@ -69,6 +69,38 @@ In Google Ads → **Goals → Conversions → New conversion action → Import �
 
 Google's GA4-import path attributes on the **GA4 `client_id` / `gclid`**, so you generally do **not** need to capture `gclid` yourself when using conversion import. Capturing `gclid` (from the landing-page query param, first-touch) is only needed if you later switch to offline/enhanced conversions that key on it. Optional for the import flow.
 
+## Conversion tracking & Enhanced Conversions for Leads
+
+Enhanced Conversions for Leads (EC-for-Leads) has two implementation paths:
+
+- **Google tag / GTM:** captures first-party user data in the browser with the lead conversion.
+- **Manual/offline upload:** sends hashed identifiers with an offline click conversion through the API.
+
+Prefer the offline-upload path when your server already captures `gclid` and you have an `UPLOAD_CLICKS` conversion action. It keeps the conversion record and match data on the server.
+
+**Enabling EC-for-Leads is UI-only.** `customer.conversion_tracking_setting.enhanced_conversions_for_leads_enabled` is Output-only in the Google Ads API. A CLI can build a mutate request for it, but the API rejects that request. Enable the setting in the Google Ads UI, through Data Manager or Conversions settings. `accepted_customer_data_terms` is a separate prerequisite and is usually handled in the UI.
+
+For offline click uploads, call `customers:uploadClickConversions`. Each `ClickConversion` includes both the click id and user identifiers:
+
+```json
+{
+  "gclid": "<click-id>",
+  "conversionAction": "customers/<customer-id>/conversionActions/<action-id>",
+  "conversionDateTime": "2026-01-15 18:30:00+00:00",
+  "conversionValue": 25,
+  "currencyCode": "USD",
+  "userIdentifiers": [{
+    "userIdentifierSource": "FIRST_PARTY",
+    "hashedEmail": "<sha256-hash>"
+  }]
+}
+```
+
+- Send **`gclid` and `userIdentifiers` together**. Use UTC `conversionDateTime` in `yyyy-MM-dd HH:mm:ss+00:00` format. The email value is a SHA-256 hash of the lowercase, trimmed email only. Do **not** remove Gmail dots or `+tags`; Google canonicalizes those server-side, and over-normalizing lowers match rate.
+- Use `partialFailure: true`, but **always inspect per-row errors and exit non-zero when any row fails**. The endpoint can return HTTP 200 with partial errors. This is a classic silent-failure money-path trap.
+- Google deduplicates on `(gclid, conversionAction, conversionDateTime)`. `ONE_PER_CLICK` reinforces this rule, so re-running the same upload is safe.
+- A **HIDDEN** conversion action is not a primary goal. Un-hide it before expecting Smart Bidding to optimize toward it.
+
 ## Customer Match (audience expansion — there is no lookalike object)
 
 Google's classic **"similar audiences" was deprecated (Aug 2023)** — you can't create a lookalike *object*. To reach people similar to your users:

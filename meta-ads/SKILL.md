@@ -147,6 +147,15 @@ utm_source=meta&utm_medium=paid_social&utm_campaign={{campaign.name}}&utm_conten
 
 Meta expands the `{{...}}` macros on every click — auto-tagging each ad and capturing **placement** (feed / reels / stories), attribution you're otherwise blind to. (This is the tracking counterpart to "creatives are immutable" above: swap the whole creative to fix a bad tag, so don't ship a bad tag.)
 
+## Per-surface creative optimization
+
+This applies to all social ad platforms. Make one creative for each placement and build it for that surface. Never use one asset everywhere.
+
+- **Reels / Stories:** Use full-bleed 9:16 creative. Design for sound-on viewing, a native or UGC feel, and a hook in the first ~1 second.
+- **Feed:** Use 4:5 or 1:1 creative. Make it thumb-stopping but legible with muted playback.
+- **Right column / Audience Network:** Create their own variants with smaller ratios suited to those placements.
+- **Across all placements:** Make the creative feel native, not ad-like. It should read as content, not a banner. Prefer video first.
+
 ## More API/launch gotchas (each one bites)
 
 - **`LANDING_PAGE_VIEWS` optimization under `OUTCOME_TRAFFIC` rejects `promoted_object{pixel_id}`** ("Promoted Object Invalid") — omit `promoted_object` for that combo.
