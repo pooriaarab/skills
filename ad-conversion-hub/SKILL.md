@@ -243,3 +243,24 @@ Use the platform-specific `*-ads` skill for vendor endpoints and console steps.
 Use `ad-experiments` for hypothesis design, seed sizing, and budget control.
 Use `google-ads`, `meta-ads`, and `reddit-ads` as detailed examples of adapter
 pitfalls and server-side verification.
+
+## Shipped as a package: adscapi
+
+This hub is productized as the `adscapi` npm package (`pooriaarab/adscapi`) — the SDK +
+CLI + MCP form of this skill, so a consumer runs `npm i adscapi` instead of re-implementing
+the flow. Learnings from the extraction, reusable here:
+
+- **Namespaced client surface** (Stripe/Segment shape): `createAdscapi()` reads secrets from
+  env → `ads.conversions.track(event)` returns a per-destination result array `{ platform,
+  ok, error }[]`; `ads.destinations.list()` / `.verify()`.
+- **Adapters throw, the client isolates.** Each dispatcher throws on non-2xx; the client
+  wraps with retry + captures per-destination so one platform's failure never blocks the
+  rest. (Do NOT copy the fire-and-forget swallow model from an in-request backend — see
+  `agentic-cli-npm-package` §6.)
+- **`verify` ≠ `check`.** `check` = secrets present; `verify` = hit the platform API to prove
+  the token works. Ship a per-platform optional `verify(secrets)` alongside each `dispatch`.
+- **The registry is the seam.** `PLATFORMS[key] = { dispatch, verify?, support, requiredSecrets }`,
+  append-only so parallel platform PRs never conflict. `support: real-capi | offline-upload |
+  pixel-only` — no platform is a silent no-op.
+- **Per-platform runbook** (`docs/platforms/<key>.md`): create-account → where each token comes
+  from → verify → event mapping → troubleshooting. Pairs with `agent-harness-docs`.
