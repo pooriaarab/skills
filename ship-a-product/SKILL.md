@@ -12,10 +12,11 @@ The stages, in order, each with its own dedicated skill. Not every project needs
 2. (your own build process) scaffold -> real working product (brainstorm/plan/implement/test -- not a single skill, it's the actual engineering work)
 3. open-source-repo-prep   working code -> a repo ready for public visibility (LICENSE, CI, branch protection, README)
 4. launch-seo              live site -> discoverable by search + shareable (sitemap, robots.txt, OG/Twitter meta, sitemap submission to Google Search Console + Bing + Yandex) -- only if there's a hosted site; skip for CLI-only/library-only projects with no deployed site
-5. launch-analytics        live site -> measurable (GA4 client + server, Microsoft Clarity; enforces the GA4 + Clarity + Search Console rule for any domain) -- only if there's a hosted site
-6. launch-video-generation storyboard -> a real launch/announcement video
-7. social-launch-post      video + copy -> a draft ready to publish across X/LinkedIn/Threads/Bluesky/Mastodon
-8. product-hunt-launch     significant release -> reviewed Product Hunt draft, assets, launch-day runbook, recap
+5. geo-aeo                 live site -> quotable by AI answer engines + usable by agents (llms.txt/llms-full.txt, markdown mirrors, schema.org JSON-LD, WebMCP manifest, answer-first copy, programmatic entity pages, free tools) -- only if there's a hosted site; run right after launch-seo
+6. launch-analytics        live site -> measurable (GA4 client + server, Microsoft Clarity; enforces the GA4 + Clarity + Search Console rule for any domain) -- only if there's a hosted site
+7. launch-video-generation storyboard -> a real launch/announcement video
+8. social-launch-post      video + copy -> a draft ready to publish across X/LinkedIn/Threads/Bluesky/Mastodon
+9. product-hunt-launch     significant release -> reviewed Product Hunt draft, assets, launch-day runbook, recap
 ```
 
 ## Deciding where to enter
