@@ -117,6 +117,10 @@ Optional accelerator: **IndexNow** — Bing and Yandex (not Google) support inst
 
 Crawl/index status is not instant in any of them — allow days, not minutes, before checking indexing results. A `site:your-domain.com` query in each engine is the quick "am I indexed yet" check.
 
+## 7. Beyond classic SEO — run `geo-aeo` next
+
+This skill makes a site findable by search crawlers and shareable as a link. It does **not** make the site quotable by AI answer engines (ChatGPT, Claude, Perplexity, Google AI Overviews) or usable by agents. That's a separate layer — `llms.txt`/`llms-full.txt`, per-page markdown mirrors, schema.org JSON-LD, a WebMCP manifest, answer-first content, and programmatic entity pages. Run the **`geo-aeo`** skill right after this one.
+
 ## Checklist
 
 - [ ] `robots.txt` content actually checked (not just status code) — confirmed it's yours, not a host-injected default.
