@@ -65,6 +65,7 @@ A coordinated suite for organizing across every digital surface — files, notes
 | [claude-handoff](claude-handoff/SKILL.md) | Hand off work to a background `claude` session and resume it cleanly. |
 | [git-guardrails-claude-code](git-guardrails-claude-code/SKILL.md) | Set up Claude Code hooks that block dangerous git commands (push, reset --hard, clean). |
 | [x-article-publisher](x-article-publisher/SKILL.md) | Publish X (Twitter) Articles from Markdown via browser automation. |
+| [spec-issue](spec-issue/SKILL.md) | Turn a thin issue-tracker ticket into an implementation-ready spec — grounds every claim in real code, right-sizes detail, writes test cases. |
 
 ## Install
 
