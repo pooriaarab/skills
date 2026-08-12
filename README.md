@@ -2,6 +2,81 @@
 
 Claude Code skills for AI-aware development and life organization.
 
+## Ad tracking skills
+
+These skills share the `ad-conversion-hub` contract. Use the platform skill for
+vendor setup and API details. Use `ad-conversion-hub` for canonical events,
+consent, hashing, deduplication, and failure isolation.
+
+### Tier 1: search and social
+
+| Skill | Platform |
+|---|---|
+| [google-ads](google-ads/SKILL.md) | Google Ads + GA4 |
+| [meta-ads](meta-ads/SKILL.md) | Meta |
+| [reddit-ads](reddit-ads/SKILL.md) | Reddit |
+| [microsoft-ads](microsoft-ads/SKILL.md) | Microsoft Advertising |
+| [amazon-ads](amazon-ads/SKILL.md) | Amazon Ads |
+| [tiktok-ads](tiktok-ads/SKILL.md) | TikTok |
+| [linkedin-ads](linkedin-ads/SKILL.md) | LinkedIn |
+| [pinterest-ads](pinterest-ads/SKILL.md) | Pinterest |
+| [snapchat-ads](snapchat-ads/SKILL.md) | Snapchat |
+| [x-ads](x-ads/SKILL.md) | X |
+| [apple-search-ads](apple-search-ads/SKILL.md) | Apple Search Ads |
+
+### Tier 2: DSP and native
+
+| Skill | Platform |
+|---|---|
+| [taboola-ads](taboola-ads/SKILL.md) | Taboola |
+| [outbrain-ads](outbrain-ads/SKILL.md) | Outbrain Amplify |
+| [criteo-ads](criteo-ads/SKILL.md) | Criteo |
+| [trade-desk](trade-desk/SKILL.md) | The Trade Desk |
+| [quora-ads](quora-ads/SKILL.md) | Quora |
+| [spotify-ads](spotify-ads/SKILL.md) | Spotify |
+| [nextdoor-ads](nextdoor-ads/SKILL.md) | Nextdoor |
+| [yelp-ads](yelp-ads/SKILL.md) | Yelp |
+| [stackadapt](stackadapt/SKILL.md) | StackAdapt |
+
+### Tier 3: AI and emerging
+
+| Skill | Platform |
+|---|---|
+| [chatgpt-ads](chatgpt-ads/SKILL.md) | ChatGPT Ads |
+| [perplexity-ads](perplexity-ads/SKILL.md) | Perplexity Ads |
+| [copilot-ads](copilot-ads/SKILL.md) | Microsoft Copilot Ads |
+| [meta-ai-ads](meta-ai-ads/SKILL.md) | Meta AI Ads |
+
+### Tier 4: regional and CTV
+
+| Skill | Platform |
+|---|---|
+| [baidu-ads](baidu-ads/SKILL.md) | Baidu |
+| [tencent-ads](tencent-ads/SKILL.md) | Tencent |
+| [douyin-ads](douyin-ads/SKILL.md) | Douyin / Ocean Engine |
+| [weibo-ads](weibo-ads/SKILL.md) | Weibo |
+| [xiaohongshu-ads](xiaohongshu-ads/SKILL.md) | Xiaohongshu |
+| [kuaishou-ads](kuaishou-ads/SKILL.md) | Kuaishou |
+| [bilibili-ads](bilibili-ads/SKILL.md) | Bilibili |
+| [yandex-direct](yandex-direct/SKILL.md) | Yandex Direct |
+| [vk-ads](vk-ads/SKILL.md) | VK |
+| [naver-ads](naver-ads/SKILL.md) | Naver |
+| [kakao-ads](kakao-ads/SKILL.md) | Kakao Moment |
+| [yahoo-japan-ads](yahoo-japan-ads/SKILL.md) | Yahoo Japan / LY Ads |
+| [line-ads](line-ads/SKILL.md) | LINE Ads |
+| [sharechat-ads](sharechat-ads/SKILL.md) | ShareChat |
+| [moj-ads](moj-ads/SKILL.md) | Moj |
+| [shopee-ads](shopee-ads/SKILL.md) | Shopee |
+| [hotstar-ads](hotstar-ads/SKILL.md) | Hotstar |
+| [mercadolibre-ads](mercadolibre-ads/SKILL.md) | Mercado Libre |
+| [twitch-ads](twitch-ads/SKILL.md) | Twitch |
+| [roku-ads](roku-ads/SKILL.md) | Roku |
+| [samsung-ads](samsung-ads/SKILL.md) | Samsung Ads |
+| [lg-ads](lg-ads/SKILL.md) | LG Ads |
+| [strava-ads](strava-ads/SKILL.md) | Strava |
+| [discord-ads](discord-ads/SKILL.md) | Discord |
+| [waze-ads](waze-ads/SKILL.md) | Waze |
+
 ## Skills
 
 ### Life organization (`organizer/`)
