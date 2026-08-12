@@ -55,6 +55,17 @@ A coordinated suite for organizing across every digital surface — files, notes
 | [crabbox-worktree](crabbox-worktree/SKILL.md) | Offload per-worktree dev work (installs, builds, dev server) to a remote GCP VM via crabbox so your laptop stays cool — bakes a golden image and wires into worktree hooks. |
 | [schengen-visa-application](schengen-visa-application/SKILL.md) | Prep a short-stay Schengen (type C) visa application from Canada — finds the right per-country handler, builds the document set from your own local folders, fills the EU form, stops before in-person submission. Zero PII stored. |
 
+### Workspace utilities
+
+| Skill | Description |
+|-------|-------------|
+| [changelog](changelog/SKILL.md) | Auto-generate a changelog from git commits since the last tag or ref. |
+| [init-project](init-project/SKILL.md) | Auto-generate a CLAUDE.md for a new project by analyzing its structure, tooling, and conventions. |
+| [stale-branches](stale-branches/SKILL.md) | List and clean up stale git branches (merged or inactive 30+ days). |
+| [claude-handoff](claude-handoff/SKILL.md) | Hand off work to a background `claude` session and resume it cleanly. |
+| [git-guardrails-claude-code](git-guardrails-claude-code/SKILL.md) | Set up Claude Code hooks that block dangerous git commands (push, reset --hard, clean). |
+| [x-article-publisher](x-article-publisher/SKILL.md) | Publish X (Twitter) Articles from Markdown via browser automation. |
+
 ## Install
 
 Via the [skills CLI](https://skills.sh). Skills live in this monorepo, so paths are `pooriaarab/skills/<skill>`.
