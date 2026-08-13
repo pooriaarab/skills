@@ -132,7 +132,9 @@ auto). Faster than authoring from zero when the aesthetic fits.
 
 - **Tone axis:** Professional / Playful / Authoritative / Minimal. Commit to one.
 - **No brand yet?** Use impeccable's aesthetic-direction — commit to a distinct world, don't
-  default. **Brand exists?** Extract its tokens and build inside them.
+  default. For a whole visual identity (multiple directions to pick from, tokens, logo,
+  favicon/OG, guidelines), run **`saas-brand-system`** first, then build this page inside the
+  chosen brand. **Brand exists?** Extract its tokens and build inside them.
 - **AI house-style tells to avoid** (they read as slop): cream + serif + terracotta/amber;
   navy + teal + Inter; purple→indigo gradients on everything; emoji as icons; three fonts.
   Run impeccable's slop-check.
