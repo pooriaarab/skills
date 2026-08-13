@@ -1,6 +1,6 @@
 ---
 name: launch-video-generation
-description: "Plan and generate a short (15-60s) launch/announcement video from a real product: a storyboard framework, wavespeed.ai API facts (submit-then-poll, image-to-video model behavior, pricing), the hard-won fix for scene transitions and on-screen text/logos, and a zero-generation-spend path (HyperFrames HTML/CSS/GSAP) for whole-video native-app-mimicry concepts (a note, a chat thread) used as a self-aware ad framing device. Also covers multi-video suites (one film genre per video), wavespeed text-to-music, cinematic-still pipelines with hero-anchor character consistency, and rendering hand-built animated HTML to mp4 via puppeteer screencast + ffmpeg. Model-agnostic where possible, wavespeed.ai/HyperFrames-specific where noted. Includes an iterative creative loop for multi-video suites: multiple variations per stage (vibe/genre/twist → storyboard stills → cheap draft video → full render) with human sign-off between stages, genre+twist assignment per video, hero-anchor character consistency (one hero reference image; every shot an edit of THAT image — frame-chaining drifts by shot 3), and TTS voice casting (minimax/speech-2.6-hd) with ffmpeg voice effects. Also: Veo 3 via Vertex AI (ADC auth, predictLongRunning -> fetchPredictOperation, inline base64 image-conditioning, fixed 8s clips), fast-cut pacing (12-15 x ~2s hard cuts per 30s spot), movie-style variation grids for fast human picks, and the constraint-sandwich prompt structure (subject anchor > action+camera > optics+lighting) with a locked style-anchor string. Also: logo compositing via glow-halo not solid rectangle, nano (gemini-2.5-flash-image/edit) reframes-to-square + hallucinates logos on two-image input (single-image lighting pass is safe), Story2Board locked-reference method + open-source repos for multi-scene character consistency, minimax music sings the lyrics field (use [instrumental]), rising-bed-to-silence comedic cut, genre wrappers (CCTV/found-footage) to unify AI stills, ffmpeg gotchas (-shortest truncates video, aevalsrc has no mod/floor, hard-cut vs xfade audio sync, blur-fill for dual aspect), and a genre-lookbook method for pitching 5-10 style variations before rendering."
+description: "Plan and generate a short (15-60s) launch/announcement video from a real product: a storyboard framework, wavespeed.ai API facts (submit-then-poll, image-to-video model behavior, pricing), the hard-won fix for scene transitions and on-screen text/logos, and a zero-generation-spend path (HyperFrames HTML/CSS/GSAP) for whole-video native-app-mimicry concepts (a note, a chat thread) used as a self-aware ad framing device. Also covers multi-video suites (one film genre per video), wavespeed text-to-music, cinematic-still pipelines with hero-anchor character consistency, and rendering hand-built animated HTML to mp4 via puppeteer screencast + ffmpeg. Model-agnostic where possible, wavespeed.ai/HyperFrames-specific where noted. Includes an iterative creative loop for multi-video suites: multiple variations per stage (vibe/genre/twist → storyboard stills → cheap draft video → full render) with human sign-off between stages, genre+twist assignment per video, hero-anchor character consistency (one hero reference image; every shot an edit of THAT image — frame-chaining drifts by shot 3), and TTS voice casting (minimax/speech-2.6-hd) with ffmpeg voice effects. Also: Veo 3 via Vertex AI (ADC auth, predictLongRunning -> fetchPredictOperation, inline base64 image-conditioning, fixed 8s clips), fast-cut pacing (12-15 x ~2s hard cuts per 30s spot), movie-style variation grids for fast human picks, and the constraint-sandwich prompt structure (subject anchor > action+camera > optics+lighting) with a locked style-anchor string. Also: logo compositing via glow-halo not solid rectangle, nano (gemini-2.5-flash-image/edit) reframes-to-square + hallucinates logos on two-image input (single-image lighting pass is safe), Story2Board locked-reference method + open-source repos for multi-scene character consistency, minimax music sings the lyrics field (use [instrumental]), rising-bed-to-silence comedic cut, genre wrappers (CCTV/found-footage) to unify AI stills, ffmpeg gotchas (-shortest truncates video, aevalsrc has no mod/floor, hard-cut vs xfade audio sync, blur-fill for dual aspect), a genre-lookbook method for pitching 5-10 style variations before rendering, and a drop-in style-anchor library (Pixar/3D, claymation/stop-motion, 2D anime, hyperreal cinematic) with a full anchor string + style-specific negative prompt per look."
 ---
 
 # launch-video-generation
@@ -241,6 +241,40 @@ Two multipliers:
 
 - **Lock a STYLE ANCHOR string**: one fixed sentence (palette, lens, lighting, grain) appended verbatim to EVERY prompt in the video, so independently-generated shots don't drift apart in look. This is the prompt-level enforcement of the §1 Visual Theme block.
 - **Reverse-engineer looks you like with video-to-prompt tools**: feed a reference clip or frame in, get a structured prompt back, adapt it — faster and more faithful than describing a look from scratch.
+
+## Style-anchor library (drop-in visual styles)
+
+Copy-paste STYLE ANCHOR strings. Append one **verbatim and identical to every shot** in a video (the §14 multiplier). A single style word ("pixar", "claymation") renders differently every call — the model fills the gap at random. A full anchor string turns the style into a *spec* (render engine, surface, light, lens, grain), so 12 independently-generated clips share one look.
+
+Two rules that make these hold:
+
+- **Image-condition the anchor (§13).** Veo invents a fresh look from text alone. Render the hero still in the target style FIRST (§3 — seedream/nano), then pass it as the `image` on every Veo instance. A text-only "pixar" anchor fights an un-styled conditioning frame and loses.
+- **Match the negative to the style**, not a generic list — each style's failure mode is different (photoreal creeping into anime, glossy CGI creeping into clay).
+
+| Style | Use when |
+|---|---|
+| Pixar / 3D animation | warm, family-friendly, broad-appeal product story |
+| Claymation / stop-motion | quirky, handmade, thumb-stopping in a photoreal feed |
+| 2D anime | high-energy, youth-skewing, expressive |
+| Hyperreal / cinematic | premium, trustworthy, product-forward |
+
+**Pixar / 3D animation**
+- Anchor: `Pixar-style 3D animation, soft rounded forms, subsurface-scattering skin with warm rim light, oversized expressive eyes, tactile matte surfaces, shallow depth of field, global-illumination bounce light, saturated storybook palette, pristine 4K render.`
+- Negative: `no photorealism, no live-action skin pores, no harsh shadows, no uncanny proportions, no text artifacts.`
+
+**Claymation / stop-motion**
+- Anchor: `handmade claymation stop-motion, matte modeling-clay surfaces with visible fingerprint and thumb-press texture, tiny seams, slight frame-to-frame jitter and imperfect registration, miniature practical set, soft tabletop key light, shallow macro depth of field, Aardman-style tactile charm.`
+- Negative: `no smooth CGI, no glossy plastic, no perfect fluid motion, no photorealism, no digital sheen.`
+
+**2D anime**
+- Anchor: `modern 2D anime cel animation, clean bold ink linework, flat cel-shaded color with hard-edged shadow blocks, expressive large eyes, dramatic speed-lines and bloom highlights, painterly background art, vivid high-saturation palette, studio key-art quality.`
+- Negative: `no 3D render, no photorealism, no muddy gradients, no western-cartoon proportions, no watermark.`
+
+**Hyperreal / cinematic**
+- Anchor: `hyperreal cinematic footage, shot on ARRI Alexa with anamorphic prime lens, shallow depth of field with gentle lens flare, motivated practical lighting with soft key and deep falloff, fine 35mm film grain, teal-and-amber grade, natural skin texture, 4K commercial polish.`
+- Negative: `no illustration, no cartoon, no CGI look, no oversaturation, no plastic skin, no text artifacts.`
+
+Extend the library the same way: one sentence naming render/surface/light/lens/grain, plus a style-specific negative. Reverse-engineer a new one from a reference clip with the video→prompt method above.
 
 ## Cinematography control vocabulary (prompt EVERY shot with these)
 
