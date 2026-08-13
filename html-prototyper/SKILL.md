@@ -43,6 +43,10 @@ Most apps have 2–3 chrome variants. **You must pick the right one per page.** 
 
 ### 1c. Locate design tokens
 
+> No brand or design system exists yet (greenfield, or a deliberate rebrand)? This skill
+> ports an *existing* look — it has nothing to extract. Run **`saas-brand-system`** first to
+> create the identity (directions → tokens → logo/favicon/OG), then prototype inside it.
+
 Try in order:
 
 1. **Tailwind config** → `theme.extend.colors/spacing/fontFamily/boxShadow/borderRadius`

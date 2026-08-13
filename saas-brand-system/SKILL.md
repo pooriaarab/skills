@@ -95,6 +95,19 @@ via the framework (e.g. `next/font`) — never a raw CDN link in production.
   taste-critical prototype round. Save CLI delegation for the bulk framework
   implementation after the pick.
 
+## Related skills
+
+This skill owns the *identity* (directions → tokens → logo/favicon/OG → guidelines). Hand off:
+
+- **`landing-page`** — once a brand is picked, design the marketing page's conversion anatomy
+  *inside* the chosen tokens (it points back here when no brand exists yet).
+- **`html-prototyper`** — prototype a new feature inside an *existing* brand's look; it points
+  here when there is no brand/design system to extract yet.
+- **`impeccable`** — the craft floor for any single surface (visual hierarchy, motion, a11y).
+- **`storybook-to-design-system`** — once the components ship, surface them as a live in-app
+  design-system gallery.
+- **`high-fidelity-ui-image-gen`** — AI mockups of a direction before/without building the HTML.
+
 ## References
 
 - `references/requirements-contract.md` — the shared per-prototype contract (copy to REQUIREMENTS.md)
