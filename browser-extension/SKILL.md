@@ -226,6 +226,19 @@ Auth tokens and per-device session ids belong in `chrome.storage.local`. `chrome
 - **Fastest way to seed a known-good session into a content script for a test:** create a valid session against the API, then set the token/id into the **page origin's `localStorage`** (content scripts read page `localStorage`, and a well-written client uses it as a fallback) — sidesteps the extension's `chrome://`-only storage UI entirely.
 - **Coordinate scaling:** a DOM tool's screenshot is often a fixed fraction of CSS-viewport pixels. Measure the ratio once (a known element's `getBoundingClientRect` vs its position in the screenshot) and scale click coordinates by it, or clicks miss.
 - **Scripted HTTP clients get bot-blocked** by some CDNs (e.g. a Cloudflare `1010`). Send a real browser `User-Agent` and the site's expected `Origin` header.
+## 12. Resubmitting a rejected Chrome item (hard-won, 2026-07)
+
+- **"Privacy policy does not contain necessary information" (User Data Privacy violation)** is the most common rejection. The privacy-policy URL must (a) actually RESOLVE — a dead / placeholder / unconfigured-`www.` host returns nothing and fails review — and (b) comprehensively disclose: what data is collected, how it's used, storage/retention, and **every** third party it's shared with (AI providers, payment processor, hosting). Omission of any section = rejection. Fix: serve a real `/privacy` page on a reachable domain (a Cloudflare Worker route returning HTML works fine) and point the listing at it.
+- **"Homepage URL is not reachable"** silently disables the Submit button (greyed, no obvious reason). Store listing → Additional fields → Homepage URL must resolve (200). Use the live apex, not an unconfigured `www.` or a staging host. The **"Why can't I submit?"** link enumerates exactly these blockers — always click it first.
+- **Resubmit the SAME item** (same item id) — fix the cited issue → Save draft → Submit for review. Don't create a new item. Bump the package version only if you're uploading new code (not needed for a listing/privacy-only fix).
+
+### Driving the dashboard with agent-browser
+
+Edit pages are path-routed: `…/devconsole/<pub>/<itemid>/edit/{status,package,listing,privacy,distribution}` — navigate directly instead of clicking tabs. `Status` shows the rejection reason verbatim; snapshot→`@ref`→`fill`/`click`/`upload`. **Google multi-account gotcha:** the Web Store may default to the wrong (e.g. work) account and show "Register / Pay $5" — the real dev account must be picked via the avatar switcher; `?authuser=<email>` in the URL does NOT switch it, and a fresh nav can bounce to "Verify it's you" (password/2FA — the human must clear it, an agent cannot).
+
+### Monitor-until-approved loop
+
+Review takes days–weeks. Set a **durable cloud schedule** (claude.ai routine + Gmail connector, via the `schedule` skill) to check the inbox daily for the verdict and report approved / rejected+reason. The cloud agent **cannot resubmit** — that needs the developer's logged-in local browser — so it alerts; the fix + resubmit happens in a local session (fast once this flow is known).
 
 ---
 
