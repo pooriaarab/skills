@@ -37,8 +37,16 @@ Reuse the product's own words. List the real entities to show, e.g. integrations
    Component + Button Lab; footer.
 6. **Motion**: purposeful, signature to the direction, wrapped in
    `@media (prefers-reduced-motion: no-preference)` / disabled under reduce.
-7. **Accessible**: semantic HTML5, AA contrast both themes, visible focus, ARIA where needed,
-   keyboard-usable toggle/tabs.
+7. **Accessible + a real color system (not one flat accent).** The palette is a **3-color
+   system** — `--primary`, `--secondary`, `--tertiary` brand colors (plus semantic
+   success/warning/error/info), not a single accent on grey. EVERY text/fill pair must pass
+   **WCAG AA**: body text ≥ 4.5:1 on its background, large/UI ≥ 3:1, and the text on each brand
+   fill (`--on-primary`/`--on-secondary`/`--on-tertiary`) ≥ 4.5:1 — pick the on-color (near-ink
+   or near-paper) by contrast, don't eyeball it. Verify both themes. Also: semantic HTML5,
+   visible focus rings, ARIA where needed, keyboard-usable toggle/tabs, `prefers-reduced-motion`.
+   > Tip: the **`vibebrand`** package generates a contrast-checked 3-color token system per
+   > direction (`npx vibebrand tokens <id>`) and gates it (`npx vibebrand check --all`, exits 1
+   > below AA). Use it as the token floor, then design on top.
 8. **Responsive**: 360px → 1440px, no horizontal body scroll, fluid type via `clamp()`.
 
 ## Craft floor

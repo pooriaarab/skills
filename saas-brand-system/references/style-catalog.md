@@ -25,6 +25,20 @@ spread across dev-credible / joyful / enterprise / bold.
 | 13 | **Claymorphism / Soft 3D** — toy | joy, tactility | soft `0.97 0.01 280` + violet `0.62 0.19 290` / coral / mint / yellow, dual soft shadows | Fredoka / Baloo 2 + DM Sans | puffy inflated clay shapes; event = glowing clay orb popping out to squishy platform coins; press = squish-in |
 | 14 | **Constellation / Starmap** — cosmic | wonder, reach | space navy `0.16 0.03 265` + starlight + cyan/periwinkle/gold star accents | Space Grotesk + JetBrains Mono | animated starfield; event-star connects via drawn glowing edges to platform stars that twinkle; star-catalog wall |
 
+## Color system + accessibility (not one flat accent)
+
+The `base + accent` columns above are the *seed*, not the whole palette. Express each direction
+as a real **3-color system** — a lead (`primary`), a support (`secondary`), and a pop
+(`tertiary`) — plus neutrals and semantic status colors. This is what fixes "the palette feels
+flat / it's all one color": e.g. Brutalist reads as acid-green + cyan + magenta on ink, not
+mono-green.
+
+Every pair must pass **WCAG AA** in both themes (body ≥ 4.5:1, large/UI ≥ 3:1, and text on each
+brand fill ≥ 4.5:1). Don't eyeball it — pick each on-color by contrast and verify. The
+**`vibebrand`** package encodes exactly this: 14 contrast-checked 3-color token systems
+(`npx vibebrand tokens <id>`, `npx vibebrand check --all`) sharing this catalog. Generate the
+accessible token floor there, then design the world on top.
+
 ## Button personality by direction (the tell)
 
 The press state is where brand lives. Match it to the world:
