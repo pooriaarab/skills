@@ -100,16 +100,49 @@ Both settle the **same USDC-on-Base payment through the same CDP facilitator**. 
 | Maturity | **GA**, free ≤1k tx/mo | **preview**, access-gated, US-first |
 | Extra creds | CDP key id+secret | Stripe key **+** CDP key id+secret |
 
-**Choose CDP direct** for the simplest GA path (recommended to launch). **Choose Stripe** only if you already live in Stripe and want unified reporting — accept the preview/allow-list gate. Either way the money is USDC on Base via CDP.
+**Choose CDP direct** for the simplest GA path. **Choose Stripe** if you already live in Stripe and want unified reporting (every agent payment as a PaymentIntent) plus a bank payout with no manual convert — accept the preview/allow-list gate. Either way the money is USDC on Base via the same CDP facilitator.
 
 Adjacent Stripe pieces, for context: **ACP** (the OpenAI Instant-Checkout standard) is **card/Link**, not stablecoin; **MPP** is agent-to-agent; Stripe's **Agent Toolkit** ships build-time skills. None replace the x402 receive path above. — https://stripe.com/newsroom/news/stripe-openai-instant-checkout
 
-## Recommended launch path (solo founder)
+## Stripe path — full walkthrough (unified reporting)
 
-1. CDP account → API key (id+secret) → **Server Wallet v2**; its Base address is `payTo`.
-2. Point at the **CDP facilitator**, network `eip155:8453`, price in USD (auto-USDC).
-3. Off-ramp by sweeping USDC → Coinbase → convert 1:1 → ACH.
-4. Skip Stripe x402 for now unless you want its PaymentIntents and can wait out the preview gate.
+Use this instead of Step 1's wallet + Step 5's Coinbase off-ramp when you want payments to appear as PaymentIntents and pay out through Stripe. It still settles USDC-on-Base through the CDP facilitator. — https://docs.stripe.com/payments/machine/x402
+
+1. **Request access.** Dashboard → **Payment methods** → request **"Stablecoins and Crypto"**; make a *separate payment-method configuration* for machine payments. Shows **Pending** → **active** after review. US except NY + 30 countries; outside US email `machine-payments@stripe.com` with your account id.
+2. **Coinbase Developer account.** portal.cdp.coinbase.com → API keys `CDP_API_KEY_ID`, `CDP_API_KEY_SECRET` (mainnet settles through the CDP facilitator; Stripe rides on it).
+3. **Create a Stripe crypto deposit address** — this is your `payTo`:
+   ```bash
+   curl https://api.stripe.com/v1/crypto/deposit_addresses \
+     -u "$STRIPE_SECRET_KEY:" -H "Stripe-Version: 2026-05-27.preview" -d network=base
+   ```
+   Keep this call off the request path; store the `0x…` as `DEPOSIT_ADDRESS`.
+4. **Config:** `AGENT_PAYMENTS_PAY_TO` = the Stripe deposit address; `AGENT_PAYMENTS_NETWORK` = `eip155:8453`; facilitator = CDP with the CDP keys. (Same secrets table as Step 3 above; only `payTo` changes.)
+5. **Record each settlement as a PaymentIntent** (the reporting piece — a code addition to the settle handler). After the facilitator settles, on `onAfterSettle` create a PaymentIntent with `mode: "transaction_verification"`, idempotent on the tx hash:
+   ```js
+   stripe.paymentIntents.create({
+     amount: amountInCents, currency: "usd", confirm: true,
+     payment_method_data: { type: "crypto" },
+     payment_method_types: ["crypto"],
+     payment_method_options: { crypto: {
+       mode: "transaction_verification",
+       transaction_verification_options: { network: "base", transaction_hash: txHash },
+     }},
+   }, { idempotencyKey: txHash });
+   ```
+   Init the Stripe client with `apiVersion: "2026-05-27.preview"`. `requirements.amount` is atomic USDC (6 decimals) → convert to cents (`/10000` for a $0.01 unit basis).
+6. **Payout.** Payments appear in Dashboard → **Payments**; pay out to your bank via normal Stripe payouts. No manual USDC→USD convert.
+
+Deps for the reference server: `@x402/core @x402/evm @x402/hono @coinbase/x402 stripe`. Sample: https://github.com/stripe-samples/machine-payments · reference: https://docs.stripe.com/payments/machine/x402
+
+**Code item for Content Rabbit:** the settle handler grants credits today; add the `onAfterSettle → paymentIntents.create` call (config-driven — fires only when the Stripe preview keys + version are set), idempotent on the tx hash, so a settlement both grants credits AND records a PaymentIntent. Keep it additive to the existing grant path.
+
+## Recommended launch path
+
+**If you want unified Stripe reporting** (the usual choice when you already run Stripe billing): follow the **Stripe path** above — request "Stablecoins and Crypto" access, create a Stripe deposit address as `payTo`, wire the CDP facilitator, add the `onAfterSettle → PaymentIntent` recording, pay out through Stripe. One caveat: it's **preview + allow-listed**, so request access early.
+
+**If you want the fastest GA path with no gate:** CDP account → **Server Wallet v2** as `payTo` → CDP facilitator (`eip155:8453`) → off-ramp by sweeping USDC → Coinbase → convert 1:1 → ACH. Add Stripe reporting later.
+
+Both settle the same USDC-on-Base payment through the CDP facilitator; the difference is only where the money lands and how you report/cash out.
 
 ## Sources
 
