@@ -18,9 +18,13 @@ The product ships one isolated `integrations/<name>/` package per platform. Each
 | **PR into a vendor monorepo** | Pipedream components | Merged PR to `PipedreamHQ/pipedream` → appears in the Pipedream app registry. Free, but human-reviewed. |
 | **Dev-portal review, free badge** | n8n **verified** node, Make apps directory | Submit → vendor QA → badge + in-app search visibility. No paid tier, but real review + real requirements. |
 | **Dev-portal review, usage/partner gate** | Zapier public app | Publish → 90-day Beta → auto-public only after **50 active users + 10 Zap templates** (waivable by embedding). |
-| **Hosted endpoint REQUIRED** | ChatGPT / Codex Apps-SDK app | Needs a **public production `/mcp` URL** the reviewer can reach. No hosted MCP = cannot submit. See §5. |
+| **Hosted MCP + OAuth 2.1 REQUIRED** | ChatGPT / Codex Apps-SDK app · Anthropic **Claude Connectors Directory** | Both need a public `/mcp` URL **and per-user OAuth** — a client-presented Bearer API key is *not* accepted. One OAuth build unblocks *both*. See §5 + §7. |
+| **Namespace verify, no review** | Official **MCP Registry** (`registry.modelcontextprotocol.io`) | Publish `server.json` under a namespace you can prove (GitHub OIDC or DNS). Feeds Anthropic/Smithery/PulseMCP/Docker/GitHub. See §8. |
+| **No directory exists** | opencode, openclaw, hermes, other agent CLIs | They consume MCP via config (URL or stdio) — nothing to submit to. Registry + npm + hosted URL covers them. See §9. |
 
-Do the zero-review ones first (npm publish for n8n, push the Claude plugin marketplace repo). They cost nothing and are live immediately. Save the usage-gated and hosting-gated ones for last.
+Do the zero-review ones first (npm publish for n8n, push the Claude plugin marketplace repo, publish `server.json` to the MCP Registry). They cost nothing and are live immediately. Save the usage-gated, hosting-gated, and OAuth-gated ones for last.
+
+**The OAuth asymmetry (read before ChatGPT or Claude Connectors):** a hosted MCP endpoint that authenticates with a raw `Authorization: Bearer <api-key>` works for Codex CLI, the SDK, and any config-driven client — but **ChatGPT and the Claude Connectors Directory cannot present a custom API key.** They speak OAuth 2.1 only (per-user login + consent). So the gate for those two is not "is there a hosted endpoint" but "does the endpoint support OAuth." Build OAuth **additively** (keep the API-key path) and one effort lists on both.
 
 ---
 
@@ -163,9 +167,17 @@ Since there's no official submission form, reach = community aggregators. These 
 
 ---
 
-## 5. ChatGPT / Codex app (Apps SDK) — HOSTED ENDPOINT REQUIRED
+## 5. ChatGPT / Codex app (Apps SDK) — HOSTED `/mcp` + OAuth 2.1 REQUIRED
 
-**Read this first: the ChatGPT app is the one connector that cannot be listed without hosting the product doesn't have yet.** The submission portal requires a **public production `/mcp` URL** that OpenAI's reviewer can reach over the network. The repo's `integrations/codex-plugin/chatgpt/` + `codex/` are the app definition, but with no hosted MCP endpoint there is nothing to point the portal at. **If the product can't yet host a public MCP server, this listing is blocked — stop here and say so.** Everything below applies only once hosting exists.
+**Read this first: the real gate is OAuth, not hosting.** The submission portal requires a **public production `/mcp` URL** the reviewer can reach *and* that URL must authenticate each end user via **OAuth 2.1** — ChatGPT cannot send a custom API key or a machine-to-machine token. So a Bearer-API-key-only MCP server is reachable but **still not listable**: a reviewer (and Scan Tools) can't connect an account to it.
+
+To unblock, the MCP host needs, additively (keep the API-key path for Codex/CLI/SDK):
+- `GET /.well-known/oauth-protected-resource` (RFC 9728) naming the auth server + scopes + resource.
+- `GET /.well-known/oauth-authorization-server` (RFC 8414) with PKCE `S256` and client registration via CIMD (`client_id_metadata_document_supported`) or DCR (RFC 7591).
+- Authorize + token endpoints with a consent flow that mints tokens the `/mcp` route accepts, token `aud` = the MCP resource URL.
+- A `WWW-Authenticate` challenge on 401 + per-tool `securitySchemes`.
+
+**Codex CLI is NOT blocked** — it sends the API key via `bearer_token_env_var`, and the stdio `.mcp.json` variant works in the ChatGPT desktop app through a local marketplace. Only the *hosted public listing* needs OAuth. Everything below applies once OAuth exists.
 
 The Apps SDK is in **beta**. Submission portal: **`platform.openai.com/plugins`**.
 
@@ -201,6 +213,40 @@ So Zapier is *listable* fast (Beta, ~1 week) but *fully public* only after real 
 
 ---
 
+## 7. Anthropic Claude Connectors Directory — self-serve in claude.ai, OAuth-gated
+
+**Distinct from §4.** §4 is the *Claude Code plugin* marketplace (a git repo users add). This is the **Connectors Directory** inside **claude.ai** — the curated list of remote MCP servers a Claude user adds with one click. It IS self-serve, and acceptance is itself the "verified" status.
+
+Same OAuth 2.1 requirement as ChatGPT (§5) — build it once, submit to both. On top of OAuth:
+- **Public privacy policy URL** — a missing/incomplete one is an *immediate* rejection. Non-negotiable.
+- **Per-tool annotations** — every tool marked read-only vs destructive (`destructiveHint`); wrong write-annotations fail review.
+- **Public docs URL** (one help page or post is enough) + **≥3 example prompts** exercising different tools.
+- **Test account** with realistic sample data the reviewer logs into, **server logo + favicon**, and confirmation of **HTTPS + Origin-header validation**.
+- You submit through the portal from a **Team or Enterprise** Claude org.
+
+Submit inside claude.ai (Settings → the connectors/submission surface). Escalations: `mcp-review@anthropic.com`. Policy + FAQ: `support.anthropic.com` MCP directory articles; building/submission: `claude.com/docs/connectors/building/submission`.
+
+---
+
+## 8. Official MCP Registry — the vendor-neutral hub
+
+`registry.modelcontextprotocol.io` is the open, neutral directory. Publishing here is the highest-leverage single step: its consumers include **Anthropic, Smithery, PulseMCP, Docker Hub, and GitHub**, so one publish fans out to many surfaces.
+
+- Publish the same `server.json` the plugin bundles.
+- **Namespace must be one you can prove** — either `io.github.<org>/<server>` (verified via GitHub OIDC, easiest) or reverse-DNS `com.<yourdomain>/<server>` (DNS TXT or HTTP challenge). **GOTCHA**: don't let the manifest's namespace drift from a domain you don't control — e.g. `ai.contentrabbit/...` fails if the live domain is `contentrabbitai.com`; use `io.github.<owner>/...` or `com.contentrabbitai/...` to match what you can actually verify.
+- Registry also verifies **package ownership** (you control the referenced npm package) and restricts base URLs to trusted public registries.
+- Publish via the registry CLI/API (namespace auth is the gate, not human review).
+
+This is a **no-review, namespace-verify** step — do it early alongside the npm publish.
+
+---
+
+## 9. Other agent harnesses (opencode, openclaw, hermes, …) — no directory to submit to
+
+These consume MCP servers via **config** (a local stdio command or a remote URL) — they have **no curated store or submission form**. Don't spend effort hunting for one. Coverage for the entire long tail = (a) the stdio npm package, (b) the hosted URL, and (c) being in the Official MCP Registry (§8), which many clients read from. Ship those three, then add a short `## Add to any MCP client` snippet (the URL + the `npx` stdio command) to the connector README — that snippet *is* the "submission" for every config-driven harness.
+
+---
+
 ## Verify the connector actually works before you submit anything
 
 A listing for a connector that errors on the first real call is worse than no listing. Each platform has a local test path — run it against the exact package/manifest you're about to submit:
@@ -218,18 +264,19 @@ Cheapest / no-review first, usage-gated and hosting-gated last:
 
 1. **npm-publish the n8n node** with the keyword + `n8n` field. Installable immediately, zero review. (Do the provenance GitHub Action *now* if you'll ever want the badge — retrofitting a local publish means a version bump and re-publish.)
 2. **Push the Claude Code plugin marketplace repo public.** Live the moment it's pushed; no submission. Share the `/plugin marketplace add` command.
-3. **Open the Pipedream monorepo PR.** One PR, all components, correct `key`s, green CI. Then it waits on human review — start it early because merge latency is out of your hands.
-4. **Import + request review on the Make app.** Needs working example scenarios built first; QA review follows.
-5. **Submit the n8n verified badge** via the Creator Portal — only after the provenance-published package is on npm and the scanner passes.
-6. **Publish the Zapier app** → Beta in ~1 week, but plan the embed/usage path for public.
-7. **ChatGPT app — LAST, and only if hosting exists.** Blocked entirely without a public `/mcp` URL; don't sequence work behind it.
+3. **Publish `server.json` to the Official MCP Registry** (§8) under a verifiable namespace. No human review, fans out to Anthropic/Smithery/PulseMCP/Docker/GitHub.
+4. **Open the Pipedream monorepo PR.** One PR, all components, correct `key`s, green CI. Then it waits on human review — start it early because merge latency is out of your hands.
+5. **Import + request review on the Make app.** Needs working example scenarios built first; QA review follows.
+6. **Submit the n8n verified badge** via the Creator Portal — only after the provenance-published package is on npm and the scanner passes.
+7. **Publish the Zapier app** → Beta in ~1 week, but plan the embed/usage path for public.
+8. **Build OAuth 2.1 on the MCP host — the shared unlock for ChatGPT (§5) + Claude Connectors (§7).** LAST and biggest: a real auth-server build, not a portal click. Once it ships + deploys, submit to both directories (mostly browser/portal steps + assets). Don't sequence 1–7 behind it.
 
-Steps 1–2 are instant and parallel. 3–7 each need a browser sign-in, a PR review, an example scenario, or a hosted endpoint — none batch-automate, so treat them as independent tracks.
+Steps 1–3 are instant and parallel (no review). 4–8 each need a browser sign-in, a PR review, an example scenario, or the OAuth build — none batch-automate, so treat them as independent tracks.
 
 ## Blocked / private-repo cautions (mirror the MCP skill)
 
 - **Private repos break the human-reviewed listings.** Pipedream is a *public* monorepo PR — the code goes public regardless. Make/Zapier/ChatGPT reviewers and the Claude marketplace all link to or fetch from your repo; a private repo means dead "view source" links and a Claude marketplace nobody can `add`. If you flip a connector repo public to list it, **audit history for secrets first** (API keys, `.env`, tokens across all branches — going public is irreversible and exposes full history), same as the MCP skill's going-public checklist.
-- **ChatGPT app is hard-blocked without hosting** — see §5. Don't promise this listing until a public MCP endpoint exists.
+- **ChatGPT + Claude Connectors are OAuth-gated** — see §5/§7. A hosted `/mcp` that only accepts a client-presented API key is reachable but not listable on either; the unlock is OAuth 2.1, and it's one build for both. Don't promise these two until the OAuth server ships.
 - **Novelty walls**: Make refuses an app for a service it already integrates; n8n refuses a node that duplicates an existing one. Check the target directory for an existing Content Rabbit connector before building the submission.
 - **Usage walls**: Zapier's public (non-Beta) listing needs 50 active users or an embed — a cold app never auto-goes-public on merit alone. Set expectations: "listed in Beta" ≠ "in the public directory."
 
@@ -241,12 +288,15 @@ An agent can *start* these and open the URL, but a human completes any OAuth/ide
 - **Make**: a **Make API key** (from your Make account) pasted into the VS Code extension, zone-specific API URL. Review is a form, no extra auth.
 - **Pipedream**: GitHub PR — just your GitHub login. CLI needs `pd login` for local testing.
 - **Claude Code plugin**: none — it's a public git repo.
-- **ChatGPT**: OpenAI Platform login + **completed identity verification** + "Apps Management" role. The identity check is a real KYC step and the slow part.
+- **ChatGPT**: OpenAI Platform login + **completed identity verification** + "Apps Management" role. The identity check is a real KYC step and the slow part. Plus the OAuth server (§5) must be live before the portal can connect.
+- **Claude Connectors Directory**: a **Team/Enterprise** claude.ai org to submit; the connector's own **OAuth 2.1** for per-user auth; a public **privacy policy** (hard reject if absent) + reviewer test account.
+- **MCP Registry**: namespace proof only — **GitHub OIDC** (`io.github.<org>/…`, automatic in an Actions publish) or a **DNS/HTTP challenge** on your domain (`com.<domain>/…`). No login-gated review.
 - **Zapier**: `zapier.com/app/developer` login; CLI `zapier login`.
 
 ## Skip / dead
 
 - **No central Claude Code plugin directory to submit to** — distribution is your marketplace repo; the Anthropic-curated list isn't self-serve. Don't hunt for a submission form.
 - **Zapier "public directory" as a quick win** — it isn't; it's a 50-user/embed gate behind a 90-day Beta. List in Beta, but don't treat public as same-day.
-- **ChatGPT app without a hosted MCP endpoint** — cannot submit at all. Skip until hosting exists.
+- **ChatGPT / Claude Connectors on a Bearer-key-only MCP** — reachable but not listable; the gate is OAuth 2.1, not hosting. Skip both until the OAuth server ships (§5/§7).
+- **Hunting for an opencode/openclaw/hermes "directory"** — none exists (§9). The MCP Registry + npm + hosted URL is the coverage; don't look for a per-harness form.
 - **Make app for an already-integrated service** — refused as duplicate; don't build the submission.
