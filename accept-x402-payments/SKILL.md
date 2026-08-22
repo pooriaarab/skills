@@ -100,7 +100,7 @@ Both settle the **same USDC-on-Base payment through the same CDP facilitator**. 
 | Maturity | **GA**, free ≤1k tx/mo | **preview**, access-gated, US-first |
 | Extra creds | CDP key id+secret | Stripe key **+** CDP key id+secret |
 
-**Choose CDP direct** for the simplest GA path. **Choose Stripe** if you already live in Stripe and want unified reporting (every agent payment as a PaymentIntent) plus a bank payout with no manual convert — accept the preview/allow-list gate. Either way the money is USDC on Base via the same CDP facilitator.
+**Choose CDP direct** for the simplest GA path — and you can still get unified Stripe reporting on it via the GA **Payment Records** API (see the section below), no preview gate. **Choose the full Stripe rail** only if you want Stripe to hold the funds (deposit address as `payTo`) and handle Bridge payouts — that part is preview/allow-listed. Either way the money is USDC on Base via the same CDP facilitator.
 
 Adjacent Stripe pieces, for context: **ACP** (the OpenAI Instant-Checkout standard) is **card/Link**, not stablecoin; **MPP** is agent-to-agent; Stripe's **Agent Toolkit** ships build-time skills. None replace the x402 receive path above. — https://stripe.com/newsroom/news/stripe-openai-instant-checkout
 
@@ -136,11 +136,31 @@ Deps for the reference server: `@x402/core @x402/evm @x402/hono @coinbase/x402 s
 
 **Code item for Content Rabbit:** the settle handler grants credits today; add the `onAfterSettle → paymentIntents.create` call (config-driven — fires only when the Stripe preview keys + version are set), idempotent on the tx hash, so a settlement both grants credits AND records a PaymentIntent. Keep it additive to the existing grant path.
 
+## Unified reporting WITHOUT preview access — Payment Records (GA)
+
+The preview `transaction_verification` receiver above is **not** the only way to get on-chain payments into Stripe reporting, and unified reporting does **not** require routing `payTo` through Stripe. Keep your own CDP wallet (the GA path) and mirror each settlement into Stripe's **Payment Records** ledger — a GA API that models off-Stripe payments so they show in the same Dashboard/reporting as card charges. No preview gate, normal secret key. — https://docs.stripe.com/payments/payment-records
+
+After a settlement that actually credits, POST the off-Stripe payment (best-effort — the credit is already committed, so a reporting failure must never fail the top-up):
+
+```bash
+curl https://api.stripe.com/v1/payment_records/report_payment \
+  -u "$STRIPE_SECRET_KEY:" \
+  -H "Idempotency-Key: x402:$NETWORK:$TX_HASH" \
+  -d "amount_requested[currency]=usd" -d "amount_requested[value]=500" \
+  -d initiated_at=$NOW -d outcome=guaranteed -d "guaranteed[guaranteed_at]=$NOW" \
+  -d "processor_details[type]=custom" \
+  -d "processor_details[custom][payment_reference]=$TX_HASH"
+```
+
+`amount_requested[value]` is cents. Key idempotency on the tx hash. Skip testnet settlements so dev traffic never pollutes live Stripe.
+
+**Shipped in Content Rabbit** (PR #613): `server/billing/report-external-payment.ts` posts `report_payment` from the topup settle path — fail-open, testnet-skipped, replay-skipped, idempotent on the tx id, no-op until `STRIPE_SECRET_KEY` is set. This is the path to prefer over the preview receiver unless you specifically want Stripe as the wallet + Bridge payouts.
+
 ## Recommended launch path
 
-**If you want unified Stripe reporting** (the usual choice when you already run Stripe billing): follow the **Stripe path** above — request "Stablecoins and Crypto" access, create a Stripe deposit address as `payTo`, wire the CDP facilitator, add the `onAfterSettle → PaymentIntent` recording, pay out through Stripe. One caveat: it's **preview + allow-listed**, so request access early.
+**Best of both (GA, no gate):** CDP **Server Wallet v2** as `payTo` → CDP facilitator (`eip155:8453`) → **Payment Records** reporting into Stripe (section above) → off-ramp by sweeping USDC → Coinbase → convert 1:1 → ACH. You get unified Stripe reporting AND keep the money in a wallet you control, with zero preview access.
 
-**If you want the fastest GA path with no gate:** CDP account → **Server Wallet v2** as `payTo` → CDP facilitator (`eip155:8453`) → off-ramp by sweeping USDC → Coinbase → convert 1:1 → ACH. Add Stripe reporting later.
+**Full Stripe rail (preview + allow-listed):** the **Stripe path** above — "Stablecoins and Crypto" access, a Stripe deposit address as `payTo`, the `transaction_verification` PaymentIntent recording, Bridge payouts to your bank. Choose this only if you want Stripe to hold the funds and handle payout; it needs the preview gate, so request access early.
 
 Both settle the same USDC-on-Base payment through the CDP facilitator; the difference is only where the money lands and how you report/cash out.
 
