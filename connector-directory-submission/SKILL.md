@@ -78,12 +78,13 @@ Make apps aren't an npm package. The `app.json` is the *export* of an app that l
 
 ### Build / import the app
 
-Three editors, same Developer Platform — pick by what you have:
-- **Make DevTool (Chrome extension)** — the **one-shot import**, and the fastest path. Install the extension, open any scenario on make.com, DevTool panel → **Tools → Import app**, load the single `app.json` → it builds BASE + CONNECTION + every WEBHOOK + MODULE + RPC at once. No tab-by-tab pasting. This is the answer to "how do I get `app.json` into Make" — prefer it.
-- **Make Apps Editor for VS Code** (Marketplace: `Integromat.apps-sdk`) — repo-managed alternative. Add an SDK environment (API URL is zone-specific, e.g. `us1.make.com/api`; EU zones differ), paste your Make API key; config downloads on open, uploads on save.
-- The in-browser app builder on make.com (My Apps) → **Create custom app** makes only the *shell* (name must match `^[a-z][0-9a-z-]+[0-9a-z]$`, 3–30 chars; label, theme, language, audience=Private while building). Then you'd paste each section by hand — slowest; use DevTool import instead.
+**There is no one-shot "import the whole `app.json`" in current Make.** (The Make DevTool Chrome extension does **not** have an "Import app" tool — its tools are Focus/Find/Copy Mapping/Swap App/Base64/Remap/Highlight, no import. Old READMEs that say "DevTool → Import app" are stale — don't repeat it.) A custom app is stored as separate components (Base + each Connection/Module/Webhook/RPC); you load it component-by-component. The bundled `app.json` in the repo is a *convenience bundle* whose top-level keys (`base`, `connection`, `modules[]`, `webhooks[]`, `rpcs[]`) map 1:1 to those components.
 
-Make has **no headless publish** — an agent cannot push the app for you. Everything here needs the human's browser + Make API key. Run the repo's validate script before importing so the JSON is well-formed.
+Two real editors, same Developer Platform — pick by what you have:
+- **Make Apps Editor for VS Code** (Marketplace: `Integromat.apps-sdk`) — the fastest path. Create the app, and the extension exposes each component as an editable JSON doc (Base, Connection, each Module, Webhook, RPC); config downloads on open, uploads on save. Paste each section from the bundle into its component. Add an SDK environment first (API URL is zone-specific, e.g. `us1.make.com/api`; EU zones differ) + your Make API key.
+- The in-browser app builder on make.com (My Apps) → **Create custom app** makes only the *shell* (name must match `^[a-z][0-9a-z-]+[0-9a-z]$`, 3–30 chars; label, theme, language, audience=Private while building). Then the app's `+` menu → **Create Connection / Webhook / Module / Remote Procedure**, pasting each section by hand. Same granularity as VS Code, no local files.
+
+Either way it's section-by-section — structure `app.json` so each top-level key is a clean paste. Make has **no headless publish**; an agent cannot push the app for you — everything here needs the human's browser + Make API key. Run the repo's validate script first so the JSON is well-formed.
 
 ### What `app.json` must contain to PASS public review (learned, concrete)
 
