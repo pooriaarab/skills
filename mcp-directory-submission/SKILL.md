@@ -1,6 +1,6 @@
 ---
 name: mcp-directory-submission
-description: "Use when the user has a working MCP server (local/stdio, npx-launched, or remote) and wants it listed on public MCP directories — the official registry, Smithery, Glama, PulseMCP, cursor.directory, mcp.so, Cline marketplace, or awesome-mcp-servers lists. Covers which directories accept local-only stdio servers with no hosted endpoint (most of them), the exact server.json schema + mcp-publisher CLI flow for the official registry, the MCPB-bundle recipe for Smithery (the old smithery.yaml is gone), the awesome-mcp-servers entry format, cursor.directory's .mcp.json web flow, the mcp.so/Cline GitHub-issue submissions, how to verify a server actually starts before submitting (catches no-mcp-subcommand / symlink-guard / tsup-barrel breakage), the audit-before-going-public step when repos are private, the per-CLI login/auth quirks (short-lived JWT, device-code timeout, WorkOS OAuth, namespace ≠ GitHub handle), and the gotchas that produce silent rejections (100-char description limit, missing mcpName ownership field, npx multi-bin resolution). Triggers: 'submit my MCP server', 'list on MCP registry', 'get my MCP on Smithery/Glama/PulseMCP/Cline/cursor.directory', 'MCP directory submission', 'publish to modelcontextprotocol registry', 'build an MCPB bundle'."
+description: "Use when the user has a working MCP server (local/stdio, npx-launched, or remote) and wants it listed on public MCP directories — the official registry, Smithery, Glama, PulseMCP, cursor.directory, mcp.so, Cline marketplace, or awesome-mcp-servers lists. Covers which directories accept local-only stdio servers with no hosted endpoint (most of them), the exact server.json schema + mcp-publisher CLI flow for the official registry, the MCPB-bundle recipe for Smithery (the old smithery.yaml is gone), the awesome-mcp-servers entry format, cursor.directory's .mcp.json web flow, the mcp.so/Cline GitHub-issue submissions, how to verify a server actually starts before submitting (catches no-mcp-subcommand / symlink-guard / tsup-barrel breakage), the audit-before-going-public step when repos are private, the per-CLI login/auth quirks (short-lived JWT, device-code timeout, WorkOS OAuth, namespace ≠ GitHub handle), and the gotchas that produce silent rejections (100-char description limit, missing mcpName ownership field, npx multi-bin resolution). ALSO covers the hosted + OAuth-2.1 path for the two directories a local server can't reach — the ChatGPT app directory (OpenAI Apps SDK) and the Anthropic Claude Connectors directory: how to add OAuth 2.1 to a remote MCP endpoint via Better Auth's mcp/oidcProvider plugin (the DRY way, not hand-rolled), the exact plugin gotchas (DCR crashes on a missing authenticationScheme column, getMcpSession doesn't check token expiry, a custom scope can't be required or every real token is rejected, refresh tokens aren't rotated), the OAuth-token→per-team-key bridge for tools that need a real API key, the mandatory read-only/destructive tool annotations, and the portal submission steps. Triggers: 'submit my MCP server', 'list on MCP registry', 'get my MCP on Smithery/Glama/PulseMCP/Cline/cursor.directory', 'MCP directory submission', 'publish to modelcontextprotocol registry', 'build an MCPB bundle', 'submit to the ChatGPT app directory', 'Claude Connectors directory', 'add OAuth to my MCP server', 'ship a ChatGPT app / MCP app'."
 ---
 
 # MCP directory submission
@@ -204,9 +204,111 @@ Cheapest, highest-reach first:
 6. Leave Glama/PulseMCP to auto-ingest for a few days before manually form-submitting, to avoid duplicate listings.
 7. Per-directory manual steps as appetite allows: cursor.directory (commit `.mcp.json`, then web submit), mcp.so (issue), Cline (issue + 400×400 logo), Smithery (MCPB build + login). Each needs a browser sign-in, a GitHub issue, a design asset, or a build step — none are pure batch automation, so they don't parallelise the way steps 4–5 do.
 
+## Hosted + OAuth 2.1 — ChatGPT app directory & Claude Connectors
+
+This is the one path a local/stdio server can't take. Both directories require a
+**remote MCP endpoint that authenticates each end user via OAuth 2.1** (per-user login
++ consent). ChatGPT and Claude cannot present a raw API key — that is the single blocker.
+If your server is Bearer-API-key-only today, you build OAuth first, then submit.
+
+### Do NOT hand-roll the OAuth server
+
+If the app uses **Better Auth**, wire its official `mcp` plugin (it pulls `oidcProvider`).
+One plugin gives every RFC piece — discovery (RFC 8414/9728), PKCE authorize, token,
+Dynamic Client Registration (RFC 7591), consent, and `getMcpSession`/`withMcpAuth`. Add
+it **additively** so the raw-API-key path still works for CLIs/SDKs. Other frameworks:
+find the equivalent OAuth-provider library; a hand-rolled OAuth server is a security
+liability, not a shortcut.
+
+```ts
+// better-auth config — plugins: [ ... , mcp({ ... }) ]
+mcp({
+  loginPage: "/login",
+  resource: `${baseURL}/api/v1/mcp`,        // the token audience = your MCP URL
+  oidcConfig: {
+    loginPage: "/login",
+    requirePKCE: true,
+    allowDynamicClientRegistration: true,   // ChatGPT/Claude self-register
+    scopes: ["mcp"],                        // merged with openid/profile/email/offline_access
+    metadata: { scopes_supported: ["openid","profile","email","offline_access","mcp"] },
+    accessTokenExpiresIn: 60 * 60,
+    refreshTokenExpiresIn: 60 * 60 * 24 * 14,
+    getConsentHTML: (p) => renderBrandedConsent(p),  // or consentPage: "/oauth/consent"
+  },
+})
+```
+
+Mount **root** well-known routes (the plugin's own copies sit under the auth basePath,
+but clients probe the resource origin): `app/.well-known/oauth-protected-resource/route.ts`
+→ `oAuthProtectedResourceMetadata(auth)` and `.../oauth-authorization-server/route.ts` →
+`oAuthDiscoveryMetadata(auth)`.
+
+### The gotchas that actually bite (verified on better-auth 1.4.18)
+
+These cost real debugging — the plugin does less than its metadata implies:
+
+- **DCR crashes on a missing column.** The register handler writes an
+  `authenticationScheme` field. With a manual-migration ORM (e.g. Drizzle on D1), the
+  OAuth-application table needs an `authentication_scheme` column or every client
+  registration fails at insert. Also map the 3 plugin tables (`oauthApplication`,
+  `oauthAccessToken`, `oauthConsent`) — for Drizzle, the **property key** must equal the
+  plugin's field name (`clientId`, `redirectUrls`, `accessToken`, `consentGiven`); the DB
+  column name is free.
+- **`getMcpSession` does NOT check token expiry.** It returns the token row on a bare
+  lookup. Enforce `accessTokenExpiresAt` yourself at the endpoint or expired tokens work.
+- **Scope is not a usable gate.** The discovery metadata advertises the OIDC scopes, not
+  your custom `mcp`, and the authorize flow won't reliably grant a custom scope — so
+  requiring `mcp` on the token rejects *every* real client. A single-purpose MCP OAuth
+  provider should treat **any valid token it issued** (audience-bound via `getMcpSession`)
+  as authorized. Advertise `mcp` for well-behaved clients, but don't require it.
+- **Consent path:** the plugin uses `getConsentHTML` only as a fallback after
+  `consentPage`. Consent IS enforced for a new client (`requireConsent` is true unless the
+  client is trusted or already consented) — but if you set neither, authorize throws. Escape
+  every interpolated value; JSON.stringify the consent `code` into any inline script.
+- **Refresh tokens are not rotated** — cap their lifetime (≈14 days) to bound replay.
+
+### The tool-auth bridge (when tools need a real API key)
+
+If your MCP tools run off a plaintext API key (calling your own REST), an OAuth token —
+which only yields `{userId}` — won't drive them. Bridge it: map the token → the user's
+team → mint **one** real per-team key (encrypted at rest, reused, revoked on team change),
+and forward that key to the exact tool path the API-key auth uses. Run the minted key back
+through your normal API-key resolver so both auth types produce an *identical* context —
+one code path for scope, rate limit, and sandbox. Watch the concurrency: use
+`onConflictDoNothing` + reclaim so a first-request race can't mint two keys or clobber a
+fresh row.
+
+### Tool annotations are mandatory for these two directories
+
+Every tool needs accurate MCP `annotations` (`readOnlyHint` / `destructiveHint` /
+`idempotentHint`). **Claude's directory rejects on wrong write annotations**; ChatGPT
+surfaces them for consent. `list/get/status` → `readOnlyHint: true`; `delete/disconnect`
+→ `destructiveHint: true`; `create/publish` → `readOnlyHint: false`. Spend-adjacent tools
+(generate/checkout) are writes, not reads.
+
+### Submit (after OAuth deploys to prod)
+
+Verify the live endpoints first: `curl <origin>/.well-known/oauth-protected-resource` → 200
+JSON; an unauthenticated `POST /api/v1/mcp` → 401 with a `WWW-Authenticate: Bearer
+resource_metadata="…"` header. Then:
+
+- **ChatGPT** (`platform.openai.com`): register the MCP connection in ChatGPT developer
+  mode (needs the OAuth above), capture the `asdk_app_…` id, serve the domain-ownership
+  token at `/.well-known/openai-apps-challenge`, run Scan Tools, fill listing (privacy URL,
+  ≥5 positive + 3 negative prompts, logo, category), submit. Origin is immutable per
+  plugin; EU-residency projects can't submit MCP plugins.
+- **Claude Connectors** (`claude.ai`, needs a **Team/Enterprise** org): public privacy-policy
+  URL (hard reject if missing) + docs URL, ≥3 prompts across different tools, correct
+  per-tool annotations, a realistic test account, logo/favicon, HTTPS + Origin validation.
+  Escalation: mcp-review@anthropic.com.
+
+The interactive login + the portal clicks are a **human** step — an agent prepares every
+asset and verifies the endpoints, but must not complete the OAuth/portal itself.
+
 ## Skip list (and why)
 
-- **OpenAI Apps SDK / ChatGPT app directory** — requires a hosted/remote MCP endpoint ChatGPT can reach over the network. A local npx server has nothing to point it at.
-- **Anthropic Connectors Directory** (`platform.claude.com`) — same constraint: OAuth + a hosted URL, not stdio.
+- **OpenAI Apps SDK / ChatGPT app directory** and **Anthropic Connectors Directory** — only
+  "skip" for a local/stdio-only server. If you have (or build) a hosted endpoint with OAuth
+  2.1, see the section above; they are the highest-value listings for an agent-facing product.
 - **Docker MCP Catalog/Toolkit** — requires an OCI image. Skip unless the server is already containerized; don't containerize solely for this listing.
 - **Claude Code plugin directory** — a different artifact type (a Claude Code plugin bundle: hooks/commands/skills), not a bare MCP server package. Only relevant if you're deliberately wrapping the MCP server as a Claude Code plugin.
