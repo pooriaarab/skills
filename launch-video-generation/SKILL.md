@@ -496,3 +496,70 @@ Downscale-then-upscale with `flags=neighbor` (nearest-neighbor) is what actually
 **"More expressive" overshoots into uncanny.** Prompting a reaction "bigger/more expressive" reliably yields a manic open-mouth laugh that reads as *unsettling*, not delighted. Add `laughing hard, open-mouth laugh, manic, unhinged, exaggerated` to the negative prompt and steer positively toward restraint: "a soft warm smile slowly spreads, her eyes light up gently, subtle." Warm-genuine beats big-and-toothy for a hook.
 
 **Tweet copy for a dev tool: a "what if" provocation beats a feature statement.** The line that landed for vibemovie was `what if claude made a movie about your pr?` — it makes the reader picture their own PR as a movie (self-insertion), where "turns your session into a cinematic video" just describes a feature. Lowercase, two short beats, the `npx` command as the payoff.
+
+## Embedding EXACT brand logos into generated scenes — image-edit with input_fidelity (supersedes "always ffmpeg-composite")
+
+§4 says never let a model draw a logo — composite it. That still holds for a flat overlay, but there is now a reliable way to put an EXACT logo *inside* a generated scene, sitting on a surface that deforms (a character's chest, a sign, a screen in perspective) where a flat ffmpeg overlay would look pasted:
+
+**`openai/gpt-image-1.5/edit` with `input_fidelity: high`, passing the real logo PNGs as reference `images[]`.** The `images` array takes up to 10; put the base scene first and the brand marks after. `input_fidelity: high` is documented for "logos that require accurate preservation" and it delivers — five different brand marks landed on five clay characters' chest badges, correct and legible, and *stayed* correct across later pose edits. `bytedance/seedream-v4/edit` is the cheaper multi-image alternative ($0.027 vs $0.10) and keeps arbitrary aspect (gpt-image only offers 1024²/1024×1536/1536×1024).
+
+Rules that made it work:
+- **Map each logo to its target by a STABLE attribute in the prompt**, not by position ("the CORAL-orange robe ninja gets the 2nd image; the GREEN robe ninja gets the 3rd…"). Colour/label survives motion; "left/right" does not.
+- **Describe each mark's shape as a fallback** ("a coral sunburst asterisk", "a bold X") so a dropped reference still renders something on-brand.
+- The marks must be **real raster PNGs on transparent bg** to pass as references — see the zero-install rasteriser below.
+- Still verify by eye; a minority of edits restyle. Re-run the single broken one.
+
+## Character + logo consistency across shots: star-topology gpt-image edits
+
+The §9 hero-anchor (every shot an edit of ONE reference, never a chain) works at the still level with `gpt-image-1.5/edit` too, and it carries embedded logos. One logo'd hero → each action beat (deliberate / argue / react / fix / celebrate) generated as an edit conditioned on that same hero + the mark PNGs. Five characters and their five badges stayed consistent through all beats. Cheaper and faster to lock the cast this way than to discover drift after paying for motion.
+
+## Rasterising SVG brand marks with ZERO install (headless Chrome)
+
+When `rsvg-convert` / `cairosvg` / ImageMagick are all absent (common on a fresh mac), don't fight package managers — use the **puppeteer `chrome-headless-shell`** binary that's already cached (`~/.cache/puppeteer/chrome-headless-shell/*/chrome-headless-shell`), or Google Chrome itself:
+
+```
+chrome-headless-shell --headless --disable-gpu --hide-scrollbars \
+  --default-background-color=00000000 --force-device-scale-factor=1 \
+  --window-size=512,512 --virtual-time-budget=1500 \
+  --screenshot=mark.png "file://…/wrap.html"
+```
+
+Wrap the SVG in an HTML doc sized to the window with the `<svg>` set to ~440px (resvg/​viewBox tininess §4 doesn't bite because the browser honours CSS size). `--default-background-color=00000000` gives real transparency; `--virtual-time-budget` lets webfonts/render settle. The same binary renders your name-tag / title-card / end-card overlays as transparent PNGs to composite in ffmpeg — no design tool needed.
+
+## Two silent-failure gotchas that eat a render
+
+- **zsh treats `$name[` as an array subscript.** Building an ffmpeg `filter_complex` string in a loop, `splits="$splits[p$i]"` or `"…adelay=$d|$d[q$j]…"` silently mangles to garbage (`$d[q5]` subscripts the scalar), and ffmpeg fails with a cryptic "Invalid argument". Brace every variable that is immediately followed by `[` — `${splits}[p$i]`, `${d}` — or just hand-write the static filter. Bash doesn't do this, so a script that works under `bash -x` still breaks under its `#!/bin/zsh` shebang.
+- **`zoompan` on a looped still multiplies its duration.** `-loop 1 -t 0.5 -i img … zoompan=…:d=15` expands EACH looped input frame by `d`, so a 0.5s loop (~12 frames) becomes ~6s. Feed a SINGLE frame instead — no `-loop`, add `-frames:v 15` and `zoompan d=15` — for exactly 15 frames = 0.5s at 30fps. Crop-fill to the target aspect BEFORE zoompan (`scale=…:increase,crop=W:H`) so a square closeup fills a 16:9 frame instead of pillarboxing.
+
+## Kling i2v inherits the INPUT image aspect
+
+A 1536×1024 keyframe animates to a 1764×1176 (3:2) clip — not 16:9. Generate your stills at whatever the edit model gives, then **blur-fill each clip to BOTH 16:9 and 9:16** from the one source (§5 blur-fill: cover-scale+crop+boxblur background, decrease-scale sharp foreground, overlay-centre). One motion render, two masters.
+
+## Voiceover on wavespeed: pick the model by how you want to steer the voice
+
+- **`minimax/speech-2.8-hd`** ($0.10): system `voice_id`s that fit a dramatic trailer (`Young_Knight`, `Imposing_Manner`, `Deep_Voice_Man`, `Determined_Man`), an `emotion` enum, `speed`, `pitch`, and inter-word pause control with `<#0.4#>` tags — use the tags to hit beat timings.
+- **`wavespeed-ai/qwen3-tts/voice-design`** ($0.005): you *describe* the voice in natural language ("an intense, dramatic anime movie-trailer narrator; deep, measured, theatrical, heroic edge") and it casts it. Cheapest, and the fastest way to get a specific *character* voice (incl. an anime-narrator-in-English read) without hunting voice IDs. Has a real `Japanese` language option too.
+- **Fit the picture to the VO, not the VO to the picture.** TTS overruns its target (a "~20s" script read 34s at first). Tighten the script to ~35–40 words, regenerate, measure the real duration, then set the video's beat lengths to that number. `loudnorm=I=-15` the VO, drop the music bed to ~-19dB under it, and keep only the punchy SFX (a stamp, a chime, keystrokes) so nothing fights the narration.
+
+## Two more small traps
+
+- **`minimax/music-2.6` ignores your "~20 seconds"** — there is no duration field; it returned an 81s track. Trim the segment you need.
+- **A nested `&` inside a backgrounded Bash tool call gets orphaned.** The outer shell exits and kills the inner `wavespeed run` poll before it finishes (empty output, no file). Run a single long call in the foreground (it blocks but completes), or as one non-nested background task.
+
+## The claymation "mascot council" launch-video pipeline (end to end)
+
+A light-mode, character-driven launch trailer with a real story spine, all zero-drift:
+
+1. **Hero still** — seedream-v4, the full cast with BLANK badges/placeholders where logos will go.
+2. **Emboss real logos** — gpt-image-1.5/edit + `input_fidelity:high`, mark PNGs as references, mapped by colour.
+3. **Action keyframes** — gpt-image edits conditioned on the logo'd hero (star topology), one per beat.
+4. **Motion** — Kling v2.5 i2v per beat (motion prompt only; the still owns the scene), 5s each, keep the best ~2s.
+5. **Story assembly (hard cuts)** — cold-open title card → per-character HERO CARDS with name·role lower-thirds → a few reaction CLOSEUPS mixed in (not a block) → clash → red-verdict → fix → green-approve → minimal end card. Overlays are headless-Chrome transparent PNGs.
+6. **Audio** — synthesized SFX (smooth aevalsrc only) + minimax instrumental bed + a TTS voiceover (PAS script: the problem one reviewer misses → the council of lenses → the fix → one green check).
+7. **Two masters** — blur-fill 16:9 and 9:16 from the same segments; mux the same audio onto both.
+
+Name-tag lower-thirds + a cold-open title + a VO are what turn "a series of nice clips" into a trailer that reads as cast → conflict → resolution — the single biggest lift for narrative cohesion.
+
+## Never fade in from black — the first frame IS the thumbnail
+
+A launch trailer's opening frame is its scroll-stopper and its poster thumbnail. A `fade=t=in:st=0:d=0.4` from black spends that most-valuable frame on nothing, and the autoplay/thumbnail lands on a black rectangle. Open ON the hero image instead — the full cast already in frame, the title over it — and start the source clip a beat in (e.g. `-ss 1.0`, not `0`) so the first visible frame already has life/motion rather than the clip's static first frame. Reserve fades for beat-to-beat dissolves you actually want, never the cold open.
