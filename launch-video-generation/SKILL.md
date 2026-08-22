@@ -559,3 +559,7 @@ A light-mode, character-driven launch trailer with a real story spine, all zero-
 7. **Two masters** — blur-fill 16:9 and 9:16 from the same segments; mux the same audio onto both.
 
 Name-tag lower-thirds + a cold-open title + a VO are what turn "a series of nice clips" into a trailer that reads as cast → conflict → resolution — the single biggest lift for narrative cohesion.
+
+## Never fade in from black — the first frame IS the thumbnail
+
+A launch trailer's opening frame is its scroll-stopper and its poster thumbnail. A `fade=t=in:st=0:d=0.4` from black spends that most-valuable frame on nothing, and the autoplay/thumbnail lands on a black rectangle. Open ON the hero image instead — the full cast already in frame, the title over it — and start the source clip a beat in (e.g. `-ss 1.0`, not `0`) so the first visible frame already has life/motion rather than the clip's static first frame. Reserve fades for beat-to-beat dissolves you actually want, never the cold open.
