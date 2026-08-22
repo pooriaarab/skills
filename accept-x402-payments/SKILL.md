@@ -102,7 +102,7 @@ Both settle the **same USDC-on-Base payment through the same CDP facilitator**. 
 
 **Choose CDP direct** for the simplest GA path — and you can still get unified Stripe reporting on it via the GA **Payment Records** API (see the section below), no preview gate. **Choose the full Stripe rail** only if you want Stripe to hold the funds (deposit address as `payTo`) and handle Bridge payouts — that part is preview/allow-listed. Either way the money is USDC on Base via the same CDP facilitator.
 
-Adjacent Stripe pieces, for context: **ACP** (the OpenAI Instant-Checkout standard) is **card/Link**, not stablecoin; **MPP** is agent-to-agent; Stripe's **Agent Toolkit** ships build-time skills. None replace the x402 receive path above. — https://stripe.com/newsroom/news/stripe-openai-instant-checkout
+Adjacent Stripe pieces, for context: **ACP** (the OpenAI Instant-Checkout standard) is **card/Link**, not stablecoin; **MPP** (Machine Payments Protocol, co-authored by Stripe + Tempo) is a *receive* protocol like x402 — an agent hits your `402`, then pays via **Shared Payment Tokens** (card/Klarna/Affirm) OR **stablecoin on Tempo**, recorded through PaymentIntents; it's an alternative rail you'd add alongside x402, not a replacement (see the MPP section below); Stripe's **Agent Toolkit** ships build-time skills. — https://stripe.com/blog/machine-payments-protocol
 
 ## Stripe path — full walkthrough (unified reporting)
 
@@ -164,9 +164,28 @@ curl https://api.stripe.com/v1/payment_records/report_payment \
 
 Both settle the same USDC-on-Base payment through the CDP facilitator; the difference is only where the money lands and how you report/cash out.
 
+## MPP — a second receive rail (card + Tempo stablecoin)
+
+MPP is the same `402 → pay → retry` shape as x402, but through Stripe's `mppx` library and PaymentIntents. It adds what x402 can't: agents paying by **card / Klarna / Affirm** (via Shared Payment Tokens) and stablecoin on **Tempo** (Stripe auto-offramps to your Stripe balance). Add it *alongside* x402, not instead. — https://docs.stripe.com/payments/machine/mpp/quickstart
+
+Receive-side is a few lines (`npm install mppx stripe`): create a Stripe **profile** (`profile_` id = `networkId`), build an `mppx` handler with `stripeMachinePayments.defaultMethods()`, and `compose` an `stripe/charge` (SPT) and `tempo/charge` (stablecoin). For Tempo you first mint a deposit address:
+
+```bash
+curl https://api.stripe.com/v1/crypto/deposit_addresses \
+  -u "$STRIPE_SECRET_KEY:" -H "Stripe-Version: 2026-05-27.preview" -d network=tempo
+```
+
+Verify end-to-end with `npx mppx@latest validate <url>` (sandbox does roundtrip test txns; SPT test tokens via `@stripe/link-cli`, Tempo via the `tempo` CLI).
+
+**Gate:** SPT card charges + Tempo deposit addresses need Stripe **machine-payments access** ("Stablecoins and Crypto", same allow-list as the Stripe x402 rail) and the `2026-05-27.preview` version — so MPP is **not** buildable/verifiable until that access lands. `mppx` is also a Node lib; confirm it runs on your runtime (e.g. CF Workers) before committing to it.
+
+**For Content Rabbit:** the `agentPaymentRails` registry (`lib/agent-payments`) already models pluggable rails (x402 today, ACP stubbed) — MPP slots in as another rail once access is granted; the `402/verify/settle` handler is reused. Until then, x402 (GA, no gate) + Payment Records reporting already accepts agent payments and shows them in Stripe.
+
 ## Sources
 
 - x402 spec + facilitator: https://github.com/coinbase/x402 · https://x402.org · https://docs.cdp.coinbase.com/x402/core-concepts/facilitator
 - CDP seller quickstart + Server Wallet: https://docs.cdp.coinbase.com/x402/quickstart-for-sellers · https://docs.cdp.coinbase.com/server-wallets/v2/introduction/welcome
 - Stripe x402 + agentic: https://docs.stripe.com/payments/machine/x402 · https://stripe.com/newsroom/news/stripe-openai-instant-checkout
+- Stripe Payment Records (GA reporting): https://docs.stripe.com/payments/payment-records
+- Stripe MPP (receive rail): https://docs.stripe.com/payments/machine/mpp/quickstart · https://mpp.dev
 - Off-ramp: https://eco.com/support/en/articles/15039728-convert-usdc-to-bank-account-fastest-routes-in-2026
