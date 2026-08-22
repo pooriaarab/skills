@@ -50,6 +50,12 @@ Two separate things. **(a) Installable** the instant it's on npm. **(b) Verified
 
 `npm publish` it. Users then install by **package name** at Settings → Community Nodes → Install (self-hosted; also available on n8n Cloud). The Trigger node ships in the same package — one package integrates exactly one service, and a trigger node for that same service is allowed alongside the main node.
 
+**Publish auth gotchas (these block the publish itself):**
+- npm now enforces 2FA on publish. From a headless/agent context, use an **automation token** (npmjs.com → Access Tokens → Classic **Automation**, or a Granular token with publish + **bypass-2fa**) — it publishes without an interactive OTP. A plain read token or a stale one fails with **`401 Unauthorized`** (check with `npm whoami`); a 2FA-required account without an automation token fails with **`E403 … Two-factor authentication … required`**.
+- Set the token without clobbering the user's `~/.npmrc`: write a temp file and pass `--userconfig <tmp>`.
+- If `prepublishOnly` runs a build/lint you don't need (dist already compiled) and it fails on an unrelated rule, publish with **`--ignore-scripts`** (only when `dist/` is already built and verified). Always `--access public` for an unscoped or public-scoped package.
+- Verify after: `npm view <pkg> version`.
+
 ### (b) Verified badge (Creator Portal review — the gated lap)
 
 Sign in to the **n8n Creator Portal** and submit the package for verification (this is the submission entry point — not an email, not a repo PR). Verify the current portal URL from the docs; the docs page is `docs.n8n.io/connect/create-nodes/deploy-your-node/submit-community-nodes`.
@@ -72,11 +78,21 @@ Make apps aren't an npm package. The `app.json` is the *export* of an app that l
 
 ### Build / import the app
 
-Two editors, same Developer Platform:
-- **Make Apps Editor for VS Code** (Marketplace: `Integromat.apps-sdk`) — the practical path for a repo-managed `app.json`. Add an SDK environment (API URL is zone-specific, e.g. `us1.make.com/api`; EU zones differ), paste your Make API key, then create/edit the app. Config downloads on open, uploads on save. This is how you get the repo's `app.json` into a live Make app.
-- The in-browser app builder on make.com (My Apps) — same backend, no local files.
+Three editors, same Developer Platform — pick by what you have:
+- **Make DevTool (Chrome extension)** — the **one-shot import**, and the fastest path. Install the extension, open any scenario on make.com, DevTool panel → **Tools → Import app**, load the single `app.json` → it builds BASE + CONNECTION + every WEBHOOK + MODULE + RPC at once. No tab-by-tab pasting. This is the answer to "how do I get `app.json` into Make" — prefer it.
+- **Make Apps Editor for VS Code** (Marketplace: `Integromat.apps-sdk`) — repo-managed alternative. Add an SDK environment (API URL is zone-specific, e.g. `us1.make.com/api`; EU zones differ), paste your Make API key; config downloads on open, uploads on save.
+- The in-browser app builder on make.com (My Apps) → **Create custom app** makes only the *shell* (name must match `^[a-z][0-9a-z-]+[0-9a-z]$`, 3–30 chars; label, theme, language, audience=Private while building). Then you'd paste each section by hand — slowest; use DevTool import instead.
 
-Run the repo's validate script before importing so the JSON is well-formed.
+Make has **no headless publish** — an agent cannot push the app for you. Everything here needs the human's browser + Make API key. Run the repo's validate script before importing so the JSON is well-formed.
+
+### What `app.json` must contain to PASS public review (learned, concrete)
+
+The private app works with far less; the *public review* has extra hard prereqs. Bake these into `app.json` before submitting (source: `developers.make.com/custom-apps-documentation/app-review/prerequisites`):
+- **A Universal module** — a generic HTTP-passthrough module (relative `url` + `method` select + optional `headers`/`qs`/`body`, bound with Make's `{{toCollection(parameters.x,'key','value')}}` idiom). Review *requires* exactly one. **Caveat**: the single-file import format has no documented `kind: "universal"` string (validators typically allow only `action`/`search`/`instant_trigger`), so author it as `"kind": "action"` and, after import, set the module type to **Universal** in the Make editor. Keep the URL **relative** — Make rejects universal modules where the user can set the host; pin the host in `base.baseUrl`.
+- **`limit` + pagination on list/search modules** — every list-type `search` module needs a `limit` param; add `cursor`/`page` where the API actually paginates. Single-item getters don't. For endpoints with no server-side pagination, a client-side `limit` cap is acceptable — note it.
+- **Typed dates** — every date field in an `interface` or mappable parameter uses `"type": "date"`, not text.
+- **Sanitized secrets** — `base.log.sanitize` (and `connection.log.sanitize`) must list `request.headers.authorization` so the API key never lands in logs.
+- **Real interfaces + labels + descriptions** on every module, matching the OpenAPI response shape.
 
 ### Submit for public listing (developers.make.com → Request app review)
 
@@ -84,7 +100,8 @@ To list in the public Make apps directory, request a review: on the app's **Revi
 
 Gotchas / gates:
 - **Novelty requirement**: the app must connect to a service Make *doesn't already integrate*. If Make already has a Content Rabbit module, review is refused as a duplicate.
-- You must supply **working example scenarios** — a bare app with no demonstrated modules gets bounced.
+- You must supply **working example scenarios**, and Make QA is specific: **every module used at least once**, **search/list modules run on their own so the log shows pagination**, and **at least one scenario that deliberately triggers an API error** (e.g. a getter with a bogus id). Run them immediately before requesting review — execution logs expire. Publishing is **permanent (no unpublish)**, so submit only when green.
+- Review form needs: API-docs URL, links to those test scenarios, support email, categories, a **512×512 PNG logo** (≤500 kB), and trademark + external-terms confirmations.
 - Until approved, the app is **private/unlisted** (usable by you, not in the directory). That's the normal pre-review state, not a failure.
 - Confirm the current prerequisites and reviewer checklist at `developers.make.com/custom-apps-documentation/app-review/prerequisites` — the pass/fail checklist drifts.
 
