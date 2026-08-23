@@ -234,6 +234,25 @@ The gate that matters:
 
 So Zapier is *listable* fast (Beta, ~1 week) but *fully public* only after real adoption or an embed. Docs: `docs.zapier.com/platform/publish/public-integration`.
 
+### CLI submit path — the real sequence + the traps (verified 2026-08)
+
+The whole submit is CLI, no browser except one ToS click. Full playbook with commands: `pooriaarab/scripts` `scripts/zapier/README.md`.
+
+```
+zapier validate → register "<Title>" --desc --url --audience global --role user --category <c> --yes
+→ zapier push → zapier promote <version> --yes   # promote = submit-for-review (there is no `zapier submit`)
+```
+
+Each of these bounced a run — fix before you start:
+- **Core version must be EXACT and match the CLI major.** `zapier-platform-core: "^16.0.1"` fails validate; CLI 17.x needs `"17.8.0"`. No `^`/`~`.
+- **A dynamic ID dropdown must reference a TRIGGER, not a search (D005).** Point `dynamic:` at a **hidden trigger** (`display.hidden:true`) returning `{id,name}[]`, not at a `list_*` search. Searches back *Find* actions; hidden triggers back dropdowns.
+- **Every search needs ≥1 input field (D009).** Empty `inputFields:[]` fails — add a filter field and use it.
+- **`zapier register` needs `--url`** or it drops to an interactive prompt that throws `ERR_USE_AFTER_CLOSE` under a pipe.
+- **`zapier promote` requires a `CHANGELOG.md`** with a user-facing `## <version>` entry in the pushed source. Add it, `push` again, then promote.
+- **Promote U001 — Developer ToS gate.** Pre-checks pass but fail on `meta.tos_agreement (U001)`; a human must accept the Developer ToS once at `zapier.com/app/developer` (the CLI can't). Then re-run promote.
+- **`.zapierapprc`** (written by `register`) links the dir to the app id — gitignore it, with `.env`/`build/`.
+- **Keep hard-coded API paths current** — a product API rename (e.g. `/social-sets` → `/teams`) 404s every call silently.
+
 ---
 
 ## 7. Anthropic Claude Connectors Directory — self-serve in claude.ai, OAuth-gated
