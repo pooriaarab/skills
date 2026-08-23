@@ -30,112 +30,40 @@ Do the zero-review ones first (npm publish for n8n, push the Claude plugin marke
 
 ## 1. n8n community node — npm keyword now, verified badge later
 
-Two separate things. **(a) Installable** the instant it's on npm. **(b) Verified badge** = a Creator Portal review with hard requirements.
+Two laps: **(a) installable** the instant it's on npm (needs the `n8n-nodes-` name + the
+`n8n-community-node-package` keyword + the `n8n` object with compiled `dist/` paths — miss
+one and n8n ignores it), **(b) the verified badge** via a Creator Portal review (hard
+cutoffs: npm provenance from 2026-05-01, zero runtime deps, the scanner, English-only).
 
-### (a) Get it installable (npm auto-index, no review)
-
-`package.json` must have all three or n8n won't recognize it:
-
-```jsonc
-{
-  "name": "n8n-nodes-contentrabbit",        // MUST start with n8n-nodes- (or @scope/n8n-nodes-)
-  "keywords": ["n8n-community-node-package"], // the discovery keyword — omit it and n8n ignores the package
-  "n8n": {
-    "n8nNodesApiVersion": 1,
-    "nodes":       ["dist/nodes/ContentRabbit/ContentRabbit.node.js"],       // compiled .js in dist/, NOT .ts
-    "credentials": ["dist/credentials/ContentRabbitApi.credentials.js"]
-  }
-}
-```
-
-`npm publish` it. Users then install by **package name** at Settings → Community Nodes → Install (self-hosted; also available on n8n Cloud). The Trigger node ships in the same package — one package integrates exactly one service, and a trigger node for that same service is allowed alongside the main node.
-
-**Publish auth gotchas (these block the publish itself):**
-- npm now enforces 2FA on publish. From a headless/agent context, use an **automation token** (npmjs.com → Access Tokens → Classic **Automation**, or a Granular token with publish + **bypass-2fa**) — it publishes without an interactive OTP. A plain read token or a stale one fails with **`401 Unauthorized`** (check with `npm whoami`); a 2FA-required account without an automation token fails with **`E403 … Two-factor authentication … required`**.
-- Set the token without clobbering the user's `~/.npmrc`: write a temp file and pass `--userconfig <tmp>`.
-- If `prepublishOnly` runs a build/lint you don't need (dist already compiled) and it fails on an unrelated rule, publish with **`--ignore-scripts`** (only when `dist/` is already built and verified). Always `--access public` for an unscoped or public-scoped package.
-- Verify after: `npm view <pkg> version`.
-
-### (b) Verified badge (Creator Portal review — the gated lap)
-
-Sign in to the **n8n Creator Portal** and submit the package for verification (this is the submission entry point — not an email, not a repo PR). Verify the current portal URL from the docs; the docs page is `docs.n8n.io/connect/create-nodes/deploy-your-node/submit-community-nodes`.
-
-Requirements that cause silent rejection:
-- **Provenance (hard cutoff): from 2026-05-01, verified nodes MUST be published via a GitHub Actions workflow with an npm provenance statement.** A node published from a local machine is rejected outright. This is the single most likely rejection now.
-- **Zero runtime dependencies.** Verified nodes may not use any run-time `dependencies` — bundle what you need. (Unverified npm install has no such limit; this bites only at verification.)
-- Must pass the scanner: `npx @n8n/scan-community-package n8n-nodes-contentrabbit`. Run it before submitting.
-- English-only for everything user-facing: parameter names, descriptions, help text, error messages, README.
-- Must not duplicate an existing node. Must follow n8n UX guidelines. README required (in the npm package or a public repo).
-- n8n strongly suggests scaffolding/maintaining with the **`@n8n/node-cli`** tool so conventions match.
-
-Verified nodes appear in the node panel under a **"More from the community"** section in node search; instance owners can toggle their visibility. Unverified nodes never appear in search — install-by-name only.
+**Full n8n build + publish + verify playbook** → invoke the **`n8n-integration`** skill
+(the three package.json fields, the npm automation-token/2FA/`--ignore-scripts` gotchas,
+the declarative credential `authenticate` auth, and every verified-badge requirement).
 
 ---
 
 ## 2. Make (Integromat) app — dev-portal build + QA review
 
-Make apps aren't an npm package. The `app.json` is the *export* of an app that lives in Make's own builder. You import it, then request review.
+Make apps aren't an npm package — the `app.json` is the *export* of an app that lives in
+Make's builder; you push it component-by-component (SDK Apps API), then request a QA review.
 
-### Build / import the app
-
-**There is no one-shot "import the whole `app.json`" in current Make.** (The Make DevTool Chrome extension does **not** have an "Import app" tool — its tools are Focus/Find/Copy Mapping/Swap App/Base64/Remap/Highlight, no import. Old READMEs that say "DevTool → Import app" are stale — don't repeat it.) A custom app is stored as separate components (Base + each Connection/Module/Webhook/RPC); you load it component-by-component. The bundled `app.json` in the repo is a *convenience bundle* whose top-level keys (`base`, `connection`, `modules[]`, `webhooks[]`, `rpcs[]`) map 1:1 to those components.
-
-**PREFER THE SDK API — an agent CAN push the whole app.** There is no UI "import", but the **SDK Apps API** creates every component programmatically. This is the fastest, least-error-prone path and the default an agent should reach for; the manual editors below are the fallback when you can't script.
-
-- Tool: `pooriaarab/scripts` → `scripts/make/publish-app.py` pushes a bundled `app.json` (base/connection/webhooks/modules/rpcs) to a live app. `MAKE_TOKEN=… python3 publish-app.py --app <slug> --app-json app.json --zone us1.make.com`. Create the app *shell* + one connection in the UI first; the script does the rest.
-- API facts it bakes in (all learned live, easy to get wrong): auth `Authorization: Token <token>`; **modules & RPCs are versioned** (`/api/v2/sdk/apps/{app}/{ver}/modules`), **webhooks and connections are NOT** (`/apps/{app}/webhooks`, sections at `/apps/webhooks/{name}/{section}`; `/apps/{app}/connections`); module `typeId` = 4 action / 9 search / 10 instant-trigger / 12 universal; set sections with `PUT …/{name}/{api|expect|interface|samples}` (raw JSON, `api`←communication, `expect`←mappable params); **HTTP 403 body `error code: 1010` is NOT a rate limit — it's Cloudflare blocking the default `Python-urllib` User-Agent** (curl passes, urllib doesn't; the real `x-ratelimit` is 10000 and untouched). Fix = send a normal `User-Agent` header (`curl/8.4.0`) and the whole app publishes in one clean run; do not chase a phantom quota. attach/detach reference the connection as `{{account.apiKey}}` (not `{{connection.*}}`) and don't inherit base, so write them absolute; Make **auto-names** created webhooks — capture the real name from the create response to link instant-trigger modules. Token needs scopes `sdk-apps:read` + `sdk-apps:write`.
-
-Manual fallbacks (same Developer Platform), section-by-section — the bundle's top-level keys (`base`, `connection`, `modules[]`, `webhooks[]`, `rpcs[]`) map 1:1 to components:
-- **Make Apps Editor for VS Code** (Marketplace: `Integromat.apps-sdk`) — each component is an editable JSON doc; downloads on open, uploads on save. Add an SDK environment (zone-specific API URL, e.g. `us1.make.com/api`) + your Make API key.
-- In-browser builder → **Create custom app** makes only the *shell* (name `^[a-z][0-9a-z-]+[0-9a-z]$`, 3–30 chars); then the app's `+` menu → Create Connection / Webhook / Module / Remote Procedure, pasting each. Note: the Connection **doesn't inherit base** so its Communication URL must be **absolute**; webhook attach/detach do inherit but use `{{account.apiKey}}`.
-
-Run the repo's validate script first so the JSON is well-formed.
-
-### What `app.json` must contain to PASS public review (learned, concrete)
-
-The private app works with far less; the *public review* has extra hard prereqs. Bake these into `app.json` before submitting (source: `developers.make.com/custom-apps-documentation/app-review/prerequisites`):
-- **A Universal module** — a generic HTTP-passthrough module (relative `url` + `method` select + optional `headers`/`qs`/`body`, bound with Make's `{{toCollection(parameters.x,'key','value')}}` idiom). Review *requires* exactly one. **Caveat**: the single-file import format has no documented `kind: "universal"` string (validators typically allow only `action`/`search`/`instant_trigger`), so author it as `"kind": "action"` and, after import, set the module type to **Universal** in the Make editor. Keep the URL **relative** — Make rejects universal modules where the user can set the host; pin the host in `base.baseUrl`.
-- **`limit` + pagination on list/search modules** — every list-type `search` module needs a `limit` param; add `cursor`/`page` where the API actually paginates. Single-item getters don't. For endpoints with no server-side pagination, a client-side `limit` cap is acceptable — note it.
-- **Typed dates** — every date field in an `interface` or mappable parameter uses `"type": "date"`, not text.
-- **Sanitized secrets** — `base.log.sanitize` (and `connection.log.sanitize`) must list `request.headers.authorization` so the API key never lands in logs.
-- **Real interfaces + labels + descriptions** on every module, matching the OpenAPI response shape.
-
-### Submit for public listing (developers.make.com → Request app review)
-
-To list in the public Make apps directory, request a review: on the app's **Review** page fill the form — link to the **service's API documentation** and link to **scenarios that actually use your app's modules** — then **Request review**. Make's QA team reads your app's code; if it passes, Make publishes it to all users. Track status by the email subject `App review: <YourAppName>`; status also shows on the Review page.
-
-Gotchas / gates:
-- **Novelty requirement**: the app must connect to a service Make *doesn't already integrate*. If Make already has a Content Rabbit module, review is refused as a duplicate.
-- **The scenarios are the real work, and NOT automatable.** The Review form has **one field PER MODULE** — a separate Make scenario URL (`https://us1.make.com/{orgId}/scenarios/{id}/edit`) for **every** module, each showing a **successful run** of that module — plus one more field for a scenario that deliberately triggers an **API error** (e.g. a getter with a bogus id). For a 32-module app that's 33 scenarios you build and run by hand. The SDK Apps API builds the app but **cannot** produce these: the Scenarios API can create empty scenarios but can't make them meaningfully pass, and modules with side effects (create/publish/delete) act for real — so budget genuine manual QA time. Also toggle **every module to "visible"** first (the form checks it). Run the scenarios right before requesting review — execution logs expire. Publishing is **permanent (no unpublish)**, so only Publish when you're ready to do all this. You CAN create the scenario *shells* via the Scenarios API to save the building (`POST /api/v2/scenarios?confirmed=true`, blueprint module ref `app#{app}:{module}`, real numeric teamId or you get `IM002`, `scenarios:write` scope) — `pooriaarab/scripts` has `make/create-review-scenarios.py` for this — but the connection is UI-only (`POST /connections` returns "Failed to load manifest" for a private app) and the runs are still manual.
-- **After you Request review, Make emails a Tally follow-up form that GATES the review** ("Externally developed apps on Make" — the review does not proceed until it's submitted). It asks: relationship to the API vendor (first-party = "We are the direct vendor of that software (ISV)"), ISV company name, software homepage URL, an optional square-PNG logo, a **partnership contact** (email + name + phone — the phone is a masked tel input, so type a leading `1` for +1 or it won't format), a **support contact** (email + name), the app **category + subcategory** (e.g. Marketing → Social Media), and two required attestations (trademark ownership, external-service T&C). Watch the inbox for it.
-- Review form needs: API-docs URL, links to those test scenarios, support email, categories, a **512×512 PNG logo** (≤500 kB), and trademark + external-terms confirmations.
-- Until approved, the app is **private/unlisted** (usable by you, not in the directory). That's the normal pre-review state, not a failure.
-- Confirm the current prerequisites and reviewer checklist at `developers.make.com/custom-apps-documentation/app-review/prerequisites` — the pass/fail checklist drifts.
+**Full Make build + submit playbook** → invoke the **`make-integration`** skill: the
+SDK-API push (`scripts/make/publish-app.py`), the component model + exact API facts
+(versioned vs unversioned endpoints, typeIds, section PUTs), the **Cloudflare `1010`
+User-Agent trap** (not a rate limit), the review prereqs (one Universal module, pagination,
+typed dates, sanitized secrets), and the review gates (a scenario PER module, 512×512 logo,
+the Tally follow-up form, permanent publish, novelty requirement).
 
 ---
 
 ## 3. Pipedream components — PR into PipedreamHQ/pipedream
 
-The registry is the monorepo. Publishing = a merged PR to `PipedreamHQ/pipedream` under `components/`.
+The registry IS the monorepo — publishing = a merged PR to `PipedreamHQ/pipedream` under
+`components/` (ES-modules only, globally-unique namespaced component keys, per-component
+metadata + annotations, auth centralized in the app file's `_makeRequest`/`_headers()`).
 
-### Layout (exact, or the PR bounces)
-
-```
-components/contentrabbit/
-  contentrabbit.app.mjs                       # the app file (shared auth + prop defs)
-  sources/<event>-instant/<event>-instant.mjs # sources = triggers, past-tense key
-  actions/<verb>-<thing>/<verb>-<thing>.mjs   # actions, active-verb key
-  package.json
-```
-
-- **ES modules only** — `.mjs`, `export default`. Not `.js`.
-- Each component's **`key`** is globally unique and namespaced: `contentrabbit-create-post` (action, active verb) / `contentrabbit-post-published` (source, past tense). This key is what gates registry identity — a dup or a mis-shaped key fails review.
-- Required metadata per component: `key`, `name` (friendly, singular, title-case, **no app name in it**), `version` (start `0.0.1`, semver), `description`, `type` (`"action"` or a source type). Actions add `annotations` (`readOnlyHint`, `destructiveHint`, `openWorldHint`).
-- Props: mirror the app's UI labels, describe with markdown, use async options for ID pickers, minimize required fields.
-
-### Submit
-
-Fork → branch → PR to `master`. A Pipedream team member is auto-notified. CI runs lint (`npx eslint components/contentrabbit`; `--fix` to autofix) and other automated checks — a red PR won't be looked at. Once merged, components appear in the Pipedream app registry for anyone to run. No paid tier, but review is real and can ask for changes. Full rules: `pipedream.com/docs/components/guidelines` and the monorepo `CONTRIBUTING.md`.
+**Full Pipedream build + PR playbook** → invoke the **`pipedream-integration`** skill (the
+exact directory layout, the key convention, required metadata, the app-file auth pattern,
+and the fork→branch→PR-to-master + CI-lint flow).
 
 ---
 
