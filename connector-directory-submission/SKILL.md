@@ -233,38 +233,9 @@ The gate that matters:
 - **Beta lasts 90 days, and public listing is auto-granted only after 50 active users + ≥10 published Zap templates.** "Active" = the user has your app in a turned-on Zap. A daily job checks and auto-launches when you qualify.
 - **Waiver**: embed Zapier in-product behind login and Zapier waives the 50-user requirement — a single signup through an embedded tool exits Beta the next business day and unlocks Partner Program benefits. For a brand-new app with no user base, the embed route is the realistic path to public.
 
-So Zapier is *listable* fast (Beta, ~1 week) but *fully public* only after real adoption or an embed. Docs: `docs.zapier.com/platform/publish/public-integration`.
+Note the harder floor than "~1 week": even the *initial* submit is blocked until **S001 — 3 distinct Zapier accounts each have a turned-on (live) Zap using the app** (plus a successful task per trigger/action/search). A cold, zero-Zap app **cannot be submitted at all** by one developer — this, not the questionnaire, is the wall. Docs: `docs.zapier.com/platform/publish/public-integration`.
 
-### CLI submit path — the real sequence + the traps (verified 2026-08)
-
-The CLI gets the app *built + registered*, but the actual submit is NOT CLI-only — it's gated on live-usage validation you can only satisfy in the browser (see "The real submission gate" below). Full playbook with commands: `pooriaarab/scripts` `scripts/zapier/README.md`.
-
-```
-zapier validate → register "<Title>" --desc --url --audience global --role user --category <c> --yes
-→ zapier push → zapier promote <version> --yes   # promote = submit-for-review (there is no `zapier submit`)
-```
-
-Each of these bounced a run — fix before you start:
-- **Core version must be EXACT and match the CLI major.** `zapier-platform-core: "^16.0.1"` fails validate; CLI 17.x needs `"17.8.0"`. No `^`/`~`.
-- **A dynamic ID dropdown must reference a TRIGGER, not a search (D005).** Point `dynamic:` at a **hidden trigger** (`display.hidden:true`) returning `{id,name}[]`, not at a `list_*` search. Searches back *Find* actions; hidden triggers back dropdowns.
-- **Every search needs ≥1 input field (D009).** Empty `inputFields:[]` fails — add a filter field and use it.
-- **`zapier register` needs `--url`** or it drops to an interactive prompt that throws `ERR_USE_AFTER_CLOSE` under a pipe.
-- **`zapier promote` requires a `CHANGELOG.md`** with a user-facing `## <version>` entry in the pushed source. Add it, `push` again, then promote.
-- **Promote U001 — Developer ToS gate.** Pre-checks pass but fail on `meta.tos_agreement (U001)`; a human must accept the Developer ToS once at `zapier.com/app/developer` (the CLI can't). Then re-run promote.
-- **`.zapierapprc`** (written by `register`) links the dir to the app id — gitignore it, with `.env`/`build/`.
-- **Keep hard-coded API paths current** — a product API rename (e.g. `/social-sets` → `/teams`) 404s every call silently.
-
-### The auth-wiring bug that `validate` can't see (verified 2026-08)
-
-Before you spend a day on the review gate, prove the connector actually authenticates. **Zapier attaches auth imperatively** — an empty `beforeRequest: []` in `index.js` means every trigger/search/create sends *no* `Authorization` header and 401s (`"API key missing"`), **while the connection test still passes** (its header is hardcoded separately). So connect succeeds and nothing else works, for every user. `zapier validate` only checks structure, so it's silent. Fix: a global `beforeRequest` middleware setting `Authorization: Bearer ${bundle.authData.api_key}`. (Make/n8n/Pipedream attach auth declaratively — this is a Zapier-only trap.) The only thing that catches it is running one real operational request.
-
-### The real submission gate — a live Zap per action (verified 2026-08)
-
-The metadata + questionnaire are necessary but **not sufficient**. Both `zapier promote` and the Platform UI "Submit for review" refuse to submit until **every trigger, search, and create has produced ≥1 successful task** (per-item blockers: T001/T002/T004/T005 + S002 — "needs a successful task but doesn't have a Zap"). **A brand-new app with zero Zaps literally cannot be submitted** — this, not the form, is the wall.
-
-Clear it cheaply: a Zap-editor **"Test"** of each step satisfies its tasks — **no publish or turn-on needed**. Connect the account **once** (a human pastes the API key into the connect popup — agents are prohibited from typing credentials into fields; but it's one-time and every step reuses the connection), seed data via the product API so triggers poll and write-actions have targets, then build a **few** Zaps that chain many action/search steps and Test each. Watch the blocking count drop, then submit. Hard item: triggers needing a real event to poll (e.g. "new webhook delivery"). Write-actions run for real — point them at a throwaway tenant with no downstream connections.
-
-The Platform UI review questionnaire (5 sections) also gates the Submit button. Notable: Zapier **mandates the reviewer test-account username be `integration-testing@zapier.com`** — for a passwordless (email-OTP) product, create that exact account (reviewers own that inbox → they get the login code) and put the API key + connection id in Notes. And `promote`/submit enforce metadata: description must **start "`<Name>` is a…"** (M002), role **employee/contractor** not "user" (M003), and a **logo** (M004, Platform-UI upload only).
+**Full Zapier depth lives in its own skill** → invoke **`zapier-integration`** for: the imperative-auth `beforeRequest` bug that `validate` can't catch (connect passes, every real call 401s), the exact-core-version pin, dropdown-must-be-a-trigger (D005), search-needs-a-field (D009), the `register --url` / `CHANGELOG` / U001-ToS / metadata (M002/M003/M004) traps, the "editor-Test clears a task without publishing" trick, the 3-users-with-live-Zaps (S001) wall + how to clear it (invite-link 3 accounts, or the embed), and the 5-section review questionnaire (incl. the mandated `integration-testing@zapier.com` reviewer account). Command-level playbook: `pooriaarab/scripts` `scripts/zapier/README.md`.
 
 ---
 
