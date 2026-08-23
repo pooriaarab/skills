@@ -305,6 +305,51 @@ resource_metadata="…"` header. Then:
 The interactive login + the portal clicks are a **human** step — an agent prepares every
 asset and verifies the endpoints, but must not complete the OAuth/portal itself.
 
+### Verified hands-on — the gotchas that only surface when you actually connect
+
+Shipped Content Rabbit into ChatGPT end-to-end. What the docs don't tell you:
+
+- **Two connections, don't confuse them.** ChatGPT **developer-mode connect** (Settings →
+  Security/login → Developer mode → Plugins → **+** → New Plugin) gives you a working,
+  *private* connector immediately after OAuth — that is NOT the public directory. The
+  public listing is a separate submit-for-review at platform.openai.com (verified
+  identity, domain challenge, Scan Tools). "It works in my ChatGPT" ≠ "it's in the store".
+- **New Plugin dialog:** Connection = **Server URL** (not Tunnel — Tunnel is for a local
+  dev server behind ngrok). Enter the Streamable-HTTP MCP URL directly (e.g.
+  `/api/v1/mcp`), not an `/sse` path despite the placeholder. Authentication = **OAuth**;
+  once the URL is entered it auto-discovers via your `.well-known` (DCR). The app id is
+  `plugin_asdk_app_…` in the browser URL after it connects.
+- **Icon 10KB limit is real and tight.** ChatGPT wants PNG ≥256×256 but ≤**10KB**. A normal
+  256px app icon is ~15KB. `sips -z 256 256` alone won't fit — palette-quantize with
+  `pngquant --force --strip --output out.png 256 -- out.png` (drops ~15KB → ~6KB). PIL's
+  `.quantize()` works too; plain resize does not.
+- **THE big one — login→authorize resume.** When a not-logged-in user connects, the MCP
+  authorize has no session, so the Better Auth `mcp` plugin stores the authorize query in
+  an `oidc_login_prompt` cookie and redirects to `/login?<authorize query>`. The plugin
+  **auto-resumes only for logins that pass through a Better Auth `/api/auth/*` endpoint**
+  (magic link, Google callback) via an after-hook that watches for the session cookie. A
+  **custom login endpoint (e.g. your own OTP verify) does NOT trigger it** — the user lands
+  on your app's default post-login page (onboarding/dashboard) and the OAuth handshake
+  silently dies. Magic link worked; OTP didn't — that's the tell. **A directory reviewer is
+  not logged in, so they hit this cold and the review fails.** Fix: `/login` detects the
+  forwarded authorize params and, after ANY sign-in method, redirects to
+  `/api/auth/mcp/authorize` to resume; and any post-login router that forces onboarding must
+  honor that OAuth resume *over* onboarding. This is the reusable OAuth-login pattern for a
+  CLI / desktop / mobile client too — build it once.
+- **Consent only renders via `consentPage`, and only on `prompt=consent`** — see the plugin
+  gotchas above. Force `prompt=consent` in middleware or a reviewer gets a code with no
+  Allow screen (and Anthropic/OpenAI both expect to see consent).
+- **Registry publish reality:** `mcp-publisher validate` passing ≠ publish working. The
+  login JWT expires in <1hr, so `publish` 401s "token is expired" — re-run
+  `mcp-publisher login github` (device flow, human approves at github.com/login/device),
+  then publish immediately. A prior version can already be live; publishing a new version
+  adds it (both stay `active`). The 100-char `description` cap and the npm `mcpName` field
+  are the two silent 422/400s.
+- **CI noise:** cancelled duplicate workflow runs show as non-success in `gh pr checks` —
+  filter to genuine `FAILURE`, not `CANCELLED`, before believing a PR is red.
+
+The interactive login and portal clicks stay a **human** step.
+
 ## Skip list (and why)
 
 - **OpenAI Apps SDK / ChatGPT app directory** and **Anthropic Connectors Directory** — only
