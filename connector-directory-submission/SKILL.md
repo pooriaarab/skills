@@ -237,7 +237,7 @@ So Zapier is *listable* fast (Beta, ~1 week) but *fully public* only after real 
 
 ### CLI submit path — the real sequence + the traps (verified 2026-08)
 
-The whole submit is CLI, no browser except one ToS click. Full playbook with commands: `pooriaarab/scripts` `scripts/zapier/README.md`.
+The CLI gets the app *built + registered*, but the actual submit is NOT CLI-only — it's gated on live-usage validation you can only satisfy in the browser (see "The real submission gate" below). Full playbook with commands: `pooriaarab/scripts` `scripts/zapier/README.md`.
 
 ```
 zapier validate → register "<Title>" --desc --url --audience global --role user --category <c> --yes
@@ -253,6 +253,18 @@ Each of these bounced a run — fix before you start:
 - **Promote U001 — Developer ToS gate.** Pre-checks pass but fail on `meta.tos_agreement (U001)`; a human must accept the Developer ToS once at `zapier.com/app/developer` (the CLI can't). Then re-run promote.
 - **`.zapierapprc`** (written by `register`) links the dir to the app id — gitignore it, with `.env`/`build/`.
 - **Keep hard-coded API paths current** — a product API rename (e.g. `/social-sets` → `/teams`) 404s every call silently.
+
+### The auth-wiring bug that `validate` can't see (verified 2026-08)
+
+Before you spend a day on the review gate, prove the connector actually authenticates. **Zapier attaches auth imperatively** — an empty `beforeRequest: []` in `index.js` means every trigger/search/create sends *no* `Authorization` header and 401s (`"API key missing"`), **while the connection test still passes** (its header is hardcoded separately). So connect succeeds and nothing else works, for every user. `zapier validate` only checks structure, so it's silent. Fix: a global `beforeRequest` middleware setting `Authorization: Bearer ${bundle.authData.api_key}`. (Make/n8n/Pipedream attach auth declaratively — this is a Zapier-only trap.) The only thing that catches it is running one real operational request.
+
+### The real submission gate — a live Zap per action (verified 2026-08)
+
+The metadata + questionnaire are necessary but **not sufficient**. Both `zapier promote` and the Platform UI "Submit for review" refuse to submit until **every trigger, search, and create has produced ≥1 successful task** (per-item blockers: T001/T002/T004/T005 + S002 — "needs a successful task but doesn't have a Zap"). **A brand-new app with zero Zaps literally cannot be submitted** — this, not the form, is the wall.
+
+Clear it cheaply: a Zap-editor **"Test"** of each step satisfies its tasks — **no publish or turn-on needed**. Connect the account **once** (a human pastes the API key into the connect popup — agents are prohibited from typing credentials into fields; but it's one-time and every step reuses the connection), seed data via the product API so triggers poll and write-actions have targets, then build a **few** Zaps that chain many action/search steps and Test each. Watch the blocking count drop, then submit. Hard item: triggers needing a real event to poll (e.g. "new webhook delivery"). Write-actions run for real — point them at a throwaway tenant with no downstream connections.
+
+The Platform UI review questionnaire (5 sections) also gates the Submit button. Notable: Zapier **mandates the reviewer test-account username be `integration-testing@zapier.com`** — for a passwordless (email-OTP) product, create that exact account (reviewers own that inbox → they get the login code) and put the API key + connection id in Notes. And `promote`/submit enforce metadata: description must **start "`<Name>` is a…"** (M002), role **employee/contractor** not "user" (M003), and a **logo** (M004, Platform-UI upload only).
 
 ---
 
