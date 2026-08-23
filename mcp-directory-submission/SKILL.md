@@ -286,6 +286,38 @@ surfaces them for consent. `list/get/status` → `readOnlyHint: true`; `delete/d
 → `destructiveHint: true`; `create/publish` → `readOnlyHint: false`. Spend-adjacent tools
 (generate/checkout) are writes, not reads.
 
+### The ChatGPT submission JSON (the portal's real gate)
+
+The ChatGPT portal doesn't take a form you type — it wants an uploaded
+`chatgpt-app-submission.json` (its "Codex-generated" import). It **rejects
+anything without the exact** `"$schema":
+"https://developers.openai.com/plugins/schemas/chatgpt-app-submission.v1.json"`.
+**Fetch that schema** (it redirects to `/plugins/schemas/...`) rather than
+guessing. Required top-level: `$schema` (that const), `schema_version: 1`,
+`tools`. Optional: `app_info`, `test_cases` (**≥5**), `negative_test_cases`
+(**≥3**).
+
+- **`tools`** — object keyed by tool name; EACH needs `annotations`
+  {`readOnlyHint`, `openWorldHint`, `destructiveHint` booleans} AND
+  `justifications` {`read_only_justification`, `open_world_justification`,
+  `destructive_justification` non-empty strings}. That's the tedious part —
+  **generate it from your MCP registry's annotations**, do not hand-write 100+
+  tools. (`openWorldHint` = touches external systems/third parties.)
+- **`app_info`**: `display_name`, `subtitle` (≤30), `description` (≤4000),
+  `category` (enum incl. PRODUCTIVITY, DEVELOPER_TOOLS, BUSINESS, …).
+- A ready generator + config shape: `pooriaarab/scripts/scripts/chatgpt-app-submission`.
+
+Two app ids exist: the **dev-mode connect** id and the **submission** id (the
+portal mints its own — read it from the edit URL
+`/plugins/edit/<app_id>/<version_id>`). Put the submission id in the JSON.
+
+Demo-account reality: an OAuth MCP app's reviewer signs in through YOUR login. If
+that's email-OTP/OAuth (no password), a demo account needs a reachable inbox for
+the OTP — a bare prod user isn't reviewer-accessible on its own. Plan a demo
+account on a controlled +alias, or a demo video. The OAuth path also mints a REAL
+token (not sandbox), so hand a demo account with no live publishing accounts
+connected.
+
 ### Submit (after OAuth deploys to prod)
 
 Verify the live endpoints first: `curl <origin>/.well-known/oauth-protected-resource` → 200
