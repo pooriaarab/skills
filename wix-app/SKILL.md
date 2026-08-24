@@ -25,9 +25,37 @@ A Vite + TypeScript app that reads `import.meta.env.VITE_*` needs `src/vite-env.
 
 ## Submission — Wix App Market
 
-**Bucket: dev-portal review.** Register in the **Wix Dev Center** (OAuth, permissions, dashboard URL) → submit. Wix runs an AI pre-check (minutes) then human review (~business weeks).
+**Submittable: portal-review**
 
-**Silent-rejection gotchas:** missing `vite-env.d.ts`; TS6305 tsconfig; over-broad permissions. TBD — confirm current review SLA at first submission.
+No marketplace-upload API. `@wix/cli` / Blocks deploy *code*; the listing is
+portal-only: App Dashboard (`dev.wix.com`) → clear blockers → **Submit & Publish**.
+That runs an automated AI review; leftover blockers must be fixed **and
+resubmitted** (appeals via Wix support). Self-managed apps need a **public HTTPS
+dashboard URL**; CLI/Blocks apps are hosted by Wix. Account is free; paid apps
+must use **Wix Billing** + a finished payout account. Docs:
+`dev.wix.com/docs/build-apps/launch-your-app`.
+
+1. Create the app in the Dev Center. Register OAuth, permissions, and the
+   dashboard-page URL (or deploy via the Wix CLI). Host over HTTPS.
+2. **App Profile → App Info**: name (no "Wix", no other-brand affiliation),
+   teaser, **1000×1000** 24-bit sRGB PNG icon, ≥3 feature bullets + description,
+   optional Wix demo-site URL, **terms & conditions URL** (shown on consent).
+3. **App Profile → Media**: 5–6 images, **≥1200×900 (4:3)** JPG/PNG (one main
+   image with name + tagline); optional YouTube promo (not a tutorial); optional
+   540×360 promo banner (no text/logo).
+4. **Company Info**: company logo (square PNG/JPG), name ≤23 chars, address,
+   website, **privacy-policy URL**. For paid apps, set pricing and finish
+   payout-account setup first. Leave a **live demo account + credentials** in
+   the review notes — keep it active for as long as the app is listed.
+5. Clear every dashboard blocker, then **Submit & Publish**. Refresh until the
+   AI review passes (or new blockers appear — those only clear on resubmit).
+
+**Silent-rejection gotchas:** AI blockers you fixed locally but didn't resubmit;
+dead demo account; name/teaser that implies Wix endorsement or another brand;
+paid app that bypasses Wix Billing; missing T&Cs/privacy URL; over-broad
+permissions; browser-native popups (use Wix modals — OAuth excepted); ads /
+"powered by" / redirects to other stores; basic setup (fonts, colors, SEO,
+GDPR, accessibility) not kept free. Human-review fallback SLA `(verify)`.
 
 ## Parity checklist
 

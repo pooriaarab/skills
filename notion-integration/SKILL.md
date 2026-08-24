@@ -57,16 +57,42 @@ npm run dev            # serves the OAuth routes + sync loop on localhost
 
 ## Submission — Notion integration gallery
 
-**Bucket: public-integration review, free.** Steps:
+**Submittable: portal-review**
 
-1. Create a **public** integration at `https://www.notion.so/my-integrations`; set the name, description, and a square icon (PNG, ≥250×250 — TBD: confirm exact spec at first submission).
-2. Request only the capabilities the code actually calls (read/update/insert content, optional user info) — reviewers check scope usage against real calls.
-3. Host the service at a public HTTPS URL and register `https://<your-domain>/oauth/callback` as a redirect URI.
-4. Prepare review materials: a test workspace, a demo video or screenshots of the OAuth flow plus one real end-to-end sync, and a support contact email.
-5. Submit from the integration's settings page (**Distribution → Submit for review**).
-6. After approval, list it in the gallery at `https://www.notion.so/integrations`, linking the public integration (TBD — confirm the current listing form at first submission).
+No listing API. Create a **public connection** in the Developer portal, then open
+a **separate Marketplace listing** and submit it for Notion security/content
+review (~**5–10 business days**, result by email). Internal connections and public
+connections scoped to **Selected workspaces only** **cannot be listed** — and
+installation scope is immutable, so start as public / **Any workspace**. Account
+is free. The OAuth service must be on **public HTTPS**. Listing is optional for
+the OAuth flow itself; the Marketplace is discovery only. Portal:
+`app.notion.com/developers/connections` (legacy `www.notion.so/my-integrations`
+redirects there). Listings: `www.notion.so/profile/connections`. Gallery:
+`www.notion.com/integrations/all`. Docs:
+`developers.notion.com/guides/get-started/marketplace-listing`.
 
-**Silent-rejection gotchas:** trying to distribute an internal integration (impossible — must be public); capabilities requested but never exercised; a redirect URI that doesn't match what the hosted OAuth flow actually sends; setup instructions that don't tell the installing user WHICH databases to pick on the consent screen (that picker IS the access grant — skip it and the sync silently sees nothing); no way for a reviewer to watch a real sync succeed from a clean workspace.
+1. Developer portal → **Public connections** → create with installation scope
+   **Any workspace**, redirect URI(s), and only the capabilities the code calls.
+   Copy the OAuth client id/secret.
+2. Host the service at a public HTTPS URL and register
+   `https://<your-domain>/oauth/callback` so authorize + token-exchange URIs
+   match byte-for-byte.
+3. Listings → Connections → **Start a new connection listing**. Attach the
+   public connection. Fill name, description, category/tags, logo + listing
+   images (exact pixel sizes: verify). Privacy-policy / terms URLs if the form
+   asks `(verify)`. Save as draft.
+4. Prepare review materials: a clean test workspace, setup steps that tell the
+   reviewer **which pages/databases to pick** on the OAuth picker, and a demo of
+   one real end-to-end sync.
+5. Submit from **Listings → Connections**. Track status there; feedback arrives
+   by email. Approval publishes to the Marketplace.
+
+**Silent-rejection gotchas:** internal token, or a public connection created as
+**Selected workspaces only** (unfixable — make a new connection); capabilities
+requested but never exercised; redirect URI mismatch; setup that doesn't explain
+the page picker (skip it and the sync silently sees nothing); no way for a
+reviewer to watch a real sync from a clean workspace; trademark / quality issues
+on the listing. Exact logo/screenshot dimensions: (verify).
 
 ## Parity checklist (prove against a real workspace before submitting)
 

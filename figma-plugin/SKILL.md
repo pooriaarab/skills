@@ -58,11 +58,11 @@ Everything Figma needs to know lives in `manifest.json` — and everything revie
 
 ## Submission — Figma Community
 
-**Bucket: community publish + review, free.** Steps:
+**Submittable: portal-review, free** (in-app Publish from the desktop app — no publish CLI or REST submit endpoint). Steps:
 1. Build and smoke-test locally in the desktop app.
 2. **Plugins → Development → Manage plugins → Publish** (or `figma.com/community` → **Publish plugin**).
-3. Fill the listing: name, **128×128** icon, **1920×1080** cover image, description (state that an API key is required and where a user gets one), tags, support contact/website.
-4. Publish. Figma reviews new plugins before they appear in Community search (exact SLA: TBD — confirm at first submission). Updates re-publish from the same listing once `"id"` is in the manifest; users are notified of updates.
+3. Fill the listing: name, **128×128** icon, **1920×1080** cover image (keep content in the `1800×1080` safe area), description (state that an API key is required and where a user gets one), tags, support contact/website.
+4. Publish. Figma reviews new plugins before they appear in Community search; there is no published SLA and it self-reports as "reasonably prompt", but real waits run days to a few weeks (verify). The decision arrives by email to your Figma account address. Updates re-publish from the same listing once `"id"` is in the manifest; users are notified of updates.
 5. Manifest changes (new `allowedDomains`, new `editorType`, renamed `main`/`ui`) only reach users through a re-publish — a local build is never enough.
 
 **Silent-rejection gotchas:** a domain missing from `allowedDomains`; a `networkAccess.reasoning` left vague; a description that doesn't tell a fresh reviewer how to authenticate; declaring editors (`editorType`) the plugin doesn't support.

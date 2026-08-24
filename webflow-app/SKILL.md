@@ -25,7 +25,7 @@ The server (`tsconfig.server.json` with `"module": "NodeNext"`, `"moduleResoluti
 
 ## Submission — Webflow marketplace
 
-**Bucket: dev-portal review.** Register the app in the Webflow developer dashboard (scopes, OAuth redirect, webhook URL) → submit for marketplace review. Provide the hosted server URL.
+**Submittable: portal-review.** Register the app in the Webflow developer dashboard (scopes, OAuth redirect, webhook URL) → submit for marketplace review. Provide the hosted server URL.
 
 **Silent-rejection gotchas:** TS2835 (above); unverified webhook signatures; a Vite `outDir` escaping the package. TBD — confirm current scopes + review SLA at first submission.
 
