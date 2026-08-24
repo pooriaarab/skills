@@ -62,7 +62,9 @@ The PHP header names the plugin to WordPress; `readme.txt` feeds the entire dire
 
 Review feedback arrives by email from the plugins team. Fix what they flag, re-zip, re-upload at the same `/developers/add/` URL, and reply on the same thread — resubmitting as a new plugin restarts the queue from zero.
 
-**Silent-bounce gotchas:** the nonce/sanitize/escape triplet (above); `Stable tag` pointing at a missing tag; a plugin name starting with another's trademark; minified-only JS; anything phoning home on install. Current queue length and exact asset dimensions: TBD — confirm at first submission.
+**Submittable: portal-review** (manual zip review, then SVN self-host — no publish API). **Plugin-page assets** live in SVN `/assets` (sibling of `trunk/`, never in trunk): icon `128×128` + `256×256` PNG, banner `772×250` + `1544×500`, and `screenshot-N.png` files referenced by caption in readme.txt. No developer fee, no OAuth registration; the only gate is a real `login.wordpress.org` account whose username is in `Contributors:`.
+
+**Silent-bounce gotchas:** the nonce/sanitize/escape triplet (above); `Stable tag` pointing at a missing tag; a plugin name starting with another's trademark; minified-only JS; anything phoning home on install. Review-queue length is variable and unpublished (days–weeks); assume slow.
 
 ## Parity checklist (prove on a real WP site before zipping)
 

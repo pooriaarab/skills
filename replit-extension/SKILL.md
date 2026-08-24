@@ -24,7 +24,7 @@ A local helper that asserts a client method returns exactly `{ data: T[] }` — 
 
 ## Submission — Replit Extensions store
 
-**Bucket: dev-portal / store publish.** Develop against the extension dev tools, then publish to the **Replit Extensions store** for review. Note the audience is developers — social-publishing fit is narrow; scope the value accordingly.
+**Submittable: portal-review.** Develop against the extension dev tools, then publish to the **Replit Extensions store** for review. Note the audience is developers — social-publishing fit is narrow; scope the value accordingly.
 
 **Silent-rejection gotchas:** over-typed wrappers; missing `vite-env.d.ts`; unclear value for a dev audience. TBD — confirm current store submission steps at first submission.
 
