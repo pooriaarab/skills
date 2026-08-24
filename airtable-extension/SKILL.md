@@ -26,9 +26,17 @@ The UI components (`Button`, `Input`, `initializeBlock`, …) come from the **`@
 
 ## Submission — Airtable
 
-**Submittable: portal-review** (custom-extension publish is self-serve; public marketplace is reviewed). `block release` publishes to your base/workspace; a public marketplace listing is a separate Airtable review. Fill `block.json` + the listing (name, icon, description).
+**Submittable: hybrid — CLI uploads code, a web form + human review does the rest.** `block release` (deploy a private build to your own bases) and `block submit` (public marketplace) are **independent** — you do NOT need to release or have prior usage first. Steps:
+1. `npm install --global @airtable/blocks-cli`; the CLI authenticates with your Airtable **personal access token** (set at CLI init — this part is automatable).
+2. From the extension dir, run **`block submit`** — it bundles + uploads the code, then **prints a per-submission web-form URL**.
+3. Open that link (a **logged-in Airtable browser session** — not scriptable) and fill the listing.
+4. Airtable reviews (a few days–weeks) and emails revisions/approval. Updates = `block submit` again; approved installs auto-update.
 
-**Silent-rejection gotchas:** the `@airtable/blocks-ui` 404 (above); React-18 mount; missing `globalConfig` permission checks. TBD — confirm the current public-marketplace submission path at first submission.
+**Required assets:** square **icon 200×200–1000×1000**; publisher name + publisher icon (same range); one-sentence short description + a multi-paragraph long one; **1–10 screenshots, min 300×500, max 1800px wide** (must match the real UI); optional demo video; **support email + URL**; and **required privacy policy + terms-of-service URLs** (a hard gate). Reviewer-only (required): install/usage instructions, a full-feature **walkthrough video**, and a **read-only invite to an example base**.
+
+**Credentials — how to obtain / self-serve?** The CLI upload needs your **Airtable personal access token** (create at airtable.com/create/tokens — you make it, then I can run `block submit`). The listing form + review assets need YOU in a logged-in browser; I can't create the account or author the screenshots/example base.
+
+**Silent-rejection gotchas:** stale/fake screenshots vs real UI; bugs on primary flows; over-specific table/field-name requirements (must generalize to any base); unnecessary data access/network calls; any CSP violation or dynamic code execution (no eval/Function/Web Workers); thin support docs; ads; **missing privacy policy / ToS**; plus the build traps above (`@airtable/blocks-ui` 404, React-18 mount).
 
 ## Parity checklist (prove in a real base)
 
