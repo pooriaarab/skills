@@ -69,12 +69,14 @@ Then, in the Framer desktop app: Plugins menu → enable **Developer Tools** →
 
 ## Submission — Framer Community / Marketplace
 
-**Bucket: instant/light review, free — the platform's selling point.**
+**Submittable: portal-review, free** (no publish CLI — you upload a zip in the Marketplace dashboard).
 
-1. `npm run pack` → the zip with `framer.json` at its root.
-2. Post the zip in the Framer Community plugins category (`framer.com/communities/`, Plugins section): title, description, the zip, plus a screenshot or short demo clip. It is published essentially immediately; there is no lengthy review gate.
-3. The Framer Marketplace listing (framer.com/marketplace) is a separate, curated step — **TBD — confirm exact submission URL + requirements at first submission.**
-4. Listing copy must explain how a fresh user authenticates (paste-the-API-key flow is fine — auth is self-service in the plugin, no reviewer account needed).
+1. `npm run pack` → `plugin.zip` with `framer.json` at its root (zip the CONTENTS of `dist/`).
+2. Go to the Marketplace dashboard `framer.com/marketplace/dashboard/plugins/` → **New Plugin** → upload the zip → fill the form (name, description, icon, screenshots, pricing model if any) → submit.
+3. Review is **manual and curated**, in two phases: an initial check (~7 days, verify) then a design review (~14 days, verify). Statuses track in the dashboard: In Review → Needs Changes / Published / Rejected; the outcome comes by email. Common rejects: unclear functionality, poor performance, confusing UI, no light/dark-mode support.
+4. Listing copy must explain how a fresh user authenticates (paste-the-API-key flow is fine — auth is self-service in the plugin, no reviewer account needed). Exact icon/screenshot dimensions are set in the dashboard form (verify at submit).
+
+(The Framer Community plugins category, `framer.com/community`, is a separate, near-instant post — useful for early distribution, but the curated Marketplace is the reviewed channel.)
 
 **Silent-failure gotchas:** framer.json not at the zip root (folder zipped instead of contents); forgetting the cert-accept step when demoing the dev plugin; window blank because `showUI` ran after render or inside an effect; a stale selection image because you read once instead of subscribing; assuming a stored key survives across projects.
 

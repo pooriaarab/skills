@@ -26,9 +26,37 @@ A Whop app is a **React app embedded as an iframe view inside a Whop** (a creato
 
 ## Submission — Whop App Store
 
-**Bucket: dev-portal review.** Create the app in the Whop dashboard → set the hosted app URL + OAuth redirects → test via the dev proxy → submit a versioned build for review → promote to the App Store. Because apps can monetize, expect review to check the billing/entitlement flow too.
+**Submittable: API**
 
-**Silent-rejection gotchas:** placeholder App ID/redirect; assuming Whop OAuth authorizes your API; a hosted URL that isn't reachable/HTTPS. TBD — confirm the current review SLA + revenue split at first submission.
+Scriptable create + ship. REST: `POST https://api.whop.com/api/v1/apps` (name,
+`company_id`, HTTPS `base_url`, `route`, `icon`, `redirect_uris`),
+`PATCH /apps/{id}` (`description`, `app_store_description`, `icon`, `status`),
+`POST /files` then `POST /app_builds` (`attachment`, `checksum`, `platform: web`),
+`POST /app_builds/{id}/promote` (draft builds enter review first). CLI:
+`whop apps deploy` (build + typecheck + upload + promote; `--preview` skips live).
+Dashboard: `whop.com/dashboard/developer`. Account is free. The iframe app needs a
+**public HTTPS `base_url`** (or a `*.whop.app` hosted site) — Whop embeds your
+URL. Discovery/`status` live needs name + icon + description. Monetized apps bill
+through Whop (dev rev-share often quoted 10–30% plus platform cut — verify).
+
+1. Create the app (dashboard or `POST /apps`) → copy the real App ID + OAuth
+   redirects. Set Hosting paths (experience `/experiences/[experienceId]`,
+   dashboard `/dashboard/[companyId]` as needed).
+2. Point `base_url` at your public HTTPS origin. Test inside a real Whop via
+   `whop-proxy` / `whop apps dev`.
+3. Fill store metadata (`PATCH /apps/{id}` or the dashboard): name, short
+   description, longer `app_store_description`, **icon** (file upload; exact px:
+   verify). Screenshots / 10–20 s demo video if the listing UI asks `(verify)`.
+4. Upload a versioned web build (`POST /app_builds` or `whop apps deploy`).
+5. Promote (`POST /app_builds/{id}/promote` or `whop apps builds promote <id>`).
+   Unapproved builds go to review; an approved build becomes the production
+   App Store version. "Verified" is a separate endorsement, not automatic.
+
+**Silent-rejection gotchas:** placeholder App ID / redirect; assuming Whop OAuth
+authorizes *your* API; `base_url` that isn't reachable HTTPS; promoting a build
+whose view types don't match the hosted paths; unpaid entitlement flow that
+doesn't read Whop access; listing with no icon/description so discovery stays
+off. Review SLA + current icon/screenshot spec: (verify).
 
 ## Parity checklist (prove in a real Whop embed)
 
