@@ -71,7 +71,7 @@ generic authorization failure, not a network error.
 
 ## Submission — Google Workspace Marketplace
 
-**Bucket: GCP-console review, free; the OAuth verification is the heavy gate.** Steps:
+**Submittable: portal-review** (Google Cloud console; OAuth verification is the heavy gate). Steps:
 
 1. Switch the script to a standard GCP project (trap 5).
 2. Configure the **OAuth consent screen** (External for public distribution). Add the

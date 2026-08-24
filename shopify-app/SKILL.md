@@ -73,30 +73,41 @@ Never let your own downstream outage propagate back to Shopify.
 
 ## Submission — Shopify App Store
 
-**Bucket: Partner review, free.** Steps:
-1. Partner Dashboard (`partners.shopify.com`) → Apps → Create app → note the
-   Client ID/secret → `.env` (`SHOPIFY_API_KEY`, `SHOPIFY_API_SECRET`) +
-   `client_id` in the toml.
-2. Host the app on a public HTTPS URL. Set `SHOPIFY_APP_URL`, update
-   `application_url` + `redirect_urls`, then `shopify app deploy` to push config
-   — this syncs the declarative webhook subscriptions, including the mandatory
-   GDPR topics.
-3. Fill the App Store listing in the Partner Dashboard: name, tagline,
-   description, a **512×512 icon**, screenshots of the embedded UI, and a public
-   **privacy policy** URL.
-4. **Submit for review.** Reviewers install on a test store and exercise the app.
-   The heavy gate is the business/content review + listing requirements (docs:
-   `shopify.dev/docs/apps/launch`). Automated checks cover OAuth on install, App
-   Bridge embedding, HMAC-validated webhooks, and the GDPR endpoints returning
-   2xx.
-5. After approval, set distribution to the App Store and point merchants at the
-   same hosted URL.
+**Submittable: portal-review**
 
-**Silent-rejection gotchas:** a GDPR webhook route that 404s or 500s; no
-privacy-policy URL; screens that break with no API key configured; requesting
-scopes the app never calls; toml changes never deployed (see above). Review
-timelines and exact listing fields change — mark anything new "TBD — confirm at
-first submission" rather than assuming.
+No submit-for-review API. `shopify app deploy` / `shopify app release` push an
+**app version** (toml, webhooks, extensions) — they do **not** host the Remix app
+and do **not** file the review. Review is portal-only: Partner / Dev Dashboard →
+**Apps → [your app] → Distribution → Shopify App Store** (also the App Store
+review page). Partner account is free; **public HTTPS hosting** is required;
+distribution method is one-way. Paid apps must use Shopify App Pricing / Billing
+API (revenue share after the first $1M USD/year — verify current split). Docs:
+`shopify.dev/docs/apps/launch`.
+
+1. `partners.shopify.com` → Apps → create the app → Client ID/secret into `.env`
+   + `client_id` in the toml. Bind with `shopify app config link`.
+2. Host the production app on public HTTPS (hostname must not contain "Shopify").
+   Set `SHOPIFY_APP_URL`, `application_url` + `redirect_urls`, subscribe the three
+   **compliance webhooks**, `shopify app deploy`.
+3. Choose **public / App Store** distribution. Complete configuration: URLs,
+   GDPR webhooks, **1200×1200** JPEG/PNG icon (no text — corners auto-round),
+   emergency contact email + phone. If you touch buyer data, file **protected
+   customer data** access *before* review (can't apply while under review).
+4. Listing: name ≤30 chars (brand-led, unique), 100-char intro + 500-char details,
+   feature list (≤80 chars each), **3–6 screenshots at 1600×900 (16:9)** (at least
+   one of the embedded UI, no browser chrome/PII/pricing), optional 1600×900
+   feature image or 2–3 min promo video, demo-store URL, pricing, support +
+   **privacy-policy URL**. Include a short reviewer screencast + test credentials.
+5. Pass the built-in **automated checks** (required) and optional AI self-review,
+   then **Submit for review**. Reviewers install on their own test store with none
+   of your state. SLA commonly weeks `(verify)`.
+
+**Silent-rejection gotchas:** off-platform billing (hard reject); URLs containing
+"Shopify"; OAuth that doesn't fire immediately on install; embedded app that
+relies on third-party cookies; invalid SSL; GDPR webhook 404/500; missing
+privacy-policy URL / test credentials / screencast; scopes the app never calls;
+screens that break with no API key; toml never deployed. Payout business
+verification `(verify)`.
 
 ## Parity checklist (prove in a real dev store before submitting)
 

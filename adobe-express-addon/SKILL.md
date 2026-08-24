@@ -26,15 +26,42 @@ The panel runs in a locked-down iframe. A `fetch` to your API **fails at runtime
 - `manifest.json`: entry points, permissions, allowed network domains, icon.
 - `npm run build` produces the bundle to upload.
 
-## Submission — Adobe Developer Console / Express add-on distribution
+## Submission — Adobe Express add-on distribution
 
-**Bucket: dev-portal review, free.** Steps:
-1. Create the add-on listing in the **Adobe Developer Console** (Express add-ons).
-2. Upload the built bundle; fill the listing (name, description, icon, screenshots).
-3. Choose distribution: **public** (marketplace review) or **private/link** (shareable without full review).
-4. Submit; Adobe reviews public add-ons before listing.
+**Submittable: portal-review**
 
-**Silent-rejection gotchas:** an external origin missing from the manifest allow-list; permissions that don't match the code; a listing that never explains how a fresh reviewer authenticates; missing/incorrect icon sizes (confirm the current required set in the console). TBD — confirm the exact icon-size set + review SLA at first submission.
+No public submission API. Package with the add-on CLI (`npm run package` →
+`dist.zip`), then upload **inside Adobe Express** (Add-ons → **Manage add-ons**,
+or the home-page Add-ons link — enable **Add-on Development** in settings first).
+Adobe hosts the zip on a unique subdomain; you do **not** serve the panel
+yourself. Public listings get marketplace review (~**10 business days**); a
+**private link** skips review and is fine for testing. Adobe ID, no listing fee;
+Adobe takes **no** revenue cut (you run checkout). Docs:
+`developer.adobe.com/express/add-ons/docs/guides/build/distribute/public-dist`.
+
+1. Enable Add-on Development. Create a new add-on listing (name ≤25 chars,
+   unique — validated in-app).
+2. `npm run package` in the project root. Zip must have `manifest.json` at the
+   **root** (≤50 MB, relative paths only, no hidden files).
+3. **Public listing** tab → Create public listing. Required: name, 50-char
+   summary, 1000-char description, **help URL**, **support email**, **144×144**
+   JPG/PNG icon (auto-resized to 36/64/144), **≥1 screenshot at 1360×800**
+   (up to 5). Optional: privacy-notice URL, EULA URL, keywords, release notes.
+   First-time publishers also need a **250×250** publisher logo + trader info
+   to sell in the EU.
+4. Declare generative-AI usage (required questionnaire) and a monetization
+   model (free / free+paid / trial / paid) plus payment options. Checkout is
+   **outside** Express. If login/credits exist, give review **test credentials
+   with enough credits**.
+5. Submit. Private-link path: upload zip + 144×144 icon + release notes → copy
+   the link; you can promote that listing to public later.
+
+**Silent-rejection gotchas:** `MANIFEST_NOT_FOUND_ERROR` from zipping the folder
+instead of its contents; origin missing from the manifest allow-list;
+permissions that don't match the code; no clean-state auth / missing test
+credentials; missing help URL or support email; undeclared generative AI;
+monetization that isn't disclosed; a flow with no Cancel/exit; Adobe-logo misuse.
+Review contact: `ccintrev@adobe.com`.
 
 ## Parity checklist (prove in a real Express session before submitting)
 

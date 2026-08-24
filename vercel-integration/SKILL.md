@@ -25,7 +25,7 @@ Vercel posts deploy events (`deployment.created`, `deployment.succeeded`/`ready`
 
 ## Submission — Vercel Marketplace
 
-**Bucket: dev-portal review.** Register the integration in the **Vercel integration console** (OAuth scopes, redirect, config URL, webhook URL) → submit for marketplace review.
+**Submittable: portal-review.** Register the integration in the **Vercel integration console** (OAuth scopes, redirect, config URL, webhook URL) → submit for marketplace review.
 
 **Silent-rejection gotchas:** unverified webhooks; assuming the Vercel token authorizes your API; unclear value for a dev audience. TBD — confirm current console submission steps at first submission.
 

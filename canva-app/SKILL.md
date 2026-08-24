@@ -29,14 +29,14 @@ The app runs in a locked-down iframe. A `fetch` to your API **fails silently** (
 
 ## Submission — Canva App Marketplace
 
-**Bucket: dev-portal review, free.** Steps:
+**Submittable: portal-review, free** (`@canva/cli` runs local preview only — there is no publish CLI; the bundle is uploaded and submitted in the Developer Portal). Steps:
 1. Create the app in `developer.canva.com`; copy its App ID into the config.
 2. Declare capabilities (design read, asset upload, allowed fetch domains).
 3. `npm run build` → upload the bundle in the portal.
-4. Fill the listing (name, description, a 512×512 icon, screenshots) → **Submit for review**.
-5. Canva reviews before it appears in the marketplace (days, not minutes). Private/team use can run without full marketplace review.
+4. Fill the listing → **Submit for review**. Required assets: app icon `512×512` PNG (1:1, full-bleed, no transparency or rounded corners) and a featured image `2400×1800` (4:3) — up to 2 in a carousel (editorial + contextual). Provide app support + privacy-policy URLs, and a **test-account login** if the app uses authentication (reviewers have no account of yours).
+5. Canva's review team (engineers, designers, QA) reviews before it appears in the marketplace (days, not minutes). Private/team use can run without full marketplace review. Cap: an app can be submitted at most **5 times per day**.
 
-**Silent-rejection gotchas:** un-allow-listed fetch domain (see above); an icon that isn't exactly 512×512; a listing that doesn't explain how a fresh reviewer authenticates; requesting capabilities the app never calls.
+**Silent-rejection gotchas:** un-allow-listed fetch domain (see above); an icon that isn't exactly 512×512 or has transparency/rounded corners; a listing that doesn't explain how a fresh reviewer authenticates (or omits the test login); requesting capabilities the app never calls; typos/formatting errors in listing copy (they run a spellcheck).
 
 ## Parity checklist (prove in a real Canva session before submitting)
 

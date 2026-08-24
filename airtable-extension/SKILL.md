@@ -26,7 +26,7 @@ The UI components (`Button`, `Input`, `initializeBlock`, …) come from the **`@
 
 ## Submission — Airtable
 
-**Bucket: custom extension / marketplace.** `block release` publishes to your base/workspace; a public marketplace listing is a separate Airtable review. Fill `block.json` + the listing (name, icon, description).
+**Submittable: portal-review** (custom-extension publish is self-serve; public marketplace is reviewed). `block release` publishes to your base/workspace; a public marketplace listing is a separate Airtable review. Fill `block.json` + the listing (name, icon, description).
 
 **Silent-rejection gotchas:** the `@airtable/blocks-ui` 404 (above); React-18 mount; missing `globalConfig` permission checks. TBD — confirm the current public-marketplace submission path at first submission.
 

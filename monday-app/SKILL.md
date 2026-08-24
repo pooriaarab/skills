@@ -24,9 +24,40 @@ A monday.com app is commonly a **board or item view** — a React app embedded i
 
 ## Submission — monday marketplace
 
-**Bucket: dev-portal review.** Build the app in the **monday Developer Center** (features, OAuth scopes, hosting URL) → submit for marketplace review.
+**Submittable: portal-review**
 
-**Silent-rejection gotchas:** missing `vite-env.d.ts`; sending monday's token to your API; over-broad scopes. TBD — confirm current review requirements at first submission.
+No marketplace-upload API. `@mondaydotcomorg/apps-cli` / monday-code deploy *code*;
+you publish a shareable install link, then submit a **web form** (Developer Center
+→ **Submit app** → Submission form; also `forms.monday.com` — exact form id:
+verify). Review is a human team on a shared monday board (first reply within **72
+business hours**). Account is free; the app needs a **public hosting URL** (your
+host or monday code). Apps built primarily with no-code / "vibe code" are **not
+eligible**. Docs: `developer.monday.com/apps/docs/submit-your-app`.
+
+1. `apps.developer.monday.com` → create the app → declare features, OAuth scopes,
+   and the view hosting URL. Request only the scopes you use.
+2. **Share** tab → publish the app (produces an `auth.monday.com` install link
+   the form requires).
+3. Listing copy: name ≤30 chars, no emoji, do **not** start with "monday" /
+   "monday.com"; short description ≤60 chars; long description 200–2,000 chars
+   (listing-page checklist also says 200–2,500 — verify); up to 10 keywords +
+   ≤3 categories; plan names/bullets if you monetize.
+4. Graphics: **192×192** JPG/PNG app icon + developer icon, **592×348** app-card
+   image, **3–5 gallery images at 1920×960**, promo video **≤120 s / 50 MB**
+   (guidelines prefer 30–60 s HD MP4 — verify). Public **privacy-policy** + **ToS**
+   URLs under the same legal entity; support email on a domain you prove you own
+   (JSON well-known — see privacy/security checklist).
+5. Submit the form. Review covers product, engineering, **Burp scan of every
+   domain**, encrypted tokens, documented scopes, PII handling, and listing
+   assets. Fix flags on the shared board; they re-review. SOC2/ISO is optional
+   (Shield Badge only). Paid apps bill through monday (rev-share often quoted
+   0% until $200k lifetime, then 85/15 — verify).
+
+**Silent-rejection gotchas:** no-code / AI-generated primary codebase; duplicate
+of an existing marketplace app / no unique value; sending monday's session token
+to your API; over-broad scopes; name that uses the monday trademark; failed Burp
+scan; secrets in the repo; missing ToS/privacy; support email on a domain you
+don't own; wrong asset dimensions. Exact form URL + current video length: (verify).
 
 ## Parity checklist
 

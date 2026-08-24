@@ -49,17 +49,17 @@ npm run lint   # ray lint (@raycast/eslint-config)
 
 ## Submission — Raycast Store
 
-**Bucket: monorepo PR review, free.** There is no developer portal upload — the store is the GitHub monorepo `github.com/raycast/extensions` and **a PR is the submission**.
+**Submittable: API (PR flow), free.** There is no developer portal upload — the store is the GitHub monorepo `github.com/raycast/extensions` and **a PR is the submission**. `npx @raycast/api@latest publish` (or a `"publish"` script that runs it) is the real submit command: it authenticates with GitHub, forks the monorepo, copies your extension in, and opens the PR for you — you rarely fork by hand.
 
 1. Fork `raycast/extensions`; add the package as `extensions/<extension-name>/`.
 2. Set `author` in `package.json` to your registered Raycast username.
 3. Run `npm install && npm run build` and `npm run lint` **inside the monorepo layout** — CI reruns both and fails the PR on any error.
 4. Open the PR against `raycast/extensions`. A bot checks manifest hygiene (author registered, categories from the fixed allowed list, icon present, README in the extension dir); then a human review follows (days, not minutes). Address review comments by pushing to the same PR.
-5. The store page pulls from the extension dir itself: its README becomes the listing, and optional screenshots live in a `metadata/` folder next to it (exact naming: TBD — confirm against the monorepo's contribution guide at first submission).
+5. The store page pulls from the extension dir itself: its README becomes the listing, and screenshots live in a `metadata/` folder next to it — PNG, `2000×1250`, named `screenshot-1.png`, `screenshot-2.png`, … (max 6). At least one is required to list. Use Raycast's built-in **Window Capture** to shoot them so the dev-mode icon is stripped.
 6. Title the PR the way the monorepo expects — "Add `<name>` extension" for a new listing, "Update `<name>` extension" for changes — so the bot routes it correctly.
 7. Updates to an already-listed extension are PRs against the same directory — same flow.
 
-(`npx @raycast/api@latest publish` automates the fork-and-PR dance from your local clone; it still ends as a PR review. Exact publish-command flags: TBD — confirm at first submission.)
+(`npx @raycast/api@latest publish` from the extension dir automates the fork-and-PR dance; it still ends as a human PR review. Run `npm run build` + `npm run lint` clean first — CI reruns both.)
 
 **Silent-rejection gotchas:** command `name` ≠ filename (command missing in review); `author` not a registered username; a hardcoded or committed API key; a README that doesn't tell a fresh reviewer how to get a key (self-serve signup or clear instructions — the reviewer has no account of yours); categories outside the allowed list; icon not a 512×512 PNG; npm-publish leftovers.
 
