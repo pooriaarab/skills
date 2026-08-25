@@ -79,6 +79,37 @@ Audit Slack/Discord/WhatsApp for the same "command/help intercept returns before
   `/api/v1/integrations/whatsapp/webhook`. The Phone Number ID is **not** the phone number — it's a
   separate numeric ID on the API Setup page.
 
+## Flow 2: attach an email in chat
+
+After a channel-first (email-less) account onboards, the owner attaches an email **in chat** to
+also sign in on the web and land in the **same** account. `initiateEmailAttach` / `confirmEmailAttach`:
+call without a code to mail a 6-digit code, then call again with the code to finish.
+
+The idiom differs by bot architecture:
+
+- **LLM-agent bots** (telegram, imessage, slack): expose an `attach_email` agent tool.
+- **Command/dispatch bots** (discord, whatsapp): a deterministic command — discord
+  `/attach_email <email> [code]`; whatsapp `attach email <addr> [code]`. WhatsApp's MCP tools are
+  API-key-scoped and can't carry a `userId`, so attach must be a non-LLM command.
+
+**Security gate (identical across every bot, non-negotiable):** the `userId` is always the
+**server-resolved channel identity** — taken from the signature-verified sender, never from message
+text or a model tool-arg. Drop any model-smuggled `userId`. Expose attach **only** in an
+authenticated 1:1 DM so a group/guild participant can never claim the owner's account:
+
+| Bot | 1:1-DM gate |
+|---|---|
+| telegram / imessage | `canClaimAccount` |
+| discord | refuse when `guildId` is set |
+| slack | `channel_type === 'im'` only |
+| whatsapp | the sender's own `wa_id`-keyed account |
+
+**Don't drive the attach step through a chat message in an automated e2e.** It routes through the
+LLM agent, which may skip `attach_email` on a given turn (observed: a freshly-onboarded account's
+next message didn't trigger the tool). Prove the attach **mechanics** deterministically through the
+tRPC/API surface (or a direct function call) with a real session; leave "the LLM invokes the tool"
+to real-app testing.
+
 ## e2e-verify a bot for real (don't trust a 200)
 
 A registered webhook returning `{ok:true}` proves nothing about onboarding. Verify the whole chain:
@@ -107,3 +138,40 @@ curl -s -o /dev/null -w "%{http_code}\n" -X POST "https://<host>/api/v1/integrat
 # then: wrangler d1 execute <db> --remote --command \
 #   "SELECT source,external_id,step FROM bot_onboarding_state WHERE external_id='99900001';"
 ```
+
+### The two-step replay, proven live
+
+Fire two inbounds in sequence and check the DB effect after each (proven on Telegram against prod):
+
+1. **Inbound 1** (`"hi"` from a fresh handle) → the shared onboarding machine writes a
+   `bot_onboarding_state` row (columns `source`, `external_id`, `step`, `attempts`, `data`,
+   `update_counter`) with `step='awaiting_choice'`.
+2. **Inbound 2** (text `NEW`) → provisions a real email-less account and a **verified**
+   `external_identity` row (`platform`, `external_id`, `user_id`, `verified=1`), then **deletes** the
+   onboarding row. Text `LINK` instead takes the link-to-existing-web-account branch.
+
+`handleUnrecognizedInbound` (the onboarding machine) is **shared by all 5 bots**, so proving it live
+on ONE forgeable platform proves the whole pipeline. Per-platform code is only the webhook adapter —
+unit-test each of those.
+
+**Reading prod D1 without wrangler D1 access:** POST to the Cloudflare D1 HTTP API
+`POST /accounts/{acc}/d1/database/{dbid}/query` with `{sql, params}` and a token that has D1 read.
+**SQL string literals need SINGLE quotes** — double quotes are SQLite identifiers, so
+`WHERE external_id="99900001"` matches nothing and returns zero rows with no error.
+
+### Which platforms you can forge for a synthetic e2e
+
+You can replay a signed inbound only when **you** hold the signing secret:
+
+| Platform | Forge? | How |
+|---|---|---|
+| Telegram | yes | static header `x-telegram-bot-api-secret-token` = deployed secret |
+| iMessage (Sendblue) | yes | HMAC with `sb-signing-secret` |
+| Slack | yes | `X-Slack-Signature: v0=` + `HMAC_SHA256(signingSecret, "v0:{ts}:{body}")`, header `X-Slack-Request-Timestamp` within 300s of now |
+| WhatsApp | yes | `x-hub-signature-256: sha256=` + `HMAC_SHA256(appSecret, body)` |
+| Discord | **no** | Discord signs each interaction with Ed25519 and holds the private key; the app only verifies with Discord's public key. A synthetic Discord inbound is impossible — cover Discord with unit tests + real-app testing. |
+
+**Scoping caveat:** Telegram and iMessage/Sendblue are global-number bots — any DM onboards, so a
+signed POST is a complete sim. Slack needs the app installed in a workspace (a team integration must
+exist for the bot token to reply) and WhatsApp needs the business number configured, so their
+synthetic onboarding needs a real installed workspace/number, not a signed POST alone.
