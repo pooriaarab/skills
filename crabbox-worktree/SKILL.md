@@ -1,9 +1,39 @@
 ---
 name: crabbox-worktree
-description: "Offload per-worktree dev work (installs, builds, dev server) to a remote GCP VM via crabbox so your laptop stays cool — bakes a golden GCP image and wires into superset.sh worktree hooks. Use when the user mentions 'crabbox worktree', 'remote dev box', 'offload bun install to cloud', or wiring crabbox into superset.sh hooks for a JS/TS repo."
+description: "Offload per-worktree dev work (installs, builds, dev server) to a remote GCP VM via crabbox so your laptop stays cool — includes a work/personal split so any private repo offloads to its OWN GCP project (personal never touches Mozilla infra), plus golden-image bake and superset.sh worktree hooks. Use when the user mentions 'crabbox worktree', 'remote dev box', 'offload bun install to cloud', 'crabbox work/personal split', 'turn crabbox on for a repo', or wiring crabbox into superset.sh hooks."
 ---
 
 # crabbox-worktree
+
+## Work/personal split (generalized, 2026-08)
+
+The original scripts below were hardcoded to one work repo (solo-admin, Mozilla GCP). They are now generalized into a **work/personal split** so any private repo offloads to its OWN GCP project — personal repos must NEVER run on Mozilla infra (same confidentiality boundary as `claude-work`/`claude-personal`).
+
+**Canonical scripts:** `pooriaarab/agents-private` → `bin/crabbox/`. Installed to `~/.local/bin/` (on PATH) + configs to `~/.config/crabbox/`.
+
+**Two roles.** `crabbox warmup` has NO project/zone/image/account flags — selection is via the `CRABBOX_CONFIG` env var plus a matching gcloud configuration. Each wrapper (`crabbox-work`, `crabbox-personal`) exports its config and execs crabbox:
+
+| | `crabbox-work` | `crabbox-personal` |
+|---|---|---|
+| config | `~/.config/crabbox/work.yaml` | `~/.config/crabbox/personal.yaml` |
+| GCP project | `<work-project>` | `<personal-project>` |
+| account | `<work-account>` | `<personal-account>` |
+| image | baked golden image | raw `ubuntu-2404-lts` + runtime install |
+| network | `<work-network>` | `default` |
+
+(Real project IDs / accounts live in the private `agents-private` configs, not here.) Verify a role never crosses: `crabbox-personal config show | grep -o 'project=[^ ]*'` must read your personal project, never the work one.
+
+**Auto-attach (zshrc `git worktree add` hook).** Work repos that carry their own `bin/` scripts run them with the global (Mozilla) config — unchanged. Repos under `~/Documents/Personal` or `~/code` with `.crabbox-default-on` run the central scripts under the PERSONAL config, selecting the gcloud config non-destructively via `CLOUDSDK_ACTIVE_CONFIG_NAME=personal` (never flips your active gcloud, never touches Mozilla).
+
+**Enable any private repo:** `crabbox-enable [repo-root]` touches `.crabbox-default-on`. All `.crabbox-*` markers are gitignored globally, so they never get committed.
+
+**Package manager** auto-detected from the worktree lockfile (`bun.lock`→bun, `pnpm-lock.yaml`→pnpm, `package-lock.json`→npm, `yarn.lock`→yarn). Raw base image → one runtime install per fresh box (no bake to maintain on the personal side).
+
+**Daily teardown** (launchd `com.pooriaarab.crabbox-sweep`, 09:00): `crabbox-{work,personal} sweep --apply` stops boxes whose worktree directory is gone OR whose branch is already merged into the default branch (`origin/main`/`origin/master`). Shared boxes and detached-HEAD worktrees are never auto-stopped. Dry-run is the default; only the cron passes `--apply`.
+
+**Cost:** enabling a repo is ~$0 until a worktree box actually warms (spot market, 30-min idle auto-stop). The daily sweep reaps stragglers. `.crabbox-default-on` does nothing until you create a worktree.
+
+The sections below document the original single-repo baked-image design (still how the WORK/solo-admin side runs). The generalized personal side above trades the bake for a raw base + runtime install.
 
 ## When to use
 
