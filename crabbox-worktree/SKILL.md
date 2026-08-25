@@ -33,6 +33,19 @@ The original scripts below were hardcoded to one work repo (solo-admin, Mozilla 
 
 **Cost:** enabling a repo is ~$0 until a worktree box actually warms (spot market, 30-min idle auto-stop). The daily sweep reaps stragglers. `.crabbox-default-on` does nothing until you create a worktree.
 
+**Two trigger paths — wire BOTH.** A worktree gets created two ways, and they use different hooks:
+
+1. **Terminal `git worktree add`** → the zshrc `git()` wrapper. It routes a personal-tree repo (under `~/Documents/Personal` or `~/code`) with `.crabbox-default-on` to the shared entrypoint — this takes **priority over any in-repo `bin/` scripts**, because some personal repos (e.g. nova) still carry their own Mozilla-pointed `bin/crabbox-attach.sh` that would otherwise leak onto the work project.
+2. **Superset "new workspace"** → the repo's tracked `.superset/config.json` `setup` array (NOT the zshrc hook). Point it at the same entrypoint.
+
+Both call one shared entrypoint, `crabbox-attach-personal.sh`, which exports `CRABBOX_CONFIG=…/personal.yaml` + `CLOUDSDK_ACTIVE_CONFIG_NAME=personal`, then runs `setup-worktree.sh` + `crabbox-attach.sh`. A personal repo's `.superset/config.json`:
+
+```json
+{ "setup": ["/absolute/path/.local/bin/crabbox-attach-personal.sh"], "teardown": [] }
+```
+
+Preserve any existing `setup`/`run` entries — append the entrypoint, don't overwrite (e.g. a repo with `"run": ["bun run dev"]`).
+
 The sections below document the original single-repo baked-image design (still how the WORK/solo-admin side runs). The generalized personal side above trades the bake for a raw base + runtime install.
 
 ## When to use
