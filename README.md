@@ -96,6 +96,11 @@ A coordinated suite for organizing across every digital surface — files, notes
 | [canada-census](canada-census/SKILL.md) | Complete the Government of Canada Census of Population online via agent-browser — asks you each question in chat, fills the StatCan form, stops for review before submit. Zero PII stored. |
 | [schengen-visa-application](schengen-visa-application/SKILL.md) | Prep a short-stay Schengen visa from Canada — finds the destination country's actual handler (no single "EU visa company"; consulate vs VFS/BLS vs a representing state's centre), builds the doc set from your own local files, drafts the employer support-letter request, fills the EU form, stops before the in-person biometrics appointment. Zero PII stored. |
 | [spec-issue](spec-issue/SKILL.md) | Turn a thin Linear issue into an implementation-ready spec — grounds every claim in real code, right-sizes detail, writes test cases. |
+| [deploy-app-self-host](deploy-app-self-host/SKILL.md) | Self-host a containerized app (Postgres + S3-compatible object store + Redis) with Docker Compose, and smoke-test it. |
+| [deploy-app-cloudflare](deploy-app-cloudflare/SKILL.md) | Deploy a containerized app to Cloudflare (Workers container + D1/R2/KV/Queues/Durable Objects) and smoke-test the live URL. |
+| [deploy-app-gcp](deploy-app-gcp/SKILL.md) | Deploy a containerized app to GCP (Cloud Run + Cloud SQL + Memorystore + GCS) with Terraform, verify, then tear down. |
+| [deploy-app-aws](deploy-app-aws/SKILL.md) | Deploy a containerized app to AWS (ECS Fargate + RDS + ElastiCache + S3 + ALB) with Terraform, verify, then tear down. |
+| [deploy-app-azure](deploy-app-azure/SKILL.md) | Deploy a containerized app to Azure (Container Apps + Postgres + Cache for Redis + Blob) with Bicep, verify, then tear down. |
 | [release-notes](release-notes/SKILL.md) | Draft user-facing release notes from a branch diff — filters to user-facing changes, writes in your product's voice. |
 | [app-screenshots](app-screenshots/SKILL.md) | Capture real web-app/extension UI headlessly and beautify it into store-ready framed screenshots + promo tiles — the mock-the-host-APIs capture recipe, the `data:`-URL compositor (why `file://` breaks), exact Chrome/Apple/Play/AMO sizes, and AI hero art for marketing tiles only (never fake the product UI). |
 | [browser-extension](browser-extension/SKILL.md) | Build a cross-browser (Firefox + Chrome) MV3 web extension and submit it per store — one-manifest-two-browsers layout, the CSP traps that break wasm/workers (+ the same-origin-worker fix), on-device AI (Firefox `trial.ml` / Chrome Prompt API), `web-ext`, and the full AMO (incl. mandatory 2FA) + Chrome Web Store flow. |
@@ -152,6 +157,11 @@ A coordinated suite for organizing across every digital surface — files, notes
 | [git-guardrails-claude-code](git-guardrails-claude-code/SKILL.md) | Set up Claude Code hooks that block dangerous git commands (push, reset --hard, clean). |
 | [x-article-publisher](x-article-publisher/SKILL.md) | Publish X (Twitter) Articles from Markdown via browser automation. |
 | [spec-issue](spec-issue/SKILL.md) | Turn a thin issue-tracker ticket into an implementation-ready spec — grounds every claim in real code, right-sizes detail, writes test cases. |
+| [deploy-app-self-host](deploy-app-self-host/SKILL.md) | Self-host a containerized app (Postgres + S3-compatible object store + Redis) with Docker Compose, and smoke-test it. |
+| [deploy-app-cloudflare](deploy-app-cloudflare/SKILL.md) | Deploy a containerized app to Cloudflare (Workers container + D1/R2/KV/Queues/Durable Objects) and smoke-test the live URL. |
+| [deploy-app-gcp](deploy-app-gcp/SKILL.md) | Deploy a containerized app to GCP (Cloud Run + Cloud SQL + Memorystore + GCS) with Terraform, verify, then tear down. |
+| [deploy-app-aws](deploy-app-aws/SKILL.md) | Deploy a containerized app to AWS (ECS Fargate + RDS + ElastiCache + S3 + ALB) with Terraform, verify, then tear down. |
+| [deploy-app-azure](deploy-app-azure/SKILL.md) | Deploy a containerized app to Azure (Container Apps + Postgres + Cache for Redis + Blob) with Bicep, verify, then tear down. |
 
 ## Install
 
