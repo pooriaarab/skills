@@ -73,13 +73,29 @@ review waits. Registering a second service for the same repository under a diffe
 runner name is the fix when a repository's queue gets long. Do not register two
 runners with the same name.
 
-## WSL restarts, and what that does to a run
+## Keep WSL alive, or every job dies mid-step
 
-WSL can stop while idle even when its systemd services are enabled. The Windows
-scheduled task `Content Rabbit WSL Keepalive` restarts it. Do not remove that task.
-After a WSL restart, every runner service restarts and reconnects within seconds, but
-jobs queued in that window sit in `queued` until a runner reconnects — a queued job is
-usually a WSL restart, not a broken workflow.
+WSL stops while idle even when its systemd services are enabled, and a stopped WSL
+kills any job that is running. Two things hold it up; both must exist:
+
+- `C:\Users\poori\.wslconfig` with `[wsl2]` / `vmIdleTimeout=-1`, so the VM does not
+  stop when its last client exits. A `.wslconfig` change needs `wsl.exe --shutdown` to
+  apply, which kills running jobs — only do it while the runners are idle.
+- A scheduled task holding `wsl.exe -d Ubuntu --user actions -- bash -lc "exec sleep
+  infinity"`. `Content Rabbit WSL Keepalive` does this but has `LogonType=Interactive`,
+  so it only fires when `poori` logs on to Windows — and the Dell normally has no
+  session at all (`quser` returns nothing). `Dell CI WSL Keepalive` runs the same action
+  at Windows startup with `LogonType=S4U`, which needs no logon and no stored password.
+  Keep both tasks.
+
+Symptoms of WSL dying under a job, all of which mean "re-run the run", not "debug the
+workflow":
+
+- A job whose steps are `Set up job` and `Checkout` success and every later step `null`.
+- A run stuck in `queued` while the runner looks idle.
+- `gh api .../actions/runners` reporting `offline busy=true`, with `A session for this
+  runner already exists` and `Runner connect error: Error: Conflict` in the journal —
+  GitHub still holds the dead session, so the restarted runner cannot reconnect yet.
 
 Verify all three states before routing a workflow, and after any Windows restart:
 
