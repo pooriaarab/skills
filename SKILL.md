@@ -39,8 +39,9 @@ The Content Rabbit pilot has these fixed values:
 - Custom runner label: `dell-ci`
 - Service: `actions.runner.pooriaarab-content-rabbit.DELL-EPD31FF.service`
 
-Use `[self-hosted, linux, dell-ci]` only for safe CI and E2E jobs. Keep deploy,
-publish, release, production, and secret-heavy jobs on GitHub-hosted runners.
+Use `[self-hosted, linux, dell-ci]` for reviewed CI, E2E, and AI review jobs. GitHub
+injects repository secrets for each job. Do not copy secret values to the Dell. Keep
+deploy, publish, release, and production jobs on GitHub-hosted runners.
 
 WSL can stop while idle even if systemd services run. The Windows scheduled task
 `Content Rabbit WSL Keepalive` must stay `Running`. It starts a WSL keepalive as
@@ -69,8 +70,9 @@ Crabbox 0.46.0 is installed on both the Mac and Dell. Use Dell as a static SSH
 host. It does not provision or clean up the Dell.
 
 The personal Mac config is `$HOME/.config/crabbox/dell-wsl.yaml`. Keep it mode
-`0600`. It uses Windows WSL2 mode, host `100.76.117.53`, Windows user `poori`,
-and WSL work root `/home/pooria/crabbox`.
+`0600`. Its historical filename is misleading: it uses native Windows mode
+(`windows.mode: normal`), host `100.76.117.53`, Windows user `poori`, and Windows
+work root `C:\\Users\\poori\\crabbox`.
 
 First run a non-mutating check:
 
@@ -78,12 +80,14 @@ First run a non-mutating check:
 CRABBOX_CONFIG="$HOME/.config/crabbox/dell-wsl.yaml" crabbox doctor --provider ssh
 CRABBOX_CONFIG="$HOME/.config/crabbox/dell-wsl.yaml" crabbox warmup \
   --provider ssh --static-host 100.76.117.53 --static-user poori \
-  --static-work-root /home/pooria/crabbox
+  --static-work-root 'C:\\Users\\poori\\crabbox'
 ```
 
-Use Crabbox only after a small sync-and-command smoke passes. The static-host
-provider never removes files, processes, or disk data from the Dell. Clean each
-remote project folder only after you confirm its exact path and branch state.
+`doctor` and `warmup` pass. A synced `crabbox run` reaches the Windows workspace lock,
+but does not finish its streamed input protocol. Do not claim full Crabbox runs work
+until a compatibility fix passes a small smoke test. The static-host provider never
+removes files, processes, or disk data from the Dell. Clean each remote project folder
+only after you confirm its exact path and branch state.
 
 ## Verification and lifecycle
 
