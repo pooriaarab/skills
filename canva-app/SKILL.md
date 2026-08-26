@@ -16,16 +16,18 @@ The app runs in a locked-down iframe. A `fetch` to your API **fails silently** (
 ## The other four that each cost a round-trip
 
 1. **Design export is async.** You get the current design via `addOnUISdk.app.document.createRenditions({ ... })` — a Promise that returns rendition blobs. There is no synchronous "give me the PNG" getter. Await it, handle the multi-page/multi-element shape, and upload the blob to your API; don't assume one image.
-2. **The App ID is portal-owned.** The `id` in `manifest`/config must match the app created in `developer.canva.com`. A placeholder ID runs in preview but fails the moment it's submitted. Copy the real ID from the portal into the app config early.
+2. **The App ID is portal-owned and lives in the environment.** Run `@canva/cli apps link` to write `CANVA_APP_ID` into `.env` — it is not a field in a source config file. A placeholder ID runs in preview but fails the moment it's submitted.
 3. **Declare only the capabilities you use.** The portal makes you declare content access (design read, asset upload). Declaring more than you use slows review; declaring less than you use breaks at runtime. Match them exactly to the SDK calls you make.
 4. **Review needs a no-account reviewer to succeed.** A Canva reviewer opens the app with none of your state. Auth must be self-service inside the app (paste-a-key or a real OAuth flow) with clear in-app instructions — an app that assumes you're already logged in elsewhere gets rejected.
 
 ## Build path
 
-- Scaffold with the Canva CLI (`@canva/cli apps create` / `apps start`) — it runs the local preview you open inside Canva.
+- Scaffold with `@canva/cli apps create`. **Dev and build are not on that CLI** — its whole surface is `create/list/link/preview/doctor/migrate/config`. Use `@canva/app-scripts dev` for the dev server and `@canva/cli apps preview` to open it in a design. A `package.json` with `"build": "@canva/cli apps build"` looks plausible and simply fails.
+- **The bundler does not typecheck.** `@canva/app-scripts build` succeeds over broken types, so if the build script was ever wrong, `tsc --noEmit` has never run on the app. Run it before every submit.
+- Pin **Node 20**: `app-scripts` declares `node>=22` but builds fine on 20, and the other marketplace CLIs (`vsce`, `ovsx`, Coda `packs`) segfault on 22+.
 - UI: `@canva/app-ui-kit` components (match Canva's look; the kit is required for a consistent review pass). Keep to the kit rather than raw HTML where a component exists.
 - API calls: your own SDK or public REST endpoint. Keep all business logic server-side; the app is a thin client.
-- `npm run build` produces the bundle you upload in the portal.
+- `@canva/app-scripts build` produces `dist/app.js`, the bundle you upload in the portal.
 
 ## Submission — Canva App Marketplace
 
@@ -36,7 +38,7 @@ The app runs in a locked-down iframe. A `fetch` to your API **fails silently** (
 4. Fill the listing → **Submit for review**. Required assets: app icon `512×512` PNG (1:1, full-bleed, no transparency or rounded corners) and a featured image `2400×1800` (4:3) — up to 2 in a carousel (editorial + contextual). Provide app support + privacy-policy URLs, and a **test-account login** if the app uses authentication (reviewers have no account of yours).
 5. Canva's review team (engineers, designers, QA) reviews before it appears in the marketplace (days, not minutes). Private/team use can run without full marketplace review. Cap: an app can be submitted at most **5 times per day**.
 
-**Silent-rejection gotchas:** un-allow-listed fetch domain (see above); an icon that isn't exactly 512×512 or has transparency/rounded corners; a listing that doesn't explain how a fresh reviewer authenticates (or omits the test login); requesting capabilities the app never calls; typos/formatting errors in listing copy (they run a spellcheck).
+**Silent-rejection gotchas:** un-allow-listed fetch domain (see above); an icon that isn't exactly 512×512 or has transparency/rounded corners — note that `sips` renders SVG to PNG but always keeps an alpha channel and a JPEG round-trip adds artifacts to flat brand colour, so flatten with sharp's `.flatten({ background })` and render from a **square, unclipped** source (the rounded icon most brand kits ship is exactly what gets rejected); a listing that doesn't explain how a fresh reviewer authenticates (or omits the test login); requesting capabilities the app never calls; typos/formatting errors in listing copy (they run a spellcheck).
 
 ## Parity checklist (prove in a real Canva session before submitting)
 
