@@ -60,6 +60,32 @@ without a jest install to read a version from — turn that one rule off if the 
 Canva's config may also disagree with your repo's. It wants a loose `!= null`; a repo with
 `eqeqeq: error` wants `!==`. Restructure to narrow on truthiness rather than picking a side.
 
+## Intents decide where the app can appear — and one of them blocks release
+
+An app registers **intents**: plug-in contracts that surface it on different Canva
+surfaces. Three are stable and shippable:
+
+| Intent | What it gets you | Surfaces |
+|---|---|---|
+| Design Editor | your panel inside the editor | Editor |
+| Data Connector | pull live external data into a design (`getDataTable` + a selection UI) | Editor, Canva AI |
+| Content Publisher | your platform as a native publish destination (`getPublishConfiguration`, settings UI, preview UI, `publishContent`) | Editor |
+
+**URL Expander is a preview intent — enabling it makes the app unreleasable.** Canva's
+docs are explicit: you cannot release a public app that uses a preview intent until it
+is stable. Worse, `prepareUrlExpander` does not exist on the `latest` SDK at all — the
+`asset` entrypoint is an empty `export {}` — it ships only under the `preview`/`beta`
+dist-tag, which can be an *older* version than `latest`. So "just turn it on" means
+downgrading the SDK **and** giving up public listing. Check `npm view @canva/intents
+dist-tags` and grep the installed `.d.ts` for `prepare*` before promising an intent.
+
+Register every intent **synchronously at load**, and do not render UI immediately.
+
+Content Publisher hands you **URLs**, not bytes: each `outputMedia[].files[].url` is a
+short-lived link you fetch yourself. Cache the created record against the submission
+(settings + the exact file URLs) so a retry resumes at the publish step — Canva lets the
+user retry, and a naive handler creates a duplicate every time.
+
 ## The SDK calls, and the scopes they do not need
 
 Export the open design with **`requestExport`** from `@canva/design`. It opens Canva's own
@@ -170,6 +196,37 @@ are a handoff, not a task.
 export the open design · handle a cancelled export · handle a multi-page export · upload the
 rendition · create the downstream action · surface success and error in the app UI ·
 authenticate from a clean state · `extract-translations` emits every visible string.
+
+## The portal autosaves, and its "saved" indicator lies
+
+There is no Save button on the portal's settings pages. Two consequences that will burn you:
+
+- **The "All changes saved" text is a page-global indicator, not per-field confirmation.**
+  It can read "saved" while the field you just typed was silently discarded. The only
+  trustworthy check is **reload the page and re-read the value**. Do this after every
+  edit you care about.
+- **The address input is an autocomplete, not a text field.** Free text is thrown away
+  with "Please choose an address from the list or add an address manually". Use the
+  **Add Manually** control — it is a *link*, not a `<button>` — and fill the structured
+  subfields. Omitting the post code leaves the whole identity block invalid, which then
+  silently blocks the compliance checkbox with no visible error.
+- **The compliance checkbox issues no network request when clicked.** It is local state
+  that is only persisted as part of the identity payload, so it cannot be driven
+  reliably by automation — budget a human click for it.
+
+## Developer verification publishes real PII
+
+Before a public release the portal demands identity verification: legal name, email,
+phone, address, and a **government-issued photo ID** (5MB cap). Canva states that on
+release your **name, email, phone number and address are displayed in the Apps
+Marketplace listing** to satisfy trader law (EU). Consequences:
+
+- Register with a **business/registered address**, never a home address — this is
+  public and permanent.
+- Use a role address (`hello@`/`support@`) you actually monitor, not a personal mailbox,
+  and never a separate employer's work address on a personal product.
+- Choose Company vs Individual to match whatever entity your published privacy policy
+  and terms already name, or the declaration contradicts your own legal pages.
 
 ## Related skills
 

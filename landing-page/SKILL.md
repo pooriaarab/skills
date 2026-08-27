@@ -12,6 +12,11 @@ generator**: it tells you what to build and how to judge it. The actual pixels/m
 from the **impeccable** skill (aesthetic direction, craft-floor, the review commands) — invoke
 that for the visual world; use this for the landing-specific structure it doesn't own.
 
+**Scope:** this skill is one page. When the product needs a *site* — a page per
+audience, per use case, per competitor, a free-tools channel, a mega-menu shell —
+that is **marketing-site**, which owns the content model those pages are generated
+from. Build the home page here; generate the other fifty there.
+
 ## Two modes — name yours first
 
 1. **CREATE new** — intake → aesthetic direction → section plan → build → review gates.

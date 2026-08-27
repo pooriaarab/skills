@@ -196,6 +196,32 @@ Always pass `--autoconfig=false` so wrangler does not wait for a TTY prompt.
 
 Tag and reference `<image>:<git-sha>` (or a build id). `:latest` (or any reused tag) can leave Cloudflare serving the previous container revision.
 
+### Prerendered pages 404 in production while `next start` is green
+
+With OpenNext, `generateStaticParams` pages are written to the **KV incremental
+cache**, not into `.open-next/assets`. `opennextjs-cloudflare deploy` populates
+that cache; a bare `wrangler deploy` does not. The result is every generated
+route returning 404 in production while every static page works and the local
+production build is perfectly fine.
+
+```bash
+# before `wrangler deploy`, from the app directory
+bunx opennextjs-cloudflare populateCache remote \
+  -c cloudflare/app-worker/wrangler.jsonc -e "$CF_ENV"
+```
+
+Three things make it stick:
+
+- The `remote` subcommand is required. Without it the CLI rejects the arguments.
+- Run it from the **app** directory. It resolves the build relative to the app,
+  and `next` is not resolvable from a monorepo root. If a build script moves
+  `.open-next` elsewhere, stop moving it.
+- Never set `dynamicParams = false` on those routes. It turns a cache miss into
+  a 404 for a page that exists; `notFound()` already handles unknown slugs.
+
+Then curl the live URLs in the deploy job — including a generated one — and fail
+the job on anything that is not 200. This class of bug cannot be caught locally.
+
 ### Live home, not a lab
 
 Do not tear the Worker / D1 / R2 / KV / Queues down after a green smoke test unless the user explicitly asked to destroy them. Use a **staging** Worker + resources for experiments; keep **production** config pointed at prod resources only.
@@ -209,9 +235,10 @@ Do not tear the Worker / D1 / R2 / KV / Queues down after a green smoke test unl
 5. Image tagged immutably
 6. `grep -nE '^\s*,\s*$' wrangler*.jsonc` is empty
 7. `wrangler deploy --config wrangler.containers.jsonc --autoconfig=false`
-8. curl health + `/` + `/login` → 200
-9. Remote D1 `sqlite_master` shows app tables
-10. R2 / KV / Queues binding check (health field or a write)
+8. `populateCache remote` ran before `wrangler deploy` (any SSG route)
+9. curl health + `/` + `/login` **+ one generated route** → 200
+10. Remote D1 `sqlite_master` shows app tables
+11. R2 / KV / Queues binding check (health field or a write)
 
 ## Related
 
