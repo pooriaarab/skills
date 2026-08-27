@@ -64,4 +64,5 @@ don't own; wrong asset dimensions. Exact form URL + current video length: (verif
 read board/item context · paste + validate your API key · row → scheduled post (`platformType`) · list posts · surface success/error.
 
 ## Related skills
+- `monday-app-submission` — the Developer Center half: version locking, branding edits, the install link, and the ~25-field submission form.
 - `wix-app`, `airtable-extension` — sibling embedded productivity-tool apps; same OAuth/session-vs-key split.
