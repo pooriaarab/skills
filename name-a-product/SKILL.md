@@ -1,56 +1,150 @@
 ---
 name: name-a-product
-description: "Find a product name that is available, memorable and legally clear — without burning a week. Company-conflict check FIRST, domain check second (the inversion that matters), RDAP bulk sweeps for speed, Cloudflare domain-check for price, plus the empirical map of which naming lanes are already exhausted on .com and .ai. Use before cloudflare-domain-launch, when renaming a product, or whenever a name search keeps returning candidates that get rejected. Empirical, from a ~100,000-check session that rejected 25+ lanes."
+description: "Find a product name and clear it before you commit — brief, generate candidates, say them aloud, check for competing COMPANIES and trademarks, then check domains (that order matters: a domain sweep hands back variants that funded competitors already occupy). Includes RDAP bulk sweeps, Cloudflare domain-check for price/tier, handle and registry checks, and an appendix of naming lanes that came back empty in one ~100k-check session. Use before cloudflare-domain-launch, or when renaming a product."
 ---
 
 # name-a-product
 
-Finding a name is a search problem with a counter-intuitive order. Get the order
-wrong and you burn days generating candidates that were dead before you checked.
+Naming fails in a predictable order: people generate, fall in love, check the
+domain, buy it, and only then discover the competitor. Run the steps below in
+order and the expensive discoveries happen while they're still cheap.
 
-## The one rule that matters
+## 0. Brief before candidates
 
-**Check for competing COMPANIES before you check domains.**
+Write down, in one line each, before generating anything:
 
-Domain availability tells you almost nothing. Funded competitors in your category
-sit on `try<name>.ai`, `<name>ai.com` and `get<name>.com` — the exact variants a
-domain sweep hands you as "available alternatives". You will happily register a
-domain inside someone else's brand.
+- **What it is** and who buys it (consumer vs enterprise changes acceptable tone).
+- **Register** — plain and modest (Notion, Ramp, Linear, Stripe, Loom) vs
+  characterful (Chili Piper, Gusto, Lemonade). Both work. Mixing them reads as
+  indecision.
+- **Markets and languages** it must work in.
+- **Budget** — register price only, or is aftermarket in scope? This single
+  answer eliminates most of the search space (see Appendix).
+- **Must it be one word?** and **must it be `.com`?** Hold these loosely; they
+  are usually the constraints that make the brief unsatisfiable.
 
-Real example: `popcorn` looked wide open on `.com` variants. It is the name of a
-**funded AI-agents company** (`trypopcorn.ai`, $500K seed) *and* a second one
-(`thepopcorn.net`). Six rounds of domain work were wasted before anyone searched
-the company name. Same session: `dumpling` → DumplingAI, `pop` → teampop.com
-("Pop", custom AI agents), `granola` → AI notetaker, `bagel` → AI company,
-`sumac` → nonprofit case-management software, `deputy` → HR SaaS.
+If a stakeholder wants a simple, one-word, kid-pronounceable `.com` at register
+price, say early that this is very unlikely to exist (Appendix) so the brief can
+change in round one rather than round ten.
 
-Order of operations:
+## 1. Generate candidates
 
-1. Candidate word
-2. **Company search** — `"<name>" <your category> startup company` and check the
-   bare `.com`/`.ai` for a live site (`curl` the title tag)
-3. Connotation check (below)
-4. Domain sweep
-5. Trademark clearance by an attorney before spending on brand assets
+Random string generation does not produce brandable names — it produces
+pronounceable mush. Names that work come from a *source*:
 
-## Availability checking — two tools, two jobs
+- **A real thing with a picture attached** — Bullpen, Legwork, Nightdesk. Concrete
+  beats abstract; abstract nouns read as "trying too hard".
+- **A metaphor from the product's own domain.** Prefer one that hands you a
+  vocabulary: *Popcorn* gives kernel (idle) → pop (activate) → batch (parallel run)
+  → kettle (dashboard). That vocabulary is worth more than a marginally nicer sound.
+- **Two simple words fused.** Facebook, Dropbox, Snapchat, YouTube. At 6–8
+  characters the seam disappears. (Netflix and TikTok are *not* this — Netflix
+  respells "flicks", TikTok is reduplication. Both are still fine models.)
+- **A suffix, not a second word.** `-ley`, `-mere`, `-wick`, `-ham`, `-ton`,
+  `-bury` are English place-name suffixes: `Mossley` reads as one word the way
+  `Ashley` does.
+- **A lower-search-volume synonym** of the word you want, when SEO matters:
+  `provolone` over `pepperoni`, `romesco` over `pesto`.
 
-**RDAP for bulk (free, no auth, ~60/sec).** 404 = unregistered, 200 = taken.
+## 2. Say it aloud, then look at it written
+
+Cheap, and it kills candidates fast:
+
+- **Phone test.** Say it to someone and have them spell it back. `Dabir` comes
+  back as `Dabeer`. That is a fatal, permanent tax.
+- **Embedded words.** `Dabir` contains "beer". Read every candidate for words
+  hiding inside it.
+- **Homophones and plurals.** Does the plural or possessive break? Does it collide
+  with a common word when spoken?
+- **Search-suggest.** Type the name into Google and read the autocomplete. If it
+  suggests something unfortunate, that is what your customers will see too.
+- **Across markets.** Check meaning and pronunciation in every language in the
+  brief, not just English.
+
+**Connotation checklist** — a name can be available, memorable, and still wrong:
+
+| Trap | Examples |
+|---|---|
+| Villain coding | `Vizier` (Jafar), `Praetorian` (assassinated emperors) |
+| Failure coding | `Icarus` (flies too close, falls), `Sisyphus` |
+| Dishonesty coding | `Fudge` — "fudge the numbers", fatal near data or money |
+| Subordinate coding | `Satrap` reads as puppet ruler |
+| Slurs / regional meaning | `Cracker` (US slur). Check every market |
+| "Plain/boring" coding | `Vanilla` |
+| Regional illegibility | `Bullpen` is invisible outside North America |
+
+## 3. Competing companies — BEFORE domains
+
+**This is the step everyone skips and it is the one that matters.**
+
+Domain availability tells you far less than it appears to. Funded competitors in
+your category already hold the `try<name>.ai`, `<name>ai.com` and `get<name>.com`
+variants that a domain sweep returns as "available alternatives" — so a clean
+sweep can walk you straight into someone else's brand.
+
+From one session, every one of these looked open on domain variants and is a live
+company: `popcorn` (Popcorn AI, AI agents), `dumpling` (DumplingAI, agent
+builder), `pop` (teampop.com, custom AI agents), `granola` (AI notetaker),
+`bagel` (Bagel Labs), `sumac` (case-management software), `deputy` (HR SaaS).
+
+For each candidate:
+
+```bash
+# live site on the bare domain?
+curl -sL --max-time 10 -A 'Mozilla/5.0' "https://<name>.com" \
+  | grep -oiE '<title>[^<]{0,80}'
+```
+
+Then search `"<name>" <your category> startup company`, and check Crunchbase and
+app stores. Also check **common-law** use (an unregistered but active brand still
+blocks you) and CLI/package-name collisions.
+
+## 4. Trademark — mechanics, not just "ask a lawyer"
+
+Do a knockout search yourself first, then pay for clearance:
+
+- **Classes** — software is Nice class **9** (downloadable) and **42** (SaaS).
+  Search both.
+- **Search** USPTO (tmsearch.uspto.gov) and EUIPO/WIPO for your markets. Both
+  block automated queries; do it by hand in a browser.
+- **Similarity + relatedness are weighed together.** Identical services raise the
+  bar on how different the marks must be. `POPCORN` wholly contains `POP`, so a
+  competitor called "Pop" in the same category is a real citation risk.
+- **Mark strength.** Fanciful (Kodak) > arbitrary (Apple for computers) >
+  suggestive > descriptive > generic. A descriptive name is cheap to pick and
+  nearly impossible to defend. Common surnames and generic historical titles
+  (`Vizier`) are weak marks.
+- Get an attorney knockout search **before** spending on brand assets or starting
+  a rename. A completed 3,000-file rename is expensive to reverse; $109 of
+  domains is not.
+
+## 5. Domains — availability and price
+
+**RDAP for bulk pre-filtering** (free, no auth). Surface unexpected codes rather
+than swallowing them — 429 and 5xx are not "taken", and RDAP has a small
+false-positive rate under load (one confirmed case: `mossley.com`, registered
+since 2012, returned 404):
 
 ```bash
 check() {
   code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 \
     "https://rdap.verisign.com/com/v1/domain/${1}.com")
-  [ "$code" = "404" ] && echo "FREE $1"
+  case "$code" in
+    404) echo "FREE  $1" ;;
+    200) ;;                       # taken
+    *)   echo "RETRY $1 (http $code)" ;;   # do NOT treat as free
+  esac
 }
 export -f check
 xargs -P 8 -I{} bash -c 'check {}' < wordlist.txt
 ```
 
-Caveat: RDAP has a **small false-positive rate under load** — one confirmed case
-(`mossley.com`, registered since 2012, returned 404). Use it as a pre-filter only.
+Throughput scales with `-P`; at `-P 8` expect roughly an hour for tens of
+thousands. Treat RDAP as a pre-filter only.
 
-**Cloudflare `domain-check` for the truth + price.** Max 20 domains/request.
+**Cloudflare `domain-check` for the truth and the price.** Batch limit is small
+(20 at the time of writing — the API returns an explicit error if you exceed it,
+so let it tell you rather than assuming):
 
 ```bash
 curl -s -X POST \
@@ -59,112 +153,104 @@ curl -s -X POST \
  -d '{"domains":["a.com","b.ai"]}'
 ```
 
-Returns `registrable`, `tier` (`standard` vs `premium` — this is the price signal;
-a "free" premium `.com` can cost thousands) and `pricing.registration_cost`.
-Works for any TLD Cloudflare sells, including `.ai` ($80/yr) — not just `.com`.
+Returns `registrable`, `pricing.registration_cost`, and `tier` — **`tier` is the
+one to read**: a "free" `premium` `.com` can cost thousands. Works for any TLD
+Cloudflare sells. Token needs `Account > Domain Registrar > Read`. The
+`cloudflare-api` MCP needs OAuth and cannot be authorized in a non-interactive
+session; use an API token.
 
-Token needs `Account > Domain Registrar > Read`. The `cloudflare-api` MCP needs
-OAuth and cannot be authorized in a non-interactive session; use an API token.
+Always re-verify finalists with Cloudflare. Never build on an RDAP-only result.
 
-Always CF-verify finalists. Never trust an RDAP-only result for a name you're
-about to build on.
+**ccTLD risk.** `.ai` is Anguilla, `.io` is British Indian Ocean Territory, `.co`
+is Colombia. Country TLDs carry policy and renewal-price risk a gTLD does not,
+and prices have been changed unilaterally before. Confirm current renewal price,
+not just registration price.
 
-## Lanes that are already exhausted (don't re-run these)
+## 6. Handles, registries, defensive registrations
 
-Verified across ~100,000 checks. On `.com` at register price, **zero** usable
-results in any of these:
-
-| Lane | Result |
-|---|---|
-| Real English words, 4–11 letters | 100% taken, every length |
-| Root + real suffix (`-ery`, `-ry`) | good ones taken (`stewardry`, `makery`, `roostery`) |
-| Random melodic coinage (10k sample) | 69% free — all unpronounceable mush |
-| Latin/Greek plurals | `vivaria`, `scriptoria`, `armaria`, `tabularia` all taken |
-| Phonetic respellings (Lyft/Flickr style) | `hyve`, `krew`, `kamp`, `teem`, `flok` — 0 of 50 free |
-| Dahl-style nonsense (`pockle`, `wimble`) | good ones taken; survivors unreadable |
-| `get`/`use`/`try` + good word | 24 free of 1,085, all junk (`getmallet`, `trychum`) |
-| `agent<word>` | 100% taken |
-| Kid compounds (`treehouse`, `beehive`) | taken |
-| `-ify` / `-ly` (Spotify/Bitly pattern) | `nestify`, `rootify`, `nestly`, `rootly` all taken |
-| Words containing `ai` | most-mined namespace in `.com`; 4-letter `ai*` names 70/70 taken |
-| Non-English simple words (JP/FA/FI/EL) | 0 of 111 free |
-| Famous ancient names | `kairos`, `argo`, `hestia`, `agora`, `simurgh`, `asha` all taken |
-| Simple words on `.ai` | 2 of 392 free — `.ai` is *more* exhausted than `.com` |
-
-**Conclusion to state up front to any stakeholder:** a simple, one-word,
-kid-pronounceable `.com` does not exist at register price, in any language. The
-words they want are six-figure aftermarket. Say this in round one, not round ten.
-
-## Lanes that actually produce results
-
-- **Two simple words fused.** Facebook, Netflix, YouTube, Dropbox, Snapchat,
-  Airbnb, TikTok are all this. At 6–8 characters the seam disappears.
-- **Suffix, not second word.** `-ley`, `-mere`, `-wick`, `-ham`, `-ton`, `-bury`
-  are English place-name suffixes, not words — `Mossley` reads as one word the way
-  `Ashley` does. Big, under-registered space.
-- **Affix + short brand.** The domain carries `try`/`use`/`hire`/`-hq`/`-team`;
-  the brand is the short word alone. Note `get`/`use`/`try` are largely exhausted;
-  `hire`, `run`, `let`, `-pod`, `-team`, `-hq`, `-ops` are open.
-- **Lower-search-volume synonyms.** If the word you want is a high-volume common
-  noun, SEO is unwinnable. Pick the rarer sibling: `provolone` over `pepperoni`,
-  `romesco` over `pesto`.
-
-## Connotation checklist — run before falling in love
-
-A name can be available, memorable, and still wrong:
-
-- **Villain coding** — `Vizier` (Jafar), `Praetorian` (assassinated emperors)
-- **Failure coding** — `Icarus` (flies too close and falls), `Sisyphus`
-- **Dishonesty coding** — `Fudge` ("fudge the numbers") in anything touching data
-- **Subordinate coding** — `Satrap` reads as "puppet ruler"
-- **Slurs and regional meanings** — `Cracker` (US slur); check every market
-- **"Plain/boring" coding** — `Vanilla`
-- **Regional legibility** — `Bullpen` is invisible outside North America
-
-## Register: the "trying too hard" axis
-
-Two failure modes, opposite directions, same cause:
-
-- **Too epic** — `Edict`, `Phalanx`, `Gordian`, `Emissary`. Announces itself.
-- **Too twee** — `Seedmere`, `Brambleburrow`, `Moondell`. Also announces itself.
-
-What the category actually does is **modest**: Notion, Linear, Ramp, Stripe, Loom,
-Clay, Cursor, Slack. A small idea, a line, a slope, dirt, the blinking thing. The
-product supplies the meaning; the name holds a slot. If a stakeholder says "too
-general" *and* "trying too hard," they want **specific and casual** — a real thing
-with a picture attached (`Bullpen`, `Legwork`, `Nightdesk`), not an abstract noun.
-
-## Metaphor dividend
-
-Prefer a name that hands you a product vocabulary for free. `Popcorn` gives you
-kernel (idle agent) → pop (activate) → batch (parallel run) → kettle (dashboard).
-That is worth more than a marginally better sound, and most agencies charge for it.
-
-## Handles, in the same pass
+Check in the same pass; free things go fast.
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}' https://api.github.com/users/<name>   # 404 = free
-curl -s -o /dev/null -w '%{http_code}' https://registry.npmjs.org/<name>    # 404 = free
+curl -s -o /dev/null -w '%{http_code}\n' https://api.github.com/users/<name>  # user
+curl -s -o /dev/null -w '%{http_code}\n' https://api.github.com/orgs/<name>   # org
+curl -s -o /dev/null -w '%{http_code}\n' https://registry.npmjs.org/<name>
 ```
 
-X blocks bots — verify by hand. Grab GitHub org and npm scope immediately; they
-are free and they go fast.
+Caveats: `404` on `/users/` does not mean the **org** name is free — check
+`/orgs/` too, and GitHub reserves some names. A `404` on npm does not guarantee
+you can publish: npm blocks names too similar to existing packages
+(see `agentic-cli-npm-package` §5). Rate limits return `403`, not `404`.
 
-## Registration
+Also check, as applicable: PyPI, crates.io, Docker Hub, Hugging Face, VS Code
+Marketplace, Chrome Web Store, Slack App Directory. And the social handles —
+note Instagram/TikTok/LinkedIn have their own length and character rules. X
+blocks automated checks; verify by hand.
 
-See **`cloudflare-domain-launch`** for the buy + deploy path. Two warnings that
-belong here too:
+**Defensive registrations**: the obvious typos, keyboard neighbours, the plural,
+and the `.net`/`.org`. Cheap now, expensive later. Watch for IDN/homograph
+lookalikes if the brand is valuable.
+
+## 7. Buy
+
+See **`cloudflare-domain-launch`** for the full buy + deploy path. Two warnings:
 
 - `POST /accounts/{acc}/registrar/registrations {"domain_name":"x.com"}`
-  **executes immediately.** There is no dry-run and no confirmation step — a
+  **executes immediately**. There is no dry-run and no confirmation step — a
   minimal body with only `domain_name` completes the purchase and charges the
   account. Do not send it as a schema probe.
-- Registration is a **real financial transaction**. Surface the exact domain and
-  price, get explicit human confirmation, then call it once.
+- It is a **real financial transaction**. Surface the exact domain and price, get
+  explicit human confirmation, call it once, then poll registration status until
+  `state` is `succeeded` before wiring anything against the domain.
 
-## Related skills
+Turn **auto-renew on**. An expired-and-unrenewed domain sitting in redemption is
+how good names come back on the market.
+
+Then: `saas-brand-system` to build the brand system, `verify-branding` to audit it.
+
+---
+
+## Appendix — lanes that came back empty
+
+One session, ~100,000 checks, `.com` at register price. This is a large sample,
+not a proof; treat it as strong prior evidence rather than a law. Re-check before
+relying on any single row.
+
+| Lane | Result in that sample |
+|---|---|
+| Real English words, 4–11 letters | no availability found at any length tried |
+| Root + real suffix (`-ery`, `-ry`) | good ones taken (`stewardry`, `makery`, `roostery`) |
+| Random melodic coinage (10k sample) | 69% free — all unpronounceable |
+| Latin/Greek plurals | `vivaria`, `scriptoria`, `armaria`, `tabularia` taken |
+| Phonetic respellings (Lyft/Flickr style) | 0 of 50 (`hyve`, `krew`, `kamp`, `teem`) |
+| Dahl-style nonsense | good ones taken; survivors unreadable |
+| `get`/`use`/`try` + a good word | 24 of 1,085, all unusable (`getmallet`, `trychum`) |
+| `agent<word>` | none found free |
+| Kid compounds (`treehouse`, `beehive`) | taken |
+| `-ify` / `-ly` (Spotify/Bitly) | `nestify`, `rootify`, `nestly`, `rootly` taken |
+| Words containing `ai` | heavily mined; 4-letter `ai*` names 70/70 taken |
+| Simple words in JP/FA/FI/EL | 0 of 111 |
+| Famous ancient names | `kairos`, `argo`, `hestia`, `agora`, `simurgh`, `asha` taken |
+| Simple words on `.ai` (392 sampled) | 2 free — `.ai` was no easier than `.com` here |
+
+**Practical read:** a simple, one-word, kid-pronounceable `.com` at register price
+is very hard to find, and the words stakeholders actually want are usually
+five-figure-plus aftermarket. Get that on the table in round one.
+
+## Related
+
+**Skills**
 
 - `cloudflare-domain-launch` — buy the domain, deploy the site, DNS/cert gotchas
-- `saas-brand-system` / `vibebrand` — generate the brand system once the name lands
-- `verify-branding` — check the name is applied consistently
-- `ship-a-product` — the wider launch sequence
+- `saas-brand-system` — build the brand system once the name lands
+- `verify-branding` — audit that the name and brand are applied consistently
+- `ship-a-product` — the wider launch sequence (this is stage 0)
+- `new-product-workspace` — overlaps on "name it"; run the company check here first
+- `agentic-cli-npm-package` — npm naming rules and publish blocks
+- `launch-seo` — exact-match vs brandable domain strategy follows from this choice
+- `product-hunt-launch`, `saas-legal-docs` — both assume a settled name
+
+**Not a skill**
+
+- `vibebrand` (`github.com/pooriaarab/vibebrand`) — npm package productizing
+  `saas-brand-system`: 14 emotion-tagged directions, oklch tokens (light + dark),
+  font pairings, generative logos, parametric mascot, CLI + SDK.

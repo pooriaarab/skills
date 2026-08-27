@@ -97,6 +97,10 @@ via the framework (e.g. `next/font`) — never a raw CDN link in production.
 
 ## Related skills
 
+- **`name-a-product`** — choose and clear the name, and register the domain, before any of this. Prerequisite.
+- **`verify-branding`** — audit logo/colour consistency once the kit ships. Next step.
+- **`vibebrand`** — npm package (not a skill) productizing this workflow: 14 emotion-tagged directions, oklch light+dark tokens, font pairings, generative logos, parametric mascot, CLI + SDK. `github.com/pooriaarab/vibebrand`.
+
 This skill owns the *identity* (directions → tokens → logo/favicon/OG → guidelines). Hand off:
 
 - **`landing-page`** — once a brand is picked, design the marketing page's conversion anatomy
