@@ -35,3 +35,8 @@ Live immediately at `<name>.pages.dev`. Then attach the custom domain:
 ## Security — domain registration spends real money
 
 `POST …/registrar/registrations` is a **real financial transaction** — it charges the Cloudflare account and registers a domain. Always run `domain-check` first, surface the exact domain + price to the user, and get **explicit human confirmation before the registration call**. Never auto-register in a loop. The API token is a secret: source it from an env var, never hardcode or log it.
+
+## Related skills
+
+- `name-a-product` — find the name and clear it for conflicts BEFORE you buy. Also documents that the `registrations` POST executes immediately with no dry-run.
+- `saas-brand-system` / `vibebrand` — generate the brand system once the domain is live.
