@@ -17,6 +17,16 @@ Assign each job to the cheapest tier that can actually run it. Keep two independ
 | Jobs with fixed-port `services:` containers, e2e that needs those containers, burst fan-out, overflow | Ephemeral cloud runners (per-job VM, for example Ubicloud at about $0.0008/min) | Each job gets its own network namespace and ports. Extra capacity appears only when a burst needs it. |
 | deploy, release, publish, macOS/iOS images, SARIF upload jobs, comment-triggered workflows | Vendor-hosted (GitHub-hosted) | Image, secret, and trust constraints that a spare Linux box cannot meet. See [Security invariants](#security-invariants). |
 
+Same job, job execution time (not run wall clock), median and best:
+
+| Runner | Median | Best |
+| --- | --- | --- |
+| self-hosted host you own | 43s | 26s |
+| ephemeral cloud VM (2 vCPU) | 50s | 48s |
+| vendor-hosted | 58s | 51s |
+
+The self-hosted host is the fastest tier per job. Cloud runners buy capacity, not speed. An earlier claim that cloud is 5x faster compared run wall clock including queue against job time. Compare job time to job time and wall clock to wall clock.
+
 The self-hosted host is the default for private-repo compile work because a warm package-manager cache and task-runner cache turn a multi-minute install into seconds. It is not the default for anything that needs a unique port, a vendor image, or a trust boundary the host should never cross.
 
 Keep the ephemeral cloud tier even after the host is humming. A single machine is a single failure domain. When it reboots, fills the disk, or hits load average 30, the cloud label still has to dispatch. That independence is the reason there are three tiers rather than "everything self-hosted, hosted as a last resort."
@@ -49,6 +59,8 @@ Package-manager caches, task-runner caches, and browser downloads are content-ad
 
 Keep each runner service's `HOME` separate. Concurrent installs race on the package manager's home directory and fail with `Text file busy`. Share the caches, not the home. A typical layout is `HOME=/opt/actions-runner/<repo>` per service and `/opt/ci-cache/...` for everything hashed by content.
 
+`runner.environment` cannot separate two self-hosted fleets. It reads `self-hosted` for a spare box and for managed cloud runners. If you use it in a cache key, both fleets share one cache. A native addon built against one kernel restores onto the other and fails. Key on distro plus kernel release instead, for example `runner.os` plus `uname -r`.
+
 ## Do not use actions/cache on a self-hosted runner
 
 `actions/cache` uploads to the provider and downloads back, which is slower than reading `/opt/ci-cache` on the same disk, and it consumes the repository's 10 GB cache quota. On a self-hosted host the local directory is the cache. Skip the action.
@@ -71,6 +83,8 @@ GitHub `services:` maps container ports onto the runner's network namespace. On 
 
 Ephemeral per-job runners fix it: each VM (or each job network) gets its own port space, so the three shards run at the same time. Send any workflow that uses fixed-port `services:` to the ephemeral cloud tier. Do not try to make them share the self-hosted host.
 
+A job carries its runner assumptions when you move it. A step that frees disk by deleting vendor-hosted toolchain paths, runs `swapoff -a`, recreates `/swapfile` and sets `vm.swappiness` is correct on a runner it owns outright. On a shared host, concurrent copies do all that to each other. Re-read every `sudo`, absolute path and cache key when you change `runs-on`.
+
 ## Runner services per repo
 
 One service per repo serializes that repo's jobs. Adding a second service for the same repo raises concurrency for that repo. It does not raise throughput once the host is CPU-bound. Check load average before adding. If the host is already at the cap from [Cap in-job parallelism](#cap-in-job-parallelism), another service only lengthens the queue you thought you were draining.
@@ -78,6 +92,14 @@ One service per repo serializes that repo's jobs. Adding a second service for th
 Removing a service: delete the registration through the API first, then stop and remove the service. Deleting the service first leaves an orphaned registration the API refuses to delete while it looks busy. The API sequence is `DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}`, then `systemctl stop` and disable, then delete the install directory.
 
 How to register a service, one per repository, is in [self-hosted-runner-fleet](../self-hosted-runner-fleet/SKILL.md).
+
+## Parallelism is a count of machines, not a setting
+
+A self-hosted host with N runner services runs at most N concurrent jobs across every branch of a repo. There is no switch to turn on. No config raises that count except adding a service.
+
+Diagnostic pattern: on a pull request, every vendor-hosted and cloud check runs concurrently while only the self-hosted checks sit queued. That queue points at the host concurrency cap, not at job slowness.
+
+The bottleneck relocates rather than disappears. After this campaign moved the heavy jobs off the host, the host went fully idle and the queue reappeared against the vendor-hosted concurrency limit. Re-measure after every move. The next constraint is somewhere else.
 
 ## Stop paying for duplicate work
 
@@ -99,6 +121,12 @@ This is the monorepo counterpart of collapsing jobs. Fan-out tax is paying insta
 
 Compare against the merge base, not against the moving tip of the default branch. A long-lived branch compared to `origin/main` looks like it touched everything main landed since it forked.
 
+## Sharding has a floor, and it is the fixed cost
+
+Measured on a 3-way sharded suite: each shard took 207s wall, of which only 22 to 33s was test execution. The rest was checkout, dependency install and module loading. Every shard pays that fixed cost in full.
+
+Adding shards multiplies the fixed cost and divides an already small number. Cut the per-shard fixed cost first, then shard further only when test execution dominates wall time.
+
 ## A remote cache is the cross-tier multiplier
 
 A cache on one host does nothing for cloud runners. A shared remote cache (the task runner's remote cache on object storage you already pay for) makes every tier warm: the self-hosted host, the ephemeral VM, and a laptop running the same tasks.
@@ -119,6 +147,24 @@ Billable minutes read zero once the work moved to self-hosted runners, so cost c
 
 Pull a sample of recent runs before changing labels. If the long pole is already a 40-second lint job on a warm host, collapsing jobs will not change how PRs feel. If the long pole is eight serial checkouts, it will.
 
+## Measure two numbers, never one
+
+Track two numbers. Never collapse them into one.
+
+- **Latency** - wall clock, run created to last job finished, queue included. What a person waiting on a PR feels.
+- **Machine seconds** - sum of each job duration. What metered runners bill.
+
+They move independently. Collapsing job fan-out cuts machine seconds and barely touches latency. Adding runners cuts latency and does not touch machine seconds. A single CI time number hides which one moved, so you cannot tell whether a change did what you thought.
+
+One repo over one day of tiering:
+
+```
+BEFORE  latency_p50=1261s  p95=5316s  machine_p50=3752s
+AFTER   latency_p50= 416s  p95=1192s  machine_p50=2488s
+```
+
+Latency fell 67 percent. Machine seconds fell only 34 percent. Most of the work moved tiers rather than disappeared. To cut machine seconds, add a cache. A different runner does not cut it.
+
 ## Cost comparison
 
 Price per minute for a 2 vCPU Linux runner:
@@ -127,7 +173,7 @@ Price per minute for a 2 vCPU Linux runner:
 | --- | --- | --- |
 | Vendor-hosted (GitHub-hosted) | about $0.008 | Vendor holds the checkout |
 | Managed ephemeral cloud runners | about $0.0008, roughly ten times cheaper | Provider holds the checkout |
-| Mid-tier providers | about $0.004, with faster single-core and a shared layer cache | Provider holds the checkout |
+| Mid-tier providers | about $0.004, with a shared layer cache | Provider holds the checkout |
 | Runners launched in your own cloud account | about $0.001 plus the instance | The checkout stays in your account |
 | A host you already own | effectively free at the margin | The checkout stays on hardware you control |
 
