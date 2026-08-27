@@ -8,6 +8,7 @@ description: "Orchestrator: sequence idea -> working code -> open-source-ready r
 The stages, in order, each with its own dedicated skill. Not every project needs every stage — enter wherever the project actually is.
 
 ```
+0. name-a-product          idea -> a name that is available, memorable and conflict-free, with the domain registered (check competing COMPANIES before domains; a domain sweep will happily hand you variants that sit inside a funded competitor's brand) -- skip only if the name is already settled
 1. build-from-template     idea -> a running scaffold (web-app-shaped ideas only; skip for CLIs/libraries/extensions)
 2. (your own build process) scaffold -> real working product (brainstorm/plan/implement/test -- not a single skill, it's the actual engineering work)
 3. open-source-repo-prep   working code -> a repo ready for public visibility (LICENSE, CI, branch protection, README)
@@ -21,6 +22,7 @@ The stages, in order, each with its own dedicated skill. Not every project needs
 
 ## Deciding where to enter
 
+- **No name yet, or renaming an existing product?** Start at `name-a-product`. Do this before scaffolding — the name decides the repo name, the package scope, and the domain, and changing it later is a multi-thousand-file rename plus a Cloudflare/GCP cutover. Note that GCP project IDs are immutable, so a late rename can never fully complete.
 - **Have an idea, no code yet, and it's web-app-shaped?** Start at `build-from-template`.
 - **Have an idea that isn't a web app, or already know the shape doesn't fit a template?** Skip straight to building it (brainstorm → plan → implement, following whatever process/skills the codebase and toolchain call for), then rejoin at stage 3.
 - **Already have working code, just need to go public?** Start at `open-source-repo-prep`.
