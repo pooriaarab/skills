@@ -1,6 +1,6 @@
 ---
 name: marketing-site
-description: "Build the whole public site for a product, not one landing page — a content model that generates page families (per audience, per use case, per module, per competitor), an animated shell with mega-menu header and full-taxonomy footer, free browser tools as an organic channel, real lead forms, and tests that guard every claim the copy makes. Use when a product has one thin landing page and needs a site, when someone asks for 'pages for each use case', '/partners', 'a page per competitor', 'programmatic SEO pages', or 'a site like <competitor>', or when a marketing site needs to scale past the point where each page is hand-written. Starts from a competitor design audit so the brief comes from evidence rather than taste. Covers the architecture, the copy discipline that keeps generated pages honest, brand assets with no design tools, and the five failures that cost real time: a registry that drifts from the pages it lists, prerendered routes that 404 only in production, delegated copy that invents plausible numbers, staging getting indexed, and a comparison page that reads as a lie. Stops where landing-page, impeccable, geo-aeo, and saas-brand-system begin."
+description: "Build the whole public site for a product, not one landing page — a content model that generates page families (per audience, per use case, per module, per competitor), an animated shell with mega-menu header and full-taxonomy footer, free browser tools as an organic channel, real lead forms, and tests that guard every claim the copy makes. Use when a product has one thin landing page and needs a site, when someone asks for 'pages for each use case', '/partners', 'a page per competitor', 'programmatic SEO pages', or 'a site like <competitor>', or when a marketing site needs to scale past the point where each page is hand-written. Starts from a competitor design audit so the brief comes from evidence rather than taste. Covers the architecture, the copy discipline that keeps generated pages honest, brand assets with no design tools, and the six failures that cost real time: a registry that drifts from the pages it lists, prerendered routes that 404 only in production, delegated copy that invents plausible numbers, staging getting indexed, a reveal wrapper that leaves the hero blank, and a title template defined but never wired. Stops where landing-page, impeccable, geo-aeo, and saas-brand-system begin."
 ---
 
 # marketing-site
@@ -171,6 +171,45 @@ Tag the element and add one rule:
 
 ---
 
+## 3b. The home page section vocabulary
+
+A shell and a content model do not make a home page feel like the reference.
+This is the section set worth copying, in order, and what each one is *for*.
+Missing three of these is the difference between "structured" and "good".
+
+| Section | Its job | The mistake |
+|---|---|---|
+| **Hero with a live artefact** | Show the product working in the first viewport | A static screenshot, or a stock illustration |
+| **Marquee of what it replaces** | Name the tools on their desk today, struck through | Listing your features instead of their tabs |
+| **Scrubber** | Let the visitor click through the workflow, one stage at a time | A static numbered row that says the same thing |
+| **Problem block** | The pain in their words, numbered, in their voice | Your solution wearing a problem's clothes |
+| **Stats row** | Two or three numbers, each with its source under it | An unsourced number, which is worse than none |
+| **Card grid to the page families** | The only place the generated pages are visible from the home page | Building the families and never linking them |
+| **Free tools grid** | Something usable before the form | Hiding the tools in a resources menu |
+| **Comparison table** | The honest matrix against the alternatives | A matrix where you win every row |
+| **FAQ** | The six questions sales answers every week | Questions nobody asked, written for keywords |
+| **Inverted CTA band** | One tonal shift that says the page is over | A fifth identical section with a button in it |
+
+Two rules make the set cohere:
+
+- **Every band gets an eyebrow.** A short uppercase label above the heading, so
+  a scanner can tell the sections apart without reading them.
+- **Alternate the ground.** Default, muted, default. A page of identical bands
+  reads as one long section however good each one is.
+
+**The card grid is the one most often skipped**, and it is the one that makes
+the page families worth building. If a visitor cannot reach `/for/insurers` from
+the home page, the only thing that will ever find it is a crawler.
+
+### Scrubber panels earn their place
+
+A scrubber whose panel only holds a paragraph is a worse accordion. Give it two
+columns: the explanation, and a small artefact that changes with the stage — a
+mock record with status dots, a before-and-after pair, the step list with the
+current one marked. The panel is the reason to click.
+
+---
+
 ## 4. Copy discipline
 
 Generated pages fail in a specific way: they read like a form letter, and they
@@ -314,7 +353,7 @@ asserted without a browser.
 
 ---
 
-## The five failures that cost real time
+## The six failures that cost real time
 
 **1. The registry drifts from the pages.** A content record with no component
 ships a page with an empty slot; a component with no record is dead code.
@@ -339,7 +378,14 @@ source it names, not against plausibility.
 disallow everything unless the request host is the canonical one — one build is
 deployed to both environments, so the host is the only runtime difference.
 
-**5. The title template is never wired.** Defining `title.template` in a
+**5. Reveal-on-scroll leaves the page blank.** A wrapper that starts at
+`opacity-0` and waits for an IntersectionObserver will never show content that
+was already on screen at mount if the observer does not fire, and a hero is
+always on screen at mount. Show anything already in the viewport immediately,
+keep a timeout as a failsafe, and add the `noscript` rule. A late reveal is
+cosmetic; a blank hero is not.
+
+**6. The title template is never wired.** Defining `title.template` in a
 metadata factory does nothing until the root layout actually exports it. Symptom:
 every page title is missing the site name and no favicon is linked. One test on
 `<title>` catches it.
@@ -352,7 +398,8 @@ every page title is missing the site name and no favicon is linked. One test on
 2. Brand assets (**saas-brand-system**, then §7 for the export pipeline)
 3. `types.ts`, the metadata factory, the JSON-LD builders, `publicRoutes()`
 4. Shell: header, footer, section primitives
-5. Home page (**landing-page** for the section anatomy, **impeccable** for craft)
+5. Home page: the section set in §3b, with **landing-page** for conversion
+   anatomy and **impeccable** for craft
 6. One content family end to end, and only then the rest
 7. Free tools engine, then the tools
 8. Forms and the lead endpoint
