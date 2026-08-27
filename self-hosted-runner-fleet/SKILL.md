@@ -115,6 +115,38 @@ Also useful on a Windows host: native OpenSSH may use PowerShell as its default 
 a remote command is PowerShell, not `sh`. Nested quoting breaks constantly — send a bash
 script as base64 and decode it on the far side instead of fighting the quoting.
 
+## Keep the runner disk off the OS drive
+
+The runner's checkouts, caches, and build output all land inside the WSL2 distro's
+virtual disk (`ext4.vhdx`). By default that disk sits on the OS drive under
+`%LOCALAPPDATA%\Packages\...\LocalState`, and it only grows — WSL never shrinks it, even
+after you delete files inside the distro. A fleet of per-repository runners fills the OS
+drive within months (one real host: 22 runners, ~160 GB of `_work` checkouts, OS drive at
+88 %). Put the distro on a data drive instead of fighting the OS drive:
+
+```
+wsl --manage <distro> --move D:\wsl\<distro>
+```
+
+The move shuts the distro down and copies the whole `ext4.vhdx`, so run it while the fleet
+is idle. Every runner is a systemd service *inside* the distro, so they all move with it
+and reconnect on the next boot — no re-registration.
+
+Two failure modes before you run this on a busy host:
+
+- **`--move` can hang on finalize.** It copies to the target, updates the registry
+  `BasePath`, then deletes the source — and can wedge on that last step, leaving the disk
+  on both drives with the OS-drive copy still present. Kill the stray `wsl.exe` processes,
+  then, once the registry already points at the data drive, delete the old
+  `LocalState\ext4.vhdx` yourself to reclaim the OS drive.
+- **A stuck `wsl.exe` wedges the service.** Any wsl command (even `wsl -l -v`) issued while
+  a move is mid-flight can leave the service in `StopPending`, and every later wsl call
+  hangs. The Store build of WSL runs as the **`WSLService`** service, not the legacy
+  `LxssManager` — restart *that* to clear it. Then cold-start the distro
+  (`wsl --terminate <distro>`, then invoke it) so systemd boots and auto-starts the runner
+  services; a plain `wsl -d <distro> -e ...` can enter without booting systemd, and then
+  `systemctl` reports `Failed to connect to bus`.
+
 ## Known job that cannot move
 
 `gitleaks-action@v2` scans fine on a self-hosted runner and then fails uploading
