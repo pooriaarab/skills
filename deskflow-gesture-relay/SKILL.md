@@ -52,7 +52,16 @@ Insert a short delay (~5-10 ms) between events.
 
 ### 3. How to read gestures while the cursor is on the client
 
-A `CGEventTap` on gesture events works only when the cursor is on the server screen. When the cursor is on the client, Deskflow swallows the stream: the tap tops out at 2 touches. 3- and 4-finger frames never arrive.
+A `CGEventTap` on gesture events works only when the cursor is on the server
+screen. When the cursor is on the client, the tap tops out at 2 touches — 3- and
+4-finger frames never arrive.
+
+Note precisely what this does and does not mean. The frames are withheld from the
+**event-tap chain**, not from the system: the server still performs its own native
+gesture (Mission Control still opens on the Mac while the user is working on the
+client). So the gesture is happening and is simply invisible to a tap, which is
+why reading the device directly recovers it — and why the native behaviour is
+preserved for free rather than needing to be re-triggered.
 
 Use the private `MultitouchSupport.framework` — it reads the device below the interception point:
 
