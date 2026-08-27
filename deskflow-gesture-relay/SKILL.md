@@ -107,3 +107,16 @@ let remote = hypot(cursor.x - center.x, cursor.y - center.y) < 4
 
 - Do not swallow or reinterpret gestures on the Mac. Emit chords only.
 - Use digits / F-keys for chords. Letters are layout-dependent (see script notes).
+
+## Related trap: modifier-plus-click across the KVM
+
+The same "one key-down, never repeated" behaviour breaks modifier+click. A
+Windows-side script that releases the forwarded Win key in order to substitute
+Ctrl leaves Win logically up for the rest of the physical hold, so every later
+click in that hold arrives bare and clears the selection instead of extending
+it. Add the modifier you need on top and leave the forwarded one held.
+
+Verify by effect, not by log: a script's synthetic clicks are invisible to
+another script's hotkeys, so the absence of a logged click proves nothing. Query
+the application state instead (for Explorer, `Shell.Application` →
+`Document.SelectedItems().Count`).
