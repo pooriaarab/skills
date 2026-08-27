@@ -155,31 +155,95 @@ not a parent of a workspace under `/opt/actions-runner`. The error reads `The ro
 /home/<user> is not a parent directory of the file: .../results.sarif`. Leave that job
 hosted and say why in the workflow, so nobody re-moves it later.
 
+## Toolchains the hosted images have and your host does not
+
+`prepare-host`-style setup is not finished after Node. Every one of these was found by a
+job that passed on GitHub and failed only on the fleet host:
+
+| Missing | Symptom | Fix |
+| --- | --- | --- |
+| passwordless sudo for the service account | `sudo: a password is required` | a `NOPASSWD` line in `/etc/sudoers.d/` |
+| Docker | `docker: command not found` on any workflow using `services:` | Docker Engine, plus the service account in the `docker` group; restart the runner services so the group applies |
+| Rust | `failed to run 'cargo metadata'` on Tauri builds | install to a shared prefix, then symlink the **toolchain** binaries into `/usr/local/bin` — not the `rustup` shims, which need `RUSTUP_HOME` that a per-service `HOME` does not have (`rustup could not choose a version of cargo to run`) |
+| `xdg-utils`, `desktop-file-utils` | `failed to bundle project xdg-mime binary not found` | install both |
+
+The general rule: a hosted image is a large pile of preinstalled tooling, and every piece
+of it your host lacks becomes a failure that reproduces nowhere else. Fix it on the host
+rather than adding install steps to the workflow, or the workflow slows down for everyone.
+
+## A fixed-port service container cannot run twice on one host
+
+This is the hard ceiling on a single-machine fleet. A job that declares
+
+```yaml
+    services:
+      postgres:
+        image: postgres:16-alpine
+        ports: ["5432:5432"]
+```
+
+binds host port 5432. Hosted runners give every job its own VM, so three parallel test
+shards each get their own 5432. One machine cannot: the second shard dies with
+`Bind for 0.0.0.0:5432 failed: port is already allocated`.
+
+So a repository whose parallel jobs use fixed-port service containers gets exactly **one**
+runner service, and its jobs serialize. If that queue is too slow, the fix is an ephemeral
+per-job runner (a cloud runner service), not more runner services on the same box.
+
 ## Remote-development tools are a separate problem
 
-A synced remote-dev tool (Crabbox and similar) usually verifies the workspace it just
-synced by fetching the target commit from the forge **on the host**, with Git's credential
-helpers neutralized (`GIT_CONFIG_GLOBAL`, `GIT_CONFIG_SYSTEM`, and `-c credential.helper=`).
-On a private repository this fails even though a plain `git fetch` on that host succeeds,
-because the host's stored token is invisible to that one command.
+A synced remote-dev tool (Crabbox and similar) verifies the workspace it just synced by
+fetching the target commit from the forge **on the host**, with Git's config neutralized
+(`GIT_CONFIG_GLOBAL`, `GIT_CONFIG_SYSTEM`, `GIT_CONFIG_NOSYSTEM`, and sometimes
+`-c credential.helper=`). That verification is where these tools break on a self-hosted
+host, and the failure message is usually generic: "remote git seed failed", "align remote
+Git metadata".
 
-What does and does not survive the neutralization:
+**Test the auth assumption before you act on it.** The obvious theory — neutralized config
+means no credentials means private repositories cannot be fetched — was wrong on a Windows
+host here. Git for Windows cloned a *private* repository with
+`GIT_CONFIG_GLOBAL=NUL GIT_CONFIG_SYSTEM=NUL` and no credential config, silently and
+successfully. Reproduce the tool's exact command on the host before rebuilding your auth
+around a guess (this cost real time, and produced two SSH keys and a deploy key that turned
+out to be unnecessary):
 
-- A global or system `credential.helper`, or `url.<alias>.insteadOf` in global config: **no**.
-- A repository-local `credential.helper`: survives `GIT_CONFIG_GLOBAL=NUL`, but not the
-  command-line `-c credential.helper=` reset.
-- SSH transport: **yes** — nothing about SSH depends on credential helpers.
+```powershell
+$env:GIT_CONFIG_GLOBAL="NUL"; $env:GIT_CONFIG_SYSTEM="NUL"; $env:GIT_TERMINAL_PROMPT="0"
+git clone --quiet --filter=blob:none --no-checkout --single-branch --branch main <url> $tmp
+```
 
-So the fix is to make the host's fetch use SSH. A per-repository deploy key works but needs
-a distinct key, host alias, and URL rewrite per repository; an account-level SSH key on the
-host covers every repository at once. Adding an account key needs the `admin:public_key`
-scope, which a normal `repo`-scoped token does not carry.
+One real and generalizable cause of these failures on Windows: **PowerShell with
+`$ErrorActionPreference = "Stop"` turns anything a native command writes to stderr into a
+terminating error.** Recent OpenSSH clients print
 
-Do **not** "fix" the related Git Credential Manager noise on Windows
-(`Unable to persist credentials with the 'wincredman' credential store`) by switching the
-store to `dpapi`: the fetch then hangs on an interactive prompt instead of printing a
-harmless warning, and you have to kill the stuck `git` and `git-credential-manager`
-processes.
+```
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+```
+
+to stderr on *every* connection, so a perfectly successful `git clone` over SSH kills the
+script that called it. Silence it per host in the host's `~/.ssh/config`:
+
+```
+Host github.com
+  LogLevel ERROR
+```
+
+After that, `git clone` produced zero stderr lines here. Verify with
+`@(& git clone ... 2>&1).Count` rather than assuming.
+
+Two more notes worth carrying:
+
+- These tools verify that the commit you are syncing is **on the branch they advertise**.
+  A local branch you never pushed fails with something unhelpful ("requested commit is not
+  on advertised branch"), and it is not a host problem — push the branch.
+- Do **not** "fix" Git Credential Manager noise on Windows (`Unable to persist credentials
+  with the 'wincredman' credential store`) by switching the store to `dpapi`: the fetch then
+  hangs on an interactive prompt instead of printing a harmless warning, and you have to
+  kill the stuck `git` and `git-credential-manager` processes.
+
+If the tool still fails after all of that, replicate each of its steps by hand on the host.
+When every individual step passes and the tool still fails, the bug is in the tool, not in
+your host — file it upstream with that evidence instead of rebuilding your machine around it.
 
 ## Verify, then move on
 
