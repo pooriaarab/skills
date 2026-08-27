@@ -16,9 +16,10 @@ const BASELINE = ".coverage-baseline.json";
 const EPS = 0.01;
 
 // vitest/jest json-summary lives here by default; accept a few common spots.
+// Must be json-summary shape ({ total: { lines: { pct } } }) — coverage-final.json
+// (istanbul's raw per-file format) does not match and is deliberately excluded.
 const CANDIDATES = [
   "coverage/coverage-summary.json",
-  "coverage/coverage-final.json",
   "apps/web/coverage/coverage-summary.json",
   "packages/website/coverage/coverage-summary.json",
 ];
@@ -46,7 +47,11 @@ if (pct == null) {
   process.exit(0);
 }
 
-const baseline = existsSync(BASELINE) ? Number(JSON.parse(readFileSync(BASELINE, "utf8")).lines) : null;
+let baseline = existsSync(BASELINE) ? Number(JSON.parse(readFileSync(BASELINE, "utf8")).lines) : null;
+if (baseline != null && !Number.isFinite(baseline)) {
+  console.log(`coverage-gate: ${BASELINE} has a non-numeric "lines" value — treating as no baseline.`);
+  baseline = null;
+}
 
 if (MODE === "update") {
   if (baseline == null || pct > baseline + EPS) {
@@ -66,7 +71,7 @@ if (baseline == null) {
 if (pct + EPS < baseline) {
   const msg = `coverage-gate: coverage DROPPED ${baseline}% → ${pct}% (−${(baseline - pct).toFixed(2)}pp).`;
   if (STRICT) { console.error(msg + " Failing (strict)."); process.exit(1); }
-  console.log("##[warning]" + msg + " (advisory — add --strict to block)");
+  console.log("::warning::" + msg + " (advisory — add --strict to block)");
   process.exit(0);
 }
 console.log(`coverage-gate: coverage ${pct}% ≥ baseline ${baseline}% — OK.`);
