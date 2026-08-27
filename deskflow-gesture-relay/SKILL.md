@@ -56,23 +56,76 @@ A `CGEventTap` on gesture events works only when the cursor is on the server scr
 
 Use the private `MultitouchSupport.framework` — it reads the device below the interception point:
 
-```swift
-import Foundation
-let handle = dlopen(
-  "/System/Library/PrivateFrameworks/MultitouchSupport.framework/MultitouchSupport",
-  RTLD_NOW)
-```
+A private framework, so the symbols must be resolved by hand — `dlopen` alone
+declares nothing. These bindings and the callback are taken from a working
+daemon, not sketched:
 
 ```swift
-let list = MTDeviceCreateList(0, 0, 0) // CFArray of raw device pointers
-for i in 0..<CFArrayGetCount(list) {
-  let dev = CFArrayGetValueAtIndex(list, i)
-  MTRegisterContactFrameCallback(dev, myCallback)
-  MTDeviceStart(dev, 0)
+import CoreGraphics
+import Foundation
+
+typealias MTDeviceRef = UnsafeMutableRawPointer
+struct MTPoint  { var x: Float = 0; var y: Float = 0 }
+struct MTVector { var position = MTPoint(); var velocity = MTPoint() }
+
+// Field order matters - a wrong layout yields plausible garbage, not a crash.
+struct MTTouch {
+    var frame: Int32 = 0
+    var timestamp: Double = 0
+    var identifier: Int32 = 0, state: Int32 = 0, foo3: Int32 = 0, foo4: Int32 = 0
+    var normalized = MTVector()
+    var size: Float = 0
+    var zero1: Int32 = 0
+    var angle: Float = 0, majorAxis: Float = 0, minorAxis: Float = 0
+    var absoluteVector = MTVector()
+    var zero2: Int32 = 0, zero3: Int32 = 0
+    var zDensity: Float = 0
 }
+
+// The touch pointer must be UnsafeMutableRawPointer: a Swift struct pointer is
+// not representable in Obj-C, so @convention(c) rejects it.
+typealias MTContactCallback =
+    @convention(c) (MTDeviceRef?, UnsafeMutableRawPointer?, Int32, Double, Int32) -> Int32
+
+let lib = dlopen("/System/Library/PrivateFrameworks/MultitouchSupport.framework/MultitouchSupport", RTLD_NOW)!
+let MTDeviceCreateList = unsafeBitCast(
+    dlsym(lib, "MTDeviceCreateList"), to: (@convention(c) () -> CFMutableArray?).self)
+let MTRegisterContactFrameCallback = unsafeBitCast(
+    dlsym(lib, "MTRegisterContactFrameCallback"),
+    to: (@convention(c) (MTDeviceRef, MTContactCallback) -> Void).self)
+let MTDeviceStart = unsafeBitCast(
+    dlsym(lib, "MTDeviceStart"), to: (@convention(c) (MTDeviceRef, Int32) -> Void).self)
+
+let onFrame: MTContactCallback = { _, touches, numTouches, _, _ in
+    guard let raw = touches, numTouches >= 3 else { return 0 }
+    let t = raw.assumingMemoryBound(to: MTTouch.self)
+    for i in 0..<Int(numTouches) {
+        _ = t[i].normalized.position     // x, y in 0...1
+    }
+    return 0
+}
+
+// MTDeviceCreateList takes NO arguments, and returns a CFArray of raw pointers
+// that does not bridge to a Swift Array via `as?`.
+guard let list = MTDeviceCreateList() else { exit(1) }
+for i in 0..<CFArrayGetCount(list) {
+    guard let raw = CFArrayGetValueAtIndex(list, i) else { continue }
+    let dev = UnsafeMutableRawPointer(mutating: raw)
+    MTRegisterContactFrameCallback(dev, onFrame)
+    MTDeviceStart(dev, 0)
+}
+CFRunLoopRun()
 ```
 
 This works regardless of cursor location.
+
+Two further caveats worth knowing before shipping this:
+
+- The callback runs on an internal framework thread, not your run loop thread.
+  Any state it shares with the rest of the process needs synchronising.
+- Calling `MTDeviceStop` straight after `MTUnregisterContactFrameCallback` can
+  crash, because in-flight events may still be in the framework's thread. A
+  long-running daemon that never stops the device sidesteps this entirely.
 
 ---
 
@@ -83,7 +136,25 @@ This works regardless of cursor location.
 
 ## Gesture Frames
 
-Gesture events interleave empty frames (zero-touch array). Do **not** treat an empty frame as "fingers lifted" — it resets accumulated swipe distance every other frame and the swipe never reaches threshold. Ignore zero-touch frames.
+Gesture events interleave empty frames (zero-touch array). Do **not** treat an
+empty frame as "fingers lifted" — that resets accumulated swipe distance on
+every other frame, so the swipe never reaches threshold.
+
+Ignoring zero-touch frames is only half of it: the gesture still needs a defined
+**end**, or one swipe's accumulated distance carries into the next and fires it
+early. Use three distinct cases, in this order:
+
+```
+n == 0                  -> return, carries no data, changes nothing
+n < 3                   -> genuine lift/partial contact: reset the baseline
+n != baselineFingerCount -> finger count changed: re-seed the baseline here
+otherwise               -> accumulate against the baseline
+```
+
+A real finger lift passes through `n == 1` or `n == 2` on the way to zero, so
+the `n < 3` case is what actually ends the gesture. Latch a `fired` flag on the
+baseline as well, so one gesture emits exactly one chord no matter how many
+frames exceed the threshold.
 
 ## Is the Cursor on the Remote Screen?
 
