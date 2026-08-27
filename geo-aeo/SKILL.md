@@ -5,6 +5,12 @@ description: Make a live site discoverable, quotable, and usable by AI answer en
 
 # geo-aeo
 
+**Where the pages come from.** This skill makes a site quotable. It assumes the
+pages already exist. If the entity pages it wants — per audience, per use case,
+per competitor, plus a free-tools channel — are still to be built, start with
+**marketing-site**, which owns the content model that generates them, then come
+back here for llms.txt, the markdown mirrors, and the JSON-LD.
+
 Classic SEO (see `launch-seo`) makes a site findable by crawlers and shareable as a link. GEO/AEO makes it **quotable by AI answer engines and usable by agents**. Different consumers, different artifacts.
 
 - **GEO** = Generative Engine Optimization: get cited inside AI answers (ChatGPT, Claude, Perplexity, Gemini, Google AI Overviews).
