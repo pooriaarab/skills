@@ -16,7 +16,7 @@ overlay, not in this skill and not in a public repo.
 
 | Move to the fleet | Keep on hosted runners |
 | --- | --- |
-| build, lint, typecheck, unit tests, E2E | deploy, release, publish, production smoke |
+| build, lint, typecheck, unit tests, E2E without fixed-port containers | deploy, release, publish, production smoke |
 | dry-run / plan / simulation jobs | anything needing a macOS or Windows image |
 | AI review jobs whose repository secret already exists | workflows that execute a prompt from comment text |
 | formatting bots that push back to a PR branch | jobs uploading SARIF through `gitleaks-action` (see below) |
@@ -34,6 +34,8 @@ Point the moved jobs at your label:
 ```yaml
 runs-on: [self-hosted, linux, <your-label>]
 ```
+
+For job placement and cost, see [high-volume-ci-optimization](../high-volume-ci-optimization/SKILL.md).
 
 ## Register one runner per repository
 
