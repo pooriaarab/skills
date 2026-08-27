@@ -42,7 +42,7 @@ Setting `CGEventFlags` (`.maskControl`, `.maskAlternate`, `.maskShift`) on the k
 
 Post real key events for each modifier:
 
-```
+```text
 keyDown ctrl  (59) → keyDown option (58) → keyDown shift (56)
 → keyDown/keyUp main key (e.g. 0x12 for "1")
 → keyUp shift → keyUp option → keyUp ctrl
@@ -153,7 +153,7 @@ Ignoring zero-touch frames is only half of it: the gesture still needs a defined
 **end**, or one swipe's accumulated distance carries into the next and fires it
 early. Use three distinct cases, in this order:
 
-```
+```text
 n == 0                  -> return, carries no data, changes nothing
 n < 3                   -> genuine lift/partial contact: reset the baseline
 n != baselineFingerCount -> finger count changed: re-seed the baseline here
@@ -169,12 +169,22 @@ frames exceed the threshold.
 
 `CGCursorIsVisible()` is removed in macOS 26. Working substitute: while the cursor is on the client, Deskflow parks the local cursor at the exact centre of the primary display.
 
+Use the **primary** display, not `NSScreen.main`. `NSScreen.main` is the screen
+holding the focused window, so it changes as the user moves between displays and
+would silently relocate the sentinel. The primary display is the one that owns
+the menu bar and the origin:
+
 ```swift
-let center = CGPoint(
-  x: NSScreen.main!.frame.midX,
-  y: NSScreen.main!.frame.midY)
-let remote = hypot(cursor.x - center.x, cursor.y - center.y) < 4
+// CGMainDisplayID() is the primary display. NSScreen.main is the FOCUSED one -
+// a different thing, and wrong here.
+let bounds = CGDisplayBounds(CGMainDisplayID())
+let cursor = CGEvent(source: nil)!.location
+let remote = abs(cursor.x - bounds.midX) <= 3 && abs(cursor.y - bounds.midY) <= 3
 ```
+
+This is a heuristic, not a supported API. It fails open in the harmless
+direction: a false "local" merely skips relaying a chord, and the only false
+"remote" is the user parking the cursor within 3px of exact centre.
 
 ## Verification Steps
 
