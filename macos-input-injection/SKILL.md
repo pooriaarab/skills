@@ -52,7 +52,7 @@ Post separate key-down / key-up events for each modifier keycode:
 
 - `ctrl` = 59, `option` = 58, `shift` = 56
 
-```
+```text
 down ctrl → down option → down shift → down/up main key → up shift → up option → up ctrl
 ```
 
