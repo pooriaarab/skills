@@ -1,6 +1,6 @@
 ---
 name: marketing-site
-description: "Build the whole public site for a product, not one landing page — a content model that generates page families (per audience, per use case, per module, per competitor), an animated shell with mega-menu header and full-taxonomy footer, free browser tools as an organic channel, real lead forms, and tests that guard every claim the copy makes. Use when a product has one thin landing page and needs a site, when someone asks for 'pages for each use case', '/partners', 'a page per competitor', 'programmatic SEO pages', or 'a site like <competitor>', or when a marketing site needs to scale past the point where each page is hand-written. Starts from a competitor design audit so the brief comes from evidence rather than taste. Covers the architecture, the copy discipline that keeps generated pages honest, brand assets with no design tools, and the six failures that cost real time: a registry that drifts from the pages it lists, prerendered routes that 404 only in production, delegated copy that invents plausible numbers, staging getting indexed, a reveal wrapper that leaves the hero blank, and a title template defined but never wired. Stops where landing-page, impeccable, geo-aeo, and saas-brand-system begin."
+description: "Build the whole public site for a product, not one landing page — a content model that generates page families (per audience, per use case, per module, per competitor), an animated shell with mega-menu header and full-taxonomy footer, free browser tools as an organic channel, real lead forms, and tests that guard every claim the copy makes. Use when a product has one thin landing page and needs a site, when someone asks for 'pages for each use case', '/partners', 'a page per competitor', 'programmatic SEO pages', or 'a site like <competitor>', or when a marketing site needs to scale past the point where each page is hand-written. Starts from a competitor design audit so the brief comes from evidence rather than taste. Covers the architecture, the copy discipline that keeps generated pages honest, brand assets with no design tools, and the seven failures that cost real time: a registry that drifts from the pages it lists, prerendered routes that 404 only in production, delegated copy that invents plausible numbers, staging getting indexed, a reveal wrapper that leaves the hero blank, a title template defined but never wired, and a merged PR that never reaches production because main deploys to staging. Stops where landing-page, impeccable, geo-aeo, and saas-brand-system begin."
 ---
 
 # marketing-site
@@ -353,7 +353,7 @@ asserted without a browser.
 
 ---
 
-## The six failures that cost real time
+## The seven failures that cost real time
 
 **1. The registry drifts from the pages.** A content record with no component
 ships a page with an empty slot; a component with no record is dead code.
@@ -389,6 +389,14 @@ cosmetic; a blank hero is not.
 metadata factory does nothing until the root layout actually exports it. Symptom:
 every page title is missing the site name and no favicon is linked. One test on
 `<title>` catches it.
+
+**7. Merged is not live.** A green PR merged to `main` is not a fix in front of
+users. Several repos deploy `main` to staging and promote to production only
+from a `release` branch, so the live site keeps serving the old page while every
+check is green and the PR reads as done. Before reporting a site fix as shipped,
+read the deploy workflow's `on.push.branches`, then fetch the production URL and
+assert the thing you changed is actually in the response. Treat the promotion as
+a separate, outward-facing step: it needs its own decision, not a merge.
 
 ---
 
