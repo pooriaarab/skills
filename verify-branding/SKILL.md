@@ -71,3 +71,8 @@ so don't strip the box to match a borderless in-app mark; just make sure its acc
 
 Run steps 1–4 in each repo. The invariant is identical everywhere, so the audit is copy-paste;
 only the component name and the accent hex change. Fan out one PR per repo.
+
+## Related skills
+
+- **`name-a-product`** — start of the chain: choose the name, clear it, register the domain.
+- **`saas-brand-system`** / **`vibebrand`** — build the brand system this skill audits. Re-run verification after any palette change or rebrand.
