@@ -31,6 +31,14 @@ The self-hosted host is the default for private-repo compile work because a warm
 
 Keep the ephemeral cloud tier even after the host is humming. A single machine is a single failure domain. When it reboots, fills the disk, or hits load average 30, the cloud label still has to dispatch. That independence is the reason there are three tiers rather than "everything self-hosted, hosted as a last resort."
 
+### What happened when this model was run for real
+
+One fleet, one host, so read this as a data point rather than a verdict. The host won on per-job speed and lost anyway. Per job it was the fastest tier, 43s median against 50s hosted. It ran a fixed 4 runner services, so it executed at most 4 concurrent jobs across every branch, and median queue was 46-52s against 2s vendor-hosted. The queue number decides this, not the per-job number.
+
+The failure mode is the part the per-job number hides. When the host went offline, the repos pinned to it did not get slow CI, they got **dead** CI. Jobs died with "the runner has received a shutdown signal" or queued until timeout, and seven repos went down at once.
+
+**Decision rule.** A host you own pays off while concurrency stays low and you can absorb it being a single point of failure. It stops paying the moment many branches compete for it, which is exactly what happens once agents open pull requests in volume. Size the runner services against your real concurrent-branch count before you make the host a default, and keep the second tier genuinely independent so a dead host is a slow day rather than a stopped one.
+
 Point self-hosted jobs at the fleet label from [self-hosted-runner-fleet](../self-hosted-runner-fleet/SKILL.md). Point overflow and `services:` jobs at the ephemeral provider's label. Leave vendor-hosted jobs on `ubuntu-latest` or the macOS/iOS image they already use.
 
 ## The job fan-out tax
