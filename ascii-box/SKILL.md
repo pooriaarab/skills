@@ -60,11 +60,20 @@ Two judgement calls:
 - `replytosocial` `backend/.env.local` stays out. It holds live Stripe keys and the production BYOK encryption key. Nothing in `backend/src` or `scripts/` reads its six names. The runtime reads the unsuffixed names from `.dev.vars`. A build Box does not need it, and a Box is a third-party VM.
 - `imecore` lists two files with identical contents (`apps/web/.env.local` and `apps/web/cloudflare/app-worker/.dev.vars`). Next.js reads one. Wrangler reads the other. Drop either and one runtime misconfigures.
 
-### 3. Make the Turborepo remote cache actually hit
+### 3. Make the Turborepo remote cache actually hit — `box env` per repo is the main mechanism
 
 The credentials already reach the Box inside the root `.env.local`, but nothing exports them and the remote script never runs turbo. Every build is cold.
 
-Create one named `box env` per repo. It carries `TURBO_API`, `TURBO_TOKEN`, and `TURBO_TEAM`. Verify the Box receives them in its environment. The env also sets `--box-credentials false --agents-credentials false` so a build Box gets neither the Box CLI credentials nor the agent logins.
+`box env` is how a Box gets a repo, its env files, and its credentials with nothing uploaded from the laptop. Three commands:
+
+- `box env add-repo <env> <owner/repo> --branch <b>` — clones the repo into every new Box.
+- `box env set-file <env> <in-box-path> --from <local file>` — writes a gitignored env file in.
+- `box env set-var <env> KEY=VALUE` — sets an environment variable.
+
+Credentials are two separate switches, and they deserve opposite answers:
+
+- `--box-credentials false` — always. These let a Box create and control other Boxes, which is the escalation that actually matters.
+- `--agents-credentials true` — if you want to run agents there. I set this to `false` first, and it made every repo Box useless for delegated work: the agent CLI logins live in the separate `agent-roster` environment, so a Box started from a repo environment had no muse, pi, gemini or codex at all. Copy `agent-roster`'s five secret files into the repo environment (`box-env-provision --with-agents`) and turn the flag on. This does widen the blast radius, and it is a deliberate trade: the keys are already stored on ascii under `agent-roster`, so copying them does not hand them to anyone new — it only means more Boxes carry them. One `box new --environment content-rabbit` then gives, with nothing uploaded from the laptop, in 8.4–10.7s: the repo cloned (5,870 files, on main), root `.env.local` with 7 keys, `apps/website/.env.local` with 221 keys, and 3 `TURBO_*` variables. 61 private repos now have an environment. Provision all with `box-env-provision --all --private-only` in `pooriaarab/scripts`.
 
 Proof on a real Box:
 
@@ -99,9 +108,11 @@ A snapshot is a filesystem image. It outlives a key rotation. Scrub secrets befo
 
 Refresh by saving the same name again. The name points at the new state and the old artifact is released. Boxes already deployed from it stay up. If a re-save fails, the name still deploys the last good save.
 
-Content Rabbit has no warm snapshot yet. Its repo is not connected to the ascii GitHub app, so the Box cannot clone it. Connect it in the dashboard, or push the tree from the laptop once.
+Content Rabbit has no warm snapshot yet. The repo now clones from the GitHub app directly (see Gotchas), so seed the snapshot from a Box — no laptop push needed.
 
 ## Trade-offs — be honest and two-sided
+
+**Environments and snapshots cost nothing.** `box limits` exposes no storage quota, no snapshot quota and no byte counter; every billing field it returns is time-based. Billing is per running second. A `box new` with no `--ttl` reports `ttlSeconds: 3600` and archives exactly 60.0 minutes after creation, so a forgotten Box costs about $0.036 at most.
 
 **Warm is slower to first command, faster to ready-to-build.** Cold `base` reaches first usable command in 2.0–2.6s. Warm from a 651 MB snapshot needs 6.6–9.1s to the same point, even though `ready` looks similar (0.8–1.3s cold vs 0.9–1.0s warm). The win comes from skipping `bun install` (7.2s) and the rest of the command phase (14.9s), not from a faster boot. Quote `ready` and you mislead.
 
@@ -113,13 +124,24 @@ Content Rabbit has no warm snapshot yet. Its repo is not connected to the ascii 
 
 **Max 10 named snapshots per account.** One per repo works. One per worktree does not. With four repos, four names fit. With dozens of worktrees, the cap forces churn. Plan `box_20` also caps starts, not just concurrency: 100 concurrent, 50 starts/hour, 150/day. The hourly start ceiling limits an agent fleet before concurrency does. Check `box limits` (`starts.hour.remaining`) before any fan-out.
 
-**Auto-stop is a TTL, not an idle timer.** Default is 1 hour, max 30 days (2592000s). The timer counts from creation or resume, never from last activity. A Box with a 1 hour TTL stops one hour after it started, even mid-work. At expiry it stops and snapshots. It is not deleted. Nothing stops a Box for being unused unless you call `box stop`. `--no-auto-stop` disables the TTL and the Box runs until you stop it.
+**Auto-stop is a TTL, not an idle timer.** Default is 1 hour — `box new` with no `--ttl` reports `ttlSeconds: 3600` and archives exactly 60.0 minutes after creation — max 30 days (2592000s). The timer counts from creation or resume, never from last activity. A Box with a 1 hour TTL stops one hour after it started, even mid-work. At expiry it stops and snapshots. It is not deleted. Nothing stops a Box for being unused unless you call `box stop`. `--no-auto-stop` disables the TTL and the Box runs until you stop it. Default forgotten Box costs about $0.036 at most (per-second billing).
+
+## Setup scripts do not work — both routes are dead ends
+
+Neither documented way to run per-repo setup on a Box works today. Verified 2026-08-28:
+
+- **`setupScript` on an environment's repo entry.** The field exists in the API response. `PUT /api/box/v1/environments/{id}` with it populated returns **200 and `environment.updated`**, and the field reads back empty. A clean success that changed nothing. There is no `--setup-script` flag on `box env add-repo`.
+- **`box new --setup-file <path>`.** `setupStatus` stayed `pending` indefinitely, `setupError` stayed null, the script never ran, and `node_modules` was never installed. It also made the Box **6x slower to first usable command — 52.7s against 8.5s without the flag**.
+
+Do the work yourself after boot instead. `box exec` is verified and takes ~1.2s, and `box exec --detach` runs past the 600s cap. That is what `box-git-sync.sh` does: fetch the commit, then `bun install`, then write a lockfile-hash marker so the next attach skips the install.
 
 ## Gotchas that cost real time
 
 - **`sizeBytes` on a named snapshot is not the restored size.** `replytosocial-ready` reports 32,830 bytes and restores 651 MB. Snapshots are incremental deltas on a chain. The first is a full base; each later one stores only what changed, compressed and deduped. `sizeBytes` is the compressed delta. Restore reassembles the full tree through the chain. Deploy from the snapshot and look; do not judge by that number.
 
-- **The ascii GitHub token is a scoped app token.** It 404s on any repo not connected in the ascii dashboard. `box env add-repo pooriaarab/content-rabbit` fails and an in-box `gh repo clone` of it fails too. Connect the repo in the dashboard, or push the source from the laptop.
+- **The ascii GitHub token is a scoped app token — this changed 2026-08-28.** It previously saw 44 public repos and 0 private ones, so `box env add-repo` and in-box `gh repo clone` failed with 404 for every private repo. It now sees 64 private repos. In-box clone speeds measured: content-rabbit (5,863 files) 3.23s, replytosocial 1.06s, imecore 1.15s. `bun install` for content-rabbit 9.80s, producing 1.9 GB of `node_modules`. New private repos still need connecting in the ascii dashboard before `add-repo` or `gh clone` can see them.
+
+- **T3 Code threads get no Box, and that is correct.** The attach is a `git()` shell function in `~/.zshrc` that intercepts `git worktree add`. A shell function only exists in an interactive zsh: `zsh -ic 'whence -w git'` prints `git: function`, `zsh -c 'whence -w git'` prints `git: command`. T3 creates its worktrees from a Node child process, so the wrapper never fires. Independently, T3 runs git, diffs and terminals on its own disk, so an attached Box would sit idle and bill while the agent worked locally. Do not auto-attach on T3 worktree creation. Run `box-fast-attach` deliberately when you want a remote build. T3's own hook would be a `t3.json` at the repo root with a `scripts[]` entry marked `runOnWorktreeCreate: true` — documented, untested here.
 
 - **The shim has two silent traps.** crabbox calls `box --no-update --json --api-url https://ascii.dev new --ttl 900`. The subcommand is not `$1`. A naive "first bare word" scan picks up `https://ascii.dev`, the value of `--api-url`. The shim then passes through and you get a cold Box that looks fine. Also crabbox runs `box` with `HOME` pointed at its own state directory, so `$HOME/.ascii/bin/box` does not exist. Resolve the real home from the OS user.
 
@@ -150,7 +172,7 @@ Not worth wiring, with reasons:
 
 ## Attaching a worktree in ~1.5s
 
-Measured 2026-08-28 on real hardware. The old path (crabbox) takes ~84s end to end: ~13s lease, ~10s bootstrap, ~43s sync, ~9s install. The sync is rsync wrapped in fingerprint/git-seed/manifest-write/prune/finalize passes costing ~21.6s of FIXED per-run bookkeeping that does not shrink when you change one file.
+Measured 2026-08-28 on real hardware. The old path (crabbox) takes ~84s end to end: ~13s lease, ~10s bootstrap, ~43s sync, ~9s install. The sync is rsync wrapped in fingerprint/git-seed/manifest-write/prune/finalize passes costing ~21.6s of FIXED per-run bookkeeping that does not shrink when you change one file. `box-fast-attach` in `pooriaarab/scripts` is faster: it detects the Box already has the repo, has the Box fetch your HEAD commit itself, then overlays only uncommitted files. Box ready 10.7s, first attach 27.6s, every attach after that 1.69/1.78s.
 
 Transport round trips against a running Box:
 
@@ -162,11 +184,9 @@ Transport round trips against a running Box:
 
 `box exec` is HTTPS and needs no SSH and no open port.
 
-`box exec` does carry a large payload, but only as its own argv word. Interpolating it into `bash -lc "...$VAR"` mangles it — a 43k-char blob arrived as ONE byte and still exited 0. As an argv word, 130,000 chars arrive intact and 150,000 fails with `E2BIG: argument list too long`. The ceiling is the box-side `ARG_MAX`, about 128 KiB. Pass a payload as an argument, never interpolate it into a `-c` string.
+`box exec` joins argv into a shell string. Pass one shell-safe word per argument. Never interpolate a payload into `bash -lc "...$VAR"` — a 43k-char blob arrived as ONE byte and still exited 0. A newline inside an argument ends the line and the next field runs as a command. Base64 anything multi-line. As its own argv word, 130,000 chars arrive intact and 150,000 fails with `E2BIG: argument list too long`. The ceiling is the box-side `ARG_MAX`, about 128 KiB. Pass a payload as an argument, never interpolate it into a `-c` string. Also `box exec "$ID" -- bash -c "test -d '$D/.git' && echo yes || echo no"` always answered "no" even with the directory present; use the exit code of a plain `test -d "$D/.git"` instead.
 
 Detecting what changed cost more than sending it. Hashing 694 files with one `shasum` process each took 8.4s locally against 0.6s of real work on the Box. Ask git instead (`git status --porcelain` plus `git diff --name-only <last-sha> HEAD`).
-
-Final numbers: seed the full tree once ~7.4s; then attach with nothing changed 1.62/1.81s and with one changed file 1.49/1.53/1.97s. About 56x faster than crabbox.
 
 Tool: `box-fast-attach` plus `box-unpack.sh` in `pooriaarab/scripts`.
 
@@ -184,7 +204,7 @@ Safety:
 
 ## Still open
 
-- Content Rabbit has no warm snapshot. Connect the repo to the ascii GitHub app, or seed the snapshot by pushing the tree from the laptop once.
+- Content Rabbit has no warm snapshot. The GitHub connection now works (clone in 3.23s), so seed the snapshot directly from a Box.
 - The 49s rsync is untouched. It is the dominant cost by a wide margin. A snapshot that already contains the repo checkout would turn the full sync into a delta. That is the next real win, and it is bigger than the install saving just banked.
 - The shim is not yet wired into `crabbox-attach.sh` for every repo.
 
