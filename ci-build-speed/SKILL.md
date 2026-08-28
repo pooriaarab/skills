@@ -17,6 +17,10 @@ monorepo it's almost always the **production build** — and spend there.
 **Don't bother if:** CI is already a few minutes and green — micro-optimizing a fast pipeline is
 the same critical-path mistake in miniature.
 
+**Go to [ci-speed-diagnosis](../ci-speed-diagnosis/SKILL.md) first if the caching below is already
+in place and CI is still slow.** A configured cache that never hits reports green, so the levers
+here read as "already done" while doing nothing.
+
 ## Step 0 — Profile. Find the critical path. (Do this FIRST, always.)
 
 Pull real per-job timings, not vibes:
