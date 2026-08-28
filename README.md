@@ -174,6 +174,7 @@ to the skill that holds the lever. The others assume you already know which job 
 | [changelog](changelog/SKILL.md) | Auto-generate a changelog from git commits since the last tag or ref. |
 | [init-project](init-project/SKILL.md) | Auto-generate a CLAUDE.md for a new project by analyzing its structure, tooling, and conventions. |
 | [stale-branches](stale-branches/SKILL.md) | List and clean up stale git branches (merged or inactive 30+ days). |
+| [branch-deploy-convention](branch-deploy-convention/SKILL.md) | Standardise branch names onto `main` (staging) and `release` (production) without breaking a deploy. The silent-dead-trigger defect class, an org-wide sweep, the safe rename order, and the four blockers to check first. |
 | [claude-handoff](claude-handoff/SKILL.md) | Hand off work to a background `claude` session and resume it cleanly. |
 | [git-guardrails-claude-code](git-guardrails-claude-code/SKILL.md) | Set up Claude Code hooks that block dangerous git commands (push, reset --hard, clean). |
 | [x-article-publisher](x-article-publisher/SKILL.md) | Publish X (Twitter) Articles from Markdown via browser automation. |
