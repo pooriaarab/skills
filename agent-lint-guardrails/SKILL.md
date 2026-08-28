@@ -71,16 +71,24 @@ hatch, never the default fix.
 ## Rollout mechanics (fleet-scale)
 
 - **Fan-out unit = 2 self-contained files** (`.oxlintrc.json` + a standalone `oxlint.yml` that runs
-  `bunx oxlint`), independent of each repo's existing turbo/eslint pipeline. Uniform, minimal blast
-  radius, no per-repo bespoke wiring.
+  `bunx oxlint` on `ubicloud-standard-4` — private `pooriaarab/*` repos run every job on an Ubicloud
+  runner, and the self-hosted Dell fleet is retired), independent of each repo's existing
+  turbo/eslint pipeline. Uniform, minimal blast radius, no per-repo bespoke wiring.
 - **No local clone needed** — create the branch and both files through the `gh` contents API
   (the token needs `workflow` scope; a git *push* of a workflow file works, but the contents-API
   edit of a workflow is classifier-gated, so patch workflows via clone+push).
 - **Skip forks and empty scaffolds.** `isFork==true` → never lint someone else's code. A 3–4 KB
   repo is an empty scaffold — skip it.
 - **Deploy guard before merge.** Check whether the PR's base branch has a deploy/release workflow
-  triggered by push to it. Merge freely where it deploys to staging or a demo; hold (or retarget to
-  the staging branch) where merging the default branch deploys production.
+  triggered by push to it. On the standard layout the default branch `main` deploys to the staging
+  environment and only `release` deploys production, so a `main` merge is safe and a PR based on
+  `release` is not. Merge freely where the base deploys to staging or a demo; hold where merging it
+  deploys production. `staging` and `production` are environment names — never retarget to a branch
+  by those names, and never create one.
+- **Check the trigger against the branches that exist.** A `branches:` filter naming a branch the
+  repo does not have never fires and never errors, so a fanned-out workflow can land in dozens of
+  repos and run in none of them. Read `git branch -r` (or the repo's default branch from the API)
+  before you trust a green fan-out.
 
 ## Beyond lint — the fuller agentic guardrail stack
 
