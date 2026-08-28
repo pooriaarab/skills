@@ -19,7 +19,12 @@ the same critical-path mistake in miniature.
 
 **Go to [ci-speed-diagnosis](../ci-speed-diagnosis/SKILL.md) first if the caching below is already
 in place and CI is still slow.** A configured cache that never hits reports green, so the levers
-here read as "already done" while doing nothing.
+here read as "already done" while doing nothing. That skill is the entry point for the whole CI
+family and routes to the rest.
+
+**Go to [e2e-ci-economics](../e2e-ci-economics/SKILL.md) if the long pole is a browser E2E job.**
+The levers below are for the build. An E2E leg has its own rules — it cannot be cached, and the
+first question is whether it gates anything at all.
 
 ## Step 0 — Profile. Find the critical path. (Do this FIRST, always.)
 
@@ -127,6 +132,9 @@ build) so this saves CI minutes, not wall-clock — and `--changed` is fragile:
   branches. Add `--passWithNoTests` (empty shards are legitimate).
 - **Honest verdict:** marginal — small PRs win a little, large PRs win nothing and pay the
   `fetch-depth: 0` tax. Ship only if CI-minute cost genuinely matters; otherwise skip.
+- **A browser E2E suite shards differently.** Do not raise the worker count to avoid a shard — two
+  workers share one dev server and one database. See
+  [e2e-ci-economics](../e2e-ci-economics/SKILL.md).
 
 ### 7. Dev-velocity wins (separate from CI, often higher daily payoff)
 - **Turbopack for `next dev`** (`next dev --turbopack`) — ~5–10× faster HMR/cold-start. The

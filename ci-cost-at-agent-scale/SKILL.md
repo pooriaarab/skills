@@ -18,6 +18,11 @@ one people reach for first.
 **Don't bother if:** a handful of humans open a handful of PRs a day. At that volume the bill is
 noise and the audit costs more than it saves.
 
+**Use a sibling instead** when the problem is latency rather than spend. Start at
+[ci-speed-diagnosis](../ci-speed-diagnosis/SKILL.md), the entry point of this family; it routes to
+[ci-build-speed](../ci-build-speed/SKILL.md), [e2e-ci-economics](../e2e-ci-economics/SKILL.md) and
+[high-volume-ci-optimization](../high-volume-ci-optimization/SKILL.md) for the levers.
+
 ## The core asymmetry
 
 A human PR costs one pipeline. An agentic PR costs **one pipeline per `synchronize` event**, and
@@ -125,6 +130,9 @@ And skip the group entirely on release-tag publish workflows — they fire once,
 ### 3. Path filters on the heavy suites
 
 A docs-only PR should not run a 20-minute e2e suite. Agents generate a lot of docs-only PRs.
+
+A path filter cuts the runs. It does not cut what one run costs. For that, and for the question of
+whether the suite gates anything at all, see [e2e-ci-economics](../e2e-ci-economics/SKILL.md).
 
 ```yaml
 on:
