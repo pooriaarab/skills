@@ -182,6 +182,29 @@ Ubicloud runs **about 6x cheaper per minute**, and its 4-core rate still undercu
 8-second job bills a full minute. That rounding waste falls hardest on the short jobs a
 queue-time argument sends to the expensive runner, not on the long ones.
 
+**Then take the arm64 discount, which is not a discount on price.** Ubicloud arm64 costs
+*exactly the same per minute* as x64 at every tier — 2 vCPU $0.00125, 4 vCPU $0.0025, 8 vCPU
+$0.005. Relabelling `ubicloud-standard-4` to `ubicloud-standard-4-arm` therefore saves nothing.
+
+The saving comes from what a vCPU means. On arm64 each vCPU is a **dedicated physical core**
+(Ampere Altra). On x64 **two vCPUs share one core**. So the arm tier at half the size has the
+same number of real cores:
+
+| x64 label | Physical cores | arm equivalent | Physical cores | Price change |
+|---|---|---|---|---|
+| `ubicloud-standard-4` | 2 | `ubicloud-standard-2-arm` | 2 | $0.0025 -> $0.00125 (**-50%**) |
+| `ubicloud-standard-8` | 4 | `ubicloud-standard-4-arm` | 4 | $0.005 -> $0.0025 (**-50%**) |
+
+**So the move is arm AND one tier down, together.** Either alone is pointless: arm at the same
+tier costs the same, and a tier drop on x64 halves your cores.
+
+Two things bound it. **Memory drops with the tier** — arm 2 vCPU is 6GB against x64 4 vCPU's
+16GB — so a build that was memory-bound rather than CPU-bound will start failing. And **not
+every job can run on arm**: check for dependencies shipping per-architecture binaries
+(`better-sqlite3`, `sharp`, `canvas`, `@napi-rs/*`), Playwright **WebKit**, which has no
+linux-arm64 build, amd64-only Docker images, and anything pinned to an x86 toolchain. Pilot on
+one small pure-JS repo and compare wall-clock before committing the fleet.
+
 Other managed runners (Blacksmith, Depot, Namespace, WarpBuild) sit in the same band and are
 also a label swap; some require a GitHub **org**, so check before planning on a personal
 account. A licensed self-hosted fleet (RunsOn and similar) or your own always-on box goes
@@ -264,4 +287,6 @@ each multiplied run cheaper.
 | A new PR gets no workflow runs at all, while other branches do | GitHub scheduling lag, which can exceed five minutes under load. Confirm with an empty commit before diagnosing the diff. |
 | Workflow triggers look fine locally but behave differently in CI | You read the file from a stale branch. For `pull_request`, read the workflow as it exists on the base and head refs, not from your working tree. |
 | A `push: branches: [main]` workflow has never once run | The repo has no `main` branch. Nothing reports this — a trigger that never fires produces no failure and no run to notice the absence of. Check every `branches:` filter against branches that actually exist. |
+| CI is green on every PR, but the production branch is never gated | The filter is `pull_request: branches: [main]` in a repo that also has `release`. It fires, so it looks healthy — it just never fires for the branch that matters. List every deployable branch in the filter, not only the default one. |
+| A cheaper runner label changed nothing on the bill | You moved x64 -> arm at the same tier. Ubicloud prices arm and x64 identically; the win is the tier drop that arm's dedicated cores allow. |
 | A cost-audit script silently returns nothing | BSD `xargs` has no `-a`; `xargs -I{}` drops tab-delimited fields. Test the pipeline on one input before fanning out. |
