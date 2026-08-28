@@ -82,7 +82,48 @@ git branch --set-upstream-to=origin/main main
 
 After this, normal work goes through feature branches and PRs.
 
-## 5. Hand off
+## 5. Repo conventions every new repo starts with
+
+Set these before the first feature branch. Fixing them later means editing
+workflows that have already run, or workflows that never ran at all.
+
+**Branch model.** `main` is the default branch and deploys to the **staging**
+environment. `release` is production. `staging` and `production` are environment
+names and must never be used as branch names. Create `release` off `main` when
+the product first needs a production deploy.
+
+**A branch filter naming a branch you do not have never fires, and never
+errors.** A workflow with `on: push: branches: [staging]` in a repo whose
+branches are `main` and `release` simply never runs. There is no failure and no
+run, so nothing reports it. Every time you add or copy a workflow, read its
+`branches:` filter against the branches that actually exist (`git branch -r`).
+
+**CI runners.** Every job on a private `pooriaarab/*` repo runs on an Ubicloud
+managed runner. The self-hosted Dell fleet (`[self-hosted, linux, dell-ci]`) is
+retired: never write that label and never add a fallback to it.
+
+| Job | `runs-on` |
+| --- | --- |
+| build, lint, typecheck, test | `ubicloud-standard-4` |
+| heavy Next.js production build | `ubicloud-standard-8` |
+| waits on an external API (LLM review, notify, deploy trigger, secret scan) | `ubicloud-standard-2` |
+
+**PR review.** Every repo gets `.github/workflows/vibecodereview.yml`, which
+calls `pooriaarab/vibecodereview@v1`. Copy the current canonical file instead of
+retyping it:
+
+```bash
+mkdir -p .github/workflows
+gh api repos/pooriaarab/imecore/contents/.github/workflows/vibecodereview.yml \
+  --jq .content | base64 -d > .github/workflows/vibecodereview.yml
+```
+
+Secrets it reads: `CLAUDE_CODE_OAUTH_TOKEN`, `CLAUDE_CODE_OAUTH_TOKEN_2`,
+`OPENAI_API_KEY`, `GEMINI_API_KEY`, `MOONSHOT_API_KEY`, `OPENROUTER_API_KEY`.
+Only `OPENROUTER_API_KEY` is strictly required. The action falls back to
+OpenRouter for any council member whose native key is missing or rejected.
+
+## 6. Hand off
 
 The workspace is now ready. Next:
 
@@ -97,4 +138,10 @@ The workspace is now ready. Next:
 - [ ] `gh repo create` done (private unless told otherwise).
 - [ ] `README.md` seeded; `main` exists on the remote.
 - [ ] Local `<product>/{branding/,code/<repo>/}` container created.
+- [ ] `release` understood as the production branch; no branch named `staging`
+      or `production`.
+- [ ] `.github/workflows/vibecodereview.yml` copied from `imecore`;
+      `OPENROUTER_API_KEY` set.
+- [ ] Every `runs-on` is an Ubicloud label; every `branches:` filter names a
+      branch that exists.
 - [ ] Domain **not** purchased unless the user asked.

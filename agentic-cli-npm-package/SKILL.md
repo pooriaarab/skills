@@ -47,7 +47,7 @@ name: publish
 on: { push: { branches: [release] }, workflow_dispatch: {} }
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: ubicloud-standard-2   # private pooriaarab/* repos run every job on Ubicloud; this one just waits on the npm API
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
