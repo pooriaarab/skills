@@ -14,10 +14,17 @@ was found this way, and each one hid behind a green check.
 **Use this skill** when someone already added caching, a remote cache, or sharding, and CI is
 still slow. Also use it before you buy a bigger runner.
 
-**Use a sibling skill instead** when the pipeline has no caching yet
-([ci-build-speed](../ci-build-speed/SKILL.md)), when you are placing jobs on runner tiers
-([high-volume-ci-optimization](../high-volume-ci-optimization/SKILL.md)), or when the problem is
-spend and queueing ([ci-cost-at-agent-scale](../ci-cost-at-agent-scale/SKILL.md)).
+**This skill is the entry point of the CI family.** It finds the constraint. The siblings hold the
+levers. Route by what you already know:
+
+| You know | Go to |
+| --- | --- |
+| nothing yet — CI is just slow | stay here, and run the four steps below |
+| the pipeline has no caching at all | [ci-build-speed](../ci-build-speed/SKILL.md) |
+| the long pole is a browser E2E job | [e2e-ci-economics](../e2e-ci-economics/SKILL.md) |
+| jobs are on the wrong runner tier, or queueing behind each other | [high-volume-ci-optimization](../high-volume-ci-optimization/SKILL.md) |
+| the problem is spend, and agents open most of the pull requests | [ci-cost-at-agent-scale](../ci-cost-at-agent-scale/SKILL.md) |
+| you are setting up the host itself | [self-hosted-runner-fleet](../self-hosted-runner-fleet/SKILL.md) |
 
 ## Diagnose in this order
 
@@ -28,13 +35,18 @@ Do not skip a step. Each one stops you from optimising a job that does not matte
    hides which one changed. Tool: `ci-pr-latency`.
 2. **Name the critical path.** Jobs run in parallel, so wall clock is the longest job, not the
    sum. Write the per-job medians down. A win on any other job buys machine time only.
-   Tool: `ci-job-timings`.
+   Tool: `ci-job-timings`. **Also check whether the long pole can fail the run.** A job with
+   `continue-on-error: true` gates nothing, so time spent there buys nothing — see
+   [e2e-ci-economics](../e2e-ci-economics/SKILL.md), where the longest job in two pipelines was
+   exactly that.
 3. **Prove the caches hit.** Read the job logs for payload size, primary-key hit rate, and
    remote-cache state. A cache that restores 0 bytes still prints a green success line.
    Tool: `ci-cache-health`.
 4. **Read the guards inside the long-pole job.** See the next section. This is where the time
    usually is.
-5. **Only now add a lever.** Go to `ci-build-speed` and spend on the critical path.
+5. **Only now add a lever.** Spend on the critical path, in the sibling that owns it:
+   `ci-build-speed` for the build, `e2e-ci-economics` for a browser suite,
+   `high-volume-ci-optimization` for job placement.
 
 ## The bug shape that repeats: one host's mitigation, every host's cost
 

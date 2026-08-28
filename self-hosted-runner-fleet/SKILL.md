@@ -36,6 +36,10 @@ runs-on: [self-hosted, linux, <your-label>]
 ```
 
 For job placement and cost, see [high-volume-ci-optimization](../high-volume-ci-optimization/SKILL.md).
+Before you move an E2E suite here, read [e2e-ci-economics](../e2e-ci-economics/SKILL.md) — a faster
+host hides a flaky test instead of fixing it, and the first question is whether the suite gates
+anything. To find out which job to move at all, start at
+[ci-speed-diagnosis](../ci-speed-diagnosis/SKILL.md).
 
 ## Register one runner per repository
 
