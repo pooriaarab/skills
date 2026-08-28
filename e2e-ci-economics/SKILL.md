@@ -1,6 +1,6 @@
 ---
 name: e2e-ci-economics
-description: "Use when a browser end-to-end suite (Playwright, Cypress, WebdriverIO) is the slowest thing in CI, or when someone proposes to add a browser to the matrix, raise the worker count, cache the suite, or mark the suite `continue-on-error`. Covers the rule that a non-gating job must never sit on the critical path, why `continue-on-error: true` plus a `pull_request` trigger is the worst of both states, gating on a minimal browser set and running the full matrix nightly, why you shard instead of raising `workers`, the fixed per-shard cost that sets the floor on sharding, why an E2E result cannot go in a task-runner cache and must not, the default-branch alert that catches the suite everyone stopped reading, and how to report a retry-pass instead of absorbing it. Says which of these a linter can enforce and which needs run timings. Triggers: 'E2E is slow', 'the e2e job takes forever', 'add WebKit to the matrix', 'raise Playwright workers', 'shard the e2e suite', 'cache the e2e job', 'mark e2e continue-on-error', 'e2e is flaky', 'e2e has been red on main'."
+description: "Use when a browser end-to-end suite (Playwright, Cypress, WebdriverIO) is the slowest thing in CI, or when someone proposes to add a browser to the matrix, raise the worker count, cache the suite, or mark the suite `continue-on-error`. Covers the rule that a non-gating job must never sit on the critical path, why `continue-on-error: true` plus a `pull_request` trigger is the worst of both states, gating on a minimal browser set and running the full matrix nightly, why you shard instead of raising `workers`, the fixed per-shard cost that sets the floor on sharding, why an E2E result cannot go in a task-runner cache and must not, the default-branch alert that catches the suite everyone stopped reading, and how to report a retry-pass instead of absorbing it, and why you address a collection member by a stable key rather than by index. Says which of these a linter can enforce and which needs run timings. Triggers: 'E2E is slow', 'the e2e job takes forever', 'add WebKit to the matrix', 'raise Playwright workers', 'shard the e2e suite', 'cache the e2e job', 'mark e2e continue-on-error', 'e2e is flaky', 'e2e has been red on main', 'the e2e test fails but the endpoint works'."
 ---
 
 # e2e-ci-economics
@@ -98,6 +98,37 @@ team already watches. This is the check that earns a page, because it is the one
 weeks. Alert on the nightly full-matrix failure too — a nightly job nobody watches is a job you
 deleted.
 
+## Address a collection member by a stable key, never by index
+
+A positional assertion is correct only while nothing is ever prepended. Nothing guarantees that.
+
+**Measured.** A spec asserted on entry `[0]` of a discovery endpoint that returns an array of
+entries. A later change prepended a new entry, which legitimately carries a different shape. The
+assertion silently retargeted onto that new object and failed on a property the object was never
+meant to have. The endpoint was healthy throughout. The spec stayed red for six days.
+
+Three properties make this E2E-shaped rather than a generic testing nit.
+
+- **The error message actively misleads.** An object-match mismatch reads as "the API returned the
+  wrong data". Proving the application was correct took reading the endpoint, `git log --follow` on
+  both sides, and bracketing CI history to one commit. An engineer who trusts the message repairs a
+  healthy endpoint.
+- **Nothing carried the signal to a person** — the same defect as the section above.
+- **E2E assertions are the ones that get forgotten,** because they live furthest from the code that
+  changed. The change that broke this one repaired the matching unit test for exactly this reason,
+  then missed the E2E spec. A sibling suite already encoded the new contract while this one rotted.
+
+**Rule.** Look the entry up by its anchor, id, name or URL. Then assert on what you found.
+
+**Establish which side moved before you change either.** `git log --follow` on the spec and on the
+implementation answers it in seconds, and the commit that changed the shape usually says what it
+intended.
+
+**Fix it stronger than you found it.** The repair replaced one indexed assertion with a lookup of
+all five entries by anchor, and added an assertion for the new entry's own shape. That is strictly
+stronger than what it replaced, and faster to reason about. A stale expectation is an opportunity to
+make a test un-shiftable, not just green.
+
 ## Report a retry-pass. Do not absorb it.
 
 `retries: 2` on CI is reasonable. Silent retries are not.
@@ -119,12 +150,17 @@ One you could build, and should not build yet.
 or its own CI job expresses it. It over-flags a cheap non-gating job as well as an expensive one.
 That is correct — the half-state is what you are banning, at any price.
 
+A second static rule is writable but noisier: flag an index expression inside an assertion, for
+example `expect(x[0])`, in the E2E spec directory only. Scope it there. In a unit test on a fixture
+you control, an index is fine.
+
 **Enforceable as an agent rule, in prose.** Put this in the repository rules file:
 
 > Never add `continue-on-error: true` to a job that runs on every push. Either remove the flag and
 > let the job gate, or move the job to `schedule` / `workflow_dispatch`. Never add a browser to a
 > pull-request matrix; add it to the nightly matrix. Never raise the E2E worker count to make a
-> shard faster.
+> shard faster. Never assert on a collection member by index; look it up by a stable key. When a
+> test fails after a shape change, establish which side moved before you change either.
 
 **Not enforceable by a workflow linter.** `actionlint` has a fixed rule set and no custom-rule
 plugin. It validates syntax, expressions, shell, and action inputs. It has no run timings, so
@@ -153,3 +189,4 @@ before.
 4. **Measure the fixed per-shard cost.** Shard while it pays. Record the floor.
 5. **Alert on default-branch and nightly failures.**
 6. **Surface retry-passes.**
+7. **Replace every indexed assertion with a key lookup.** Do it before the array grows.
