@@ -145,6 +145,8 @@ A cache on one host does nothing for cloud runners. A shared remote cache (the t
 
 Without it, the three-tier model leaks. Overflow jobs on ephemeral runners rebuild from zero while the host next to them has a hot `/opt/ci-cache`. Point `TURBO_REMOTE_CACHE` / `NX_SELF_HOSTED_REMOTE_CACHE` / the vendor remote-cache URL at the same bucket from every tier. Local `/opt/ci-cache` remains the first hit on the host. The remote cache is what the other machines see.
 
+**Before you wire the credentials into a workflow, ask two questions, not one.** A sweep of 19 candidate workflows for a missing remote-cache env block found 19 correct skips. The near-miss: one workflow genuinely ran the task runner, but both its tasks were pinned `cache: false` — correctly, since a cache hit on a `*:fix` task would skip the fix and still report success. Wiring the credentials in would have let it reach a cache it could never legitimately read. So confirm both: does the tool run here, **and** are these specific tasks cacheable.
+
 ## Cache masking is a real hazard
 
 A pipeline that passes only because of a cache hit can hide broken code until something busts the cache. Verify with one cache-busting run before trusting a green result.
