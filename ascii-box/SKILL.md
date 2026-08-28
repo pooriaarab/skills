@@ -148,6 +148,33 @@ Not worth wiring, with reasons:
 - `box desktop` — no use for a build Box.
 - `box api-key` — one key already exists and works. Rotate, do not automate.
 
+## Attaching a worktree in ~1.5s
+
+Measured 2026-08-28 on real hardware. The old path (crabbox) takes ~84s end to end: ~13s lease, ~10s bootstrap, ~43s sync, ~9s install. The sync is rsync wrapped in fingerprint/git-seed/manifest-write/prune/finalize passes costing ~21.6s of FIXED per-run bookkeeping that does not shrink when you change one file.
+
+Transport round trips against a running Box:
+
+| transport | round trip |
+| --- | --- |
+| `box exec` | 1.2s |
+| `box ssh` | 5.2s |
+| `box scp` | 6.1s |
+
+`box exec` is HTTPS and needs no SSH and no open port.
+
+`box exec` does carry a large payload, but only as its own argv word. Interpolating it into `bash -lc "...$VAR"` mangles it — a 43k-char blob arrived as ONE byte and still exited 0. As an argv word, 130,000 chars arrive intact and 150,000 fails with `E2BIG: argument list too long`. The ceiling is the box-side `ARG_MAX`, about 128 KiB. Pass a payload as an argument, never interpolate it into a `-c` string.
+
+Detecting what changed cost more than sending it. Hashing 694 files with one `shasum` process each took 8.4s locally against 0.6s of real work on the Box. Ask git instead (`git status --porcelain` plus `git diff --name-only <last-sha> HEAD`).
+
+Final numbers: seed the full tree once ~7.4s; then attach with nothing changed 1.62/1.81s and with one changed file 1.49/1.53/1.97s. About 56x faster than crabbox.
+
+Tool: `box-fast-attach` plus `box-unpack.sh` in `pooriaarab/scripts`.
+
+Safety:
+
+- Pass a payload as an argv word, not inside `-c`.
+- `box exec` runs the command on the Box, so an environment variable exported around the local `box` process never reaches it — that silently skipped every file deletion while still reporting success.
+
 ## Security
 
 - `box env list` prints secret-file contents in plaintext. Keep app secrets out of environments.
