@@ -65,6 +65,17 @@ checkout+setup+install across N jobs.
 > `if: always()` — never runs, and the framework cache never seeds. The cache only starts helping
 > *after the first build that completes*. Fix the OOM (lever 3) first, or caching is theoretical.
 
+> **CRITICAL gotcha — an incomplete cache key poisons the cache permanently, not once.**
+> `next.config.ts` is a webpack build dependency. Leave it out of the cache key and a PR that
+> only touches it gets an exact primary-key hit on a now-stale cache, so webpack reads its
+> build dependencies, sees the config changed, and discards the pack for a full cold compile —
+> while the save step (correctly gated `if: cache-hit != 'true'`) skips, because the key still
+> looks like a hit. The stale entry stays pinned under a key every later run matches exactly,
+> until some unrelated commit happens to touch a file the key **does** cover. Measured: 326–421s
+> across ten runs, then 605–689s across three, with no recovery path in between. **Every input
+> the tool treats as a build dependency belongs in the cache key** — the save gate is correct;
+> only an incomplete key turns it into a trap.
+
 ### 2. Build once (kill duplicate full builds)
 Pipelines accumulate **two** full builds — e.g. a "build" job and a "deploy-simulation" build that
 mirrors the host (Netlify) exactly. A full build is the most expensive thing in CI; running it twice
@@ -72,6 +83,11 @@ is pure waste. **Collapse to one.** Keep the **deploy-mirror** build (the one th
 the host does) — it catches prod-only breaks (workspace-resolution gaps a root-install build hides);
 drop the redundant one. Fold any post-build check (bundle-size budgets) into the same job so there's
 no artifact upload/download round-trip.
+
+**Deleting a step is not the same as deleting the work.** One deploy workflow ran an explicit
+build step nothing consumed; removing it saved under a second, because the deploy task carried
+`dependsOn: ["build"]` and the task runner ran it anyway. Check the task graph before you delete
+a step — the redundancy may be the dependency, not the step.
 
 ### 3. Fix the build OOM (the subtle, high-value one)
 Large Next apps OOM during **"Collecting page data using N workers"** — the static-generation phase

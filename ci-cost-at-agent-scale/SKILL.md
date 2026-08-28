@@ -200,6 +200,11 @@ moved 46 repos on that basis; 131 samples put it at 2s. **Take more than 100 sam
 fleet-wide migration.** A cold-start outlier dominates a small sample, and queue time is exactly
 the metric that produces them.
 
+**Recency decides it too.** A fleet audit ranked roughly 15 repos at the top on 400–880s
+medians. Every one was **n=1, from a burst rollout nine days earlier**, and none had run CI
+since. Optimizing them would have moved nothing. Before you trust any per-repo ranking, check
+when each sample last ran — a median over one stale observation is not a median.
+
 ## Agent sandboxes are not CI runners
 
 This proposal recurs, so it gets its own section. E2B, Daytona, Modal, Vercel Sandbox and
@@ -247,4 +252,5 @@ each multiplied run cheaper.
 | Branch protection API returns 403 on a private repo | Required status checks need a paid plan. Also means path filters cannot deadlock a check — verify rather than assume. |
 | A new PR gets no workflow runs at all, while other branches do | GitHub scheduling lag, which can exceed five minutes under load. Confirm with an empty commit before diagnosing the diff. |
 | Workflow triggers look fine locally but behave differently in CI | You read the file from a stale branch. For `pull_request`, read the workflow as it exists on the base and head refs, not from your working tree. |
+| A `push: branches: [main]` workflow has never once run | The repo has no `main` branch. Nothing reports this — a trigger that never fires produces no failure and no run to notice the absence of. Check every `branches:` filter against branches that actually exist. |
 | A cost-audit script silently returns nothing | BSD `xargs` has no `-a`; `xargs -I{}` drops tab-delimited fields. Test the pipeline on one input before fanning out. |
