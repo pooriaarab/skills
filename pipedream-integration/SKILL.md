@@ -35,6 +35,17 @@ every action must declare an `annotations` object**, and all 17 were missing it.
 Also add the `package.json` the registry expects in an app directory, and **check every
 documentation link resolves**. Twenty links pointed at a docs path that 404s.
 
+**`multiline-ternary: always` catches everyone, including review bots.** Every ternary must
+break across three lines. A one-line `cond ? a : b` is two errors. Four of these arrived in
+Content Rabbit's PR from an automated review bot's own follow-up commits — so re-lint after
+*anything* touches the files, not just after you do.
+
+**Linting without installing the monorepo:** a bare `npx eslint` fails on their config's plugin
+imports, and installing them loose hits version conflicts. Copy the stylistic rules out of
+`eslint.config.mjs` into a throwaway flat config and lint the component directory against that.
+It takes a minute and catches the whole formatting class. Verify the throwaway config actually
+inspects the files — lint a deliberately malformed file first and confirm it reports errors.
+
 ## annotations: destructiveHint is about permanence, not mutation
 
 Set them from real behaviour. This is the one reviewers correct most:
