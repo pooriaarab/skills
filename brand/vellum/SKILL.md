@@ -28,7 +28,11 @@ dark   bg #17150f  surface rgba(240,232,214,0.10)  fg #efe7d6  muted #a89c86
        border rgba(240,232,214,0.16)  accent #e4694f  accentFg #1a0d09  alt #8f9a86
 ```
 
-**Surfaces are translucent on purpose: alpha is the material.** Never flatten `rgba(255,252,244,0.72)` to a hex — the 6% overlap darkening comes from alpha compositing, not from hand-painting. `#a8331f` is rubrication: on real vellum the one non-black ink was vermilion. `#7d8a7a` is the olive cast that appears where three or more sheets stack.
+**Surfaces are translucent on purpose: alpha is the material.** Never flatten `rgba(255,252,244,0.72)` to a hex.
+
+**The 6% step is an explicit overlap layer, not a by-product of the sheet alpha.** This is worth stating precisely, because the intuitive reading is wrong: `rgba(255,252,244,0.72)` is *lighter* than the `#f3efe6` field, so compositing it composites toward white, and a second sheet goes lighter again. Stacking alpha alone would wash the field out and hit a white ceiling by the fifth sheet, which would destroy the one signal this direction runs on. So the overlap region carries its own layer: `rgba(35,32,26,0.06)`, the same ink used in the hairline, painted only where two sheets cross. That gives a true 6% step, it is monotonic, and it never saturates. Every "6% darker" rule below refers to this layer.
+
+`#a8331f` is rubrication: on real vellum the one non-black ink was vermilion. `#7d8a7a` is the olive cast that appears where three or more sheets stack.
 
 Verified contrast — light fg/bg **14.15**, muted/bg **5.19**, accentFg/accent **6.25**; dark fg/bg **14.84**, muted/bg **6.75**, accentFg/accent **5.82**. Vermilion on the light field is **5.79**, so `#a8331f` is legal as text.
 

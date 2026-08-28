@@ -208,9 +208,10 @@ cue. It says both "there is more" and "this is printed" in one mark.
 1280×720, designed for the ~210px sidebar render.
 
 Paper `#f4efe1` fills the frame. Three lowercase words maximum in Archivo Black at roughly 42% of frame
-height, so about 300px, sitting in the left two thirds, printed pink with a blue duplicate **8px**
-behind it. That offset is the whole recognition cue at sidebar size, so it is exaggerated well past the
-0.5% rule here on purpose.
+height, so about 300px, sitting in the left two thirds, printed blue `#2b44a8` with a fluorescent pink
+duplicate **8px** behind it. Blue reads at 7.3:1 on paper and pink reads at 2.6:1, so blue takes the
+front plate and pink stays behind it, exactly as the token contract requires. That offset is the whole
+recognition cue at sidebar size, so it is exaggerated well past the 0.5% rule here on purpose.
 
 Face on the right third, two-tone, cropped so the crown leaves the top edge.
 
@@ -231,8 +232,9 @@ more than 60% of the frame with ink. The words change every video; the offset di
 3000×3000, seen at 150px. Simplify to one word and one offset.
 
 Paper `#f4efe1`. The show name in lowercase Archivo Black filling 78% of the frame width, flush left
-with a 300px inset, vertically centred, printed pink with a blue duplicate **60px** behind it, down and
-left. Two words maximum.
+with a 300px inset, vertically centred, printed blue `#2b44a8` with a fluorescent pink duplicate **60px**
+behind it, down and left. Blue is the front plate here for the same reason as the thumbnail: pink type
+on paper is 2.6:1 and fails. Two words maximum.
 
 Drop the ink grain, the portrait, the rules, the tagline. At 150px the only thing that survives is the
 doubled letterform, so make the offset 2% of the frame instead of 0.5%. Anything subtler looks like a
