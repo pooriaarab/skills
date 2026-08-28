@@ -20,6 +20,24 @@ The stages, in order, each with its own dedicated skill. Not every project needs
 9. product-hunt-launch     significant release -> reviewed Product Hunt draft, assets, launch-day runbook, recap
 ```
 
+## Conventions every repo in this pipeline starts with
+
+Set once, at stage 0/1, by `new-product-workspace` (§5). They are listed here so
+a stage that scaffolds a workflow does not reinvent them:
+
+- `main` is the default branch and deploys to the **staging** environment;
+  `release` is production. `staging` and `production` are environment names,
+  never branch names.
+- Every job on a private `pooriaarab/*` repo runs on an Ubicloud runner
+  (`ubicloud-standard-4` for build/lint/typecheck/test, `-8` for a heavy Next.js
+  production build, `-2` for a job that only waits on an external API). The
+  self-hosted Dell fleet is retired.
+- Every repo carries `.github/workflows/vibecodereview.yml`
+  (`pooriaarab/vibecodereview@v1`).
+- **A workflow trigger naming a branch the repo does not have never fires and
+  never errors.** Whenever a stage adds or copies a workflow, check its
+  `branches:` filter against the branches that exist.
+
 ## Deciding where to enter
 
 - **No name yet, or renaming an existing product?** Start at `name-a-product`. Do this before scaffolding — the name decides the repo name, the package scope, and the domain, and changing it later is a multi-thousand-file rename plus a Cloudflare/GCP cutover. Note that GCP project IDs are immutable, so a late rename can never fully complete.

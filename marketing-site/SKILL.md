@@ -391,8 +391,8 @@ every page title is missing the site name and no favicon is linked. One test on
 `<title>` catches it.
 
 **7. Merged is not live.** A green PR merged to `main` is not a fix in front of
-users. Several repos deploy `main` to staging and promote to production only
-from a `release` branch, so the live site keeps serving the old page while every
+users. `main` deploys to the staging environment and production is promoted only from
+the `release` branch, so the live site keeps serving the old page while every
 check is green and the PR reads as done. Before reporting a site fix as shipped,
 read the deploy workflow's `on.push.branches`, then fetch the production URL and
 assert the thing you changed is actually in the response. Treat the promotion as
