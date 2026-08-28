@@ -91,7 +91,7 @@ The shim pins the Box to the repo's environment (for example `replytosocial` v5)
 
 ### 5. Stop reinstalling what the base image already has
 
-crabbox apt-installs `curl git build-essential python3 pkg-config` and then installs bun. The base image already ships `node` 24, `bun` 1.3.14, `git`, `gh`, `rg`, `jq`, `docker`, `ffmpeg`, Chrome, plus Go, Rust, Java, Ruby, PHP and more. That work is pure waste on every attach. Skip it when the Box is `base` or a snapshot derived from it.
+The base image ships `node` 24, `bun` 1.3.14, `git`, `gh`, `gcc`, `make`, `python3`, `pkg-config`, `rg`, `jq`, `docker`, `ffmpeg`, Chrome, plus Go, Rust, Java, Ruby and PHP. It looks like crabbox wastes time apt-installing that on every attach. It does not: the step is guarded by `command -v curl / git / gcc`, all three are present, and it never fires. Verified on a real Box. There is nothing to cut here, and it is worth recording because it is the obvious-looking optimisation that turns out not to exist.
 
 ### 6. Build the warm snapshot (scrubbed)
 
