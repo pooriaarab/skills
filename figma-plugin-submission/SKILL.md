@@ -13,6 +13,12 @@ hand on 2026-08-28; none of it is in Figma's docs or in the `figma-plugin` skill
 Companion playbook: `pooriaarab/scripts` `scripts/figma-plugin/README.md` — the
 command-level steps. This skill is the traps.
 
+Worked example: Content Rabbit, submitted 2026-08-28 —
+<https://www.figma.com/community/plugin/1675058575243742396>. Source is
+`integrations/figma-plugin/` in `pooriaarab/content-rabbit`, and the filled-in
+listing copy and data-security answers are in that repo's
+`.claude/docs/figma/submission.md`.
+
 ## 1. `figma.clientStorage` throws without a plugin ID
 
 The exact error is `Cannot access client storage without a plugin ID`.
