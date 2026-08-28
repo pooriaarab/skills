@@ -41,7 +41,11 @@ Do not skip a step. Each one stops you from optimising a job that does not matte
    exactly that.
 3. **Prove the caches hit.** Read the job logs for payload size, primary-key hit rate, and
    remote-cache state. A cache that restores 0 bytes still prints a green success line.
-   Tool: `ci-cache-health`.
+   Tool: `ci-cache-health`. **A primary-key hit is not proof the build used it** — a build tool
+   can discard a correctly restored, correctly sized pack over a build dependency the key
+   missed (see the checklist below). `ci-cache-health` cannot see that decision; it happens
+   inside the build tool, after the restore succeeds. Cross-check against `ci-job-timings`: a
+   reported hit next to a duration matching the cold-build baseline is the tell.
 4. **Read the guards inside the long-pole job.** See the next section. This is where the time
    usually is.
 5. **Only now add a lever.** Spend on the critical path, in the sibling that owns it:
@@ -82,6 +86,7 @@ count, free disk. Do not gate it on `!dev`, on a branch name, or on a number som
 | Every `restore-keys` level embeds the lockfile hash | a dependency bump invalidates the primary key **and its only fallback** together | Keep one fallback level that does not depend on the lockfile. |
 | Prettier runs with the default `--cache-strategy metadata` | the cache never hits in CI, because it compares mtime and `actions/checkout` rewrites every mtime | Use `--cache-strategy content`. |
 | `outputFileTracingExcludes` is keyed on `"*"` | a second, mis-rooted trace pass re-reads 368 MB of JSON across 610 manifests and drops zero entries | Key it on `"next-server"`. |
+| The cache key is missing a build dependency (e.g. a config file) | an exact primary-key hit, yet the build compiles fully cold, because the tool sees the dependency changed and discards the pack. The save step then skips (it gated correctly on `cache-hit != 'true'`), so the stale entry never repairs itself | Put every input the build tool treats as a dependency into the key. See [ci-build-speed](../ci-build-speed/SKILL.md#1-cache-everything-biggest-safe-win-near-zero-risk) for the full incident. |
 
 ## Measurement discipline
 
