@@ -17,7 +17,8 @@ On a solo repo with no other collaborators, GitHub's default permissions already
 - **CODE_OF_CONDUCT.md** — Contributor Covenant v1.4 is a standard, freely-reusable template (not another project's IP) — adapt only the contact/enforcement line to point at the actual maintainer.
 - **CONTRIBUTING.md** — keep it to what's true for *this* project: local setup commands, PR expectations (one focused change, tests updated, run lint/typecheck locally before opening), and who merges. Don't copy a template project's CI/release/signing details (e.g. a Go project's GoReleaser/keychain signing steps) into a project that doesn't have them.
 - **.github/CODEOWNERS** — `* @<owner>` requests review from the owner on every PR. On its own this is a review *request*, not a merge *gate* — see §3.
-- **.github/workflows/ci.yml** — the minimum useful CI is install deps, typecheck, test. Don't wire release/deploy automation the project doesn't have yet.
+- **.github/workflows/ci.yml** — the minimum useful CI is install deps, typecheck, test. Don't wire release/deploy automation the project doesn't have yet. Put the job on `ubicloud-standard-4`: every job on a private `pooriaarab/*` repo runs on an Ubicloud runner (`ubicloud-standard-8` only for a heavy Next.js production build, `ubicloud-standard-2` for a job that just waits on an external API), and the self-hosted Dell fleet is retired — never write `[self-hosted, linux, dell-ci]` and never add a fallback to it. If the workflow carries a `branches:` filter, check it against the branches that exist: `main` is the default branch and deploys to staging, `release` is production, and `staging`/`production` are environment names, never branch names. **A filter naming a branch the repo does not have never fires and never errors** — the workflow just silently never runs.
+- **.github/workflows/vibecodereview.yml** — the PR review council (`pooriaarab/vibecodereview@v1`). Copy the canonical file rather than retyping it: `gh api repos/pooriaarab/imecore/contents/.github/workflows/vibecodereview.yml --jq .content | base64 -d`. It reads `CLAUDE_CODE_OAUTH_TOKEN`, `CLAUDE_CODE_OAUTH_TOKEN_2`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `MOONSHOT_API_KEY` and `OPENROUTER_API_KEY`; only `OPENROUTER_API_KEY` is strictly required, because the action falls back to OpenRouter for any member whose native key is missing or rejected.
 
 ## 2a. README for public consumption
 
@@ -26,6 +27,8 @@ Beyond the standard sections (features, install, quick start, license), for a pr
 Run the finished README through a humanizer/plain-English pass before publishing — AI-tells (em-dash overuse, inline-header bullet lists, "seamless"/"robust" vocabulary) are exactly the kind of thing a technical audience notices in a project's front door.
 
 ## 3. Branch protection — the actual mechanics
+
+Protect `main` (the default branch, which deploys to staging) and `release` (production) once it exists. Do not create a branch called `staging` or `production` — those are environment names.
 
 **CODEOWNERS alone does not gate merges.** It only becomes load-bearing once a branch protection rule adds "Require review from Code Owners" *and* restricts who can push/merge. Say this explicitly in CONTRIBUTING.md rather than implying CODEOWNERS is sufficient on its own.
 
