@@ -163,26 +163,32 @@ broken, and the breakage surfaces later on an unrelated PR that happens to bust 
 scheduled cache-cold run on the default branch so drift surfaces on a schedule instead of
 ambushing whoever pushes next.
 
-### 5. Only now, change runners
+### 5. Change runners — price decides this, not queue time
 
-Providers that are real drop-in runners — they register with GitHub and you swap a label:
+**Default to a managed runner (Ubicloud and peers) on a private repo generally, not only once a
+concurrency ceiling forces it. Price alone justifies the move.**
 
 ```yaml
 runs-on: ubicloud-standard-4   # was ubuntu-latest
 ```
 
-| Option | Rough $/hr at 4 vCPU | Notes |
-|---|---|---|
-| Managed cheap runners (Ubicloud, Blacksmith, Depot, Namespace, WarpBuild) | $0.10 – $0.20 | Label swap. Some require a GitHub **org** — personal-account repos are excluded. Check before planning. |
-| Self-hosted in your own cloud (RunsOn and similar) | flat licence + spot instances | Lifts the concurrency ceiling to your own account limits. Free tiers exist for personal/non-commercial use. |
-| Your own always-on box | fixed monthly | Cheapest per minute. You own patching and isolation. Fine for private repos, dangerous for public ones. |
-| GitHub-hosted | ~$0.96 | The baseline you are leaving. |
+| Provider | 2-core | 4-core | 8-core |
+|---|---|---|---|
+| GitHub-hosted (private repo) | $0.008/min | $0.016/min | $0.032/min |
+| Ubicloud | $0.00125/min | $0.0025/min | $0.005/min |
 
-If the driver was queueing rather than money, only the rows that run in **your** infrastructure
-help. A cheaper managed runner usually carries its own concurrency limit.
+Ubicloud runs **about 6x cheaper per minute**, and its 4-core rate still undercuts GitHub's
+2-core rate. GitHub also **bills a private-repo job rounded up to the next whole minute** — an
+8-second job bills a full minute. That rounding waste falls hardest on the short jobs a
+queue-time argument sends to the expensive runner, not on the long ones.
 
-**A managed runner does not start faster than the vendor's own — measure before you claim it
-does.** Queue time to pick up a job, same repos, same week:
+Other managed runners (Blacksmith, Depot, Namespace, WarpBuild) sit in the same band and are
+also a label swap; some require a GitHub **org**, so check before planning on a personal
+account. A licensed self-hosted fleet (RunsOn and similar) or your own always-on box goes
+lower still, at the cost of owning patching and isolation yourself.
+
+**The honest cost of moving: about 17s more queue time per job.** Measured queue time to pick
+up a job, same repos, same week:
 
 | Runner | n | Median queue | p90 |
 |---|---|---|---|
@@ -190,15 +196,20 @@ does.** Queue time to pick up a job, same repos, same week:
 | `ubicloud-standard-4` | 40 | 19s | 30s |
 | `ubicloud-standard-2` | 27 | 19s | 25s |
 
-The vendor-hosted pool starts about 17s sooner. You move to a managed runner for price and
-for a concurrency ceiling you control, and you pay queue time for it. Say that plainly — an
-honest "this costs 17s of queue and here is what it buys" survives contact with reality, and
-"it is faster" does not.
+That 17s is real — say it plainly rather than claiming a managed runner starts faster. It is
+just a much smaller number than a 6x price gap plus round-up waste, so it is not a reason to
+keep short jobs on the expensive runner. **A latency measurement without a cost measurement is
+half an answer** — this same table, read alone, argues the other way, and did once already.
 
-Sample size decides this. An 8-sample measurement put `ubuntu-latest` queue at 164s and nearly
-moved 46 repos on that basis; 131 samples put it at 2s. **Take more than 100 samples before a
-fleet-wide migration.** A cold-start outlier dominates a small sample, and queue time is exactly
-the metric that produces them.
+**Exceptions — keep these on GitHub-hosted:** a macOS/iOS toolchain, an action that only works
+on the GitHub-hosted image, or preinstalled software a managed runner doesn't carry. If the
+driver is queueing rather than price, only a provider running in **your own** infrastructure
+lifts the concurrency ceiling — a cheaper managed runner usually carries its own limit too.
+
+Sample size decides the queue number too. An 8-sample measurement put `ubuntu-latest` queue at
+164s and nearly moved 46 repos on that basis; 131 samples put it at 2s. **Take more than 100
+samples before a fleet-wide migration.** A cold-start outlier dominates a small sample, and
+queue time is exactly the metric that produces them.
 
 **Recency decides it too.** A fleet audit ranked roughly 15 repos at the top on 400–880s
 medians. Every one was **n=1, from a burst rollout nine days earlier**, and none had run CI
