@@ -7,6 +7,8 @@ description: "Use when many agent-generated PRs per hour across many repos make 
 
 CI feels instant when the jobs that run on every PR hit a warm cache on a host you already own, and still complete when that host is down because two other independent tiers exist. This skill is the job-placement and cost playbook. How to register and operate the host is in [self-hosted-runner-fleet](../self-hosted-runner-fleet/SKILL.md). Do not copy that setup here.
 
+**Measure before you place.** [ci-speed-diagnosis](../ci-speed-diagnosis/SKILL.md) is the entry point of this family. It names the critical path, so you move the job that matters instead of the job you noticed. Moving a job that is not on the critical path buys machine time only.
+
 ## Three-tier runner model
 
 Assign each job to the cheapest tier that can actually run it. Keep two independent paid-or-hosted tiers so that when the self-hosted host dies, CI still runs.
@@ -14,7 +16,7 @@ Assign each job to the cheapest tier that can actually run it. Keep two independ
 | Job type | Runner | Why |
 | --- | --- | --- |
 | lint, typecheck, build, AI review | Self-hosted host you own | Caches stay warm between runs. Marginal cost is electricity. |
-| Jobs with fixed-port `services:` containers, e2e that needs those containers, burst fan-out, overflow | Ephemeral cloud runners (per-job VM, for example Ubicloud at about $0.0008/min) | Each job gets its own network namespace and ports. Extra capacity appears only when a burst needs it. |
+| Jobs with fixed-port `services:` containers, e2e that needs those containers, burst fan-out, overflow | Ephemeral cloud runners (per-job VM, for example Ubicloud at about $0.0008/min) | Each job gets its own network namespace and ports. Extra capacity appears only when a burst needs it. See [e2e-ci-economics](../e2e-ci-economics/SKILL.md) before you decide how many e2e legs run per PR. |
 | deploy, release, publish, macOS/iOS images, SARIF upload jobs, comment-triggered workflows | Vendor-hosted (GitHub-hosted) | Image, secret, and trust constraints that a spare Linux box cannot meet. See [Security invariants](#security-invariants). |
 
 Same job, job execution time (not run wall clock), median and best:
@@ -134,6 +136,8 @@ Compare against the merge base, not against the moving tip of the default branch
 Measured on a 3-way sharded suite: each shard took 207s wall, of which only 22 to 33s was test execution. The rest was checkout, dependency install and module loading. Every shard pays that fixed cost in full.
 
 Adding shards multiplies the fixed cost and divides an already small number. Cut the per-shard fixed cost first, then shard further only when test execution dominates wall time.
+
+A browser E2E shard has a much higher floor, because it boots a server as well. One suite paid about 92s of cold dev-server compile per leg, so a third shard bought about 30s for 50% more machine time. Measure the floor per suite. [e2e-ci-economics](../e2e-ci-economics/SKILL.md) carries the E2E rules, including why raising the worker count is not an alternative to sharding.
 
 ## A remote cache is the cross-tier multiplier
 
