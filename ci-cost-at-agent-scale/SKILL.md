@@ -173,6 +173,25 @@ runs-on: ubicloud-standard-4   # was ubuntu-latest
 If the driver was queueing rather than money, only the rows that run in **your** infrastructure
 help. A cheaper managed runner usually carries its own concurrency limit.
 
+**A managed runner does not start faster than the vendor's own — measure before you claim it
+does.** Queue time to pick up a job, same repos, same week:
+
+| Runner | n | Median queue | p90 |
+|---|---|---|---|
+| `ubuntu-latest` | 131 | **2s** | 4s |
+| `ubicloud-standard-4` | 40 | 19s | 30s |
+| `ubicloud-standard-2` | 27 | 19s | 25s |
+
+The vendor-hosted pool starts about 17s sooner. You move to a managed runner for price and
+for a concurrency ceiling you control, and you pay queue time for it. Say that plainly — an
+honest "this costs 17s of queue and here is what it buys" survives contact with reality, and
+"it is faster" does not.
+
+Sample size decides this. An 8-sample measurement put `ubuntu-latest` queue at 164s and nearly
+moved 46 repos on that basis; 131 samples put it at 2s. **Take more than 100 samples before a
+fleet-wide migration.** A cold-start outlier dominates a small sample, and queue time is exactly
+the metric that produces them.
+
 ## Agent sandboxes are not CI runners
 
 This proposal recurs, so it gets its own section. E2B, Daytona, Modal, Vercel Sandbox and
