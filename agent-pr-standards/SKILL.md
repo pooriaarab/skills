@@ -1,125 +1,208 @@
 ---
 name: agent-pr-standards
-description: "Use when an agent fleet generates pull requests faster than humans can review them. Covers the rules that stop unreviewable PRs: one issue, one PR, one concern, under 500 lines. Details the mechanics of enforcing branch, title, and body formats, the necessity of excluding generated files from line counts, and the four layers of defense from a local hook to a review council. Explains the honest gap of running on a GitHub Free account where checks cannot be mandatory gates. Also covers the rollout strategy for installing this standard across multiple repositories. Triggers: 'setup pr standards', 'restrict agent pull requests', 'enforce 500 line limit', 'one issue one pr', 'cap agent pr size', 'stop unreviewable PRs', 'pr standards rollout'."
+description: "Use when setting up or tightening pull-request rules on a repo where agents open most of the PRs, or when an agent is about to open one. Teaches the one-issue one-PR one-concern under-500-lines standard, why 500 is a design constraint that forces decomposition before the agent writes, why generated files are excluded from the count, the four layers (PreToolUse hook, pre-push hook, CI check, review-council scope lens), the GitHub Free gap that leaves red CI as a signal rather than a gate, and the fleet rollout that must itself obey the standard. Sibling to agent-lint-guardrails (code shape vs change shape). Triggers: 'PR is too big', 'unreviewable PR', 'one issue one PR', '500 line cap', 'agent opened a giant PR', 'PR standards', 'drive-by AI PR', 'Assisted-by trailer', 'roll out PR standards', 'cap agent PRs'."
 ---
 
 # agent-pr-standards
 
 Generation cost collapsed to near zero in 2026. Review cost did not move. That
-asymmetry is why a fleet drifts into unreviewable 20,000-line pull requests, and it is
-the only thing this skill is really about.
+asymmetry is the whole reason this standard exists. An agent will open a 20,000-line
+PR against no agreed scope in minutes. The only thing standing between that PR and
+`main` is your attention, and attention does not scale with the fleet.
 
-The field already reacted, and the responses converged:
+## The field already voted
 
-| Project | What it did | When |
-|---|---|---|
-| Ghostty | Zero tolerance for drive-by AI PRs not tied to an accepted issue | Jan 2026 |
-| llama.cpp | Tightened policy six times in four months; new contributors capped at one open PR | Nov 2025 to Mar 2026 |
-| curl | Shut down its HackerOne bounty after the valid-report rate fell below 5 percent | Jan 2026 |
-| Linux kernel | Requires an `Assisted-by: AGENT:MODEL` trailer; `Signed-off-by:` stays human | 2026 |
+Public projects hit the same wall and wrote the same shape of rule.
 
-Nothing on that list is about model quality. Every one of them is a rule about the
-SHAPE of a contribution, imposed because reading is the scarce resource. This skill is
-that rule, written down and made checkable.
+- Ghostty, January 2026: zero-tolerance for drive-by AI PRs not tied to an
+  accepted issue. No issue, no work. That is why the issue number is the join key.
+- llama.cpp tightened its policy six times in four months and limited new
+  contributors to one open PR at a time. Review queue is the scarce resource.
+- curl shut down its HackerOne bounty in January 2026 after the valid-report rate
+  fell below 5%. Unreviewable PRs are the same failure mode: noise drowning signal.
+- The Linux kernel requires an `Assisted-by: AGENT:MODEL` trailer and reserves
+  `Signed-off-by:` for humans, so later you can tell which agent produced which
+  class of defect.
 
 ## The rule
 
 One issue. One PR. One concern. Under 500 lines.
 
-### Branch, title, and body formats
+The issue number ties the branch, the title, the body, and the merged commit to
+one agreed piece of work.
 
-The issue number is the join key. It ties the branch, the title, the body and the
-merged commit to one agreed piece of work. No issue, no branch. That single rule does
-most of the work here, because it is what stops an agent from inventing its own scope.
+### Branch
 
-| Asset | Rule | Example |
-|---|---|---|
-| Branch | `<prefix>-<issue>-<slug>` | `cr-142-fix-onboarding-drop-off` |
-| Title | `[PREFIX-ISSUE] Subject` | `[CR-142] Fix onboarding drop-off` |
-| Body | Exactly one `Closes #N` | `Closes #142` |
-| Body | Includes `## How I verified` | `bun test -> 214 passed` |
-| Body | Includes `Assisted-by:` | `Assisted-by: claude-personal:claude-opus-5` |
+```
+<prefix>-<issue>-<slug>
+cr-142-fix-onboarding-drop-off
+```
 
-The subject is imperative mood, 10 to 50 characters, no trailing period, no emoji.
-Rejected openers: Added, Fixed, Updated, Removed, Changed, and any first word ending in
--ing. The body must clear 120 characters and must name a verification command and what
-it returned. `N/A` and `tested locally` fail, because neither tells a reviewer anything.
-
-`Assisted-by:` is disclosure, not attribution. Months from now it is the only way to
-tell which fleet member produced which class of defect, which is what lets you route
-work away from a model that keeps drifting. It is not `Co-Authored-By:` and does not
-belong in the commit message.
-
-The prefix is per-repo, 2 to 4 lowercase letters, and it must be unique across the
-account. Keep the mapping in one registry file and assert uniqueness when you generate
-it. Two repos that derive the same prefix produce branch names that no longer say which
-repo they belong to, and you will not notice until you are reading a list of them.
-
-## Size and atomicity constraints
-
-| Constraint | Limit |
+| Part | Rule |
 |---|---|
-| Net counted lines | 500 |
-| Counted files changed | 40 |
-| Closing issue references | 1 |
+| `prefix` | 2-4 lowercase letters, one per repo, from `.github/pr-standards.json` |
+| `issue` | a GitHub issue that exists and is open. No issue, no branch. |
+| `slug` | `[a-z0-9]+(-[a-z0-9]+)*`, 3-48 characters. Names the change, not the file. |
 
-500 is a design constraint, not a nuisance. It is roughly one reviewable sitting. An
-agent that must stay under it decomposes the work BEFORE it writes, which is the
-behaviour you actually want; a cap applied afterwards only produces an argument. Pick
-500 over 1000 for exactly this reason.
+Full pattern: `^[a-z]{2,4}-[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$`
 
-The only bypass is an `oversized-approved` label that the repo owner applies. An agent
-that can clear its own oversize check does not have a cap.
+Never checked: `main`, `release`, `refactor`, `release/*`, `gh-pages`,
+`dependabot/*`, `renovate/*`.
 
-The count must exclude generated files: lockfiles, `dist/`, `build/`, `.next/`,
-snapshots, migrations, vendored code and binary assets. A cap that punishes an agent for
-a lockfile it did not write teaches the agent that the cap is noise, and an agent that
-believes the cap is noise will route around it. Report both numbers so the exclusion is
-visible: `640 counted lines (1,240 raw; 600 excluded as generated)`.
+### Title
 
-Atomic means one concern. Mechanical proxies like line counts catch obvious violations. True atomicity is a judgement call for the review council.
+```
+[CR-142] Fix onboarding drop-off on step three
+```
 
-## The four layers of enforcement
+The tag is the uppercase prefix and the same issue number as the branch. The
+subject after the tag is imperative, 10-50 characters, no trailing period, starts
+with a capital letter. Rejected openers, because they are not imperative: `Added`,
+`Fixed`, `Updated`, `Removed`, `Changed`, `Refactored`, `Implemented`, and any
+`-ing` first word. No emoji. No conventional-commit prefix. The tag already
+carries the scope.
 
-| Layer | Runs | Catches | Why it exists |
+### Body
+
+Four things, all required:
+
+```
+Closes #142
+
+## What
+One to three sentences. What changed, in plain words.
+
+## Why
+The problem from issue #142, and why this is the fix.
+
+## How I verified
+bun test        -> 214 passed
+bun run build   -> clean
+
+Assisted-by: claude-personal:claude-opus-5
+```
+
+Exactly one `Closes #N` / `Fixes #N`, matching the branch issue. Two closing
+references means two concerns, which means two PRs. `## How I verified` must name
+a command and its result. `N/A`, `TODO`, `tested locally`, and an unedited
+template comment all fail. A body under 120 characters fails. A description that
+only restates the diff is not a description.
+
+## Why 500, not 1000
+
+500 is roughly one reviewable sitting. It is a design constraint that forces
+decomposition before the agent writes, not a nuisance after. A 1000-line cap
+still looks like a cap, and an agent will fill it. The number is small enough
+that the split happens at planning time, when it is cheap, instead of at review
+time, when it is you.
+
+If a change genuinely cannot be split, say so out loud. The only way past the
+cap is the `oversized-approved` label, applied by the repo owner. An agent cannot
+clear its own PR. Hard caps next to it: more than 40 counted files fails, more than 500 counted
+lines fails, exactly one closing issue reference, and a warning at 3 top-level
+directories. Say whether the boundary is inclusive; "under 500" and a table
+saying `500` are not the same rule.
+
+Count every closing keyword, not only the one you documented. GitHub closes an
+issue on `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`,
+`resolves` and `resolved`. A check that counts only `Closes` waves through
+`Closes #1` plus `Fixes #2`, which is two concerns wearing one coat. Those are mechanical proxies. Whether a PR
+really does one thing is a judgement for the review-council scope lens. No regex
+can make it.
+
+## Why generated files do not count
+
+A cap that punishes an agent for a lockfile it did not write teaches the agent
+to distrust the cap. Once it distrusts the cap, it looks for escapes instead of
+splitting the work. Lockfiles, build output, snapshots, generated sources,
+minified assets, sourcemaps, migrations, and binary media are excluded. The 500
+is for the lines a reviewer has to read.
+
+Keep the list per repo, because what counts as generated differs by stack and
+some entries are judgement rather than fact. A hand-written migration is real
+code that deserves review; most migrations are scaffolded and are not. Default
+to excluding the category, let a repo narrow it, and report both totals so the
+exclusion stays visible rather than becoming a place to hide.
+
+## Four layers, two jobs
+
+Local layers exist for speed. CI is the authority. Neither replaces the other.
+
+| Layer | Runs | What it actually buys | Bypass |
 |---|---|---|---|
-| Agent `PreToolUse` hook | At tool-call time | A bad branch before it exists | Local speed |
-| `pre-push` git hook | Before the push | A bad branch before GitHub sees it | Local speed |
-| `pr-standards.yml` in CI | On every PR | Everything, including size and body | The authority |
-| `vibecodereview` scope lens | On every PR | Non-atomic and off-scope work | Semantic judgement |
+| Agent `PreToolUse` hook | at the tool call | a bad branch, before the branch exists | another agent |
+| `pre-push` git hook | before the push | a bad branch, before GitHub sees it | `--no-verify` |
+| `pr-standards.yml` in CI | on every PR | size, body, issue, title. The record. | ignoring red |
+| Review-council scope lens | on every PR | the "is this atomic" call no regex can make | ignoring the review |
 
-Local layers exist for speed. CI is the authority. Neither replaces the other. The local layers prevent the feedback loop from taking two minutes. The semantic lens prevents an agent from sneaking two features into one branch that happens to be under 500 lines.
+## The honest gap, and it is narrower than "pay GitHub"
 
-## The honest gap
+Whether any check can be made mandatory depends on plan AND visibility:
 
-GitHub rulesets and required status checks need GitHub Pro. On a Free account, no check on a private repo can be made mandatory. Red CI is a signal, not a gate. Do not paper over this limitation. This means the two local layers carry more weight, because they physically prevent the bad state from reaching the server. A bad PR can still merge on a Free account if a human ignores the red cross.
+| Repo | Rulesets and required checks on GitHub Free |
+|---|---|
+| Public | Available. Turn them on today, at no cost. |
+| Private, personal account | Needs GitHub Pro |
+| Private, organization | Needs GitHub Team or Enterprise |
 
-## Rollout mechanics
+So a mixed fleet gets a mixed answer, and "we are on Free, so we cannot gate
+anything" is the wrong conclusion. Gate every public repo now. Measure rather
+than assume: `gh api repos/OWNER/NAME/rulesets` returns `[]` where rulesets are
+available and `403 Upgrade to GitHub Pro` where they are not.
 
-Roll this standard out across the fleet using the pattern from [agent-lint-guardrails](../agent-lint-guardrails/SKILL.md). That skill caps the shape of the code. This skill caps the shape of the change.
+Where nothing can be required, red CI is a signal and not a gate. A human can
+merge a red PR, and an agent that watches merge history will copy that. The two
+local layers then carry the weight, but be precise about what they buy: they are
+the fastest feedback and they stop the bad state before it reaches the server,
+yet `git push --no-verify` skips the git hook and another agent's harness never
+loaded the PreToolUse hook at all. They are early feedback, not a boundary. The
+only real boundary is a required check on the remote. Treat `--no-verify` as a
+review event, not a convenience flag.
 
-1. Fan out four self-contained files per repo: `.github/pr-standards.json` (the
-   per-repo config), `.github/pull_request_template.md`, `.github/workflows/pr-standards.yml`,
-   and a marked block in `AGENTS.md`. The block sits between
-   `<!-- pr-standards:start -->` and `<!-- pr-standards:end -->` so a second run updates
-   it instead of appending a second copy.
-2. Put the CI check in ONE place and have every repo fetch it. Sixty copies of the same
-   validator is sixty places to fix a rule. The cost of that choice is that the workflow
-   tracks a branch of a repo you own; pin it to a commit SHA where a repo needs the rules
-   frozen.
-3. Skip forks and empty scaffolds. Never run the checker on someone else's code, and a
-   3-KB repo is a scaffold, not a project.
-4. Respect the `workflow` token scope. A git push of a workflow file works, but the
-   contents-API edit of one is classifier-gated. Report that failure per repo rather than
-   aborting the whole fan-out.
-5. **The rollout must obey the standard it installs.** That means an issue per repo
-   before the branch, and a PR body with the sections the new check requires. If the
-   rollout PR cannot pass its own check, the standard is wrong and you have just found
-   out cheaply.
+## Rollout
 
-Two knobs are worth leaving visible in the config rather than hard-coding. `allowChoreEscape`
-lets a `chore/<slug>` branch skip the issue requirement; start with it off, and turn it on
-only when issue bookkeeping for dependency bumps costs more than it saves. `excludeGlobs`
-is per repo, because what counts as generated differs by stack.
+Borrow the pattern that already worked in
+[agent-lint-guardrails](../agent-lint-guardrails/SKILL.md). Fan out four
+self-contained artifacts: `.github/pr-standards.json`, a pull request template,
+a standalone `pr-standards.yml` workflow, and a marked block in `AGENTS.md`.
+Keep the workflow independent of each repo's existing pipeline. The `AGENTS.md`
+block is how the non-Claude fleet members learn the rule, and it belongs between
+markers so a re-run updates it instead of appending a second copy.
 
-For related pipeline efficiency, see [ci-speed-diagnosis](../ci-speed-diagnosis/SKILL.md) to keep CI fast when enforcing these checks.
+If the workflow fetches the checker from one central repo rather than vendoring
+it, be clear about the trade. One copy means one place to fix a rule. It also
+means a mutable branch runs in every repo at once, with a token, which is a real
+supply-chain surface even when you own the repo. Track the branch while the
+rules are still moving; pin a full 40-character commit SHA once they settle. Skip forks (`isFork==true` means
+never install this on someone else's process). Skip empty scaffolds. A 3-4 KB
+repo has no PRs to shape.
+
+The `workflow` token scope gotcha still applies. A git push of a workflow file
+works. A contents-API edit of a workflow is classifier-gated, so patch workflows
+via clone and push.
+
+The rollout itself must obey the standard it installs. That means an issue per
+repo before the PR that adds the check. A fleet-wide "add PR standards" PR
+against no issue is the first violation, and agents copy what they see.
+
+## The one knob, and how it goes wrong
+
+`allowChoreEscape` lets a `chore/<slug>` branch skip the issue requirement, for
+dependency bumps and CI fixes where the issue costs more than it saves. Start
+with it off so the decision stays visible.
+
+It must skip the issue requirement and NOTHING else. A chore branch still has to
+satisfy every title and body rule. This is easy to get wrong: implement the
+escape as "there is no issue number, so skip the checks that need one" and it
+silently disables the title and body rules too, turning the knob into a way to
+opt out of the whole standard. Ask any implementation to prove otherwise with a
+test.
+
+## Sibling layers
+
+Lint budgets cap the shape of the code. This skill caps the shape of the change.
+Run both. See [agent-lint-guardrails](../agent-lint-guardrails/SKILL.md).
+
+Once PRs are small and frequent, silent CI (a cache that reports green and does
+nothing) becomes the next tax. Start at
+[ci-speed-diagnosis](../ci-speed-diagnosis/SKILL.md) before adding more pipeline.
