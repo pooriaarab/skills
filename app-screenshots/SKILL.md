@@ -70,3 +70,7 @@ For the *marketing* tiles only (feature graphic, marquee, promo banner), an imag
 - [ ] Output matches the store's exact dimensions (`deviceScaleFactor` set intentionally).
 - [ ] AI used (if at all) only for promo/marketing tiles, text-free, with a no-AI brand-gradient fallback.
 - [ ] Capture script is repeatable (seeded, committed) so re-shooting after UI changes is one command.
+
+## Related
+
+- [pr-standards](../pr-standards/SKILL.md) — where a captured screenshot goes: GitHub user-attachments in the PR body, never a commit.
