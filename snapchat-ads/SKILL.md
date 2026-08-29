@@ -1,100 +1,240 @@
 ---
 name: snapchat-ads
-description: "Snapchat Ads Pixel and Conversions API tracking, token setup, audience matching, and conversion verification. Use when setting up Snapchat Ads, debugging conversion tracking, building retargeting audiences, or validating a small paid test."
+description: "Use when creating a Snapchat Ads account, installing Snap Pixel, sending web conversions through Snapchat Conversions API v3, pairing Pixel and CAPI events, preserving ScCid, or debugging consent, attribution windows, event age, and Events Manager verification."
 ---
 
 # Snapchat Ads
 
-This is a breadth-first stub for the shared conversion hub. It is intentionally
-conservative where the public documentation does not verify a current API fact.
+Snapchat supports self-serve Ads Manager accounts and a public web Conversions API.
+Use one Pixel ID for the browser Pixel and web CAPI. Use the hub for consent,
+normalization, dispatch, retries, and payment reconciliation.
+## Account and API access
 
-## The three-layer conversion model
+1. Open [Snap Ads Manager](https://ads.snapchat.com/) and select **Sign Up**.
+2. Create a Snapchat account, business account, and Public Profile.
+3. Enter the business country, currency, phone number, and website.
+4. Create the ad account and add a payment method before launch.
+Snap's [business setup guide](https://businesshelp.snapchat.com/articles/en_US/Knowledge/set-up-snapchat)
+documents this self-serve path. Sign-up is country-limited. Check Snap's
+[current eligible-country list](https://businesshelp.snapchat.com/s/article/business-countries?language=en_US).
+Ads require a Public Profile.
+Create the Pixel in Ads Manager. It belongs to an ad account and has a UUID. See
+the [Snap Pixel reference](https://developers.snap.com/marketing-api/Ads-API/snap-pixel).
+Conversions API access needs a Business Manager. An Organization Admin opens
+**Ads Manager → Business Details → Conversions API Tokens** and generates a static,
+long-lived token. It does not expire and only works with assets in that organization.
+Snap also supports partner integrations. See [CAPI access requirements](https://developers.snap.com/marketing-api/Conversions-API/GetStarted).
+Use these adapter names. Snap does not define process environment variable names:
 
-1. **Client tag.** Use the platform's official browser tag or event source.
-2. **Server API.** Send the canonical event from the conversion hub after the payment provider confirms it.
-3. **Attribution and reporting.** Configure the platform's conversion action so it can count the event and optimize delivery.
-
-This entry is a breadth-first stub. The official product docs do not expose a stable, public, product-agnostic CAPI contract for every account type.
-
-## Client tag or app attribution
-
-Use the exact tag or event code generated in the platform console. Do not copy a stale blog snippet.
-
-> ⚠ UNVERIFIED — confirm the current client tag URL, init call, pixel ID field, and purchase event shape at [Snapchat Ads tracking documentation](https://businesshelp.snapchat.com/s/article/Conversions-API).
-
-Store the identifier as `SNAPCHAT_ADS_PIXEL_ID` or `SNAPCHAT_ADS_TAG_ID`, depending on the platform's official naming.
-
-## Server-side conversion API
-
-The platform has an official API surface, but the request shape depends on account product and access level.
-
-> ⚠ UNVERIFIED — confirm the current POST endpoint, auth header, timestamp unit, deduplication field, and JSON payload at [Snapchat Ads API documentation](https://developers.snap.com/api/marketing-api).
-
-Do not invent a CAPI request. If the account has no public server conversion API, keep this adapter disabled and use the platform's documented import or partner path.
-
-## Get a token and validate it
-
-1. Open the official console for [Snapchat Ads](https://businesshelp.snapchat.com/s/article/Conversions-API).
-2. Create the pixel, tag, app, or advertiser resource required by the account.
-3. Open the current developer, events, or API settings area. Generate the credential required by the documented API.
-4. Store it as `SNAPCHAT_ADS_TOKEN`. Keep it server-side.
-
-> ⚠ UNVERIFIED — confirm the current click path, OAuth scopes, expiry, and credential type at [Snapchat Ads official API docs](https://developers.snap.com/api/marketing-api).
-
-Token validation:
-
-```bash
-curl -sS -H "Authorization: Bearer $SNAPCHAT_ADS_TOKEN" 'https://developers.snap.com/api/marketing-api'
+```text
+SNAPCHAT_ADS_PIXEL_ID   public Pixel UUID; safe in the browser
+SNAPCHAT_ADS_CAPI_TOKEN server-only long-lived CAPI token
 ```
 
-⚠ UNVERIFIED — replace this placeholder with an official read endpoint after the platform publishes one for the enabled product.
+## Client-side Snap Pixel
 
-## Audience, retargeting, and lookalike expansion
+Load the official asynchronous script once in the document head on every page.
+The [official installation example](https://developers.snap.com/marketing-api/Ads-API/snap-pixel)
+loads `https://sc-static.net/scevent.min.js`, initializes the Pixel ID, and tracks
+`PAGE_VIEW`. A current [Snap installation guide](https://businesshelp.snapchat.com/articles/en_US/Knowledge/pixel-bigcommerce)
+also places the script in the head on all pages.
 
-Use the platform's documented site audience, customer-list, or partner upload product.
+```html
+<script type="text/javascript">
+(function (e, t, n) {
+  if (e.snaptr) return;
+  var a = e.snaptr = function () {
+    a.handleRequest ? a.handleRequest.apply(a, arguments) : a.queue.push(arguments);
+  };
+  a.queue = [];
+  var s = 'script';
+  var r = t.createElement(s);
+  r.async = true;
+  r.src = n;
+  var u = t.getElementsByTagName(s)[0];
+  u.parentNode.insertBefore(r, u);
+})(window, document, 'https://sc-static.net/scevent.min.js');
 
-Normalize and SHA-256 hash email after trim and lowercase only when the official product requires hashed contact data. Verify the audience status in the console.
+snaptr('init', '<SNAPCHAT_ADS_PIXEL_ID>');
+snaptr('track', 'PAGE_VIEW');
+</script>
+```
 
-> ⚠ UNVERIFIED — confirm hashed-email fields, minimum list size, match-rate rules, lookalike or expansion availability, and failure modes at [Snapchat Ads audience documentation](https://businesshelp.snapchat.com/s/article/Conversions-API).
+Send a canonical event ID as `client_dedup_id` when the browser and server both
+send the event. For a purchase, also send the same order reference as
+`transaction_id`:
 
-## Deduplication and hub contract
+```js
+snaptr('track', 'PURCHASE', {
+  client_dedup_id: event.event_id,
+  transaction_id: event.order_id,
+  price: event.value,
+  currency: event.currency,
+});
+```
 
-- Use one canonical event ID for client and server sources when the platform supports deduplication.
-- Do not gate a server conversion on a click ID. Add the click ID only when available.
-- Make an absent `SNAPCHAT_ADS_PIXEL_ID` or `SNAPCHAT_ADS_TOKEN` a logged no-op.
-- Hash contact data only after consent and only as the official product requires.
+Do not pass raw email to the Pixel. Apply consent and Snap's hashing rules to any
+user data. The [Pixel FAQ](https://businesshelp.snapchat.com/articles/en_US/Knowledge/snap-pixel-faq)
+says Snap accepts SHA-256 hashed user data.
 
-## Small-budget campaign launch
+## Server-side Conversions API v3
 
-- Start with one audience, one geo, one creative, and one conversion goal.
-- Disable broad placement, search, audience, and automatic-expansion defaults until they are part of the hypothesis.
-- Use traffic or click optimization when the account has no conversion history.
-- Set a hard budget cap where the product supports one.
-- ⚠ UNVERIFIED — confirm current bid floors, learning thresholds, minimum budgets, and default placements at [Snapchat Ads campaign documentation](https://developers.snap.com/api/marketing-api).
+Send web events to:
+
+```text
+POST https://tr.snapchat.com/v3/{PIXEL_ID}/events?access_token={TOKEN}
+Content-Type: application/json
+```
+
+The [CAPI request guide](https://developers.snap.com/marketing-api/Conversions-API/UsingTheAPI)
+requires `event_name`, `event_time`, `action_source`, and `event_source_url` for
+web events. It requires at least one matching signal: hashed `em`, hashed `ph`,
+or both `client_ip_address` and `client_user_agent`. A `PURCHASE` also requires
+`value` and `currency` in `custom_data`.
+
+```json
+{
+  "data": [{
+    "event_name": "PURCHASE",
+    "event_time": "<epoch_seconds>",
+    "event_source_url": "https://example.com/checkout/complete",
+    "action_source": "WEB",
+    "event_id": "payment_evt_123",
+    "user_data": {
+      "em": ["<sha256(trim(email).toLowerCase())>"],
+      "ph": ["<sha256(country-code digits)>"],
+      "client_ip_address": "<request IP>",
+      "client_user_agent": "<request user-agent>",
+      "sc_click_id": "<ScCid value>",
+      "sc_cookie1": "<_scid value>"
+    },
+    "custom_data": {
+      "value": 49.99,
+      "currency": "USD",
+      "order_id": "order_123"
+    }
+  }]
+}
+```
+
+Snap's [parameter reference](https://developers.snap.com/marketing-api/Conversions-API/Parameters)
+defines the identity rules:
+
+- `em`: trim, lowercase, then SHA-256 hash as UTF-8.
+- `ph`: include the country code, remove `+`, spaces, punctuation, and the national
+  leading zero, then SHA-256 hash.
+- `client_ip_address`, `client_user_agent`, `sc_click_id`, and `sc_cookie1` are
+  not hashed.
+- `external_id` is a stable first-party ID. Hashing is recommended.
+
+Apply the [ad-conversion-hub](../ad-conversion-hub/SKILL.md) consent gate before
+hashing or dispatch. Do not require `ScCid` before sending a purchase. Organic,
+direct, email, and SEO purchases still need measurement.
+
+### Canonical event mapping
+
+Use uppercase Snap event names. The supported names include `PURCHASE`,
+`START_CHECKOUT`, `VIEW_CONTENT`, `SIGN_UP`, `PAGE_VIEW`, `SUBSCRIBE`, and five
+custom events. See the [official event list](https://developers.snap.com/marketing-api/Conversions-API/Parameters).
+
+| Hub event | Snap event | Adapter note |
+|---|---|---|
+| `page_view` | `PAGE_VIEW` | Send the full page URL. |
+| `view_content` | `VIEW_CONTENT` | Put product IDs in `content_ids`. |
+| `lead` | **UNMAPPED** | Snap lists no native `LEAD` event. Do not invent one. |
+| `signup` | `SIGN_UP` | Keep the same ID in `client_dedup_id` and `event_id`. |
+| `begin_checkout` | `START_CHECKOUT` | Use `checkout_id` as the event ID when stable. |
+| `purchase` | `PURCHASE` | Send `value`, `currency`, and `order_id`. |
+| `subscription_start` | `SUBSCRIBE` | Send `subscription_id` without hashing. |
+| `refund` | **UNMAPPED** | Snap lists no native `REFUND` event. Do not invent one. |
+
+Snap supports `CUSTOM_EVENT_1` through `CUSTOM_EVENT_5`, but assigns them no meanings.
+Do not silently map `lead` or `refund` to one.
+## Deduplication
+
+For web, Snap matches the Pixel's `client_dedup_id` with CAPI's top-level
+`event_id`. Use the same opaque value, Pixel ID, and event name on both sides.
+The [deduplication guide](https://developers.snap.com/marketing-api/Conversions-API/Deduplication)
+says the normal cross-channel window is 48 hours.
+
+For `PURCHASE`, send the order reference too. The Pixel field is `transaction_id`.
+CAPI v3 calls the same value `custom_data.order_id`. Snap documents this as a
+fallback deduplication signal with a window of up to 30 days.
+
+If the Pixel creates its own ID, it cannot match a server event. Set
+`client_dedup_id` yourself when shipping both sources.
+
+## Click ID and cookies
+
+Snap appends `ScCid` to an ad destination URL. Send it as `user_data.sc_click_id`,
+or send the full URL in `event_source_url` and let CAPI extract it. The [CAPI click-ID guide](https://developers.snap.com/marketing-api/Conversions-API/UsingTheAPI)
+says to persist it for all later events in that session.
+
+Snap does not state a browser-cookie TTL for `ScCid` in the current CAPI docs.
+**UNVERIFIED:** do not claim a vendor storage lifetime. Store first-touch and
+most-recent values in first-party storage under the product's retention policy.
+Pass the Pixel's `_scid` cookie as `sc_cookie1` when available.
+
+The [Ads API measurement reference](https://developers.snap.com/marketing-api/Ads-API/measurement)
+supports swipe-up attribution windows of 1, 7, or 28 days, and view windows of
+1 hour, 3 hours, 6 hours, 1 day, or 7 days. These are attribution windows, not a
+browser storage TTL.
+
+## Tracking quirks that cause failures
+
+- Current v3 parameters say `event_time` cannot be more than 7 days old. Send the
+  actual conversion time in epoch seconds or milliseconds. Send events promptly.
+- Web CAPI needs `event_source_url`, even when the event came from a webhook.
+- A request can be syntactically valid but fail matching without `em`, `ph`, or
+  the IP-plus-user-agent pair. Keep these fields when consent allows them.
+- For web opt-out handling, Snap documents `data_processing_options: ["LMU"]`.
+  Older examples use `data_use: ["lmu"]`; follow the current [parameter reference](https://developers.snap.com/marketing-api/Conversions-API/Parameters).
+- A CAPI token and Pixel from different organizations fail authorization. Generate
+  the token in the same Business Manager that owns the Pixel.
+- CAPI batches support up to 2,000 events. Apply the hub's bounded retry policy.
+- Snap's deduplication diagnostics can take up to 24 hours to update after a fix.
+  Do not treat an immediate Ads Manager count as final.
+- App events use `snap_app_id`, not `pixel_id`. App events also need
+  `app_data.extinfo` and `advertiser_tracking_enabled` for iOS ATT status.
 
 ## Verification
 
-Use the official test-event view or reporting API for Snapchat Ads. Reconcile its conversions with the payment provider's succeeded charges.
+Use Snap's server-side validation endpoints before production dispatch:
 
-> ⚠ UNVERIFIED — confirm the current test-event endpoint, reporting query, delay, and status fields at [Snapchat Ads official API docs](https://developers.snap.com/api/marketing-api).
+```bash
+curl -sS -X POST \
+  "https://tr.snapchat.com/v3/$SNAPCHAT_ADS_PIXEL_ID/events/validate?access_token=$SNAPCHAT_ADS_CAPI_TOKEN" \
+  -H 'Content-Type: application/json' \
+  --data @snap-test-event.json
 
-Do not call this stub wired until a real test event appears in the platform surface.
+curl -sS \
+  "https://tr.snapchat.com/v3/$SNAPCHAT_ADS_PIXEL_ID/events/validate/logs?access_token=$SNAPCHAT_ADS_CAPI_TOKEN"
 
-## Hub conventions
+curl -sS \
+  "https://tr.snapchat.com/v3/$SNAPCHAT_ADS_PIXEL_ID/events/validate/stats?access_token=$SNAPCHAT_ADS_CAPI_TOKEN"
+```
 
-Pair this skill with `ad-conversion-hub` for event taxonomy, consent, hashing,
-secret names, and multi-platform dispatch. Pair it with `ad-experiments` for
-seed sizing, one-variable tests, and payment-provider truth. This platform is
-not yet wired into a product integration. Treat every `⚠ UNVERIFIED` marker as
-a stop sign before production use.
+The [Verify Setup guide](https://developers.snap.com/marketing-api/Conversions-API/VerifySetUp)
+defines `POST /events/validate` as a near-real-time test. A valid response proves
+Snap accepted the test payload. The logs show event status and errors. The stats
+response shows the test event count in the past hour. Then confirm the event and
+deduplication signals in Events Manager Diagnostics, and reconcile production
+`PURCHASE` events with payment-provider succeeded charges.
 
+## Common pitfalls
+
+- Using the old v2 endpoint. Use CAPI v3 at `tr.snapchat.com/v3/...`.
+- Sending `transaction_id` in CAPI v3 instead of `custom_data.order_id`.
+- Generating a different server ID instead of reusing the browser ID.
+- Sending raw email or phone values.
+- Treating `ScCid` as required for every conversion.
+- Sending the wrong time unit, or sending events older than the v3 limit.
+- Assuming a `VALID` HTTP response is reporting proof. Check test logs and Diagnostics.
+- Creating a Pixel in one organization and a token in another.
+- Mapping `lead` or `refund` to an invented native event name.
 ## Security
 
-Load client code only from the vendor's official HTTPS origin. Keep `SNAPCHAT_ADS_TOKEN`
-server-side. Never log or commit it. Do not send raw email, phone, or device
-identifiers. Follow the platform's current consent and retention rules.
-
-## Official sources checked (2026-08-11)
-
-- https://developers.snap.com/api/marketing-api
-- https://businesshelp.snapchat.com/s/article/Conversions-API
+Keep `SNAPCHAT_ADS_CAPI_TOKEN` in the deployment secret store. Never expose it to
+the browser, commit it, log it, or put it in client URLs. Redact access tokens.
+Send only consent-approved identifiers. Hash user identity fields as Snap requires.
+Load the Pixel only from Snap's official HTTPS origin. Do not log click IDs or PII.
