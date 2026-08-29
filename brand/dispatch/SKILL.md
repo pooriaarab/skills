@@ -43,7 +43,7 @@ warms from `#b4231f` to `#c2251d`, because a cool red on a black screen loses it
 
 **The red is legal as type in light mode only.** On newsprint it is 5.3:1, so a red kicker or a red word
 is allowed. On the dark field it is 3.2:1, which is large-text-only: in dark mode the red is a filled
-stamp with `#fff2ec` knocked out of it, and never a word on the background.
+stamp carrying its words in `#fff2ec` on top of the red (5.4:1), and never a word on the background.
 
 There is no third colour. Not on any surface, ever.
 
@@ -69,9 +69,24 @@ Between the top rule and the headline sits a Roboto Mono kicker in caps: the dat
 
 ### The stamp
 
-A filled `#b4231f` rectangle rotated **-3 degrees**, carrying one or two words in Roboto Mono caps
-knocked out in `#fbf6ec`. It overprints whatever is under it at `mix-blend-mode: multiply`. It bleeds
-off one edge of the asset, always, so it reads as struck rather than placed.
+**Light (native).** A filled `#b4231f` rectangle rotated **-3 degrees**, carrying one or two words in
+Roboto Mono caps knocked out in `#fbf6ec` (6.1:1). It overprints whatever is under it at
+`mix-blend-mode: multiply`, because that is what wet ink does to paper. It bleeds off one edge of the
+asset, always, so it reads as struck rather than placed.
+
+**Dark. `multiply` is banned here, and the ban is the whole point of the dark port.** Multiplying
+`#c2251d` against the `#121110` field gives `#0e0202`, and it drags the cream letters down to
+the red — the mark goes black and the stamp disappears. Ink absorbs light; a wire terminal emits it, so
+in the dark the stamp is not printed, it is lit:
+
+- **Compositing** — `mix-blend-mode: normal`, and put the stamp in its own stacking context with
+  `isolation: isolate` so no page-level blend layer can reach it. Nothing under the stamp shows through.
+- **Fill** — `#c2251d` at full opacity. Against `#121110` that is 3.2:1, which is fine for a filled
+  rectangle: a shape is not text, and the band is never smaller than the 96px it takes on the avatar
+  export.
+- **Words** — `#fff2ec` set on the red, 5.4:1, exactly as the token table declares. Do **not** knock
+  them through to the field: `#121110` letters on `#c2251d` are 3.2:1 and fail the floor.
+- Rotation, the bleed off one edge, and **one stamp per asset** are unchanged in both modes.
 
 Legal stamp words: `CONFIRMED`, `CANCELLED`, `LIVE`, `FILED`, `CLOSED`, `REVERSED`, or a bare date.
 Nothing aspirational. `COMING SOON` is not a stamp, it is an advert.

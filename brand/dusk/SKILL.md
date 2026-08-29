@@ -84,7 +84,7 @@ The horizon is the layout, not a mood. Place sections by which side of the line 
 
 dusk survives 48px, in the flat variant only.
 
-400×400 on flat `#10131f`. **No gradient** — at 48px it turns to mud. Face cropped crown-cut to mid-neck, lit from below-left in `#f2a25c` so the fill light is visibly the ember. One `#f2a25c` rule, 10px tall, full 400px width at 78% height (y=312), behind the shoulders. No ring, no circle border, no text.
+400×400 on flat `#0a0c16` — the small-export field the table declares, not the web base `#10131f`. **No gradient** — at 48px it turns to mud. Face cropped crown-cut to mid-neck, lit from below-left in `#f2a25c` so the fill light is visibly the ember. One `#f2a25c` rule, 10px tall, full 400px width at 78% height (y=312), behind the shoulders. No ring, no circle border, no text.
 
 At 48px the 10px rule renders **1.2px** and survives as a warm seam under the jaw. That is the point: at thumbnail size the avatar is a dark square, a face, and one ember line.
 
