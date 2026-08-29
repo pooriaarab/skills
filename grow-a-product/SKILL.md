@@ -11,7 +11,7 @@ pipeline — you will run it many times on the same product.
 
 ```
 0. product-analytics       live product -> you can see activation, funnel, retention, cohorts
-1. (fix activation)        signup -> the moment the product first delivers its value
+1. user-onboarding         signup -> the moment the product first delivers its value
 2. (hold retention)        the retention curve flattens instead of going to zero
 3. saas-billing-stripe     a human can pay, on a plan that makes sense
    + pricing-page          the price and packaging are decided and presented
@@ -19,6 +19,7 @@ pipeline — you will run it many times on the same product.
 4. launch-seo, geo-aeo     found by search engines and answer engines
    + content-rabbit        an ongoing publishing cadence, not a one-off launch post
 5. founder-led-sales       the first customers, by hand, for anything not cheap self-serve
+   unit-economics          before any paid spend: fully-loaded CAC, gross margin, payback
 6. ad-conversion-hub       one canonical conversion event, consented and deduplicated
    + google-ads / meta-ads / the platform adapter you actually buy on
    + ad-experiments        a test with a decision rule written before it runs
@@ -48,6 +49,11 @@ skipped.
   flattens, not at how high it starts.
 - **Charging before scaling.** A free product with no billing path has no
   signal about value and no money to fund acquisition.
+- **Economics before paid.** `unit-economics` turns "is this channel working"
+  into a number. Without a fully-loaded CAC and a payback period, `ad-experiments`
+  and `ad-auto-optimizer` optimise a figure that is not tied to whether the
+  business works. Payback usually binds harder than the LTV:CAC ratio at this
+  size, because it is about cash rather than profit.
 
 ## Deciding where to enter
 
@@ -68,8 +74,9 @@ skipped.
 
 ## What this skill does NOT replace
 
-Stage 1 and stage 2 are product work, not marketing work. There is no skill for
-"make the product good enough that people come back" because that is the actual
+Stage 2 is product work, not marketing work. `user-onboarding` covers stage 1 --
+shortening the path to the activation moment -- but there is no skill for "make
+the product good enough that people come back", because that is the actual
 job. This orchestrator makes sure the surrounding stages are not skipped or
 reinvented; it cannot substitute for the product being worth returning to.
 
