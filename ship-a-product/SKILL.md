@@ -12,6 +12,7 @@ The stages, in order, each with its own dedicated skill. Not every project needs
 1. build-from-template     idea -> a running scaffold (web-app-shaped ideas only; skip for CLIs/libraries/extensions)
 2. (your own build process) scaffold -> real working product (brainstorm/plan/implement/test -- not a single skill, it's the actual engineering work)
 3. open-source-repo-prep   working code -> a repo ready for public visibility (LICENSE, CI, branch protection, README)
+3b. saas-billing-stripe    working product -> a product that can charge a human (Checkout subscription, webhooks as source of truth, Customer Portal, dunning) -- only if the product charges money; skip for a free tool or an OSS library. Do this BEFORE the announcement: a launch that cannot take payment wastes the traffic it earns. Use `regional-pricing-stripe` alongside it if prices vary by market.
 4. launch-seo              live site -> discoverable by search + shareable (sitemap, robots.txt, OG/Twitter meta, sitemap submission to Google Search Console + Bing + Yandex) -- only if there's a hosted site; skip for CLI-only/library-only projects with no deployed site
 5. geo-aeo                 live site -> quotable by AI answer engines + usable by agents (llms.txt/llms-full.txt, markdown mirrors, schema.org JSON-LD, WebMCP manifest, answer-first copy, programmatic entity pages, free tools) -- only if there's a hosted site; run right after launch-seo
 6. launch-analytics        live site -> measurable (GA4 client + server, Microsoft Clarity; enforces the GA4 + Clarity + Search Console rule for any domain) -- only if there's a hosted site
@@ -19,6 +20,20 @@ The stages, in order, each with its own dedicated skill. Not every project needs
 8. social-launch-post      video + copy -> a draft ready to publish across X/LinkedIn/Threads/Bluesky/Mastodon
 9. product-hunt-launch     significant release -> reviewed Product Hunt draft, assets, launch-day runbook, recap
 ```
+
+## After stage 9: the launch is not the finish line
+
+This pipeline ends at the announcement, and that is deliberate -- it is a launch
+orchestrator, not a growth one. But a launch with no loop behind it decays. Two
+skills own what comes next, and neither is optional for a product meant to earn:
+
+- `product-analytics` -- activation, funnel, retention and cohorts. `launch-analytics`
+  (stage 6) measures traffic; this measures whether anyone came back. Instrument the
+  activation event before the announcement, or the launch spike arrives unmeasured and
+  cannot be analysed later.
+- `lifecycle-email` -- welcome and activation sequences, trial-ending, abandoned
+  checkout, dunning, win-back. Triggered from the events `product-analytics` defines,
+  and it carries the dunning mail that `saas-billing-stripe` depends on.
 
 ## Conventions every repo in this pipeline starts with
 
