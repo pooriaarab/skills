@@ -175,3 +175,10 @@ never folded into a currency-pricing change where it could get nodded through as
 ## Security — writes to a live payment gateway
 
 This skill writes Stripe `Price` / `currency_options` objects. It never moves funds, but it changes what customers are charged. **Run every change against the Stripe test/sandbox account first, verify, then require explicit human confirmation before repeating against live** (`livemode: true`). The Stripe secret key stays in an env var — never hardcode, commit, log, or echo it.
+
+## Related
+
+- `pricing-page` — decide the value metric, the tiers and the presentation
+  before deciding how they vary by market.
+- `saas-billing-stripe` — Checkout, subscriptions, webhooks and dunning. This
+  skill only covers how the price changes by currency.

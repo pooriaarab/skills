@@ -198,3 +198,9 @@ after repeated conversations support it.
 - [ ] Move repeated objections into `pricing-page` and onboarding.
 - [ ] Use `product-analytics` for shared events and post-signup outcomes.
 - [ ] Never use fake urgency, fake referrals, fake customers, or misleading claims.
+
+## Related
+
+- `community-organic` — where the first conversations often start.
+- `support-inbox` — the same customer, after they buy.
+- `grow-a-product` — where this sits in the loop.

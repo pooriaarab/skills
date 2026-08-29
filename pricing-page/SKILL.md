@@ -193,3 +193,8 @@ See [Bringing Dark Patterns to Light](https://www.ftc.gov/reports/bringing-dark-
 11. Create new Stripe Prices; read `saas-billing-stripe` for mechanics.
 12. Track pricing events, then compare activation and retention by plan.
 13. Remove fake scarcity, hidden fees, unsupported badges, and fictional tiers.
+
+## Related
+
+- `unit-economics` — whether the price you picked actually pays for acquisition.
+- `founder-led-sales` — sales calls are where pricing objections surface first.

@@ -198,3 +198,9 @@ Do not re-teach those skills here. This skill decides whether to use them.
 - [ ] Use absolute counts for small samples and keep sources separate.
 - [ ] Kill or narrow the idea when the written criteria fail.
 - [ ] Archive learning before `name-a-product` or `build-from-template`.
+
+## Related
+
+- `ship-a-product` — the pipeline that begins once the answer is yes.
+- `grow-a-product` — if stage 2 keeps failing later, the answer may be that
+  this stage was skipped.

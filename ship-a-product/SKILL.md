@@ -13,6 +13,7 @@ The stages, in order, each with its own dedicated skill. Not every project needs
 1. build-from-template     idea -> a running scaffold (web-app-shaped ideas only; skip for CLIs/libraries/extensions)
 2. (your own build process) scaffold -> real working product (brainstorm/plan/implement/test -- not a single skill, it's the actual engineering work)
 3. open-source-repo-prep   working code -> a repo ready for public visibility (LICENSE, CI, branch protection, README)
+3a. auth-and-tenancy       scaffold -> the tenancy decision made before the first schema lands. Is the paying customer a person or an organisation? Retrofitting organisations onto a single-user product is one of the most expensive migrations a small product ever does, so decide it here even if the UI never shows it.
 3b. saas-billing-stripe    working product -> a product that can charge a human (Checkout subscription, webhooks as source of truth, Customer Portal, dunning) -- only if the product charges money; skip for a free tool or an OSS library. Do this BEFORE the announcement: a launch that cannot take payment wastes the traffic it earns. Use `pricing-page` to decide the value metric, the tiers and how they are presented, and `regional-pricing-stripe` if prices vary by market.
 4. launch-seo              live site -> discoverable by search + shareable (sitemap, robots.txt, OG/Twitter meta, sitemap submission to Google Search Console + Bing + Yandex) -- only if there's a hosted site; skip for CLI-only/library-only projects with no deployed site
 5. geo-aeo                 live site -> quotable by AI answer engines + usable by agents (llms.txt/llms-full.txt, markdown mirrors, schema.org JSON-LD, WebMCP manifest, answer-first copy, programmatic entity pages, free tools) -- only if there's a hosted site; run right after launch-seo
@@ -38,6 +39,10 @@ skills own what comes next, and neither is optional for a product meant to earn:
 - `incidents` -- error tracking, an uptime check and one alert channel a human
   actually reads. A product nobody is watching fails silently, and the first
   report is a churned customer.
+- `support-inbox` -- the other half of finding out something is wrong, and the
+  cheapest source of product truth there is.
+- `dependency-hygiene` -- the slow failure. A product you cannot rebuild is
+  already broken; you just do not know yet.
 - `grow-a-product` -- the orchestrator for all of the above. It sequences the
   growth loop the way this skill sequences the launch, and it is where to go
   once stage 9 is done.

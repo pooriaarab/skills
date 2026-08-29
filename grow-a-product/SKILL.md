@@ -17,7 +17,9 @@ pipeline — you will run it many times on the same product.
    + pricing-page          the price and packaging are decided and presented
    + regional-pricing-stripe  only if the market spans wildly different incomes
 4. launch-seo, geo-aeo     found by search engines and answer engines
-   + content-rabbit        an ongoing publishing cadence, not a one-off launch post
+   + content-engine        what to publish and how often, on the channel you own
+   + community-organic     other people's spaces, where being a guest is the whole rule
+   + content-rabbit        the queue that keeps the cadence
 5. founder-led-sales       the first customers, by hand, for anything not cheap self-serve
    unit-economics          before any paid spend: fully-loaded CAC, gross margin, payback
 6. ad-conversion-hub       one canonical conversion event, consented and deduplicated
@@ -27,6 +29,8 @@ pipeline — you will run it many times on the same product.
 7. lifecycle-email         welcome, activation, trial-ending, abandoned checkout, dunning, win-back
    + release-notes         shipping visibly is retention work, not marketing
 8. incidents               you find out it broke before your customers tell you
+   + support-inbox          and when they tell you first, which is most of the time
+   + dependency-hygiene     the slow failure: a product you can no longer build
 ```
 
 ## The order is the whole point

@@ -198,3 +198,9 @@ Ship the clearest improvement, then watch the next cohort for harm to activation
 - [ ] Run moderated sessions before relying on a small cohort comparison.
 - [ ] Use one primary metric and stable cohorts for any A/B test.
 - [ ] Mark small-sample results as directional and monitor the next cohort.
+
+## Related
+
+- `auth-and-tenancy` — sign-up friction and invitations are decided there.
+- `support-inbox` — recurring "how do I start" tickets are onboarding defects.
+- `grow-a-product` — stage 1 of the loop.

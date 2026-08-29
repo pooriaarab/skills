@@ -198,3 +198,11 @@ Attribute outcomes with a defined window and holdout group. Compare clicks and p
 - [ ] Process opt-outs within 48 hours and meet the applicable legal deadline.
 - [ ] Measure delivery, complaints, clicks, product outcomes, revenue, and suppression latency.
 - [ ] Treat open rate as a diagnostic signal, not the success metric.
+
+## Related
+
+- `product-analytics` — defines the events these sequences trigger from, and the
+  exit conditions that stop an activated user getting the activation nudge.
+- `saas-billing-stripe` — the dunning sequence exists because payments fail.
+- `user-onboarding` — the in-product half of activation; this is the email half.
+- `founder-led-sales` — cold outbound must not share a domain with product email.

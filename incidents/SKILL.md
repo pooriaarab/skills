@@ -175,3 +175,11 @@ The Cloudflare status page reports platform incidents. It does not report that t
 - [ ] Workers Logs are enabled, sampled, and retained within the current plan.
 - [ ] `npx wrangler tail` is used for live debugging, not incident history.
 - [ ] Cloudflare platform status and product health are checked separately.
+
+## Related
+
+- `support-inbox` — the other way you find out something is broken. Most
+  outages at this size are reported by a customer before any alert fires.
+- `dependency-hygiene` — the slow failure. This skill covers a product breaking
+  now; that one covers a product you can no longer build.
+- `grow-a-product` — where this sits in the loop.

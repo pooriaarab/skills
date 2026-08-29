@@ -193,3 +193,8 @@ bounded result say this channel is not yet affordable for a cash-constrained bus
 - [ ] Recompute the same definitions each month.
 - [ ] Point billing implementation to `saas-billing-stripe`.
 - [ ] Point event and cohort implementation to `product-analytics`.
+
+## Related
+
+- `grow-a-product` — the gate this skill answers before any paid spend.
+- `pricing-page` — change the price and every number here moves.
