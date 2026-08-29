@@ -105,11 +105,14 @@ long letter.
 
 Hero: lowercase headline at 96px, Instrument Serif, leading 1.02, flush left, eight words maximum on two
 lines. One body line under it at 22px in muted. One button under that: 17px, lowercase, radius 14,
-`#ffc72c` fill, `#1c1a15` text, the 2px hard shadow.
+`#fffdf7` fill, `#1c1a15` text, a 2px `#1c1a15` border, the 2px hard shadow. **Not a yellow button.**
 
-The element that carries the direction is the highlight on the last two words of the hero headline. It
-is the only yellow above the fold. Body sections are prose, not feature grids. If a grid is unavoidable,
-cap it at two columns of `#fff8e8` cards.
+**The one-yellow rule, resolved.** The element that carries the direction is the highlight on the last
+two words of the hero headline, and it is the only yellow above the fold. The hero button loses its
+`#ffc72c` fill for exactly that reason: a yellow button beside a yellow highlight puts two yellows on
+one screen, the eye has to choose, and the mark stops being a mark. **A `#ffc72c` fill is licensed below
+the fold only, one per screen, and never on a screen that already carries a highlight.** Body sections
+are prose, not feature grids. If a grid is unavoidable, cap it at two columns of `#fff8e8` cards.
 
 ## 3. X / Twitter avatar
 
@@ -206,7 +209,7 @@ Never an outline on the type, an arrow, a red circle, a shocked face, or a fifth
 ## 10. YouTube edit style
 
 - **Cut rhythm** — slow. Average shot 4 to 6 seconds. A cut lands on the end of a sentence, never mid-clause. No jump cuts inside one thought. The pace is the argument that this person is not performing.
-- **Titles and lower thirds** — Instrument Serif, lowercase, 64px at 1080p, bottom-left, inset 80px. Text sits on the footage with no bar and no box. It fades in over 420ms on the house ease and holds 3 seconds. One highlight may wipe behind one word, once per video.
+- **Titles and lower thirds** — Instrument Serif, lowercase, 64px at 1080p, bottom-left, inset 80px. Text sits on the footage with no bar and no box. It arrives at full opacity and rises 12px into place over 420ms on the house ease, then holds 3 seconds. **It never fades up from nothing** — a title that starts invisible is a title lost to a thumbnail grab, a scrub or a paused frame, and the only thing that should move is its position. One highlight may wipe behind one word, once per video.
 - **B-roll** — warm grade. Lift shadows to about 8% so nothing is black, temperature +6, saturation 100%, 2% film grain. Speed stays 100%. No ramps.
 - **Transitions** — cut only. One exception: a 200ms cross-dissolve for a time jump, twice per video maximum.
 - **Cold open** — the first three seconds are the admission. Open on the face, mid-sentence, saying the thing that did not work. No logo, no intro animation, no "hey guys". A title card, if any, arrives at 0:08 and lasts 1.5 seconds.

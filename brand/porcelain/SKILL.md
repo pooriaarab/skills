@@ -107,7 +107,7 @@ porcelain as authored does not survive 48px, so the avatar uses a declared varia
 **YouTube banner, 2560×1440, safe area 1546×423 (x 507–2053, y 508–931).**
 
 - Field `#fbfaf8` across the full frame.
-- Hairline at **x=845** (33% of 2560), full 1440px height, **6px**. x=845 falls inside the safe area, so the phone crop keeps the rail. On a phone the banner scales to roughly 390px wide, so 6px renders 1.4px.
+- Hairline at **x=845** (33% of 2560), full 1440px height, **6px**. x=845 falls inside the safe area, so the phone crop keeps the rail. **The phone shows the 1546px safe area and nothing else**, at roughly 390px wide, so the scale is 390 / 1546 = 0.25 and 6px renders **1.5px**. Scaling the whole 2560 frame to 390px would give 0.9px, but that is the wrong basis: the outer band is never shown.
 - Right of the rail, inside the safe area: one IBM Plex Mono line, 30px, `#5f6a6c`, at **x=893**, y=720. Nothing else.
 - Left of the rail: empty. Outside the safe area: empty field. **porcelain wastes the outer band on purpose.** Filling it would be the second mark.
 

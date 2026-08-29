@@ -148,7 +148,10 @@ Portrait pushed to pure black and white with a coarse halftone, dots visible at 
 centimetre, no grey left anywhere. Square on `#e8e6e0`, rotated -2 degrees so the paper corners show.
 One `#ff4a00` rectangle behind the head, the same rotation but 3 degrees further off. No border.
 
-Export 400×400 with the dot pitch at **5px**, which is coarse enough to still read as dots at 48px.
+**Export two files.** The 400×400 master carries the dot pitch at **5px** — that is the halftone at
+full size. The **48px avatar is a separate raster**, halftoned on its own at a **16px** pitch: 25 dots
+across the frame, which lands 1.9px per dot at 48px and still reads as dots. A 5px pitch renders 0.6px
+at 48px, the dots merge into flat grey, and the portrait becomes the same smudge the tape becomes.
 **Drop the tape marks and the paper texture below 128px export.** At 48px the tape is a grey smear on
 the face. The orange rectangle at a different angle from the portrait is the only recognition cue that
 survives, so keep those two angles at least 3 degrees apart.

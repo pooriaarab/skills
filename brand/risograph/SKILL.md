@@ -215,8 +215,9 @@ recognition cue at sidebar size, so it is exaggerated well past the 0.5% rule he
 
 Face on the right third, two-tone, cropped so the crown leaves the top edge.
 
-**The recurring rule:** blue plate always sits behind and down-left of the pink plate, and the paper
-always shows through at least 40% of the frame. Never centre the type, never add an outline, never fill
+**The recurring rule:** the **pink** plate always sits behind the blue and offset **down-left** of it,
+never the reverse. Blue is 7.3:1 on paper and pink is 2.6:1, so blue is the only plate that may carry a
+word and pink exists only to double it. The paper always shows through at least 40% of the frame. Never centre the type, never add an outline, never fill
 more than 60% of the frame with ink. The words change every video; the offset direction never does.
 
 ## 10. YouTube edit style

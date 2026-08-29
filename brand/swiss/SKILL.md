@@ -193,8 +193,15 @@ x=990. The grid texture runs on every slide.
 **Cover slide.** Headline starts one module in and one module down (x=90, y=90), Archivo
 700 at **120px**, tracking `-0.035em`, leading 0.98, **5 words maximum**, over three
 lines with a hard ragged right. The headline occupies modules 2 through 8. Modules 9 to
-12 stay empty. A `#c8102e` bar 16px tall and one module wide sits directly under the
+12 stay empty. A `#111111` bar 16px tall and one module wide sits directly under the
 last line, 36px below the baseline.
+
+**The bar is ink, not red, and that is how the one-red rule resolves on this surface.**
+The cover spends its single red on the swipe cue below, because the clipped module is the
+mark that recurs on the avatar, the Open Graph card, the end card and the podcast cover —
+it is the one that has to stay red. A red bar as well would put two reds on one cover,
+the eye would have to choose between them, and the end card's claim to be "the second and
+last red in the carousel" would already be false on slide one.
 
 **Swipe cue.** A `#c8102e` square of exactly one module (90×90) sits at the vertical
 centre and is **bled off the right edge** — 45px of it visible, 45px clipped. A clipped

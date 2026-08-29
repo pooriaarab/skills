@@ -91,6 +91,22 @@ Apply a hard floor of 24px so nothing dissolves under compression. Every number 
 that formula already applied. Never exceed it — overshooting the cap is the most common
 way this direction is ruined.
 
+**`export_width` is the width that is actually shown, not the width of the file.** On the
+YouTube banner the phone crops to the 1546px safe area and fills its width with it, so
+`export_width` is 1546. Using 2560 there doubles every size and is the standard mistake.
+
+**The hairline law.** The same arithmetic governs the rule under the title, and it bites
+harder, because a rule either lands on a pixel or it does not exist:
+
+```
+hairline_px = ceil(1.3 × export_width / rendered_width)
+```
+
+The rule must land at **1.3px or more** where the asset is actually seen. Under 1px it
+antialiases into a grey smear, which is precisely what the honesty rule forbids — and
+plaque without its rule is not plaque. Every hairline number below is that formula
+applied. Where a surface declares no render size, the web value of 1px stands.
+
 ---
 
 ## 1. Voice and writing
@@ -149,23 +165,26 @@ Ship the full-name version at 400px and the `PA` version as the 48px file.
 
 ## 4. X header and YouTube banner
 
-2560×1440. Phone-safe area 1546×423 centred: x **507–2053**, y **509–932**. Rendered on
-a phone at roughly 390pt wide, so the scaling law gives title **80px**, mono **52px**.
+2560×1440. Phone-safe area 1546×423 centred: x **507–2053**, y **509–932**. The phone
+shows the safe area and nothing else, at roughly 390pt wide, **so `export_width` here is
+1546, not 2560**: 1546 / 390 = 3.96, which gives title **80px**, mono **52px** and a
+hairline of **6px**.
 
 Charcoal wall with grain across the whole 2560 frame and **no type in the left two
 thirds**. That emptiness is the decoration.
 
 In the right third of the safe area (from x=**1540**), one label block aligned to the
-vertical centre: the name in Source Sans 3 600 italic at 80px, a `2px #ddd9cd` hairline
+vertical centre: the name in Source Sans 3 600 italic at 80px, a `6px #ddd9cd` hairline
 beneath at 34% of the block width, then a single mono line of **8 words maximum** at
-52px. Nothing else in the frame.
+52px. Nothing else in the frame. **The rule is 6px, not 2px** — at this surface's 0.25
+scale a 2px rule renders 0.5px and is gone.
 
 ## 5. Open Graph card
 
 1200×630, read at roughly 400×210. Scaling law: title **60px**, mono **39px**.
 
 Charcoal. One centred label block 640px wide (the source's 320px, doubled for the
-shrink): title in Source Sans 3 600 italic at 60px, a `2px #ddd9cd` hairline, then three
+shrink): title in Source Sans 3 600 italic at 60px, a `4px #ddd9cd` hairline, then three
 mono lines at 39px — role, year, duration. The block sits at optical centre, **one third
 down** (its cap line at y=210). The remaining 80% of the card is empty wall.
 
@@ -243,8 +262,9 @@ instruction. Charcoal, one label block at optical centre: `The archive` in Sourc
 Charcoal field with 18% margins on all sides. Title in Source Sans 3 600 italic,
 sentence case, **6 words maximum**, at 122px on the lower left. One mono line under it
 at 79px giving medium and year. Any image of the work sits in the upper-right quadrant
-only and never bleeds to an edge. The hairline is **3px** here, not 1px — below 3px it
-disappears at 210px wide.
+only and never bleeds to an edge. The hairline is **8px** here, not 1px: the sidebar
+render divides every dimension by 6.1, so 3px lands at 0.5px and only 8px reaches the
+1.3px floor.
 
 **The recognisability rule:** the label block always sits in the lower left and the work
 always sits in the upper right, with wall between them. What changes is the title and
@@ -284,7 +304,8 @@ anywhere else.
 - Charcoal `#1a1a19`, 18% margins (540px).
 - Show title in Source Sans 3 600 **italic** at **400px**, sentence case, **3 words
   maximum**, over two lines, lower left.
-- A **12px** `#ddd9cd` hairline above it at 34% of the block width.
+- A **26px** `#ddd9cd` hairline above it at 34% of the block width. At the 20× shrink a
+  12px rule renders 0.6px and vanishes; 26px lands at 1.3px.
 - **One** mono line beneath at **200px**, three words maximum, e.g. `Interviews, 2026`.
 - No grain, no image, no host name, no episode count.
 
@@ -298,7 +319,7 @@ nobody reads 15px from row 12. Use the scaling law with a rendered width of 400p
 **title 96px, mono 62px** on a 1920px frame.
 
 **Title slide.** One label block, lower left, at 18% margins: talk title in Source Sans
-3 600 italic at 96px, a `2px #ddd9cd` hairline at 34% of the block, then two mono lines
+3 600 italic at 96px, a `7px #ddd9cd` hairline at 34% of the block, then two mono lines
 at 62px — venue and date. The rest is wall.
 
 **Section divider.** One mono line at 62px, lower left, giving the section number and

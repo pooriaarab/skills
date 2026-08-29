@@ -164,8 +164,8 @@ Recognisably his without being identical: graticule, centre-line number, amber s
 
 3000×3000, shown at **150px**. Simplify to a 4-division graticule and one trace.
 
-- **Graticule drops from 10×8 to 4×4.** At 150px, ten divisions is 15px each and reads as a grey haze. Four divisions is 37px each and reads as a grid. Draw the majors at 8px stroke, 0.20 alpha. **Minor ticks off. Crosshairs stay** — they are the direction's most recognisable mark at any size.
-- One `#ffb000` trace, **24px stroke**, flat along the centre for the left half and rising to 75% height in the right half. Same gesture as the avatar, deliberately.
+- **Graticule drops from 10×8 to 4×4.** At 150px, ten divisions is 15px each and reads as a grey haze. Four divisions is 37px each and reads as a grid. Draw the majors at **24px** stroke, 0.20 alpha — the shrink is 20×, so an 8px stroke lands at 0.4px and does not exist, while 24px lands at 1.2px. **Minor ticks off. Crosshairs stay** — they are the direction's most recognisable mark at any size.
+- One `#ffb000` trace, **80px stroke** — 4px at 150px, so it stays more than three times the weight of the graticule and remains the subject rather than another grid line. Flat along the centre for the left half, rising to 75% height in the right half. Same gesture as the avatar, deliberately.
 - Show title in Saira Condensed 600 uppercase at **300px**, `#f2e2b4`, **two lines max, three words per line**, sitting in the bottom two divisions, left at 240px.
 - **No readouts, no unit, no number.** Share Tech Mono at any size that fits here renders under 10px at 150px.
 

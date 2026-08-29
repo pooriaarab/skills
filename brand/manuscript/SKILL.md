@@ -155,17 +155,24 @@ rubric.
 
 ## 5. Open Graph card
 
-1200×630, read in feed at roughly 400×210. Nothing under 28px survives.
+1200×630, read in feed at roughly 400×210 — **one third**. Every size on this card is
+divided by three before anyone reads it, so the floor is **45px**, which lands at 15px in
+the feed. A 28px excerpt renders 9.3px. That is not small text, it is texture.
 
 Cream page with a **12% margin** on all four sides (144px left and right, 76px top and
 bottom). Title flush left at a 40-character measure in Cormorant Garamond 500 at
-**64px**. Beneath it, the opening paragraph at **28px** EB Garamond, leading 1.7, **cut
-off mid-sentence with no ellipsis** so the card reads like an open book rather than a
-summary. A footnote marker `1` in Courier Prime 24px sits in the bottom-right corner.
+**64px** — 21px in the feed. Beneath it, the opening paragraph at **48px** EB Garamond,
+leading 1.7, **two lines maximum**, **cut off mid-sentence with no ellipsis** so the card
+reads like an open book rather than a summary. 48px is 16px in the feed, and 48 × 1.7
+gives 82px of leading, so two lines and the title clear the margins with room left. A
+footnote marker `1` in Courier Prime **45px** sits in the bottom-right corner; at 24px it
+renders 8px and is a speck.
 
 **Drop for the shrink:** the drop cap. At 400px wide a three-line initial eats a third
 of the card and the excerpt stops being readable. The rubric leaves the OG card
-entirely, and the footnote marker is the only mark.
+entirely, and the footnote marker is the only mark. **When the excerpt will not fit in
+two lines at 48px, cut the excerpt. Never cut the size** — that is the move that put 28px
+on this card in the first place.
 
 ## 6. LinkedIn banner
 
@@ -237,9 +244,12 @@ discipline and no note is not manuscript — it is warm paper, and vellum owns t
 
 Cream field. Title in Cormorant Garamond 500, sentence case, **7 words maximum**,
 centred horizontally but sitting on the upper-third baseline, at **110px**, opened by a
-three-line red initial at **200px**. Below it a `2px` `#ddd2bb` rule at 40% width,
-centred — the 1px hairline does not survive the downsample, so this is the one place it
-thickens. Then the essay number in Courier Prime **44px**: `no. 14`. Never a face.
+three-line red initial at **200px**. Below it an `8px` `#ddd2bb` rule at 40% width,
+centred — the sidebar render is 210 of 1280, so **every dimension here divides by 6.1**.
+A 1px hairline is 0.16px and the 2px rule this surface used to carry is 0.33px; neither
+exists. 8px lands at 1.3px and is the thinnest mark the surface can hold. Then the essay
+number in Courier Prime **88px**: `no. 14`, which renders 14px — at 44px it renders 7px
+and cannot be read. Never a face.
 
 **The recognisability rule:** the rubric initial is always the largest object in the
 frame and always sits left of the title's first line. Only the letter and the words
