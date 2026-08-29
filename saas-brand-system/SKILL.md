@@ -110,6 +110,7 @@ This skill owns the *identity* (directions → tokens → logo/favicon/OG → gu
 - **`impeccable`** — the craft floor for any single surface (visual hierarchy, motion, a11y).
 - **`storybook-to-design-system`** — once the components ship, surface them as a live in-app
   design-system gallery.
+- **`brand/`** — once a direction is picked, the twenty-direction suite runs it across a person's non-web surfaces (voice, Instagram carousels, YouTube thumbnails and edit style, LinkedIn, podcast, decks). Product identity here; whole-person consistency there. See [`../brand/README.md`](../brand/README.md).
 - **`high-fidelity-ui-image-gen`** — AI mockups of a direction before/without building the HTML.
 
 ## References
