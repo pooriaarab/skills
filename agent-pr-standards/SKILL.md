@@ -106,9 +106,10 @@ saying `500` are not the same rule.
 Count every closing keyword, not only the one you documented. GitHub closes an
 issue on `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`,
 `resolves` and `resolved`. A check that counts only `Closes` waves through
-`Closes #1` plus `Fixes #2`, which is two concerns wearing one coat. Those are mechanical proxies. Whether a PR
-really does one thing is a judgement for the review-council scope lens. No regex
-can make it.
+`Closes #1` plus `Fixes #2`, which is two concerns wearing one coat.
+
+Every cap above is a mechanical proxy. Whether a PR really does one thing is a
+judgement for the review-council scope lens, and no regex can make it.
 
 ## Why generated files do not count
 
