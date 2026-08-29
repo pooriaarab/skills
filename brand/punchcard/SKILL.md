@@ -138,7 +138,9 @@ Keep the clipped corner, the stock, the headline and one punched row. Headline A
 
 **End card.** The last card is the index entry: `RECORD 0114 / FILED 28 AUG 2026 / POORIAARAB.COM` in Archivo 700 uppercase at 54px, stacked three lines, with a full-width punched row spanning columns 1 through 80 above it. The ask is stated as a filing instruction, not a plea: `FILED WEEKLY. SUBSCRIBE TO GET THE NEXT ONE.`
 
-**Swipe cue.** The ruler does not finish. It counts **1 to 62 and is cut by the right frame edge mid-numeral**, with columns 63 to 80 missing. Anyone who has looked at the top of the card for two slides knows there are eighty, and that this one stops short.
+**Swipe cue.** The ruler does not finish. **It numbers columns 1 to 62 and then goes silent** — columns 63 to 80 print their tick marks with no numerals and run on to the right margin at x=**1008**. Anyone who has looked at the top of the card for two slides knows there are eighty, and that this one stopped being read at 62.
+
+**The ruler cannot be cut by the frame edge, and the arithmetic is the reason.** At 11.7px per column starting at x=72, column 80 ends at 72 + 936 = **1008**, which is 72px short of the 1080 frame edge — the margin, exactly. Reaching the edge would take 86 columns, and a card has 80. So the cue is the **numbering** stopping, not the lattice stopping. No arrow, no dot row, no "swipe".
 
 **On faces:** punchcard handles a photograph better than any other direction in this family. Print it as a **coarse 6px halftone in `#201a10` on the stock**, cropped square, never full colour, never on the cover. A halftoned face reads as an archive print, which is exactly the register.
 
@@ -189,7 +191,7 @@ Recognisably his without being identical: clipped corner, punched row above the 
 - **The clipped corner and the 80-column ruler appear on every slide.** On a 1920×1080 artboard with 120px margins, 1680px / 80 = **21px per column**. The slide number is filed as `CARD n / N` in Courier Prime **24px** in the bottom-right.
 - **Title slide.** Title in Archivo 700 uppercase at **130px**, **never more than 7 words**, with a punched row above it spanning the title's width.
 - **Section divider.** The section name at 160px uppercase, plus its record line — `RECORD 03 — 28 AUG 2026` — in Courier Prime 28px. No punched row on a divider.
-- **Data slide.** Figures in Courier Prime, right-aligned, on a column-snapped grid, **max 8 rows**. Each row's label is Archivo 400. The row's column span is stamped in the footer.
+- **Data slide.** Figures in **Archivo 500 with `font-variant-numeric: tabular-nums`**, right-aligned, on a column-snapped grid, **max 8 rows**. Each row's label is Archivo 400. The row's column span is stamped in the footer. **Not Courier Prime.** The monospace is confined to column numbers, card IDs and dates, and a data figure is none of the three; Archivo's tabular figures are already one width, so the right-aligned column holds without borrowing the ruler's typeface.
 - **Slides with a lot of words:** the cap is **45 words** in Archivo 400 at 34px, in past tense, and the slide carries no data. **The red is a stamp: it may punch one row or mark one word per slide, and it may not do both.**
 
 Minimum type: 28px on a 1920px artboard. Never set ink type below 28px on a projected slide — a room's projector will lose the 4.52:1.

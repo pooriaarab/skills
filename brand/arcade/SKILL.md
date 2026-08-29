@@ -67,10 +67,17 @@ constraint and you plan around it, not past it.
 |---|---|
 | 16px and up (or 5%+ of an image's short edge) | Press Start 2P |
 | 12px to 16px | Silkscreen, which is wider and simpler |
-| under 12px | **Stop using pixel type.** Set Barlow or the system sans, uppercase, weight 700, tracking `0.06em`, in `#22e4f5` with a 2px `#ff2e88` shadow down-right |
+| under 12px, dark | **Stop using pixel type.** Set Barlow or the system sans, uppercase, weight 700, tracking `0.06em`, in `#22e4f5` with a 2px `#ff2e88` shadow down-right |
+| under 12px, light | Same font, casing, weight and tracking, but in `#1a0740` with a 2px `#c4116e` shadow down-right |
 
-The cyan-on-magenta double edge is the recognition cue, not the font. Keep the edge and drop the pixels,
-and the asset still reads as arcade. Keep the pixels below the floor and it reads as a broken image.
+**The small-text fallback is the one place the two modes cannot share a colour.** Cyan is 12.8:1 on the
+tube and 1.4:1 on the card, and the card rule says cyan is fill only. So the light card sets the words
+in `#1a0740` (15.9:1) and keeps the offset edge in `#c4116e` magenta (5.0:1). Never put cyan type on
+the card at any size.
+
+The double edge is the recognition cue, not the font: accent word, magenta shadow, 2px down-right. Keep
+the edge and drop the pixels, and the asset still reads as arcade. Keep the pixels below the floor and
+it reads as a broken image.
 
 Character budgets, which follow from the floor: headline **14 characters**, OG headline 24, banner 30,
 deck headline 24. Write to the budget before you design.
@@ -144,8 +151,9 @@ Portrait posterised to four colours, cyan, magenta, coin gold, and the `#0b0420`
 so the pixels are visibly square at about **48 blocks across**. Scanlines over the top. Square crop,
 head filling the frame edge to edge. No smoothing, ever.
 
-Export 400×400 with nearest-neighbour scaling, so each block is exactly 8px. At 48px each block lands on
-one device pixel, which is why 48 blocks is the right number and 96 is not. **Drop the scanlines below
+Export **384×384** with nearest-neighbour scaling, so each block is exactly 8px — 48 × 8 = 384, and 400
+is not divisible by 48, so a 400px export lands blocks on 8.33px and smears every edge. At 48px each
+block lands on one device pixel, which is why 48 blocks is the right number and 96 is not. **Drop the scanlines below
 96px export**: a 1px scanline on a 48px avatar is a grey wash over the face and it kills the
 posterisation.
 
