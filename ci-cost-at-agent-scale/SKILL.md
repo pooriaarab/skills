@@ -182,6 +182,42 @@ Ubicloud runs **about 6x cheaper per minute**, and its 4-core rate still undercu
 8-second job bills a full minute. That rounding waste falls hardest on the short jobs a
 queue-time argument sends to the expensive runner, not on the long ones.
 
+**Do not move to arm64 for a PR gate. It is measurably more expensive.** The pricing table
+makes it look free: Ubicloud arm64 costs *exactly the same per minute* as x64 at every tier, an
+arm vCPU is a **dedicated physical core** while two x64 vCPUs **share** one, so
+`ubicloud-standard-2-arm` has the same core count as `ubicloud-standard-4` at half the price.
+That reasoning is right about core *count* and wrong about core *throughput*.
+
+Measured, same repo, same commit, re-run twice to rule out a cold cache:
+
+| Step | x64 `standard-4` | arm `standard-2-arm` |
+|---|---|---|
+| `npm ci` | 2s | 6s |
+| `tsc -b` | 5s | 15s |
+| `eslint` | 4s | 11s |
+| `vitest run` | 10s | 47s |
+| **Job total** | **32s median** | **92s** |
+| **Cost per run** | **$0.00133** | **$0.00192 (+44%)** |
+
+Ampere Altra Q80-30 (Neoverse N1, 3.0 GHz) delivers roughly **a third of an x64 core** on
+single-threaded Node/TypeScript work. Billing is per wall-clock minute, so a half-price tier
+that runs 2.9x longer costs **44% more**, and the PR waits three times as long.
+
+**Arm is worth it only when the job is wall-clock-insensitive and genuinely parallel across
+cores** — a nightly, or a matrix leg nobody is waiting on. Never for a gate.
+
+Before any tier drop, x64 or arm, **grep the workflow for `--max-old-space-size`**. Arm gives
+3GB per vCPU against x64's 4GB, so 4 vCPU is 12GB, not 16GB. A job asking for a 12288MB heap
+cannot survive a drop to `ubicloud-standard-4-arm`.
+
+If you do move a batch job, the real arm64 blockers, in the order worth checking: **`puppeteer`
+as a real dependency under npm** (its postinstall fetches Chrome for Testing, which has no
+`linux-arm64` build at all — under bun it is inert unless listed in `trustedDependencies`);
+Tauri or any `--target x86_64-*`; Docker steps on amd64-only images; an arch string hardcoded in
+a `curl` release URL. **Playwright is not a blocker** — 1.58+ ships linux-arm64 for chromium,
+firefox and webkit. Most prebuilt-binary packages are fine: check the lockfile for the
+`-linux-arm64` sibling of each `-linux-x64` package.
+
 Other managed runners (Blacksmith, Depot, Namespace, WarpBuild) sit in the same band and are
 also a label swap; some require a GitHub **org**, so check before planning on a personal
 account. A licensed self-hosted fleet (RunsOn and similar) or your own always-on box goes
@@ -264,4 +300,6 @@ each multiplied run cheaper.
 | A new PR gets no workflow runs at all, while other branches do | GitHub scheduling lag, which can exceed five minutes under load. Confirm with an empty commit before diagnosing the diff. |
 | Workflow triggers look fine locally but behave differently in CI | You read the file from a stale branch. For `pull_request`, read the workflow as it exists on the base and head refs, not from your working tree. |
 | A `push: branches: [main]` workflow has never once run | The repo has no `main` branch. Nothing reports this — a trigger that never fires produces no failure and no run to notice the absence of. Check every `branches:` filter against branches that actually exist. |
+| CI is green on every PR, but the production branch is never gated | The filter is `pull_request: branches: [main]` in a repo that also has `release`. It fires, so it looks healthy — it just never fires for the branch that matters. List every deployable branch in the filter, not only the default one. |
+| A move to arm64 raised the bill and slowed the gate | Arm cores are ~3x slower per thread on Node work, and billing is per wall-clock minute. Equal core count is not equal core speed. Pilot and measure before rolling out. |
 | A cost-audit script silently returns nothing | BSD `xargs` has no `-a`; `xargs -I{}` drops tab-delimited fields. Test the pipeline on one input before fanning out. |
