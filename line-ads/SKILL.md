@@ -1,107 +1,240 @@
 ---
 name: line-ads
-description: "Set up LINE Ads tracking as a regional or CTV adapter — official token or partner access, client tag or app measurement, server conversion shape, audience limits, reporting verification, and explicit unverified boundaries. Use when evaluating LINE Ads, planning a regional campaign, or deciding whether a production integration exists."
+description: "Set up LINE Ads Platform (LAP) web conversion tracking in Taiwan or Thailand: self-serve advertiser access, LINE Tag, LINE Conversion API v1, ldtag_cl capture, deduplication_key pairing, consent and user matching, 30-day attribution, and server-side verification. Use when wiring LAP Purchase or GenerateLead tracking, or debugging missing LINE conversions."
 ---
 
 # LINE Ads
 
-This is a breadth-first stub. It records the current official entry point and
-does not invent undocumented contracts. Product names, endpoints, access rules,
-and availability can vary by country and advertiser agreement.
+LINE Ads is a real self-serve platform in Taiwan and Thailand. Its web stack is
+LINE Tag plus LINE Conversion API v1.
 
-## Availability and official scope
+Do not use this skill for a new Japan LINE Ads account. Japan stopped new LINE
+Ads API applications on 2025-12-25 and new LINE Ads account applications on 2026-06-30. LINE says Japan LINE Ads ends in March 2027. Use LY Ads instead.
+Sources: [Japan sunset notice](https://developers.line.biz/en/news/2026/03/31/line-ads-api/),
+[Japan account notice](https://pages.linebiz.com/line-ads-real-estate/index.html),
+and [Japan API notice](https://www.lycbiz.com/jp/manual/line-ads/other_011/).
 
-LINE documents a Conversion API and states that LINE Ads API is scheduled for discontinuation in March 2027. Confirm the replacement LY Ads path before new work.
+## Account and access
 
-Official source: [LINE Ads documentation](https://developers.line.biz/en/news/tags/line-ads/1/).
+### Taiwan LAP
 
-## The three-layer conversion model
+1. Create a LINE Business ID and open LAP from [LINE Taiwan](https://tw.linebiz.com/account/).
+   This is a self-serve signup path.
+2. Complete advertiser identity verification. Non-individual advertisers upload
+   business registration and a signed identity authorization letter.
+3. Enable 2FA on the LINE Business ID. Taiwan requires 2FA before ad-account
+   creation. See the [Taiwan identity guide](https://lap-identify-verfication.landpress.line.me/lap-identify-verfication-en/).
+4. Create the ad account and LINE Tag in Ad Manager.
+5. In Business Manager, issue a Conversion API token for that LINE Tag.
 
-1. **Client or app layer.** Load the official tag, SDK, or CTV measurement source.
-2. **Server layer.** Send the canonical event through a documented API or approved partner.
-3. **Counting layer.** Read the platform's official reporting surface and reconcile it with payment truth.
+### Thailand LINE Ads
 
-## Client tag or app measurement
+1. Create a LINE Official Account.
+2. Create a LINE Business ID and open [LINE Ads Manager](https://admanager.line.biz/).
+3. Create a group and ad account. Enter payer, advertiser, product, and website
+   information. The account enters review.
+4. Complete business verification and add a payment method.
+5. Create a LINE Tag. Issue its Conversion API token in Business Manager.
 
-> ⚠ UNVERIFIED — confirm the official browser tag, app SDK, or CTV
-measurement source at [LINE Ads](https://developers.line.biz/en/news/tags/line-ads/1/). Use only code copied from the vendor
-console. Store the public ID as `LINE_ADS_PIXEL_ID` or `LINE_ADS_TAG_ID` after the vendor
-confirms its name.
+See the [Thailand onboarding guide](https://lineforbusiness.com/th-en/service/line-ads)
+and [account manual](https://lineforbusiness.com/th-en/service/line-ads/manual).
+The LINE Official Account admin must approve the ad-account link.
 
-## Server-side conversion API
+LINE does not define environment-variable names. Use these local adapter names:
 
-> ⚠ UNVERIFIED — confirm the current server conversion endpoint,
-auth header, timestamp unit, deduplication key, and JSON payload at the official
-source: [LINE Ads](https://developers.line.biz/en/news/tags/line-ads/1/).
-
-Do not invent an endpoint for this regional or managed-advertiser product. If the
-vendor requires a partner or sales agreement, record that gate and keep the hub
-adapter disabled until access is granted.
-
-## Get a token and validate it
-
-1. Open the official LINE Ads developer or advertiser site: [LINE Ads](https://developers.line.biz/en/news/tags/line-ads/1/).
-2. Create the required advertiser, app, tag, or data connection in the official console.
-3. Request the API product or managed measurement access if the vendor gates it.
-4. Store the approved credential as `LINE_ADS_TOKEN`. Keep it server-side.
-
-LINE documents a Conversion API and states that LINE Ads API is scheduled for discontinuation in March 2027. Confirm the replacement LY Ads path before new work.
-
-Token validation:
-
-```bash
-curl -sS 'https://developers.line.biz/en/news/tags/line-ads/1/' -H "Authorization: Bearer $LINE_ADS_TOKEN"
+```text
+LINE_ADS_TAG_ID       LINE Tag `tagId` and API path ID
+LINE_ADS_CAPI_TOKEN   Business Manager Conversion API token
+LINE_ADS_CHANNEL_ID   Numeric LINE channel ID when sending `line_uid`
 ```
 
-⚠ UNVERIFIED — this is a placeholder validation command unless the official
-source documents that exact read endpoint and bearer header. Replace it only
-with a verified official read operation.
+Keep the token and channel ID on the server. The tag ID is public.
 
-## Audience, retargeting, and lookalike expansion
+## Client-side LINE Tag
 
-> ⚠ UNVERIFIED — confirm site retargeting, customer-list upload, hashed-email
-fields, minimum usable size, lookalike expansion, and eligibility at [LINE Ads](https://developers.line.biz/en/news/tags/line-ads/1/).
+Get the account-specific code from Ad Manager: **Reports and figures** →
+**Tracking (LINE Tag)**. Put the base code in `<head>` on every page that needs
+measurement. A tag manager is also supported. Load the base code before event
+code. Use one base code from the account's tag set per page. Source: [LINE Tag
+manual](https://lineforbusiness.com/th-en/service/line-ads/manual).
 
-Normalize email with trim → lowercase → SHA-256 only when the official product
-requires it and consent permits it. Never treat upload success as serving proof.
+This is the real loader and call shape. Copy the generated account code before
+deployment.
 
-## Deduplication and hub contract
+```html
+<script>
+(function(g,d,o){g._ltq=g._ltq||[];g._lt=g._lt||function(){g._ltq.push(arguments)};
+var h=location.protocol==='https:'?'https://d.line-scdn.net':'http://d.line-cdn.net';
+var s=d.createElement('script');s.async=1;s.src=o||h+'/n/line_tag/public/release/v1/lt.js';
+var t=d.getElementsByTagName('script')[0];t.parentNode.insertBefore(s,t);})(window,document);
+_lt('init',{customerType:'lap',tagId:'<LINE_ADS_TAG_ID>'});
+_lt('send','pv',['<LINE_ADS_TAG_ID>']);
+</script>
+```
 
-- Use one stable payment transaction ID as the event ID when the platform supports deduplication.
-- Do not gate the server event on a click ID. Add the ID only when available.
-- Make `LINE_ADS_PIXEL_ID` and `LINE_ADS_TOKEN` absent-safe no-ops.
-- Store consent with the canonical event before dispatch.
-- Keep region-specific identifiers inside this adapter. The hub keeps one event taxonomy.
+Install the conversion code on the conversion page, after the base code:
 
-## Small-budget launch
+```html
+<script>
+_lt('send','cv',{type:'Purchase',value:25.00,currency:'USD'},['<LINE_ADS_TAG_ID>']);
+</script>
+```
 
-- Start with one region, one audience, one creative, and one conversion goal.
-- Disable broad expansion and automatic placements until the account's official defaults are known.
-- Use traffic or reach when no conversion signal exists. Move to conversion bidding only after real events land.
-- Confirm billing, review, currency, local policy, and reporting time zone before spend.
-- ⚠ UNVERIFIED — confirm current budget floors, bid rules, learning thresholds, and default placements at the official source.
+`Purchase` supports `value` and `currency` for value optimisation. The [standard
+event guide](https://www.lycbiz.com/jp/manual/line-ads/tracking_021/) lists the
+standard event names.
+
+## Server-side Conversion API v1
+
+```text
+POST https://conversion-api.tr.line.me/v1/{line_tag_id}/events
+Content-Type: application/json
+X-Line-TagAccessToken: $LINE_ADS_CAPI_TOKEN
+X-Line-ChannelID: $LINE_ADS_CHANNEL_ID   # only with user.line_uid
+```
+
+The [official API reference](https://conversion-api-docs.linebiz.com/en/)
+requires a JSON array. Each item requires `event` and `user`. Web events can
+include `web`; standard-event value data goes in `custom`.
+
+```json
+[
+  {
+    "event": {
+      "source_type": "web", "event_type": "conversion",
+      "event_name": "Purchase", "event_timestamp": 1735689600,
+      "deduplication_key": "payment-provider-event-id", "test_flag": false
+    },
+    "user": {
+      "click_id": "<ldtag_cl>", "browser_id": "<__lt__cid>",
+      "email": "<sha256-email>", "phone": "<sha256-phone>"
+    },
+    "web": {"url":"https://example.com/thanks", "referrer":"https://example.com/checkout",
+      "user_agent":"<user-agent>", "ip_address":"<client-ip>"},
+    "custom": {"value":25.00, "currency":"USD"}
+  }
+]
+```
+
+`event_timestamp` uses Unix seconds. `user` needs at least one match field.
+LINE lists `line_uid`, `click_id`, `phone`, `email`, `ifa`, `browser_id`, and
+`external_id`. `browser_id` and `external_id` work after LINE creates mapping
+data. The token must belong to the `line_tag_id` in the URL.
+
+### Identity and consent
+
+Apply the hub consent gate before hashing. Normalize email as trim, lowercase,
+UTF-8, then SHA-256 hex. LINE's [official server template](https://github.com/line/line-conversion-api-server-tag/blob/main/template.tpl)
+uses the same rule and accepts an existing 64-character hex hash.
+
+Do not guess phone normalisation. UNVERIFIED: the reviewed direct-API reference
+does not define it. Apply the region's current rule before hashing. Send no
+identifiers without consent. LINE discards events when matching fails or consent
+cannot be confirmed, and does not update Business Manager status.
+
+For `user.line_uid`, send the provider's numeric channel ID in
+`X-Line-ChannelID`. This is not a LINE Login or Messaging API token.
+
+## Canonical event mapping
+
+The [ad-conversion-hub](../ad-conversion-hub/SKILL.md) owns canonical events.
+This adapter owns LINE names:
+
+| Hub event | LINE request |
+| --- | --- |
+| `page_view` | `event_type: "page_view"`; omit `event_name` |
+| `view_content` | `ViewItemDetail` |
+| `lead` | `GenerateLead` |
+| `signup` | `CompleteRegistration` |
+| `begin_checkout` | `InitiateCheckOut` |
+| `purchase` | `Purchase` |
+| `subscription_start` | Custom event `SubscriptionStart` |
+| `refund` | Custom event `Refund` |
+
+For conversion rows, use `event_type: "conversion"`. The last two names are
+custom events, not standard events. Custom event names allow up to 20
+alphanumeric characters without spaces. Create a custom conversion in Ad
+Manager for attributed reporting. See the [Thailand tag manual](https://lineforbusiness.com/th-en/service/line-ads/manual).
+
+## Deduplication
+
+LINE uses `event.deduplication_key`. It compares both `event_name` and `deduplication_key`.
+It deduplicates matching events that arrive within 30 days
+of first acceptance. Use the hub's stable `event_id` for both twins. Pass it to
+the browser as `deduplicationKey` and to the server as `deduplication_key`.
+
+Do not stringify `undefined` or `null`. LINE warns that repeated undefined
+values can collapse unrelated events. Do not let the official template generate
+a random key when a shared key is available. Source: [deduplication guidance](https://conversion-api-docs.linebiz.com/en/).
+
+## Click ID and cookies
+
+The click parameter is `ldtag_cl`. Capture it on the first landing request and
+persist it in first-party storage. Keep first-touch and most-recent values when
+needed. Send it as `user.click_id`. LINE's official template reads `ldtag_cl`
+from the page URL.
+
+The same template uses the first-party `__lt__cid` browser ID cookie. It sets
+that cookie for two years when cookie measurement is enabled. Source: [official
+LINE server-tag source](https://github.com/line/line-conversion-api-server-tag/blob/main/template.tpl).
+
+UNVERIFIED: LINE does not publish a separate `ldtag_cl` TTL. Use the documented
+attribution window and your own first-party retention policy.
+
+Default web attribution is 30 days after the ad press. The current Conversion
+API guide documents custom windows from 1 to 90 days. An older Thailand help
+page says 1 to 180 days. Treat the target account's Ad Manager setting as
+authoritative. LINE uses event acceptance time, so late delivery can miss the
+window. Do not gate a server purchase on a click ID.
+
+For different root domains, use `sharedCookieDomain` and `autoLink`. This needs
+first-party cookies or local storage and can fail on JavaScript-driven
+navigation. Source: [cross-domain guide](https://lineforbusiness.com/th-en/service/line-ads/manual).
+
+## Tracking quirks that break attribution
+
+- Web and app tracking are separate. Web uses LINE Tag or Conversion API. App
+  measurement uses mobile SDK or an MMP. Do not send app installs as web events.
+- `test_flag: true` accepts a test but excludes it from reporting, audiences,
+  and optimisation. Use `false` for production proof.
+- Custom events need a console custom-conversion definition before attributed
+  reporting starts.
+- Browser privacy, expired cookies, and cross-domain redirects reduce matching.
+- One invalid item can discard the full JSON array. Send small validated batches.
+- A 500 response can mean partial acceptance. Replay with the same key only after
+  checking the dispatch log.
+- A standard `Purchase` code and a custom event with the same name can double
+  results. Use one.
 
 ## Verification
 
-Use the official test-event view, event history, postback response, or reporting
-API. Reconcile with payment-provider succeeded charges. A successful token call
-does not prove that a conversion can receive ad credit.
+1. Send a test event with `test_flag: true` and a real match field. Record the
+   redacted response. `202` means LINE received all events in the request.
+   `400` rejects the request, `401` means an invalid token, and `500` can mean
+   partial acceptance. Source: [API responses](https://conversion-api-docs.linebiz.com/en/).
+2. If using LINE's GTM template, use server-container Preview. It shows the
+   outbound request, response, event data, and error logs.
+3. Send a production event with `test_flag: false`. Check **Tracking (LINE Tag)**
+   status and the relevant conversion or standard-event report column.
+4. Reconcile attributed events with payment-provider succeeded charges. Store
+   status, canonical event ID, LINE event name, and retry count in the hub log.
 
-> ⚠ UNVERIFIED — confirm the current event-test and reporting operation at the official source.
+## Common pitfalls
 
-## Hub conventions
-
-Pair this stub with `ad-conversion-hub` and `ad-experiments`. Keep canonical
-events, consent, hash policy, secret names, and payment-provider truth in the
-hub. A partner gate or missing secret must produce a logged no-op. It must not
-fail checkout.
+- Using a tag ID from another account, or a token not associated with that tag.
+- Using a LINE Login or Messaging API token in `X-Line-TagAccessToken`.
+- Sending `event_id` instead of `deduplication_key`.
+- Sending `Purchase` in the browser and `Conversion` on the server.
+- Double-hashing a 64-character identity hash.
+- Sending milliseconds instead of Unix seconds.
+- Blocking `ldtag_cl` or `__lt__cid` during redirects.
+- Treating `202` as attribution proof. It proves receipt only.
 
 ## Security
 
-Load code only from the vendor's official HTTPS origin. Keep `LINE_ADS_TOKEN`
-server-side. Never log or commit credentials. Send only consented identifiers,
-hashed when the official platform requires hashing.
+Keep `LINE_ADS_CAPI_TOKEN` in the deployment secret store. Never place it in a
+browser bundle, URL, log, screenshot, or repository. Use HTTPS.
 
-## Official sources checked (2026-08-11)
-
-- https://developers.line.biz/en/news/tags/line-ads/1/
+Apply the hub consent gate before dispatch. Do not log raw email, phone, LINE
+user IDs, click IDs, cookies, tokens, or full request bodies. Redact identifiers
+and tokens in errors. Delete temporary normalized values after dispatch.
