@@ -1,107 +1,207 @@
 ---
 name: strava-ads
-description: "Set up Strava Ads tracking as a regional or CTV adapter — official token or partner access, client tag or app measurement, server conversion shape, audience limits, reporting verification, and explicit unverified boundaries. Use when evaluating Strava Ads, planning a regional campaign, or deciding whether a production integration exists."
+description: "Evaluate Strava Sponsored Challenges and Sponsored Segments when you need advertiser access, reward-site conversion tracking, partner reporting, or an answer about Strava pixels, retargeting, DSP access, click IDs, or a public conversion API. Strava uses a managed activation model. It does not document a self-serve Strava Ads conversion API or support conventional ad pixels."
 ---
 
 # Strava Ads
 
-This is a breadth-first stub. It records the current official entry point and
-does not invent undocumented contracts. Product names, endpoints, access rules,
-and availability can vary by country and advertiser agreement.
+Strava Ads is a managed brand-activation product. It is not a self-serve
+performance ad platform with a public pixel or conversion API.
 
-## Availability and official scope
+Strava offers Sponsored Challenges, Sponsored Segments, and subscription
+partnerships. Its own FAQ says that it does not support conventional ad
+formats, third-party cookies, or pixels. It also says that it does not offer
+traditional retargeting or access through an ad exchange or DSP.
 
-No official Strava advertiser pixel, CAPI, or customer-list API was verified. Do not treat the Strava athlete API as an ads API.
+Sources: [Strava advertising overview](https://business.strava.com/resources/advertising-strava),
+[Strava FAQ](https://business.strava.com/why-strava/faqs).
 
-Official source: [Strava Ads documentation](https://developers.strava.com/).
+## Account and access
 
-## The three-layer conversion model
+There is no public self-serve Strava advertiser signup in the official sources
+checked. Use the managed business route:
 
-1. **Client or app layer.** Load the official tag, SDK, or CTV measurement source.
-2. **Server layer.** Send the canonical event through a documented API or approved partner.
-3. **Counting layer.** Read the platform's official reporting surface and reconcile it with payment truth.
+1. Open [Strava for Business contact](https://business.strava.com/contact).
+2. Submit the brand, market, activation type, audience, dates, reward flow,
+   and destination website.
+3. Work with a Strava Client Partner on the campaign and reporting plan.
 
-## Client tag or app measurement
+Agencies can use the [Strava agency partner route](https://business.strava.com/why-strava/agencies).
+Strava says that its team helps agencies and brands plan Sponsored Challenges
+and other activations. The official FAQ says that these products usually suit
+larger brands. It recommends an organic Strava Club for smaller brands.
 
-> ⚠ UNVERIFIED — confirm the official browser tag, app SDK, or CTV
-measurement source at [Strava Ads](https://developers.strava.com/). Use only code copied from the vendor
-console. Store the public ID as `STRAVA_ADS_PIXEL_ID` or `STRAVA_ADS_TAG_ID` after the vendor
-confirms its name.
+Do not create a fake advertiser account or token. A partner agreement is the
+access gate for campaign setup, audience planning, and campaign reporting.
+
+## What the public Strava API is
+
+Strava has a public API, but it is an athlete and activity API. The reference
+lists resources such as athletes, activities, clubs, routes, and gear. It does
+not document ad conversion ingestion, ad click attribution, or advertiser
+reporting endpoints. See the [Strava API reference](https://developers.strava.com/docs/reference/).
+
+Developer access is separate from Strava Ads access:
+
+- Create a Strava account and subscribe to Strava.
+- Create an app at [Strava API settings](https://www.strava.com/settings/api).
+- Use OAuth 2.0. The token exchange is
+  `POST https://www.strava.com/oauth/token`.
+- Send the resulting access token as `Authorization: Bearer <token>`.
+- Access tokens expire. The getting-started guide lists a six-hour lifetime
+  and a refresh token.
+
+These credentials read or write data for athletes who authorize the app. They
+do not grant Strava Ads access. Do not send a hub conversion to an athlete API
+endpoint.
+
+Sources: [Strava getting started](https://developers.strava.com/docs/getting-started/),
+[Strava authentication](https://developers.strava.com/docs/authentication/).
+
+## Client-side tag or pixel
+
+Strava does not support a conventional advertiser pixel or third-party cookie.
+The official FAQ says this directly. There is no Strava Ads script, browser
+SDK, pixel ID, or public tag ID to install.
+
+Do not add any of these as assumed secrets:
+
+```text
+STRAVA_ADS_PIXEL_ID
+STRAVA_ADS_TAG_ID
+STRAVA_ADS_TOKEN
+```
+
+Those names are not official Strava Ads configuration. Keep them absent until
+a Strava partner gives a written, current contract for a different product.
+
+The conversion page is your site, not Strava. Load your own consented
+analytics there. Fire the hub's `page_view`, `signup`, `lead`, `begin_checkout`,
+`purchase`, or `subscription_start` event only for the action that occurs on
+your site. The hub owns the event envelope and consent gate. See
+[`ad-conversion-hub`](../ad-conversion-hub/SKILL.md).
 
 ## Server-side conversion API
 
-> ⚠ UNVERIFIED — confirm the current server conversion endpoint,
-auth header, timestamp unit, deduplication key, and JSON payload at the official
-source: [Strava Ads](https://developers.strava.com/).
+No public Strava Ads conversion API is documented in the official sources
+checked. Therefore there is no verified Strava endpoint, auth header, required
+payload field, identity hashing rule, event-name set, or server deduplication
+field to implement.
 
-Do not invent an endpoint for this regional or managed-advertiser product. If the
-vendor requires a partner or sales agreement, record that gate and keep the hub
-adapter disabled until access is granted.
+The Strava FAQ mentions a public API for developer access to Strava data. It
+tells brands to consult the Strava team for campaign integrations. That is not
+a documented self-serve conversion contract. See the [FAQ](https://business.strava.com/why-strava/faqs)
+and [API reference](https://developers.strava.com/docs/reference/).
 
-## Get a token and validate it
+Do not invent or probe an endpoint such as `/conversions`, `/events`, or
+`/pixel`. Do not post hashed email, phone, `event_id`, or payment data to the
+athlete API. A partner-only postback or reporting feed is UNVERIFIED until the
+partner supplies its current endpoint, auth model, fields, retention, and
+deduplication rules in writing.
 
-1. Open the official Strava Ads developer or advertiser site: [Strava Ads](https://developers.strava.com/).
-2. Create the required advertiser, app, tag, or data connection in the official console.
-3. Request the API product or managed measurement access if the vendor gates it.
-4. Store the approved credential as `STRAVA_ADS_TOKEN`. Keep it server-side.
+## Canonical event mapping
 
-No official Strava advertiser pixel, CAPI, or customer-list API was verified. Do not treat the Strava athlete API as an ads API.
+There is no Strava Ads event mapping today. Keep the adapter out of the
+hub's `real-capi` path.
 
-Token validation:
+| Hub event | Strava Ads action |
+| --- | --- |
+| `page_view` | No Strava event. Measure on the reward site. |
+| `view_content` | No Strava event. Measure on the reward site. |
+| `lead` | No Strava event. Store the lead in your system. |
+| `signup` | No Strava event. Store the reward-site signup. |
+| `begin_checkout` | No Strava event. Store the checkout in your system. |
+| `purchase` | No Strava event. Use payment-provider truth. |
+| `subscription_start` | No Strava event. Use subscription truth. |
+| `refund` | No Strava event. Use payment-provider truth. |
 
-```bash
-curl -sS 'https://developers.strava.com/' -H "Authorization: Bearer $STRAVA_ADS_TOKEN"
-```
+Do not gate these first-party events on a Strava click ID. A campaign can
+still produce useful first-party measurement without a Strava postback.
 
-⚠ UNVERIFIED — this is a placeholder validation command unless the official
-source documents that exact read endpoint and bearer header. Replace it only
-with a verified official read operation.
+## Click IDs and attribution
 
-## Audience, retargeting, and lookalike expansion
+Strava does not document a Strava-owned click parameter or its lifetime. The
+official model sends users to a brand website to redeem a reward after they
+complete a challenge. See [Sponsored Challenges](https://business.strava.com/challenges).
 
-> ⚠ UNVERIFIED — confirm site retargeting, customer-list upload, hashed-email
-fields, minimum usable size, lookalike expansion, and eligibility at [Strava Ads](https://developers.strava.com/).
+Do not create `strava_click_id`, `stravaid`, or another guessed parameter. Do
+not promise a seven-day or thirty-day Strava attribution window.
 
-Normalize email with trim → lowercase → SHA-256 only when the official product
-requires it and consent permits it. Never treat upload success as serving proof.
+Ask the Client Partner whether the campaign link may carry a first-party
+campaign code or UTM values. If the partner approves one, capture it on the
+reward-site landing request and persist it under your own first-party storage.
+Keep first-touch and most-recent values when your measurement design needs
+both. Store the value with the canonical event. Follow the hub's click-ID and
+consent rules.
 
-## Deduplication and hub contract
+The lifetime, query parameter name, and partner reporting join key remain
+UNVERIFIED until Strava documents them for the specific campaign.
 
-- Use one stable payment transaction ID as the event ID when the platform supports deduplication.
-- Do not gate the server event on a click ID. Add the ID only when available.
-- Make `STRAVA_ADS_PIXEL_ID` and `STRAVA_ADS_TOKEN` absent-safe no-ops.
-- Store consent with the canonical event before dispatch.
-- Keep region-specific identifiers inside this adapter. The hub keeps one event taxonomy.
+## Tracking facts that affect implementation
 
-## Small-budget launch
+- Strava uses native activations. A user discovers a challenge, participates,
+  completes the goal, and then claims a reward on the brand website. A
+  website signup, purchase, or donation is your event, not a Strava event.
+- Strava reports campaign metrics such as impressions, joins, and completions
+  through its business process. The FAQ does not define a public reporting API
+  or a conversion-event export.
+- Strava does not support traditional retargeting through third-party cookies.
+  Do not install a retargeting pixel in the expectation that Strava will use it.
+- Strava does not offer inventory through an external ad exchange or DSP.
+  Plan for direct partner coordination.
+- Strava allows targeting by activity type and geographic location. Its FAQ
+  says that it does not allow third-party data or partner targeting methods.
+- Strava does not publish personal user data to brands. The agency page says
+  that brands receive aggregated campaign insights.
+- Pricing is based on campaign scope, market, and duration. It is not
+  documented as performance-based pricing in the FAQ.
+- Reporting delay, conversion windows, partner link fields, and any offline
+  upload format are UNVERIFIED. Get them in the campaign order or partner
+  documentation before launch.
 
-- Start with one region, one audience, one creative, and one conversion goal.
-- Disable broad expansion and automatic placements until the account's official defaults are known.
-- Use traffic or reach when no conversion signal exists. Move to conversion bidding only after real events land.
-- Confirm billing, review, currency, local policy, and reporting time zone before spend.
-- ⚠ UNVERIFIED — confirm current budget floors, bid rules, learning thresholds, and default placements at the official source.
+Sources: [Strava FAQ](https://business.strava.com/why-strava/faqs),
+[Strava agency partners](https://business.strava.com/why-strava/agencies).
 
 ## Verification
 
-Use the official test-event view, event history, postback response, or reporting
-API. Reconcile with payment-provider succeeded charges. A successful token call
-does not prove that a conversion can receive ad credit.
+Use two separate proofs:
 
-> ⚠ UNVERIFIED — confirm the current event-test and reporting operation at the official source.
+1. **First-party proof:** record the reward-site request, campaign code if
+   approved, canonical event ID, consent decision, and payment or signup result
+   in your own server logs. Reconcile `purchase` and `refund` with the payment
+   provider.
+2. **Strava campaign proof:** request the Client Partner's campaign report.
+   Confirm impressions, challenge joins, and completions against the campaign
+   dates and target market. The official FAQ lists these reporting metrics.
 
-## Hub conventions
+There is no public Strava endpoint that proves a conversion event landed. A
+successful call to the public athlete API proves only athlete API access. It
+does not prove campaign attribution.
 
-Pair this stub with `ad-conversion-hub` and `ad-experiments`. Keep canonical
-events, consent, hash policy, secret names, and payment-provider truth in the
-hub. A partner gate or missing secret must produce a logged no-op. It must not
-fail checkout.
+## Common pitfalls
+
+- Treating the athlete API as a marketing conversion API.
+- Searching for a pixel ID when Strava explicitly says it does not support
+  conventional pixels.
+- Expecting Meta-style `event_id` deduplication. Strava documents no such
+  field for Ads.
+- Sending hashed customer lists. Strava says it does not allow third-party
+  data or partner targeting methods.
+- Counting challenge completions as purchases. A completion may only unlock a
+  reward; the payment provider decides whether a purchase occurred.
+- Assuming a click ID, attribution window, DSP feed, or delayed-reporting SLA.
+  Ask the Client Partner and record the answer for that campaign.
+- Letting a missing Strava partner integration block checkout. The hub must
+  return `skipped` for this destination, not fail the payment webhook.
 
 ## Security
 
-Load code only from the vendor's official HTTPS origin. Keep `STRAVA_ADS_TOKEN`
-server-side. Never log or commit credentials. Send only consented identifiers,
-hashed when the official platform requires hashing.
+Keep Strava developer client secrets, access tokens, refresh tokens, partner
+credentials, and campaign exports in the server secret store. Never place
+them in browser bundles, URLs, logs, screenshots, or commits. Strava tells
+developers not to share these credentials publicly; see [authentication](https://developers.strava.com/docs/authentication/).
 
-## Official sources checked (2026-08-11)
-
-- https://developers.strava.com/
+Apply the hub consent gate before sending first-party measurement. Do not send
+athlete data or customer identifiers to Strava Ads without a documented
+partner contract and a valid consent decision. Keep the adapter disabled until
+Strava supplies a current, reviewable Ads contract.

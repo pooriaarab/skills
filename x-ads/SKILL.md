@@ -1,100 +1,240 @@
 ---
 name: x-ads
-description: "X Ads website tag and server conversion tracking, OAuth access, tailored audiences, and campaign verification. Use when setting up X Ads, debugging conversion tracking, building retargeting audiences, or validating a small paid test."
+description: "Set up X Ads website conversion tracking with the X Pixel or Conversion API. Use for X Ads account creation, Ads API OAuth access, twclid persistence, conversion_id deduplication, attribution-window checks, and server-side event verification."
 ---
 
 # X Ads
 
-This is a breadth-first stub for the shared conversion hub. It is intentionally
-conservative where the public documentation does not verify a current API fact.
+X has two current web measurement paths: the X Pixel and the Conversion API
+(CAPI). Use either path, or both with the same `conversion_id` value. X CAPI
+is public, but it requires an approved developer account and Ads API access.
+It uses OAuth 1.0a, not a bearer token.
 
-## The three-layer conversion model
+## Account and access
 
-1. **Client tag.** Use the platform's official browser tag or event source.
-2. **Server API.** Send the canonical event from the conversion hub after the payment provider confirms it.
-3. **Attribution and reporting.** Configure the platform's conversion action so it can count the event and optimize delivery.
+### Advertiser account
 
-This entry is a breadth-first stub. The official product docs do not expose a stable, public, product-agnostic CAPI contract for every account type.
+1. Create or use the X handle that will publish the ads.
+2. Open [ads.x.com](https://ads.x.com) while logged into that handle.
+3. Select the billing country, time zone, and currency.
+4. Add an active payment card in Billing.
 
-## Client tag or app attribution
+The country, time zone, and currency cannot change after account creation.
+Self-serve ads and card billing are available only in supported markets. If
+self-serve is unavailable, contact X Ads support or an account manager. [X documents signup](https://business.x.com/en/help/account-setup/ads-account-creation).
 
-Use the exact tag or event code generated in the platform console. Do not copy a stale blog snippet.
+Adding a card unlocks Tools and Events Manager. X may request more information
+to review the business or identity. [Billing documents this gate](https://business.x.com/en/help/account-setup/billing-basics).
 
-> ⚠ UNVERIFIED — confirm the current client tag URL, init call, pixel ID field, and purchase event shape at [X Ads tracking documentation](https://business.x.com/en/help/campaign-measurement-and-analytics/conversion-tracking-for-websites).
+### Ads API and CAPI access
 
-Store the identifier as `X_ADS_PIXEL_ID` or `X_ADS_TAG_ID`, depending on the platform's official naming.
+1. Create an approved [X Developer Account](https://developer.x.com/en/portal/dashboard).
+2. Create an app under Projects & Apps.
+3. Apply with the [Ads API Access Form](https://docs.x.com/forms/ads-api-access).
+4. Wait for review. X says to allow up to three business days.
+5. Grant the app access to the advertiser's X Ads account.
 
-## Server-side conversion API
+X recommends the official company handle for the developer account. Enable
+two-factor authentication. A subscription plan can provide instant developer
+account approval, but Ads API access still needs application approval. [CAPI prerequisites](https://docs.x.com/x-ads-api/measurement/web-conversions)
+and [Ads API access levels](https://docs.x.com/x-ads-api/fundamentals/accessing-ads-accounts)
+define this gate.
 
-The platform has an official API surface, but the request shape depends on account product and access level.
+Use these adapter environment names in the server secret store:
 
-> ⚠ UNVERIFIED — confirm the current POST endpoint, auth header, timestamp unit, deduplication field, and JSON payload at [X Ads API documentation](https://developer.x.com/en/docs/x-ads-api).
-
-Do not invent a CAPI request. If the account has no public server conversion API, keep this adapter disabled and use the platform's documented import or partner path.
-
-## Get a token and validate it
-
-1. Open the official console for [X Ads](https://business.x.com/en/help/campaign-measurement-and-analytics/conversion-tracking-for-websites).
-2. Create the pixel, tag, app, or advertiser resource required by the account.
-3. Open the current developer, events, or API settings area. Generate the credential required by the documented API.
-4. Store it as `X_ADS_TOKEN`. Keep it server-side.
-
-> ⚠ UNVERIFIED — confirm the current click path, OAuth scopes, expiry, and credential type at [X Ads official API docs](https://developer.x.com/en/docs/x-ads-api).
-
-Token validation:
-
-```bash
-curl -sS -H "Authorization: Bearer $X_ADS_TOKEN" 'https://developer.x.com/en/docs/x-ads-api'
+```text
+X_ADS_API_KEY              X_ADS_API_SECRET
+X_ADS_ACCESS_TOKEN         X_ADS_ACCESS_TOKEN_SECRET
+X_ADS_ACCOUNT_ID           X_ADS_PIXEL_ID
+X_ADS_EVENT_ID_PAGE_VIEW   X_ADS_EVENT_ID_VIEW_CONTENT
+X_ADS_EVENT_ID_LEAD        X_ADS_EVENT_ID_SIGNUP
+X_ADS_EVENT_ID_BEGIN_CHECKOUT
+X_ADS_EVENT_ID_PURCHASE    X_ADS_EVENT_ID_SUBSCRIPTION_START
 ```
 
-⚠ UNVERIFIED — replace this placeholder with an official read endpoint after the platform publishes one for the enabled product.
+X does not define environment-variable names. The Pixel ID and event IDs come
+from Events Manager. The access token must belong to a user with `AD_MANAGER`
+or `ACCOUNT_ADMIN` access for CAPI. The app owner can create a personal token
+in Developer Console. For a different advertiser handle, use three-legged
+OAuth. [X requires OAuth 1.0a and four credentials](https://docs.x.com/x-ads-api/fundamentals/making-authenticated-requests).
 
-## Audience, retargeting, and lookalike expansion
+## X Pixel
 
-Use the platform's documented site audience, customer-list, or partner upload product.
+In Ads Manager, open Tools > Events Manager. Select Add event source and create
+the X Pixel. Select Add events and create one event for each conversion. Use
+code-based events when you need dynamic values or deduplication.
 
-Normalize and SHA-256 hash email after trim and lowercase only when the official product requires hashed contact data. Verify the audience status in the console.
+Use the complete code generated by Events Manager. The current base loader is:
 
-> ⚠ UNVERIFIED — confirm hashed-email fields, minimum list size, match-rate rules, lookalike or expansion availability, and failure modes at [X Ads audience documentation](https://business.x.com/en/help/campaign-measurement-and-analytics/conversion-tracking-for-websites).
+```html
+<script>
+!function(e,t,n,s,u,a){e.twq||(s=e.twq=function(){s.exe?s.exe.apply(s,arguments):s.queue.push(arguments)},s.version='1.1',s.queue=[],u=t.createElement(n),u.async=!0,u.src='https://static.ads-twitter.com/uwt.js',a=t.getElementsByTagName(n)[0],a.parentNode.insertBefore(u,a))}(window,document,'script');
+twq('config', '<X_ADS_PIXEL_ID>');
+</script>
+```
 
-## Deduplication and hub contract
+Load the base code on every page, immediately before `</head>`. Do not put it
+in an iframe or another tag. Those placements can prevent first-party-cookie
+use. [X specifies the loader and placement](https://business.x.com/en/help/campaign-measurement-and-analytics/conversion-tracking-for-websites).
 
-- Use one canonical event ID for client and server sources when the platform supports deduplication.
-- Do not gate a server conversion on a click ID. Add the click ID only when available.
-- Make an absent `X_ADS_PIXEL_ID` or `X_ADS_TOKEN` a logged no-op.
-- Hash contact data only after consent and only as the official product requires.
+Fire an event after the action succeeds. Use the event ID from Events Manager:
 
-## Small-budget campaign launch
+```html
+<script>
+twq('event', '<X_ADS_EVENT_ID_PURCHASE>', {
+  value: 25.00, currency: 'USD', conversion_id: '<canonical event_id>'
+});
+</script>
+```
 
-- Start with one audience, one geo, one creative, and one conversion goal.
-- Disable broad placement, search, audience, and automatic-expansion defaults until they are part of the hypothesis.
-- Use traffic or click optimization when the account has no conversion history.
-- Set a hard budget cap where the product supports one.
-- ⚠ UNVERIFIED — confirm current bid floors, learning thresholds, minimum budgets, and default placements at [X Ads campaign documentation](https://developer.x.com/en/docs/x-ads-api).
+X automatically hashes Pixel email and phone parameters. The phone value must
+include the country code. [X defines these event parameters](https://business.x.com/en/help/campaign-measurement-and-analytics/conversion-tracking-for-websites).
+
+## Conversion API
+
+Create or reuse the same conversion event in Events Manager. Reuse the Pixel
+event when you need Pixel and CAPI deduplication. The current endpoint is:
+
+```text
+POST https://ads-api.x.com/12/measurement/conversions/{pixel_id}
+Authorization: OAuth <OAuth 1.0a signed header>
+Content-Type: application/json
+```
+
+X describes the path as `/{version}/measurement/conversions/:pixel_id`; its
+current example uses version `12`. Recheck the version when X publishes an
+update. [The official CAPI guide defines this endpoint](https://docs.x.com/x-ads-api/measurement/web-conversions).
+
+Send from a payment webhook or durable hub dispatch:
+
+```json
+{"conversions":[{"conversion_time":"2026-08-29T19:14:00.603Z","event_id":"<X event ID>","identifiers":[{"twclid":"<when present>"},{"hashed_email":"<sha256 email>"},{"hashed_phone_number":"<sha256 E.164 phone>"},{"ip_address":"203.0.113.10","user_agent":"<browser UA>"}],"value":"25.00","conversion_id":"<canonical event_id>","contents":[{"content_id":"plan_pro","content_price":25.00,"num_items":1}]}]}
+```
+
+Use these fields:
+
+- `conversion_time`: ISO 8601 timestamp with milliseconds.
+- `event_id`: the X conversion event ID from Events Manager.
+- `identifiers`: at least one of `twclid`, `hashed_email`, or
+  `hashed_phone_number`. If you send IP or user agent, send a second identifier.
+- `conversion_id`: the event-level deduplication value.
+- `value`, `contents`, and `description`: optional event details.
+
+Trim email, then SHA-256 hash it without salt. Normalize phone to E.164, then
+SHA-256 hash it without salt. Do not hash `twclid`, IP, or user agent. [X defines identifier formats](https://docs.x.com/x-ads-api/measurement/web-conversions).
+
+The CAPI example documents `value` but does not show `currency`. Keep currency
+in the canonical hub event. Send it only if the current X CAPI schema accepts
+it. Do not assume that Pixel and CAPI schemas are identical.
+
+X allows 60,000 events per account in each 15-minute interval. Retry timeouts
+and 5xx responses with bounded backoff. Honor `Retry-After`. Do not retry a
+4xx response without changing the request or credentials. [X documents the limit](https://docs.x.com/x-ads-api/measurement/web-conversions).
+
+## Hub event mapping
+
+X receives an Ads Manager event ID, not the hub's `event_name`. Configure one
+X event ID for each mapping:
+
+| Hub event | X event type | Adapter field |
+|---|---|---|
+| `page_view` | Page View or base-code Site Visit | `X_ADS_EVENT_ID_PAGE_VIEW` |
+| `view_content` | Content View | `X_ADS_EVENT_ID_VIEW_CONTENT` |
+| `lead` | Lead | `X_ADS_EVENT_ID_LEAD` |
+| `signup` | Sign Up or Custom, as configured | `X_ADS_EVENT_ID_SIGNUP` |
+| `begin_checkout` | Checkout Initiated | `X_ADS_EVENT_ID_BEGIN_CHECKOUT` |
+| `purchase` | Purchase | `X_ADS_EVENT_ID_PURCHASE` |
+| `subscription_start` | Subscribe, with completed status if supported | `X_ADS_EVENT_ID_SUBSCRIPTION_START` |
+| `refund` | No standard X web refund event | Do not dispatch without an approved Custom event |
+
+X's web event list includes Page View, Purchase, Custom, Lead, Add to Cart,
+Checkout Initiated, Content View, Added Payment Info, Search, Subscribe, and
+Start Trial. Analytics reports metrics such as `conversion_purchases`,
+`conversion_sign_ups`, `conversion_checkouts_initiated`, and
+`conversion_content_views`. [Event types](https://business.x.com/en/help/campaign-measurement-and-analytics/conversion-tracking-for-websites)
+and [web conversion metrics](https://docs.x.com/x-ads-api/analytics) are the sources.
+
+## Deduplication
+
+X does not deduplicate lower-funnel events by default. It uses `conversion_id`.
+Send the same canonical `event_id` in the Pixel payload and each CAPI conversion object. Do not use X's `event_id` as the hub dedup key.
+X's `event_id` selects the configured conversion event. [X documents this distinction](https://docs.x.com/x-ads-api/measurement/web-conversions).
+
+Create only one event of each conversion type. Several Purchase events split
+the signal and can weaken campaign optimization.
+
+## Click ID and tracking quirks
+
+- X appends `twclid` to an ad destination URL. Capture it on first landing.
+- The Pixel can copy it to the advertiser's `_twclid` first-party cookie.
+- `_twclid` lasts 30 days from the first day X stores the click ID.
+- Persist it with the user, checkout, or order record. Keep first-touch and
+  most-recent values separately when the product needs both.
+- Do not gate a server conversion on `twclid`. Email matching can work without it.
+- Avoid redirects that strip `twclid` before the landing page receives it.
+- Keep “Allow first-party cookies” enabled in Events Manager unless consent or
+  policy requires otherwise. Disabling it weakens Click ID measurement.
+- Post-engagement windows are 1, 2, 3, 5, 7, 14, or 30 days. The documented
+  default is 30 days. Post-view supports Off, 1, 2, 3, 5, 7, 14, or 30 days;
+  the documented default is one day.
+- X reporting is estimated near real time and finalizes after 24 hours. Segmented
+  data can be delayed one hour, or 12 hours for interest segments.
+- A strict CSP must allow `ads-twitter.com`, `ads-api.twitter.com`, and
+  `analytics.twitter.com` in `img-src` and `connect-src`.
+- Apply the hub measurement and `ad_user_data` gates before loading the Pixel or hashing identifiers. X's consent guidance requires privacy choices where law requires them.
+- X has Restricted Data Use, but its exact request parameter is UNVERIFIED in
+  the public English API guide. Contact X support before using it.
+
+The click-cookie lifetime and first-party setting are in [X's tracking policy](https://business.x.com/en/help/campaign-measurement-and-analytics/conversion-tracking-for-websites/about-conversion-tracking).
+Attribution windows and reporting delay are in [the website conversions guide](https://business.x.com/en/help/campaign-setup/create-website-conversions-campaign).
 
 ## Verification
 
-Use the official test-event view or reporting API for X Ads. Reconcile its conversions with the payment provider's succeeded charges.
+1. Log the redacted CAPI response for every dispatch.
+2. Require HTTP 200 and `data.conversions_processed > 0`.
+3. Store the returned `debug_id` in the hub dispatch record.
+4. In Events Manager, open Recent Activity Log and confirm the event and parameters.
+5. Query synchronous analytics with `metric_groups=WEB_CONVERSION`:
 
-> ⚠ UNVERIFIED — confirm the current test-event endpoint, reporting query, delay, and status fields at [X Ads official API docs](https://developer.x.com/en/docs/x-ads-api).
+```text
+GET https://ads-api.x.com/12/stats/accounts/{account_id}?entity=CAMPAIGN&entity_ids={campaign_id}&start_time=2026-08-29T19:00:00Z&end_time=2026-08-29T20:00:00Z&granularity=HOUR&placement=ALL_ON_TWITTER&metric_groups=WEB_CONVERSION
+```
 
-Do not call this stub wired until a real test event appears in the platform surface.
+Use `conversion_purchases`, `conversion_sign_ups`, or the metric for the
+configured event. The endpoint requires whole-hour ISO times. It returns
+near-real-time estimates. Use Ads Manager exports for final reporting. Reconcile
+against payment-provider truth. [X analytics defines this proof path](https://docs.x.com/x-ads-api/analytics).
 
-## Hub conventions
+## Common pitfalls
 
-Pair this skill with `ad-conversion-hub` for event taxonomy, consent, hashing,
-secret names, and multi-platform dispatch. Pair it with `ad-experiments` for
-seed sizing, one-variable tests, and payment-provider truth. This platform is
-not yet wired into a product integration. Treat every `⚠ UNVERIFIED` marker as
-a stop sign before production use.
+- A valid X handle is not an Ads API developer account.
+- A developer account is not Ads API access. Submit the access form.
+- CAPI requires an account administrator or ad manager user token.
+- `X_ADS_PIXEL_ID` is not `X_ADS_ACCOUNT_ID`.
+- OAuth 1.0a needs four credentials. A bearer token is not enough.
+- X event ID and `conversion_id` have different meanings.
+- IP and user agent alone are not enough for CAPI matching.
+- Pixel email is hashed by the client. CAPI email must be hashed by the adapter.
+- Multiple Purchase events split the signal.
+- A 200 response with zero processed conversions is not platform proof.
+- Early metrics can change. Wait for finalization before reconciliation.
+- Tools may stay hidden until a payment card is present.
+- Old UWT and SET snippets are legacy. Use Events Manager's current X Pixel code.
 
 ## Security
 
-Load client code only from the vendor's official HTTPS origin. Keep `X_ADS_TOKEN`
-server-side. Never log or commit it. Do not send raw email, phone, or device
-identifiers. Follow the platform's current consent and retention rules.
+Keep API key, API secret, access token, and access-token secret server-side.
+Never place them in browser code, URLs, logs, screenshots, or commits. Expose
+only the public Pixel ID and event IDs to the client bundle.
 
-## Official sources checked (2026-08-11)
+Hash email and phone only after the hub consent gate. Keep raw identity data
+inside the server boundary. Redact request bodies and OAuth headers. Load the
+Pixel only from `https://static.ads-twitter.com/uwt.js` after measurement consent.
 
-- https://developer.x.com/en/docs/x-ads-api
-- https://business.x.com/en/help/campaign-measurement-and-analytics/conversion-tracking-for-websites
+## Pairing
+
+Read `ad-conversion-hub/SKILL.md` for canonical events, consent, identity
+normalization, click-ID storage, adapter contract, deduplication, retry policy,
+and payment-provider reconciliation. This skill supplies only X-specific facts.
+
+Use `ad-experiments` for test design, audience sizing, and budget controls.

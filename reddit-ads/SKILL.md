@@ -1,149 +1,247 @@
 ---
 name: reddit-ads
-description: "Set up Reddit Ads pixel tracking and server-side Conversions API (CAPI) purchase attribution for a web app — Developer Portal app creation, pixel install, Conversion Access Token (not OAuth), the CAPI v3 endpoint shape, and client/server event dedup. Use when wiring up Reddit ad conversion tracking, debugging a 'Base pixel configuration error' in Reddit Ads Manager, or deciding between Reddit's two token types."
+description: "Set up Reddit Ads account access, the Reddit Pixel, and Reddit Conversions API v3 for web events. Use for Reddit Ads signup, Events Manager setup, rdt_cid persistence, conversion_id deduplication, LDU consent, CAPI v2-to-v3 migration, or missing Reddit conversions."
 ---
 
 # reddit-ads
 
-Reddit Ads conversion tracking has two halves — a client-side pixel (fires on page load and on-click) and a server-side Conversions API call (fires from your backend after the conversion actually happens, e.g. a Stripe webhook). Ship both together with a shared dedup key, or purchases get double-counted.
+Reddit offers self-serve Ads signup and a public server-side Conversions API.
+Use the Pixel and CAPI together. Use one conversion ID across both paths.
 
-## Setup, in order
+## Account and access
 
-1. **Reddit Ads Manager → Events Manager → create a pixel.** The pixel ID looks like `a2_xxxxxxxxxxxx`. This is safe to expose client-side (treat it like any other analytics ID, not a secret).
-2. **Get a Conversions API token — use the Conversion Access Token, not an OAuth Developer Portal token.** Reddit has two distinct token mechanisms and it's easy to grab the wrong one:
-   - **OAuth Developer Portal app token** — requires registering an app at the Reddit Developer Portal (which asks for a redirect URI even for a non-interactive server-to-server use case — any placeholder HTTPS URL works, e.g. your own domain, since you'll never complete an OAuth redirect flow with it). This token type expires and needs a refresh flow.
-   - **Conversion Access Token** — generated directly in Events Manager, scoped to one pixel, does **not expire**, and needs zero OAuth flow. This is the one you want for a server-side CAPI integration. Events Manager → your pixel → generate access token.
-3. If Ads Manager shows a **"Base pixel configuration error"** or a **"Prepare for deduplication"** prompt after creating the pixel, that's normal at this stage — it clears once the client-side base pixel actually fires on a real page load (step below) and Reddit sees a live event.
+1. Open [Reddit Ads](https://ads.reddit.com/) and select **Get started**.
+   Set up a business and advertiser account.
+2. For an existing business, ask its owner to add you as a creator or
+   administrator. Reddit documents both paths in its [CAPI direct integration
+   guide](https://ads-api.reddit.com/docs/v3/guides/programs/capi/direct-integration).
+3. In the correct business, open **Events Manager**. Select **Configure data
+   source → Conversions API → Set up manually**. Select **Conversions API Only**
+   if the Pixel does not exist.
+4. Copy the Pixel ID. Select **Generate Access Token**, name and generate it,
+   then copy it. Reddit says it cannot retrieve this token later. Reddit
+   recommends this non-expiring conversion token in its [CAPI
+   guide](https://ads-api.reddit.com/docs/v3/guides/programs/capi/direct-integration).
 
-## Client-side base pixel
+This direct CAPI path does not require a Developer Portal OAuth app. Use that
+separate OAuth credential for other Ads API work. The API uses a bearer token
+with `adsconversions`; see [Reddit API authentication](https://ads-api.reddit.com/docs/v3/authenticate-your-developer-application).
 
-Standard Reddit pixel snippet, fires `PageVisit` on load:
+Use these application names. They follow [`ad-conversion-hub`](../ad-conversion-hub/SKILL.md).
+Reddit does not define the environment variable names.
+
+```text
+REDDIT_PIXEL_ID    public Pixel identifier
+REDDIT_CAPI_TOKEN  server-only Conversion Access Token
+```
+
+The Pixel must belong to the same business account as the events. See [About the Reddit Pixel](https://business.reddithelp.com/articles/Knowledge/reddit-pixel).
+
+## Client-side Pixel
+
+Load the official script on every page that can begin attribution, before event
+calls. Reddit documents manual, GTM, Shopify, and partner installs in [About the Reddit Pixel](https://business.reddithelp.com/articles/Knowledge/reddit-pixel).
 
 ```html
 <script>
 !function(w,d){if(!w.rdt){var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};p.callQueue=[];var t=d.createElement("script");t.src="https://www.redditstatic.com/ads/pixel.js";t.async=!0;var s=d.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}}(window,document);
-rdt('init', '<PIXEL_ID>');
+rdt('init', '<REDDIT_PIXEL_ID>');
 rdt('track', 'PageVisit');
 </script>
 ```
 
-For advanced matching (better match rates), pass a hashed email on init:
+Fire the conversion on the page where the action completes. For a purchase,
+use the payment transaction ID as the deduplication value.
+
 ```js
-rdt('init', '<PIXEL_ID>', { email: '<sha256-hashed-lowercased-trimmed-email>' });
+rdt('track', 'Purchase', { value: 25, currency: 'USD', conversionId: '<canonical-event-id>' });
 ```
 
-Fire a conversion event client-side too (in addition to server-side CAPI — see dedup below):
-```js
-rdt('track', 'Purchase', { value: 25, currency: 'USD', conversionId: '<shared-dedup-id>' });
-```
-Note the client SDK's param is **camelCase `conversionId`**; the server CAPI payload below uses **snake_case `conversion_id`**. Don't copy one casing into the other — verified against Reddit's live `pixel.js` vs the CAPI schema, they genuinely differ.
+The client field is `conversionId`. The CAPI field is
+`metadata.conversion_id`. Keep the value identical. Do not use a page-load
+timestamp. Reddit also supports an Event Setup Tool, GTM, Shopify, and partner
+integrations. Use one client implementation, or share the same ID.
 
-## Server-side Conversions API (CAPI v3)
+## Canonical event mapping
 
-```
-POST https://ads-api.reddit.com/api/v3/pixels/{pixelId}/conversion_events
-Authorization: Bearer <CONVERSION_ACCESS_TOKEN>
+The hub owns the canonical name. This adapter owns Reddit's spelling. See [Reddit's standard event list](https://business.reddithelp.com/articles/Knowledge/supported-conversion-events).
+
+| Hub event | Pixel event | CAPI `tracking_type` | Custom name |
+|---|---|---|---|
+| `page_view` | `PageVisit` | `PAGE_VISIT` | — |
+| `view_content` | `ViewContent` | `VIEW_CONTENT` | — |
+| `lead` | `Lead` | `LEAD` | — |
+| `signup` | `Sign Up` | `SIGN_UP` | — |
+| `begin_checkout` | — | `CUSTOM` | `BeginCheckout` |
+| `purchase` | `Purchase` | `PURCHASE` | — |
+| `subscription_start` | — | `CUSTOM` | `SubscriptionStart` |
+| `refund` | — | `CUSTOM` | `Refund` |
+
+Custom names are case-sensitive, can use up to 64 UTF-8 characters, and must
+not match standard events. Only the 20 most recent show in the dashboard. See [CAPI direct integration](https://ads-api.reddit.com/docs/v3/guides/programs/capi/direct-integration).
+
+## Server-side Conversions API v3
+
+Send from the backend after the business action succeeds. For purchases, use the payment provider webhook. See [Post Conversion Events](https://ads-api.reddit.com/docs/v3/operations/Post%20Conversion%20Events).
+
+```text
+POST https://ads-api.reddit.com/api/v3/pixels/{pixel_id}/conversion_events
+Authorization: Bearer <REDDIT_CAPI_TOKEN>
 Content-Type: application/json
 ```
 
+The v3 body has a `data` object. A top-level `events` array is a v2 mistake.
+
 ```json
 {
-  "events": [
-    {
-      "event_at": 1700000000000,
-      "click_id": "<rdt_cid value captured from the ad click>",
-      "action_source": "WEBSITE",
-      "type": { "tracking_type": "PURCHASE" },
-      "metadata": {
-        "conversion_id": "<shared-dedup-id>",
-        "currency": "USD",
-        "value": 25,
-        "item_count": 1
-      },
-      "user": { "email": "<sha256-hashed-lowercased-trimmed-email>" }
+  "data": { "events": [{
+    "event_at": 1700000000000,
+    "action_source": "WEBSITE",
+    "event_source_url": "https://example.com/thanks?rdt_cid=...",
+    "click_id": "<rdt_cid>",
+    "type": { "tracking_type": "PURCHASE" },
+    "metadata": {
+      "conversion_id": "<canonical-event-id>",
+      "currency": "USD", "value": 25, "item_count": 1,
+      "products": [{"id": "plan_pro", "name": "Pro", "quantity": 1, "item_price": 25}]
+    },
+    "user": {
+      "email": "<sha256-reddit-email>",
+      "external_id": "<sha256-stable-user-id>",
+      "ip_address": "<client-ip>", "user_agent": "<client-user-agent>",
+      "uuid": "<first-party-_rdt_uuid>"
     }
-  ]
+  }]}
 }
 ```
 
-- `event_at` is epoch **milliseconds**.
-- `click_id` is the `rdt_cid` query param from the ad click. **Reddit's own `_rdt_uuid` cookie does NOT store it** — `rdt_cid` only lands on the entry URL, so persist it to first-party storage (localStorage or a cookie) on landing or it's gone by checkout and CAPI has no click to match. Capture first-touch; don't overwrite on a later visit.
-- `email` must be SHA-256 hashed after trimming and lowercasing — never send a raw email.
-- `tracking_type` for other standard events: `LEAD`, `SIGNUP`, `ADD_TO_CART`, `VIEW_CONTENT`, etc. — match whichever conversion action you configured in Events Manager.
-- This call should never be allowed to break the request that triggers it (e.g. a payment webhook). Catch and log failures; don't let a Reddit API error fail an unrelated critical path.
+Required fields are `event_at`, `action_source`, and `type.tracking_type`.
+`event_at` uses Unix epoch milliseconds. Use `WEBSITE` for web events, and up to
+1,000 events per request. Send revenue `value`, ISO 4217 `currency`, and
+`item_count`; Reddit strongly recommends them for revenue optimization.
 
-## Don't gate the CAPI call on the click id
+`event_source_url` is recommended for `WEBSITE` events. Reddit uses it for
+domain detection and can extract `rdt_cid` if `click_id` is missing. A valid response contains `Successfully processed N conversion events.`
 
-Fire the server event whenever you have a **hashed email** (`user.email`) — not only when `click_id`/`rdt_cid` is present. Reddit matches on email alone, so gating on the click id silently drops every organic, direct, and email-driven purchase (usually most of them). Include `click_id` only when you actually have it; never make it a precondition for firing.
+## Identity and consent
 
-## Dedup: client pixel + server CAPI, same key
+The hub gates dispatch. Require `measurement: true` before any event and
+`ad_user_data: true` before email, phone, or external IDs. Do not reject an
+event only because it has no click ID. Follow the [hub consent and adapter contract](../ad-conversion-hub/SKILL.md).
 
-Firing both a client pixel event and a server CAPI event for the *same* conversion double-counts it unless they share a dedup key:
+This adapter sends hashed identity only. Reddit's [match-key and hashing
+rules](https://ads-api.reddit.com/docs/v3/guides/programs/capi/direct-integration) are:
 
-- Use one value both sides can independently produce or receive — a payment-processor session/transaction ID is a good choice (e.g. a Stripe Checkout Session ID), since the client already has it in the redirect URL and the server already has it in the webhook payload.
-- Client sends it as `conversionId` (camelCase, in the `rdt('track', ...)` call).
-- Server sends the *same* value as `conversion_id` (snake_case, in the CAPI `metadata`).
-- Reddit's events manager reconciles the two into one conversion.
+- Email: lowercase it. Remove local-part dots and the plus suffix. SHA-256 it
+  to 64 lowercase hex digits.
+- Phone: normalize to E.164. Include country and area code. Remove the
+  extension and non-numeric characters. Ensure `+`, then SHA-256 it.
+- External ID: use a stable user ID and SHA-256 it. Send IP, user agent, and
+  UUID as documented. Do not hash them.
+
+Do not hash an identifier twice. If measurement is allowed but behavioral
+targeting is not, send LDU. `LDU` is the only mode; country is required and
+region is optional.
+
+```json
+"data_processing_options": {
+  "modes": ["LDU"], "country": "US", "region": "US-CA"
+}
+```
+
+LDU does not replace the hub's measurement consent gate.
+
+## Deduplication
+
+Use one ID for the client and server copies:
+
+- Pixel: `conversionId`.
+- CAPI: `metadata.conversion_id`.
+
+Reddit matches the same event type and channel. Pixel events deduplicate
+against CAPI `WEBSITE` events, not different channels. It prefers more metadata
+and match keys. Events should arrive within two days; the record stays for up to
+seven days. See [Reddit's deduplication rules](https://ads-api.reddit.com/docs/v3/guides/programs/capi/direct-integration).
+
+Without a conversion ID, session deduplication needs the same UUID or external
+ID on both events. Use the explicit conversion ID path for purchases.
+
+## Click ID persistence
+
+Reddit appends `rdt_cid` to the landing URL. Capture it on first landing and
+preserve it through redirects, signup, and checkout. Reddit documents a
+first-party cookie, browser storage, or server session; use a server session
+when possible. See [Click ID persistence](https://ads-api.reddit.com/docs/v3/capi-click-id-persistence).
+
+Reddit does not document a native `rdt_cid` expiration. Retain it for the
+selected window. The default is 28-day click-through and one-day view-through.
+Click windows are 1, 7, or 28 days. View-through cannot exceed click-through.
+Check **Events Manager → Attribution Settings**. See [Web Attribution](https://business.reddithelp.com/articles/Knowledge/Web-Attribution-Overview).
+
+CAPI events must be sent within seven days. This is separate from attribution.
+Do not gate a server event on `rdt_cid`; `click_id` is optional.
+
+## Tracking quirks that cause failures
+
+- **v2 payloads fail in v3.** Use `data.events`, `type.tracking_type`, and
+  `metadata`.
+- **Test Events is limited.** Put `test_id` inside `data`. Only one event per
+  request appears, and it can take five seconds. Remove `test_id` in production.
+  See [Verify Conversion Events](https://ads-api.reddit.com/docs/v3/capi-verify-events).
+- **Pixel tests need third-party cookies.** Use the Reddit Pixel Helper if the
+  Events Manager test view is empty.
+- **Attribution settings alter totals.** An accepted event can receive no ad
+  credit outside the active attribution window.
+- **LDU needs a country.** `modes: ["LDU"]` without `country` is invalid.
+- **Campaign setup needs a Pixel.** Since July 13, 2026, new ad groups and CBO
+  campaigns require `conversion_pixel_id`; see the [v3 change
+  history](https://ads-api.reddit.com/docs/v3/history).
+- **Reports settle slowly.** Metrics can take up to six hours to stabilize;
+  see [Get A Report](https://ads-api.reddit.com/docs/v3/api/get-a-report).
 
 ## Secrets: don't assume `process.env` is populated at request time
 
 Some app setups bake environment variables into a generated module at **build time** rather than reading `process.env` directly at runtime (common on serverless/edge platforms where the runtime environment isn't guaranteed to match the build environment). If your pixel/token reads come back empty in production despite being set somewhere in your deploy config, check whether your app has a build-time secret-generation step (grep for wherever your other, working analytics secrets — e.g. a GA4 API secret — are imported from) and match that pattern, rather than assuming a direct `process.env.YOUR_VAR` read will work. This exact mismatch silently no-ops a CAPI integration with no error — the code runs, the `if (!token) return` guard just always takes the empty-token branch.
 
-## Small-budget campaign setup (cross-platform)
-
-- On a small test budget, **don't optimize delivery toward a conversion you can't yet produce in volume.** Like Google Smart Bidding and Meta's learning phase, Reddit's conversion-optimized delivery needs conversions to learn from — start with a clicks/traffic objective to fill the funnel, then switch to conversion optimization once conversions accumulate.
-- Run **one narrow audience × geo × creative per experiment**, prove the **cheapest conversion (free signup) first**, and verify against server-side truth (the `rp.gif` beacon + payment provider), not the dashboard. See the `ad-experiments` skill for the full methodology.
-
-## Campaign API mechanics (the ones that bite)
-
-- **Budget cap belongs on the AD GROUP, not the campaign.** The campaign `spend_cap` has a **high minimum (≈$100)**; for a smaller screening budget, leave the campaign uncapped and cap each **ad group** instead.
-- **The ad-group budget field is `goal_value`** (microcurrency: `33000000` = $33) with `goal_type: LIFETIME_SPEND`. It is **not** `lifetime_budget` — sending that returns **400 "Additional fields not permitted"**. (Discover the field by GETting an existing ad group and reading its keys, not by guessing.)
-- **Bidding:** for small screening budgets, **`bid_strategy: MAXIMIZE_VOLUME` + `bid_type: CPC` + a CPC bid cap** works well.
-- **Create ads ACTIVE at birth** (`configured_status: ACTIVE`). Creating them PAUSED and then PATCHing to ACTIVE **corrupted ads to DELETED** — don't do the two-step.
-- **Update bodies must be wrapped `{"data": {...}}`** and sent via **stdin**, not inline — an inline `--data` string gets wrapped as a string and rejected.
-- **Split targeting into separate ad groups to compare:** community targeting vs interest targeting vs a creative-variation arm — one lever each.
-
-## Auth
-
-- The OAuth token is **~24h and auto-refreshes on the next request** (with `duration=permanent` you get a lasting refresh token). When it **401s**, re-auth is an **interactive browser OAuth login** (`auth login`) — there's no non-interactive `refresh` subcommand. The Developer-Portal app's redirect URI can be any placeholder HTTPS URL (you complete the flow in a browser once).
 ## No email-match audience product (no lookalike here)
 
 Reddit's custom audiences are **retargeting / device-id (MAID) based — there's no hashed-email upload**, so you can't seed a lookalike from your own user list the way Meta (Custom Audience → Lookalike) or Google (Customer Match) let you. Don't mistake the custom-audience endpoints for an email-match product — for lookalike/seed-audience experiments, use Meta or Google and skip Reddit. See `ad-experiments`.
 
-## Verification (server-side truth, not "the pixel is on the page")
+## Verification
 
-Reddit has no Meta-style pixel `stats` API, so verify at the edges:
+Use request proof, platform proof, and business proof:
 
-- Inspect the live beacon to `alb.reddit.com/rp.gif` in the browser network tab — confirm the `event` and that `value`/`currency`/`conversion_id`/`external_id` are populated (empty on a plain `PageVisit` is fine; empty on a purchase is the bug).
-- **Ground truth:** cross-check recorded conversions against your payment provider's actual succeeded-charge count. Real charges > 0 with Reddit conversions = 0 means tracking is broken, full stop.
-- **Timing:** a conversion count of 0 over a window that predates the tracking deploy is expected, not a bug — check the deploy date before debugging.
-- **Silent failure is the norm:** these integrations fail by sending nothing (an unset token early-returns, a click-id gate never matches organic traffic), not by throwing.
+1. Require a 2xx response. Do not treat it as platform proof.
+2. In **Events Manager → Event Testing**, create a test ID. Send one event and
+   check its Pixel ID, event name, conversion ID, match keys, and metadata.
+3. Call the server-side [Get Last Fired At](https://ads-api.reddit.com/docs/v3/api/get-last-fired-at)
+   endpoint with the same token:
+
+```text
+GET https://ads-api.reddit.com/api/v3/pixels/{pixel_id}/last_fired_at
+Authorization: Bearer <REDDIT_CAPI_TOKEN>
+```
+
+The response gives the latest ISO 8601 time for standard and custom events.
+Use [Get A Report](https://ads-api.reddit.com/docs/v3/api/get-a-report) for
+attributed counts. Reconcile purchases with the payment provider. Reddit is
+not the payment ledger.
 
 ## Common pitfalls
 
-- Grabbing an OAuth Developer Portal token instead of a Conversion Access Token — more setup, expires, unnecessary for server-to-server CAPI.
-- Sending a raw (unhashed) email in `user.email` — always SHA-256 hash it, trimmed and lowercased.
-- Mismatched casing between the client `conversionId` and server `conversion_id` — same key, different casing, don't typo one to match the other's casing.
-- Reconstructing timestamps instead of preserving the original click time where the platform's own cookie/click-id encodes it (check whether your click-id format embeds a timestamp before assuming "now" is correct).
-- Letting a CAPI call's failure or latency affect the critical path (payment webhook, checkout redirect) it's attached to — always fire-and-log, never fire-and-block, and if your runtime can tear down background work after a response is sent (common on serverless functions), `await` the call rather than firing it detached.
-- Assuming `rdt_cid` survives to checkout on its own — it only lands on the entry URL and Reddit's cookie doesn't store it; persist it first-party on landing or Reddit CAPI matches almost nothing.
-- Gating the CAPI call on `rdt_cid` — organic/direct purchases then never report; fire on hashed email and attach the click id only when present.
+- Using a Developer Portal OAuth token instead of a Conversion Access Token.
+- Sending a v2 top-level `events` array to the v3 endpoint.
+- Putting `event_id` or `conversion_id` at the wrong level.
+- Using `SignUp` or `SIGNUP` instead of `Sign Up` and `SIGN_UP`.
+- Reusing one conversion ID for several events.
+- Losing `rdt_cid` during a redirect or checkout handoff.
+- Sending different event types or channels from Pixel and CAPI.
+- Sending raw identity or logging request bodies.
+- Letting a Reddit timeout fail a payment webhook. Apply the hub retry policy.
 
----
+## Security
 
-## Security — the Pixel is the official first-party vendor script
-
-`https://www.redditstatic.com/ads/pixel.js` is Reddit's own first-party ad pixel — the standard, required loader for Reddit Ads conversion tracking, not arbitrary third-party code. Load it only from the official `redditstatic.com` origin over HTTPS. The Conversion Access Token stays server-side in an env var; never place it in the client snippet.
-
-## Hub conventions and official references
-
-Use the shared conversion-hub contract: map the canonical event to Reddit's
-`tracking_type`, reuse the payment transaction as `conversion_id`, and make an
-absent `REDDIT_PIXEL_ID` or `REDDIT_CAPI_TOKEN` a logged no-op. See
-`ad-conversion-hub` and `ad-experiments` for consent, hashing, seed sizing, and
-payment-provider reconciliation.
-
-Official references checked 2026-08-11:
-
-- [Reddit Conversions API](https://ads-api.reddit.com/docs/v3/)
-- [Reddit Ads pixel](https://business.reddithelp.com/s/article/Install-the-Reddit-Pixel)
+Keep `REDDIT_CAPI_TOKEN` in the deployment secret store. Never put it in a
+browser bundle, URL, log, screenshot, or pull request. Load the Pixel only from
+`https://www.redditstatic.com/ads/pixel.js` over HTTPS. Restrict raw identity
+access. Record consent. Delete temporary normalized values after dispatch.

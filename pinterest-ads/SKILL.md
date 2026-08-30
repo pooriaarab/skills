@@ -1,116 +1,240 @@
 ---
 name: pinterest-ads
-description: "Wire Pinterest Ads conversion tracking for a web app — Pinterest Tag, Pinterest Conversions API, conversion access tokens, event_id deduplication, customer-list and actalike audiences, and server-side verification. Use when setting up Pinterest Tag, shopping or conversion campaigns, retargeting, audience uploads, or a small Pinterest test."
+description: "Set up Pinterest Business advertising and conversion tracking for a web app — create an advertiser account in a supported market, generate a Pinterest Tag and conversion token, map the shared conversion hub to Pinterest Tag and Conversions API events, persist the epik click identifier, deduplicate browser and server events with event_id, and verify delivery in Test events, Conversions Health, and the API response. Use when wiring Pinterest Tag, Pinterest Conversions API, checkout or signup tracking, catalog campaigns, or Pinterest attribution debugging."
 ---
 
 # Pinterest Ads
 
-This skill follows the shared conversion-hub contract. Map the canonical event
-to the platform event, send it after the payment provider confirms the charge,
-and make an absent `PINTEREST_ADS_TOKEN` a logged no-op.
+Pinterest has a public, self-serve Conversions API. A Pinterest Business
+account and an advertiser account are the real gates. The CAPI conversion token
+does not need a Pinterest app or app ID. [Conversions API overview](https://help.pinterest.com/en/business/article/the-pinterest-api-for-conversions)
 
-## The three-layer conversion model
+Use this skill with `ad-conversion-hub`. The hub owns event timing, consent,
+normalization, hashing, retries, durable dispatch, and failure isolation. This
+skill owns Pinterest names, fields, endpoints, and account settings.
 
-1. **Pinterest Tag.** Load the base tag on every page and event code on conversion pages. It supports conversion reporting and site audiences. [Official tag guide](https://developers.pinterest.com/docs/track-conversions/pinterest-tag/).
-2. **Conversions API.** Send the same canonical event from the server after the payment provider confirms it. Pinterest accepts a conversion access token or an OAuth token. [Official API guide](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/).
-3. **Ads Manager attribution.** Pinterest matches events to ad interactions and reports conversions. Use the same `event_id` and `event_name` in both ingestion paths to prevent duplicate counting. [Official deduplication guidance](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/).
+## Account and API access
 
-## Client tag or app attribution
+1. Create a free Pinterest Business account from a desktop device, or convert
+   a personal account. The email must not already belong to another Pinterest
+   account when creating a new one. [Create a Business account](https://help.pinterest.com/en/business/article/get-a-business-account)
+2. In Business Manager, open **Ad accounts**, select **Create ad account**,
+   choose the country, and assign people. Pinterest does not allow a later
+   currency change. [Create an advertiser account](https://help.pinterest.com/en/business/article/create-an-advertiser-account)
+3. Check that the advertiser country is supported. Pinterest blocks direct ad
+   setup in other markets. Some markets use an advertising partner such as
+   Aleph, Mediadonuts, or DMS. [Ads availability](https://help.pinterest.com/en/business/article/promoted-pins-overview)
+   Campaign API use also needs Business Access, the Advertising Services
+   Agreement, a business profile, and billing. [Ads API prerequisites](https://developers.pinterest.com/docs/work-with-ads/ads-overview/)
+4. For CAPI only, open **Ads Manager → Ad Account Overview → Conversions →
+   Conversions API → Set up API**, choose **Conversion access token**, and
+   generate a token. Copy the token and advertiser ID immediately. [Generate a conversion token](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/)
+5. Use `PINTEREST_TAG_ID` in the browser, `PINTEREST_AD_ACCOUNT_ID` in the
+   server endpoint, and `PINTEREST_CAPI_TOKEN` in the server secret store.
+6. If the integration also uses campaigns, audiences, or other Pinterest API
+   endpoints, use an OAuth token with at least `ads:write` and an advertiser ID.
+   Register an app, accept the Developer Terms, and request trial access first.
+   A conversion token is not general Pinterest API access. [App access](https://developers.pinterest.com/docs/getting-started/connect-app/) and [CAPI prerequisites](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/)
+
+## Pinterest Tag
+
+Load the base code once in the document `<head>` on every page. Run it before
+any event code. Use the generated code from Conversion Tag Manager with the ID
+in `PINTEREST_TAG_ID`; do not create one tag per page. [Install the base code](https://help.pinterest.com/en/business/article/install-the-base-code)
 
 ```html
 <script>
-  /* Use the account-specific tag code generated by Pinterest. */
+  !(function (e) {
+    if (!window.pintrk) {
+      window.pintrk = function () {
+        window.pintrk.queue.push(Array.prototype.slice.call(arguments));
+      };
+      var n = window.pintrk;
+      n.queue = [];
+      n.version = '3.0';
+      var t = document.createElement('script');
+      t.async = true;
+      t.src = e;
+      var r = document.getElementsByTagName('script')[0];
+      r.parentNode.insertBefore(t, r);
+    }
+  })('https://s.pinimg.com/ct/core.js');
   pintrk('load', '<PINTEREST_TAG_ID>');
   pintrk('page');
-  pintrk('track', 'checkout', {event_id: '<shared-event-id>', value: 25, currency: 'USD'});
 </script>
 ```
 
-The official sample uses `https://s.pinimg.com/ct/core.js`, `pintrk('load', tagId)`, and `pintrk('page')`. [Source](https://developers.pinterest.com/docs/track-conversions/pinterest-tag/). Confirm event parameter casing for each event in the current table.
+Fire the event code only after the user action. A conversion event placed in a
+confirmation page fires again on every reload. For a purchase, send the same
+hub `event_id` in the Tag event object:
 
-## Server-side conversion API
-
-The official Conversions API reference describes the v5 send-conversions operation and its `event_id`, `event_name`, `user_data`, and event payload. Use the endpoint shown by the current API reference for the advertiser account:
-
-> ⚠ UNVERIFIED — confirm the current full POST path and outer JSON envelope at [Pinterest Send conversions](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/).
-
-The documented user-data fields include hashed `em`, `external_id`, and click or device identifiers. Hash email after trim and lowercase. Use `is_test` when the endpoint supports it, then confirm the event in Conversions Health. [Rate-limit and test note](https://developers.pinterest.com/docs/reference/rate-limits/).
-
-## Get a token and validate it
-
-For a conversion-only integration:
-
-1. Open [Pinterest Ads Manager](https://ads.pinterest.com).
-2. Select **Ad Account Overview → Conversions → Conversions API → Set up API**.
-3. Select **Conversion access token → Generate new token**.
-4. Store the token as `PINTEREST_CAPI_TOKEN` and the displayed advertiser ID as `PINTEREST_AD_ACCOUNT_ID`. [Official click path](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/).
-
-For campaigns and audiences, register an app and use OAuth with the required `ads:read` or `ads:write` scopes. [Official OAuth guide](https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/).
-
-Token validation:
-
-```bash
-curl -sS 'https://api.pinterest.com/v5/user_account' \
-  -H "Authorization: Bearer $PINTEREST_CAPI_TOKEN"
+```js
+pintrk('track', 'checkout', {
+  event_id: '<shared-event-id>',
+  value: 25.00,
+  currency: 'USD',
+  order_id: '<order-id>',
+  order_quantity: 1,
+});
 ```
 
-Pinterest documents this read endpoint and bearer header. A 401 means the token is missing or invalid. [Source](https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/).
+Pinterest documents `eventID`, `event_id`, and `eid` as accepted, case-sensitive
+Tag fields. Use `event_id` in this adapter. [Tag event data](https://help.pinterest.com/en/business/article/add-event-codes)
 
-## Audience, retargeting, and lookalike expansion
+Call `pintrk('setconsent', true)` only after the hub grants measurement consent.
+Call it with `false` when consent is denied. `false` stops events and deletes
+Pinterest first-party session storage. [Tag consent](https://help.pinterest.com/en/business/article/install-the-base-code)
 
-Pinterest supports site-visitor audiences from Pinterest Tag and customer lists. Its audience API uses a rule with a visitor source and ingestion source, including `tag`, `file_upload`, and `conversions_api`. [Official audience API](https://developers.pinterest.com/docs/work-with-targets-and-audiences/create-audiences/).
+The Tag can send enhanced match data. Pinterest hashes an unhashed email before
+transmission. The hub still requires consent before identity collection. Use
+the hub's lowercased, trimmed SHA-256 values. [Enhanced match](https://developers.pinterest.com/docs/track-conversions/pinterest-tag/)
 
-For a customer list, use the documented customer-list fields and hash email with SHA-256 after trim and lowercase. Pinterest also documents actalike audiences, but eligibility and minimum size are product and account rules:
+## Conversions API
 
-> ⚠ UNVERIFIED — confirm the current customer-list minimum, match-rate floor, and actalike eligibility in [Pinterest audience targeting](https://developers.pinterest.com/docs/work-with-targets-and-audiences/set-up-targets-for-your-ads/).
+Send a server event after the payment provider confirms the charge. Do not wait
+for a click ID. Pinterest can match with hashed identity or client data.
 
-Do not treat an upload request ID as proof that the audience can serve. Check its Ads Manager status.
+```http
+POST https://api.pinterest.com/v5/ad_accounts/<PINTEREST_AD_ACCOUNT_ID>/events
+Authorization: Bearer <PINTEREST_CAPI_TOKEN>
+Content-Type: application/json
+```
 
-## Deduplication and event rules
+The body has a `data` array. Each event requires `action_source`, `event_id`,
+`event_name`, and `event_time`. Use `web` for website events. `event_time` is
+Unix seconds. `user_data` must contain `em`, `hashed_maids`, or the pair
+`client_ip_address` and `client_user_agent`. [Send conversion events](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/)
 
-- Use the same stable transaction ID for the client and server event.
-- Do not require a click ID before sending a paid conversion. Organic and direct purchases still matter.
-- Attach the platform click ID only when it is present. Persist it in first-party storage when the platform does not keep it.
-- Hash email with SHA-256 after trimming and lowercasing. Never send raw email or phone data.
-- Make the event name and timestamp match the platform's current schema.
+```json
+{
+  "data": [
+    {
+      "action_source": "web",
+      "event_name": "checkout",
+      "event_time": 1769818901,
+      "event_id": "<shared-event-id>",
+      "event_source_url": "https://example.com/checkout/complete",
+      "opt_out": false,
+      "user_data": {
+        "em": ["<sha256-email>"],
+        "external_id": "<sha256-user-id>",
+        "click_id": "<epik-cookie-value>",
+        "client_ip_address": "<client-ip>",
+        "client_user_agent": "<client-user-agent>"
+      },
+      "custom_data": {
+        "value": "25.00",
+        "currency": "USD",
+        "order_id": "<order-id>",
+        "num_items": 1
+      }
+    }
+  ]
+}
+```
 
-## Small-budget campaign launch
+`em`, `external_id`, and `ph` are SHA-256 values. Normalize email to lowercase
+before hashing. Normalize phone to digits with country code, area code, and
+number. Remove symbols, letters, spaces, and leading zeros. Follow the hub's
+identity rules and consent gate. [User data formatting](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/)
 
-- Pinterest Ads are available only in select countries and require business access, an ad account, billing, and the advertising agreement. [Official ads overview](https://developers.pinterest.com/docs/work-with-ads/ads-overview/).
-- Use one conversion objective, one narrow audience, and one creative hypothesis for a small test.
-- Validate `value`, `currency`, `order_id`, and `event_id` before activating a shopping or conversion campaign.
-- Avoid duplicate events from Tag and API. Pinterest requires identical `event_id` and `event_name` values for duplicate suppression.
-- ⚠ UNVERIFIED — confirm current default placements, bid minimums, and learning requirements in Ads Manager before spend.
+For purchases, Pinterest calls the standard event `checkout`. Its `order_id`
+is recommended for CAPI and required for Tag conversion analysis reporting.
+Send the pre-tax, pre-shipping value and the ISO-4217 currency. Pinterest
+accepts `value` as a string and parses it as a number. [CAPI parameter reference](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/) and [Tag event data](https://help.pinterest.com/en/business/article/add-event-codes)
+
+The response can contain mixed results. Check `num_events_processed` and each
+event's `status`; do not treat an HTTP 200 response as proof that every event
+was processed. [CAPI response example](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/)
+
+## Hub event mapping
+
+Use the same canonical `event_id` in both browser and server events. The API
+uses snake case names. The Tag uses the corresponding event names shown below;
+Pinterest's code examples also show their lowercase forms.
+
+| Hub event | CAPI `event_name` | Tag event | Notes |
+| --- | --- | --- | --- |
+| `page_view` | `page_visit` | `PageVisit` / `pagevisit` | Send on route or page load. |
+| `view_content` | `view_content` | `ViewContent` / `viewcontent` | Send on a meaningful product or plan view. |
+| `lead` | `lead` | `Lead` / `lead` | Send after a qualified form submit. |
+| `signup` | `signup` | `SignUp` / `signup` | Send after account creation. |
+| `begin_checkout` | `initiate_checkout` | `InitiateCheckout` / `initiatecheckout` | Send when checkout starts. |
+| `purchase` | `checkout` | `Checkout` / `checkout` | Send after a confirmed charge. |
+| `subscription_start` | `subscribe` | `Subscribe` / `subscribe` | Closest standard event. Confirm campaign semantics. |
+| `refund` | custom `refund` | custom `refund` | No standard refund event. Map the custom event to a standard event only if reporting needs it. |
+
+These names and purposes come from Pinterest's conversion event table. Custom
+events support audience creation, but need a standard-event mapping for
+conversion reporting. [Conversion event types](https://developers.pinterest.com/docs/track-conversions/understand-conversions-and-how-to-track-them/)
+
+## Deduplication
+
+Pinterest deduplicates redundant Tag and API events with matching `event_id`
+and `event_name`. The Tag's `eventID` value must equal the API's `event_id`
+value. Pinterest keeps the first event and removes duplicates within 48 hours.
+Use the payment transaction ID for a purchase when possible. [Deduplication and event IDs](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/)
+
+Do not reuse a purchase ID for a refund or another event. Do not send a new
+random ID when retrying a request. Let the hub retry policy and durable dispatch
+record control retries.
+
+## Click ID and attribution
+
+Pinterest adds `epik` to the landing URL. The Tag caches it in first-party
+`_epik`. Send that cookie as `user_data.click_id`; Pinterest prefers it when a
+redirect removes the URL value. [CAPI click ID](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/) and [Pinterest cookies](https://help.pinterest.com/en/business/article/pinterest-tag-parameters-and-cookies)
+
+Tag cookies persist for one year from installation, but users can delete them.
+`epik`'s separate expiry is UNVERIFIED; Pinterest does not publish one. The
+default reporting window is one-day view and 30-day click. [Cookie behavior](https://help.pinterest.com/en/business/article/pinterest-tag-parameters-and-cookies) and [Conversion windows](https://help.pinterest.com/en/business/article/conversion-insights)
+
+Capture `epik` on first landing. Store first-touch and most-recent values in
+first-party storage under the hub's retention policy. Also pass the browser's
+`_epik` cookie to the server at conversion time. Never make the click ID a
+condition for sending a purchase; organic and direct purchases still need
+measurement.
+
+## Tracking quirks that bite
+
+- Each advertiser account needs its own Tag. The base code runs once before
+  event code. A page-load event fires again on every reload. [Tag setup](https://help.pinterest.com/en/business/article/create-an-advertiser-account)
+- Tag reporting exposes `value` and `order_quantity`. CAPI accepts richer data,
+  but purchase `order_id`, value, and currency must be correct. [Tag event data](https://help.pinterest.com/en/business/article/add-event-codes)
+- Send CAPI events within one hour. Production batches allow 1,000 events.
+  Test batches process only the first 20. [CAPI best practices](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/)
+- Use `web` for browser events. Other sources are `app_android`, `app_ios`, and
+  `offline`. Automatic enhanced match is an Ads Manager setting that can hash
+  form fields in certain regions. Align it with consent. [Action sources and match](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/)
+- Conversion Insights can take days to build. Its selected windows can differ
+  from Ads reporting and analytics. [Conversion Insights](https://help.pinterest.com/en/business/article/conversion-insights)
 
 ## Verification
 
-Use the Conversions Health page in Ads Manager. For API testing, set `is_test` when supported and inspect the response. Then compare Pinterest-reported conversions with the payment provider's succeeded charges. [Official conversion guide](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/).
-
-Check that the tag fires once, the server event has the same `event_id`, consent permits collection, and the advertiser ID matches the token. A zero count before deployment is expected; a real payment with no event is a tracking failure.
-
-## Hub conventions
-
-Pair this skill with `ad-conversion-hub` for canonical event taxonomy, consent,
-hashing, secret names, and multi-platform dispatch. Pair it with
-`ad-experiments` for one-audience tests, seed sizing, PII-export authorization,
-and payment-provider truth. Keep platform adapters thin. A missing secret must
-skip only that adapter and must not fail checkout.
+1. Send a test request to the same endpoint with `?test=true`. Test data goes
+   to a sandbox and does not affect reporting or optimization.
+2. Open **Ads Manager → Campaign manager → Conversions → Test events**. Confirm
+   the event appears there. [CAPI test events](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/)
+3. For production, require each response event to be `processed`. Then inspect
+   Conversions Health and the deduplication view. [Conversions Health](https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/)
+4. Confirm Tag `verified` status and Tag Event History. This can take up to
+   three hours. Reconcile processed `checkout` events with succeeded charges. [Tag verification](https://developers.pinterest.com/docs/track-conversions/pinterest-tag/)
 
 ## Common pitfalls
 
-- A browser tag can load while the server event is absent.
-- A successful API response does not prove attribution or audience eligibility.
-- A conversion report can be zero before the tracking deploy or when no ad interaction exists.
-- Build-time environment variables need a redeploy after a secret changes.
-- Read the account's status and error surfaces. Do not infer delivery from an object-create response.
+- Use `PINTEREST_CAPI_TOKEN`, not a browser-visible token or `PINTEREST_ADS_TOKEN`.
+- Put the advertiser ID in the URL path. Use `checkout` for a completed
+  purchase; use `initiate_checkout` only when checkout starts.
+- Include dynamic `order_id`, `value`, and `currency`. Do not use zero,
+  negative, static, or pre-tax-incorrect values.
+- Do not use `epik` as the send gate. Do not replace `_epik` with a new ID.
+- Do not send raw email or phone values in CAPI or Tag image requests. Check
+  each event status in a mixed response. Match reporting windows before comparing
+  Pinterest with last-click analytics.
 
 ## Security
 
-Load client code only from the vendor's official HTTPS origin. Keep `PINTEREST_ADS_TOKEN` in a server-side secret store. Never log or commit it. Send only hashed first-party identifiers when the platform's policy and user consent permit them.
-
-## Official sources checked (2026-08-11)
-
-- https://developers.pinterest.com/docs/track-conversions/pinterest-tag/
-- https://developers.pinterest.com/docs/track-conversions/track-conversions-in-the-api/
-- https://developers.pinterest.com/docs/work-with-targets-and-audiences/create-audiences/
-- https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/
+Keep `PINTEREST_CAPI_TOKEN` in the server secret store. Never put it in client
+JavaScript, URLs, logs, screenshots, or commits. Use HTTPS and the hub consent
+gate. Keep raw identity data server-side. Load `https://s.pinimg.com/ct/core.js`
+only as the official Pinterest Tag script.
