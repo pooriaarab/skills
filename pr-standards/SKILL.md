@@ -19,7 +19,7 @@ need the exact boundary; this skill is what to do.
 Open the issue first. No issue, no branch. The issue number is the join key that ties the
 branch, the title, the body and the merged commit to one agreed piece of work.
 
-```
+```text
 branch:  <prefix>-<issue>-<slug>     cr-142-fix-onboarding-drop-off
 title:   [CR-142] Fix onboarding drop-off
 ```
@@ -38,7 +38,8 @@ pr-standards precheck --branch <name>     # offline, for a hook
 
 ## The body
 
-Four things, all required.
+Five things, all required. The checker enforces the first four; the review
+council reads the fifth.
 
 ```markdown
 Closes #142
@@ -101,8 +102,10 @@ A successful upload returns JSON holding the `user-attachments` URL. Images embe
 `![alt](url)`; a video goes on its own line as a bare URL. Supported: `image/png`,
 `image/jpeg`, `image/gif`, `image/webp`, `video/mp4`.
 
-- `$GITHUB_ATTACHMENTS_TOKEN` unset → skip the upload and say so in the body. Do not commit
-  the file instead.
+- `$GITHUB_ATTACHMENTS_TOKEN` unset → you cannot upload, but the requirement stands. Say so
+  in the body and ask a maintainer to attach the capture by dragging it into the body in the
+  GitHub UI. Never commit the file instead, and never treat the missing token as a
+  `Proof: n/a` reason — the change is still visible.
 - A browser recording is usually WebM, which GitHub will not take:
   `ffmpeg -i in.webm -c:v libx264 -pix_fmt yuv420p out.mp4`
 - Capture with `agent-browser` or the Chrome DevTools MCP. For store-ready framed shots, see
@@ -110,7 +113,7 @@ A successful upload returns JSON holding the `user-attachments` URL. Images embe
 
 When the change genuinely cannot be shown, write the reason:
 
-```
+```text
 Proof: n/a — pure type-level refactor, no runtime path and no visible surface
 ```
 
@@ -165,13 +168,23 @@ permanently.
 ## Rolling it out
 
 ```bash
-pr-standards rollout --repo pooriaarab/<name> --dry-run   # see what it writes
-pr-standards rollout --repo pooriaarab/<name>             # config + workflow
+pr-standards-rollout --repo <name>                            # dry run, the default
+pr-standards-rollout --repo <name> --apply                    # opens the adoption PR
+pr-standards-rollout --repo <name> --apply --with-post-merge-verify   # also the deploy check
 ```
 
-It writes `.github/pr-standards.json` and `.github/workflows/pr-standards.yml`, never
-overwrites an existing config, and derives the prefix from the repo name unless you pass
-`--prefix`. Land it as its own PR, which then has to satisfy the standard it installs.
+One rollout writes four artifacts, and a repo missing any of them has not adopted the
+standard:
+
+| File | What it carries |
+|---|---|
+| `.github/pr-standards.json` | the repo's prefix and its caps |
+| `.github/pull_request_template.md` | the body every PR starts from |
+| `.github/workflows/pr-standards.yml` | the CI check, which is the authority |
+| `AGENTS.md` | the rule itself, between markers, for every agent CLI |
+
+It reads the prefix from `repo-prefixes.json`, never overwrites an existing config, and
+opens the adoption PR itself — which then has to satisfy the standard it installs.
 
 Set `requireProof: false` in a repo where no change is ever visible, rather than teaching the
 fleet that `Proof: n/a` is routine.
