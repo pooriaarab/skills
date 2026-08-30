@@ -1,13 +1,18 @@
 ---
 name: self-hosted-runner-fleet
-description: "Turn a spare always-on machine into GitHub Actions runners for your private repositories, one runner service per repository. Use when asked to cut Actions minutes or queue time, add a machine to a runner fleet, decide which jobs are safe to move off hosted runners, or debug a self-hosted runner whose jobs die, queue forever, or report offline while busy. Covers Linux hosts and Windows hosts running the runner inside WSL2."
+description: "Run GitHub Actions on your own machine, and know when not to. Use when asked to cut Actions minutes or queue time, add a machine to a runner fleet, decide which jobs are safe to move off hosted runners, choose between self-hosted and a managed ephemeral runner, or debug a self-hosted runner whose jobs die, queue forever, or report offline while busy. Covers Linux hosts and Windows hosts running the runner inside WSL2, and the operational costs that decide whether it is worth it."
 ---
 
 # Self-hosted runner fleet
 
-A spare desktop is usually faster than a hosted runner and costs nothing per minute. The
-work is not installing the runner — that takes a minute. The work is knowing which jobs
-may move, and which host details silently kill jobs.
+A spare desktop is faster per job than a hosted runner and costs nothing per minute. The
+work is not installing the runner — that takes a minute. The work is knowing which jobs may
+move, which host details silently kill jobs, and whether you want to own a machine at all.
+
+Read the last section first if you are deciding rather than debugging: the fleet this skill
+documents was built across fifteen repositories and then **retired within days** in favour
+of managed ephemeral runners. Everything here still applies to a host you choose to run;
+none of it argues that you should.
 
 Keep host specifics (address, SSH key, account names, service paths) in a private host
 overlay, not in this skill and not in a public repo.
@@ -248,6 +253,39 @@ Two more notes worth carrying:
 If the tool still fails after all of that, replicate each of its steps by hand on the host.
 When every individual step passes and the tool still fails, the bug is in the tool, not in
 your host — file it upstream with that evidence instead of rebuilding your machine around it.
+
+## Before you build one: what it costs to own the machine
+
+This skill came out of a real fleet — fifteen private repositories, one Windows desktop,
+runners in WSL2 — that was **retired within days** for managed ephemeral runners
+(Ubicloud). Not because the idea was wrong, but because of what a single owned machine
+actually costs once it is load-bearing.
+
+**What it delivered.** Per job, the box beat the hosted runner: no queue wait, warm caches,
+zero minutes billed. On an idle host, jobs finished in roughly the same wall clock as a
+managed runner and sometimes faster.
+
+**What it cost.**
+
+| Cost | What it looked like |
+| --- | --- |
+| Fixed concurrency | One runner service runs one job at a time. A busy day meant ~30-minute queues while a managed runner would have started every job at once. |
+| A ceiling you cannot script past | A `services:` container on a fixed host port cannot run twice on one machine, so sharded test jobs serialize. |
+| Image drift, forever | Every hosted-image tool the host lacks is a red job that reproduces nowhere else. Docker, Rust, `xdg-utils`, `gh`, `jq`, a current Node — each found the hard way. |
+| Outages that look like nothing | Three separate outages in one day, all reading identically on GitHub as "runner offline". Nothing alerts by default. |
+| Invisible failure once a second tier exists | When managed runners absorbed the load, CI stayed green through every outage. The fleet was down for hours and nobody noticed. |
+
+**The decision rule.** Self-hosted wins when you need something the managed tier cannot
+sell you: a GPU, a specific OS or kernel, hardware attached to the machine, a licence tied
+to a host, data that may not leave your network, or genuinely enormous monthly minutes.
+Speed alone is not on that list — per-job speed was a wash, and per-job isolation is worth
+more than warm caches on anything with parallelism.
+
+**If you own one anyway, own it properly.** Two tiers is the stable arrangement: managed
+ephemeral runners carry the fleet, the owned host takes work that needs it. Then a health
+check that **exits nonzero** when the host is unreachable or a runner is offline is not
+optional — a second tier hides the first tier's outages completely, which is exactly how a
+fleet stays broken for a day.
 
 ## Verify, then move on
 
