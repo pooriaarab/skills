@@ -204,3 +204,11 @@ the browser, but it cannot decide what the server bills.
 10. Separate test and live keys, endpoints, secrets, Price IDs, and D1 data.
 11. Enable Stripe Tax only after checking registrations, tax codes, and filing responsibility.
 12. Resolve every billable Price server-side from the environment-specific catalog.
+
+## Related
+
+- `pricing-page` — what to charge and how to present it. This skill collects the
+  money; that one decides the number.
+- `regional-pricing-stripe` — when the price varies by market.
+- `lifecycle-email` — carries the dunning mail this skill depends on.
+- `unit-economics` — whether the revenue this collects covers what acquisition cost.
