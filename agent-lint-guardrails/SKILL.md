@@ -105,3 +105,7 @@ Lint budgets are one layer. The complete stack for high-quality agent-authored c
    `ci-cost-at-agent-scale` skill) before the bill surprises you.
 
 Roll each out the same way: warn/advisory first across the fleet, then ratchet to blocking per repo.
+
+## Related
+
+- [pr-standards](../pr-standards/SKILL.md) — the pull-request rule these budgets keep a PR inside: one issue, one concern, under 500 lines, with proof of the work.
