@@ -86,9 +86,9 @@ taxonomy for first-party measurement, then map it to local evidence:
 | `lead` | No documented Shopee Ads event | Store the lead in your system. |
 | `signup` | No documented Shopee Ads event | Store the signup in your system. |
 | `begin_checkout` | No documented Shopee Ads event | Store the checkout in your system. |
-| `purchase` | Shopee order and product metrics | Use payment-provider truth for your event. Compare it with Seller Centre metrics. |
+| `purchase` | Shopee order and product metrics | Shopee processes the checkout and payment for an on-platform order, so use Seller Centre's confirmed order and settlement data as your event truth. Compare it with your own order records. |
 | `subscription_start` | No documented Shopee Ads event | Store subscription truth in your system. |
-| `refund` | No documented Shopee Ads event | Reconcile against payment-provider truth. |
+| `refund` | No documented Shopee Ads event | Reconcile against Seller Centre's confirmed order and settlement data. |
 
 Shopee's standard click attribution in the Philippines help page covers orders
 within seven days of an ad click. Its GMV Max view attribution covers orders
@@ -212,11 +212,13 @@ Use two separate proofs:
    those navigation paths. See [Monitoring Ads
    Performance](https://ads.shopee.ph/learn/faq/58/29).
 
-Reconcile orders, sales, and refunds with payment-provider truth. Do not treat
-Shopee's `Placed` numbers as settled revenue. Shopee defines placed sales as
-the order value at checkout, including paid and unpaid orders. It defines
-confirmed sales separately. See [Placed and Confirmed
-metrics](https://ads.shopee.ph/learn/faq/58/29).
+Shopee processes checkout and payment for on-platform orders, so there is no
+separate external payment provider to reconcile against for those sales.
+Reconcile orders, sales, and refunds against Shopee's `Confirmed` order and
+settlement data instead. Do not treat Shopee's `Placed` numbers as settled
+revenue. Shopee defines placed sales as the order value at checkout,
+including paid and unpaid orders. It defines confirmed sales separately. See
+[Placed and Confirmed metrics](https://ads.shopee.ph/learn/faq/58/29).
 
 For the Philippines page checked, the dashboard can export data for up to the
 last 90 days. Keep a dated export with the campaign ID, market, time zone, and
