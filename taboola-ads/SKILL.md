@@ -90,6 +90,7 @@ scheme. They are local choices, not Taboola-reserved event names.
 | `purchase` | `purchase` | Payment provider confirms the charge |
 | `subscription_start` | `subscription_start` | Paid subscription activates |
 | `refund` | No default dispatch | Reconcile in payment truth |
+
 Taboola allows a unique descriptive Event Name, and the name sent by S2S must
 match that field exactly. The Conversion Name is only descriptive.
 See [manual S2S rule setup](https://developers.taboola.com/pixel/docs/s2s-manual-integration).
