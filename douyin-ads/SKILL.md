@@ -112,8 +112,12 @@ and [response model](https://raw.githubusercontent.com/oceanengine/ad_open_sdk_j
 An HTTP `200` proves the request reached Ocean Engine. It does not prove the
 signal was accepted — read the response body's `code` on every call and treat
 a non-success `code` as a failed dispatch under the hub's retry policy, the
-same way the response's HTTP status alone would be insufficient. Record the
-redacted `code`, `message`, and `request_id` in the dispatch log.
+same way the response's HTTP status alone would be insufficient. The reviewed
+sources do not publish the exact success value for `code`; confirm it against
+the current [response model](https://raw.githubusercontent.com/oceanengine/ad_open_sdk_java/main/src/main/java/com/bytedance/ads/model/AdConvertSignalV2Response.java)
+or a live response before implementing the success/failure check, and fail
+closed (treat the dispatch as failed) if `code` is absent or unrecognized.
+Record the redacted `code`, `message`, and `request_id` in the dispatch log.
 
 The request model exposes these fields, among others:
 
@@ -121,14 +125,15 @@ The request model exposes these fields, among others:
 {
   "account_ids": [1234567890],
   "event_name": "purchase",
-  "event_time": "<epoch-seconds>",
+  "event_time": 1767225600,
   "user_unique_id": "<advertiser-user-id>",
   "params": "<single-level-event-properties-as-json>"
 }
 ```
 
 The public model describes `event_time` as a seconds timestamp and `params` as a
-single-level JSON map serialized as a string. See the [request model](https://raw.githubusercontent.com/oceanengine/ad_open_sdk_java/main/src/main/java/com/bytedance/ads/model/AdConvertSignalV2Request.java).
+single-level JSON map serialized as a string. Send `event_time` as the numeric
+epoch-seconds value shown above, not a quoted string. See the [request model](https://raw.githubusercontent.com/oceanengine/ad_open_sdk_java/main/src/main/java/com/bytedance/ads/model/AdConvertSignalV2Request.java).
 
 The generated model marks every request property nullable. See the [generated
 request model](https://raw.githubusercontent.com/oceanengine/ad_open_sdk_java/main/src/main/java/com/bytedance/ads/model/AdConvertSignalV2Request.java).
