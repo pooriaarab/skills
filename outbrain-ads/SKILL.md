@@ -180,6 +180,11 @@ fields](https://www.outbrain.com/help/advertisers/server2server-integrations/).
 Keep one hub `event_id` across local browser and server records. Do not add an
 Outbrain deduplication field that the vendor does not document. See [ad-conversion-hub](../ad-conversion-hub/SKILL.md).
 
+Because Outbrain has no dedup field, send each conversion event through exactly
+one path — the browser pixel event-based rule or the server-to-server
+postback, not both — or Outbrain double-counts it with no way to reconcile the
+duplicate.
+
 ## Amplify settings that override code
 
 The conversion rule controls its category, name, URL or event condition,
