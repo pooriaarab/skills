@@ -1,6 +1,6 @@
 ---
 name: hotstar-ads
-description: "Platform-specific integration guidance for JioHotstar Ads."
+description: "Integrate JioHotstar Ads self-serve account setup, the JioHotstar Pixel, and approved MMP postback partners (Singular, Adjust, AppsFlyer), with explicit boundaries where no public Conversions API is documented. Use when evaluating JioHotstar Ads, launching a CTV or app campaign, or deciding whether a production integration exists."
 ---
 
 # JioHotstar Ads

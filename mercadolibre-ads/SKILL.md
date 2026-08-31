@@ -1,6 +1,6 @@
 ---
 name: mercadolibre-ads
-description: "Integrate Mercado Libre Ads advertiser lookup, campaign reporting, and activation through the official OAuth API. Product Ads supports seller-side activation; Display Ads uses Commercial Advisor access. Mercado Libre does not document a public browser tag, conversions API, or campaign-mutation endpoints in the official Ads documentation checked."
+description: "Integrate Mercado Libre Ads advertiser lookup and campaign reporting through the official OAuth API. Product Ads activation is seller-side (My profile → Advertising), not an API call; Display Ads uses Commercial Advisor access. Mercado Libre does not document a public browser tag, conversions API, or campaign-mutation endpoints in the official Ads documentation checked."
 ---
 
 # Mercado Libre Ads
