@@ -18,7 +18,6 @@ envelope, consent gate, identity rules, retry policy, and adapter contract.
 
 Create an Amplify account at [my.outbrain.com](https://my.outbrain.com/).
 Outbrain’s current advertiser guide presents this as the account entry point.
-See [Amplify account setup](https://www.outbrain.com/help/advertisers/how-to-connect-to-our-model-context-protocol-mcp-server/).
 
 The Amplify API is a separate access path. Outbrain’s advertiser guide says
 that API access is available to selected partners by request. Apply through

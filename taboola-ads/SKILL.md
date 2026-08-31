@@ -95,7 +95,6 @@ See [S2S fields](https://developers.taboola.com/pixel/docs/bulk-submit-s2s-conve
 
 Taboola's documented direct server surface is manual S2S tracking, not a named
 Conversions API. It supports one conversion per postback URL or batches through a bulk endpoint.
-It supports one conversion per postback URL or batches through a bulk endpoint.
 See [manual S2S integration](https://developers.taboola.com/pixel/docs/s2s-manual-integration).
 For one event, send a request to the documented postback URL. The required
 parameters are the case-sensitive Taboola Click ID and exact Event Name.
