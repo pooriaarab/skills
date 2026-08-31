@@ -63,7 +63,7 @@ Use the exact tag copied from Samsung DSP. The public example is:
 The example comes from Samsung's Standard Segment guide. Do not replace the
 segment path or hand-edit generated identifiers. [Standard Segment](https://help.dsp.samsungads.com/v1/docs/standard-segment)
 
-Place the tag between <body> and </body>, near the end of the page. For a
+Place the tag between `<body>` and `</body>`, near the end of the page. For a
 button action, Samsung recommends the destination page. A same-tab redirect
 can race the tag request and is not guaranteed to complete. See [Standard Segment](https://help.dsp.samsungads.com/v1/docs/standard-segment).
 
@@ -150,10 +150,10 @@ The documented conversion routes are:
    Samsung documents data-provider matching and currently names Circana as the
    available provider in that guide. See [Offline Segment](https://help.dsp.samsungads.com/docs/offline-segment).
 
-Samsung documents __TXN_ID__ for server-side conversion tracking. Pass it
+Samsung documents `__TXN_ID__` for server-side conversion tracking. Pass it
 through a click tracker to the destination, associate it with a transaction,
 and call a conversion tag. This is not a public server-to-server endpoint.
-__TXN_ID_INT__ cannot be used for conversion attribution. See [Samsung DSP macros](https://help.dsp.samsungads.com/v1/docs/macros).
+`__TXN_ID_INT__` cannot be used for conversion attribution. See [Samsung DSP macros](https://help.dsp.samsungads.com/v1/docs/macros).
 
 ## Identity and consent
 
@@ -183,7 +183,7 @@ Samsung does not document a Samsung-owned website click query parameter, a
 Samsung cookie name, or a cookie lifetime in the sources checked. Do not invent
 samsung_click_id, samsung_fat_id, or a retention window. [Segment Overview](https://help.dsp.samsungads.com/v1/docs/segments-pixels) [Samsung DSP macros](https://help.dsp.samsungads.com/v1/docs/macros)
 
-For creative click tracking, use the documented __TXN_ID__ macro when the
+For creative click tracking, use the documented `__TXN_ID__` macro when the
 campaign configuration provides a click tracker. Capture it on the destination
 server and associate it with the canonical event. Do not require it before
 recording a confirmed first-party conversion. See [Samsung DSP macros](https://help.dsp.samsungads.com/v1/docs/macros).
