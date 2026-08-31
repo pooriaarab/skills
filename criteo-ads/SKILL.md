@@ -1,6 +1,6 @@
 ---
 name: criteo-ads
-description: "Use when integrating Criteo Retail Media or Commerce Growth tracking, choosing OneTag versus Delivery API, wiring trackTransaction, configuring first-party IDs and consent, or verifying audience and attribution setup."
+description: "Use when integrating Criteo Retail Media or Commerce Growth tracking, choosing OneTag versus Delivery API, wiring trackTransaction, configuring first-party IDs and consent, or verifying attribution setup."
 ---
 
 # Criteo Ads
@@ -246,6 +246,6 @@ See [OneTag troubleshooting](https://help.criteo.com/kb/guide/en/how-to-troubles
 - [API parameters](https://developers.criteo.com/retailer-integration/docs/api-parameters-1) · [Authentication Tokens](https://developers.criteo.com/retailer-integration/docs/using-tokens)
 - [Integration overview](https://developers.criteo.com/retailer-integration/docs/overview) · [Create API Application](https://developers.criteo.com/retail-media/docs/create-your-app)
 - [Authorization Requests](https://developers.criteo.com/retail-media/docs/authorization-requests) · [Authentication](https://developers.criteo.com/retail-media/docs/authentication)
-- [About Audiences](https://help.criteo.com/kb/guide/en/about-audiences-0EJNOqUqYu/Steps/1842905) · [TCF](https://help.criteo.com/kb/guide/en/transparency-and-consent-framework-bbFLejr6XZ/Steps/1842462?fpc=1342.198.90.009e702c38c26b7c)
+- [TCF](https://help.criteo.com/kb/guide/en/transparency-and-consent-framework-bbFLejr6XZ/Steps/1842462?fpc=1342.198.90.009e702c38c26b7c)
 - [Beacon types](https://developers.criteo.com/retailer-integration/docs/beacon-types) · [BeaconSDK](https://developers.criteo.com/retailer-integration/docs/beacon-sdk)
 - [Sponsored Products checklist](https://developers.criteo.com/retailer-integration/docs/sponsored-products-1) · [OneTag troubleshooting](https://help.criteo.com/kb/guide/en/how-to-troubleshoot-criteo-onetag-errors-JA9r8CLYjC/Steps/1777861,1812351,1812350,1826966)
