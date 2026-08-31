@@ -1,6 +1,6 @@
 ---
 name: roku-ads
-description: "Platform-specific implementation guidance for Roku Ads Manager."
+description: "Set up Roku Ads Manager tracking — self-serve account and CAPI-key creation, JavaScript Pixel and server-side Conversions API, event-name mapping to the hub taxonomy, identity hashing and consent, deduplication, and verification against Ads Manager reporting. Use when integrating Roku Ads Manager, mapping hub events to Roku CAPI event names, or debugging missing Roku conversions."
 ---
 
 # Roku Ads
