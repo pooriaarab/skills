@@ -122,9 +122,14 @@ enhanced conversions. See [enhanced conversions setup](https://support.google.co
 
 For Google enhanced conversions, Google requires SHA-256 hashing for email,
 phone, first name, last name, and street address. It says not to hash country,
-state, city, or postal code. Normalize by trimming leading and trailing spaces
-and lowercasing before hashing. Gmail and Googlemail addresses have additional
-domain-specific rules. See [Google’s normalization and hashing rules](https://developers.google.com/google-ads/api/docs/conversions/upload-online?hl=en).
+state, city, or postal code. For email, name, and street address, normalize by
+trimming leading and trailing spaces and lowercasing before hashing. Gmail and
+Googlemail addresses have additional domain-specific rules. Phone numbers need
+their own normalization: strip all non-digit characters and format the number
+in E.164 (a leading `+`, then country code, then the number, no spaces,
+dashes, or parentheses) before hashing — trimming and lowercasing alone will
+not match Google's expected format. See [Google’s normalization and hashing
+rules](https://developers.google.com/google-ads/api/docs/conversions/upload-online?hl=en).
 
 Keep raw identifiers and Google Ads credentials in the server secret store. Hash
 only after the hub consent gate permits ad-user data. Never place credentials in
