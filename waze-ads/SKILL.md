@@ -1,107 +1,226 @@
 ---
 name: waze-ads
-description: "Set up Waze Ads tracking as a regional or CTV adapter — official token or partner access, client tag or app measurement, server conversion shape, audience limits, reporting verification, and explicit unverified boundaries. Use when evaluating Waze Ads, planning a regional campaign, or deciding whether a production integration exists."
+description: "Use Waze Ads through Google Ads Performance Max for store goals. Covers market limits, conversion measurement, API access, consent, and verification."
 ---
 
 # Waze Ads
 
-This is a breadth-first stub. It records the current official entry point and
-does not invent undocumented contracts. Product names, endpoints, access rules,
-and availability can vary by country and advertiser agreement.
+Waze Ads is not a separate API integration. The current buying route is Google
+Ads Performance Max for store goals. Waze announced that its old advertising
+system would move to Google Ads, and its current buying announcement sends
+advertisers to Google’s Performance Max guidance. See [Waze’s transition
+announcement](https://www.waze.com/discuss/t/waze-ads-update/305756) and [Waze’s
+buying announcement](https://www.waze.com/discuss/t/waze-ads-are-back-and-here-s-how-to-buy-them/398689).
 
-## Availability and official scope
+Use [ad-conversion-hub](../ad-conversion-hub/SKILL.md) for the canonical event
+envelope, consent gate, identity rules, retry policy, and adapter contract. Pair
+it with [ad-experiments](../ad-experiments/SKILL.md) for one-audience tests,
+seed sizing, and PII-export authorization.
 
-No public Waze Ads conversion API contract was verified. Confirm current Google or Waze managed-advertiser measurement options.
+## Account and access
 
-Official source: [Waze Ads documentation](https://www.waze.com/business/).
+Plainly: Waze does not publish a separate self-serve Waze Ads signup in the
+current first-party route. Create a [Google Ads account](https://support.google.com/google-ads/answer/6366720?hl=en)
+using the route linked by [Waze’s buying announcement](https://www.waze.com/discuss/t/waze-ads-are-back-and-here-s-how-to-buy-them/398689).
+Google’s signup flow asks for business information, campaign goals and budget,
+and payment details.
 
-## The three-layer conversion model
+Create a Performance Max campaign for store goals. Link a Google Business
+Profile or select affiliate locations, then provide locations, budget, and ad
+assets. Google says this campaign type can serve across Google properties,
+including Waze. See [Performance Max for store goals](https://support.google.com/google-ads/answer/12971048?hl=en).
 
-1. **Client or app layer.** Load the official tag, SDK, or CTV measurement source.
-2. **Server layer.** Send the canonical event through a documented API or approved partner.
-3. **Counting layer.** Read the platform's official reporting surface and reconcile it with payment truth.
+The current Google Ads Help page says Waze Ads are available only in the United
+States through Performance Max store-goal campaigns bidding to Store Visits,
+Store Sales, or Local Actions Directions. A February 2026 Waze announcement
+lists the US, Canada, Brazil, Mexico, Colombia, Malaysia, Australia, and Israel.
+These first-party pages disagree. Treat market eligibility as account-specific
+and verify it before spend. Sources: [Google’s Waze placement guidance](https://support.google.com/google-ads/answer/12971048?hl=en)
+and [Waze’s market announcement](https://www.waze.com/discuss/t/waze-ads-are-back-and-here-s-how-to-buy-them/398689).
 
-## Client tag or app measurement
+For local customer optimization, Google documents the **Local store visits and
+promotions** objective, **Performance Max** campaign type, store goals, and
+Business Profile or location assets. It says the feature is incompatible with
+online campaign goals and Performance Max campaigns using Merchant Center
+products. See [Local customer optimization](https://support.google.com/google-ads/answer/17198659?hl=en).
 
-> ⚠ UNVERIFIED — confirm the official browser tag, app SDK, or CTV
-measurement source at [Waze Ads](https://www.waze.com/business/). Use only code copied from the vendor
-console. Store the public ID as `WAZE_ADS_PIXEL_ID` or `WAZE_ADS_TAG_ID` after the vendor
-confirms its name.
+Plainly: Waze does not publish a separate public Waze Ads API in the first-party
+sources checked. For programmatic account management, use the [Google Ads API](https://support.google.com/google-ads/answer/2375503?hl=en),
+not a Waze endpoint. Google documents Google Ads API access through gRPC or
+JSON REST. API calls require OAuth 2.0 credentials and a developer token. The
+developer token comes from the API Center of a Google Ads manager account. See
+[OAuth for the Google Ads API](https://developers.google.com/google-ads/api/docs/oauth/overview)
+and [developer tokens](https://developers.google.com/google-ads/api/docs/api-policy/developer-token).
 
-## Server-side conversion API
+Do not create Waze-specific credentials or API URLs. The sources checked here
+document Google Ads account and API credentials instead.
 
-> ⚠ UNVERIFIED — confirm the current server conversion endpoint,
-auth header, timestamp unit, deduplication key, and JSON payload at the official
-source: [Waze Ads](https://www.waze.com/business/).
+## Client-side Google tag
 
-Do not invent an endpoint for this regional or managed-advertiser product. If the
-vendor requires a partner or sales agreement, record that gate and keep the hub
-adapter disabled until access is granted.
+The Waze route documented by Google uses the Google tag and Google Ads
+conversion actions. It does not publish a Waze pixel ID, Waze browser tag, or
+Waze app SDK contract. Install the Google tag on every page and the event
+snippet on the conversion page, using the snippets generated by Google Ads. See
+[Google tag conversion tracking](https://support.google.com/google-ads/answer/7548399?hl=en-EN).
 
-## Get a token and validate it
+Google says the Google tag sets first-party cookies containing a user or ad-click
+identifier. Google Tag Manager’s Conversion Linker can also read ad-click data
+from landing-page URLs and store it in first-party cookies. See [how Google Ads
+tracks website conversions](https://support.google.com/google-ads/answer/7521212?hl=en).
 
-1. Open the official Waze Ads developer or advertiser site: [Waze Ads](https://www.waze.com/business/).
-2. Create the required advertiser, app, tag, or data connection in the official console.
-3. Request the API product or managed measurement access if the vendor gates it.
-4. Store the approved credential as `WAZE_ADS_TOKEN`. Keep it server-side.
+Do not add a guessed Waze pixel or tag identifier. Store Google-generated tag
+and conversion identifiers using the project’s secret and configuration
+conventions.
 
-No public Waze Ads conversion API contract was verified. Confirm current Google or Waze managed-advertiser measurement options.
+## Rule setup and event mapping
 
-Token validation:
+Google’s conversion documentation uses a separate conversion action for each
+conversion source or action. Its API category guide maps website conversions to
+the `WEBPAGE` or `WEBPAGE_ONCLICK` conversion action types. See [conversion
+action categories](https://developers.google.com/google-ads/api/docs/conversions/categories?authuser=50&hl=en).
 
-```bash
-curl -sS 'https://www.waze.com/business/' -H "Authorization: Bearer $WAZE_ADS_TOKEN"
-```
+Use this adapter mapping:
 
-⚠ UNVERIFIED — this is a placeholder validation command unless the official
-source documents that exact read endpoint and bearer header. Replace it only
-with a verified official read operation.
+| Hub event | Google Ads / Waze route |
+| --- | --- |
+| `page_view`, `view_content` | Measure on the website only. Do not treat it as a Waze event. |
+| `lead`, `signup`, `begin_checkout`, `purchase`, `subscription_start` | Use a [Google Ads website conversion action](https://developers.google.com/google-ads/api/docs/conversions/categories?authuser=50&hl=en) when the campaign has an eligible online goal. |
+| `refund` | Reconcile with payment truth. Do not dispatch to Waze. |
+| Store visit, store sale, call click, direction click | Use the [store goals documented for Performance Max](https://support.google.com/google-ads/answer/12971048?hl=en). |
 
-## Audience, retargeting, and lookalike expansion
+The current Waze placement guidance names Store Visits, Store Sales, and Local
+Actions Directions as the eligible Waze goals. Do not assume that a website
+purchase conversion controls Waze delivery. See [Waze placement eligibility](https://support.google.com/google-ads/answer/12971048?hl=en).
 
-> ⚠ UNVERIFIED — confirm site retargeting, customer-list upload, hashed-email
-fields, minimum usable size, lookalike expansion, and eligibility at [Waze Ads](https://www.waze.com/business/).
+## Server-side conversions API
 
-Normalize email with trim → lowercase → SHA-256 only when the official product
-requires it and consent permits it. Never treat upload success as serving proof.
+Plainly: Waze has no separate public conversions API contract in the first-party
+sources checked. Do not send events to a guessed Waze endpoint. Waze’s documented integration is with Google Ads, and Google
+documents its own conversion measurement and API surfaces instead. See [Waze’s
+Google Ads integration announcement](https://www.waze.com/discuss/t/atencao-os-anuncios-do-waze-estao-de-volta/303496)
+and [Google Ads conversion management](https://developers.google.com/google-ads/api/docs/conversions/overview?authuser=50&hl=en).
 
-## Deduplication and hub contract
+For website conversions, use the Google tag or Google Tag Manager route to
+record the original conversion. Google's enhanced conversions for web then
+supplement that already-recorded conversion: its example uploads a
+`ConversionAdjustment` with hashed user identifiers and an `order_id` matching
+the original conversion; it also documents an optional conversion date and
+user agent. See [Upload enhanced conversions for web](https://developers.google.com/google-ads/api/samples/upload-enhanced-conversions-for-web).
+A `ConversionAdjustment` enhances an existing conversion; it does not create
+one. A checkout flow where the Google tag never fires has no original
+conversion for the adjustment to match, so Google rejects or drops it. To
+create a conversion purely server-side instead, upload a click conversion
+keyed on `GCLID` — see [online conversion imports](https://developers.google.com/google-ads/api/docs/conversions/upload-online?hl=en).
 
-- Use one stable payment transaction ID as the event ID when the platform supports deduplication.
-- Do not gate the server event on a click ID. Add the ID only when available.
-- Make `WAZE_ADS_PIXEL_ID` and `WAZE_ADS_TOKEN` absent-safe no-ops.
-- Store consent with the canonical event before dispatch.
-- Keep region-specific identifiers inside this adapter. The hub keeps one event taxonomy.
+Google says an accepted import response does not necessarily mean that a
+conversion received attribution. Review the API diagnostics and Google Ads
+conversion reporting after import. See [online conversion imports](https://developers.google.com/google-ads/api/docs/conversions/upload-online?hl=en).
 
-## Small-budget launch
+Keep the hub adapter disabled when the required Google Ads account, conversion
+action, consent, or API access is missing. A missing measurement integration
+must return a logged no-op and must not fail checkout.
 
-- Start with one region, one audience, one creative, and one conversion goal.
-- Disable broad expansion and automatic placements until the account's official defaults are known.
-- Use traffic or reach when no conversion signal exists. Move to conversion bidding only after real events land.
-- Confirm billing, review, currency, local policy, and reporting time zone before spend.
-- ⚠ UNVERIFIED — confirm current budget floors, bid rules, learning thresholds, and default placements at the official source.
+## Identity and consent
+
+Before sending customer data, confirm permission to share conversion data and
+accept Google’s customer data terms. Google documents this requirement for
+enhanced conversions. See [enhanced conversions setup](https://support.google.com/google-ads/answer/13258081?hl=en-0).
+
+For Google enhanced conversions, Google requires SHA-256 hashing for email,
+phone, first name, last name, and street address. It says not to hash country,
+state, city, or postal code. For email, name, and street address, normalize by
+trimming leading and trailing spaces and lowercasing before hashing. Gmail and
+Googlemail addresses have additional domain-specific rules. Phone numbers need
+their own normalization: strip all non-digit characters and format the number
+in E.164 (a leading `+`, then country code, then the number, no spaces,
+dashes, or parentheses) before hashing — trimming and lowercasing alone will
+not match Google's expected format. See [Google’s normalization and hashing
+rules](https://developers.google.com/google-ads/api/docs/conversions/upload-online?hl=en).
+
+Keep raw identifiers and Google Ads credentials in the server secret store. Hash
+only after the hub consent gate permits ad-user data. Never place credentials in
+browser bundles, URLs, logs, screenshots, or commits.
+
+## Click ID and first-party cookie
+
+Google’s documented click identifier is `GCLID`. Turn on Google Ads auto-tagging
+and preserve `GCLID` through click trackers, redirects, and cross-domain landing
+flows when applicable. See [Google’s website conversion tracking guidance](https://support.google.com/google-ads/answer/7521212?hl=en).
+
+The first-party sources checked document `GCLID` for Google Ads, not a Waze-owned
+click-ID parameter or attribution window. Do not invent a Waze click ID or
+cookie name. Capture `GCLID` only under Google Ads consent and the hub’s
+first-party storage rules. Do not require a click ID before recording a
+first-party conversion.
+
+## Deduplication
+
+No Waze-specific browser/server deduplication field is documented in the sources
+checked. Do not invent a Waze transaction or deduplication field.
+
+Use the hub’s stable event ID for internal idempotency. If you upload Google Ads
+enhancements, follow the current Google Ads API schema and its documented
+`order_id` and conversion-action fields. Treat the Google API response as
+transport evidence, not attribution proof. See [Google’s upload guidance](https://developers.google.com/google-ads/api/docs/conversions/upload-online?hl=en).
+
+## Google Ads settings that override code
+
+- Campaign goals determine which signals Google uses for optimization. Confirm
+  Store Visits, Store Sales, Local Actions Directions, or an online goal in the
+  campaign before wiring events. See [Performance Max store goals](https://support.google.com/google-ads/answer/12971048?hl=en).
+- Local customer optimization cannot run with online campaign goals or a
+  Performance Max campaign using Merchant Center products. See [the feature
+  limits](https://support.google.com/google-ads/answer/17198659?hl=en).
+- Waze is one eligible Google property in Performance Max. The campaign can
+  also be eligible across Search, Maps, YouTube, Display, Business Profiles,
+  and Gmail. Do not promise Waze-only delivery. See [where Performance Max ads
+  can appear](https://support.google.com/google-ads/answer/12971048?hl=en).
+- Location assets come from a linked Business Profile or affiliate locations.
+  Keep those records accurate before launch. See [location assets](https://support.google.com/google-ads/answer/2404182?hl=en).
 
 ## Verification
 
-Use the official test-event view, event history, postback response, or reporting
-API. Reconcile with payment-provider succeeded charges. A successful token call
-does not prove that a conversion can receive ad credit.
+1. **Account proof:** Confirm the Google Ads account, location assets, campaign
+   goal, and Waze eligibility in the Google Ads UI.
+2. **Tag proof:** Use Tag Assistant and confirm the Google Ads conversion action
+   status. Google says the status can take up to 48 hours to update after fixes.
+   See [tag verification guidance](https://support.google.com/google-ads/answer/7521212?hl=en).
+3. **Data proof:** Record the canonical event ID, consent decision, conversion
+   action, and payment or store result in your own server logs.
+4. **Attribution proof:** Check Google Ads conversion reporting and diagnostics.
+   A successful Google Ads API import does not prove attribution. See [Google’s
+   import review guidance](https://developers.google.com/google-ads/api/docs/conversions/upload-online?hl=en).
+5. **Business proof:** Reconcile website purchases and refunds with the payment
+   provider. Reconcile store visits, store sales, calls, or directions with the
+   corresponding Google Ads goal report.
 
-> ⚠ UNVERIFIED — confirm the current event-test and reporting operation at the official source.
+The first-party sources checked publish no Waze test-event endpoint or Waze
+conversion response contract. Do not add a test command until Google or Waze
+publishes the exact operation and authentication model.
 
-## Hub conventions
+## Common pitfalls and security
 
-Pair this stub with `ad-conversion-hub` and `ad-experiments`. Keep canonical
-events, consent, hash policy, secret names, and payment-provider truth in the
-hub. A partner gate or missing secret must produce a logged no-op. It must not
-fail checkout.
+- Do not build against the retired standalone Waze Ads route. Use Google Ads.
+- Do not claim a Waze-specific pixel, SDK, token, API endpoint, click ID, cookie,
+  event field, or deduplication rule without a new first-party contract.
+- Do not assume every Google Ads conversion goal can optimize Waze placements.
+  The current Waze guidance names Store Visits, Store Sales, and Local Actions
+  Directions.
+- Do not promise Waze-only delivery from Performance Max.
+- Do not send unhashed customer identifiers to Google enhanced conversions.
+- Do not hash country, state, city, or postal code when using the documented
+  Google enhanced-conversion upload format.
+- Keep Google Ads OAuth credentials, developer tokens, conversion data, and raw
+  identifiers server-side. Never log or commit them.
+- A missing Google Ads integration must produce a logged no-op. It must not fail
+  checkout or payment reconciliation.
 
-## Security
+## Official sources checked (2026-08-31)
 
-Load code only from the vendor's official HTTPS origin. Keep `WAZE_ADS_TOKEN`
-server-side. Never log or commit credentials. Send only consented identifiers,
-hashed when the official platform requires hashing.
-
-## Official sources checked (2026-08-11)
-
-- https://www.waze.com/business/
+- [Waze Ads transition](https://www.waze.com/discuss/t/waze-ads-update/305756) · [Waze Ads buying route](https://www.waze.com/discuss/t/waze-ads-are-back-and-here-s-how-to-buy-them/398689)
+- [Waze Ads US integration](https://www.waze.com/discuss/t/waze-ads-are-back-in-the-united-states/386395) · [Waze Ads market announcement](https://www.waze.com/discuss/t/waze-ads-are-back-and-here-s-how-to-buy-them/398689)
+- [Performance Max for store goals](https://support.google.com/google-ads/answer/12971048?hl=en) · [Local customer optimization](https://support.google.com/google-ads/answer/17198659?hl=en) · [Google Ads signup](https://support.google.com/google-ads/answer/6366720?hl=en)
+- [Google tag conversion tracking](https://support.google.com/google-ads/answer/7521212?hl=en) · [Enhanced conversions](https://support.google.com/google-ads/answer/13258081?hl=en-0)
+- [Google Ads API](https://support.google.com/google-ads/answer/2375503?hl=en) · [OAuth](https://developers.google.com/google-ads/api/docs/oauth/overview) · [Developer token](https://developers.google.com/google-ads/api/docs/api-policy/developer-token)
+- [Conversion categories](https://developers.google.com/google-ads/api/docs/conversions/categories?authuser=50&hl=en) · [Online conversion imports](https://developers.google.com/google-ads/api/docs/conversions/upload-online?hl=en) · [Enhanced conversion upload sample](https://developers.google.com/google-ads/api/samples/upload-enhanced-conversions-for-web)
+- [Location assets](https://support.google.com/google-ads/answer/2404182?hl=en) · [Waze privacy and measurement](https://support.google.com/waze/answer/12075406?hl=en)
