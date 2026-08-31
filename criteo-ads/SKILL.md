@@ -9,6 +9,7 @@ Criteo documents OneTag for Retail Media and a Direct API for ad delivery.
 The reviewed Criteo documentation does not describe a general public conversion-ingestion endpoint.
 Use the documented OneTag or Delivery API route for the agreed Criteo product.
 Use [ad-conversion-hub](../ad-conversion-hub/SKILL.md) for the canonical event envelope, consent gate, identity rules, retry policy, and adapter contract.
+Pair it with [ad-experiments](../ad-experiments/SKILL.md) for one-audience tests, seed sizing, PII-export authorization, and payment-provider truth.
 
 ## Account and access
 
