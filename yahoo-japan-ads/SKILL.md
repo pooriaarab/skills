@@ -237,12 +237,15 @@ history](https://ads-help.yahoo-net.jp/s/article/H000054775?language=en_US)
   [Tracking Tag scope](https://ads-developers.yahoo.co.jp/en/lytag/post/30590584.html)
 - Treat `202` as ingestion acceptance, not ad attribution. [CAPI response](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
 - Keep the adapter a logged no-op per transport: skip the Tracking Tag when the
-  tag ID or consent is unavailable, and skip CAPI when the CAPI token or
-  consent is unavailable. For `purchase` and `refund`, also require
-  payment-provider truth before dispatch; `generate_lead`, `sign_up`, and
-  other non-payment events do not have a payment-provider record and must not
-  be gated on one. A missing server token must not silence the client-side
-  tag, and neither path may fail checkout.
+  tag ID or consent is unavailable, and skip CAPI when the tag ID, the CAPI
+  token, or consent is unavailable — the CAPI body requires `tag_id` too, so a
+  present token with a missing tag ID must not dispatch. For `purchase`, also
+  require payment-provider truth before dispatch; `generate_lead`, `sign_up`,
+  and other non-payment events do not have a payment-provider record and must
+  not be gated on one. `refund` has no supported Yahoo event type (see the
+  mapping table above), so never dispatch it to the Tracking Tag or CAPI —
+  reconcile it in the payment system only. A missing server token must not
+  silence the client-side tag, and neither path may fail checkout.
 
 ## Official sources checked (2026-08-31)
 
