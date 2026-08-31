@@ -250,9 +250,12 @@ Keep canonical events, consent, identity normalization, click storage, retry
 policy, and payment reconciliation in the hub. Keep only the documented LG
 syntax in this adapter.
 
-A missing partner contract, missing approved credential, or missing required
-measurement field must produce a logged `skipped` result. It must not fail the
-checkout or payment webhook.
+A missing partner contract or missing approved credential must produce a
+logged `skipped` result — the adapter has no route to dispatch. A malformed
+or missing required field on an otherwise-configured, enabled integration
+must produce a logged `failed` result instead, per the hub adapter contract,
+so a misconfigured but enabled integration cannot silently drop conversions.
+Neither result may fail the checkout or payment webhook.
 
 ## Official sources checked (2026-08-30)
 
