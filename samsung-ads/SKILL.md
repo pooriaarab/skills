@@ -63,7 +63,7 @@ Use the exact tag copied from Samsung DSP. The public example is:
 The example comes from Samsung's Standard Segment guide. Do not replace the
 segment path or hand-edit generated identifiers. [Standard Segment](https://help.dsp.samsungads.com/v1/docs/standard-segment)
 
-Place the tag between <body> and </body>, near the end of the page. For a
+Place the tag between `<body>` and `</body>`, near the end of the page. For a
 button action, Samsung recommends the destination page. A same-tab redirect
 can race the tag request and is not guaranteed to complete. See [Standard Segment](https://help.dsp.samsungads.com/v1/docs/standard-segment).
 
