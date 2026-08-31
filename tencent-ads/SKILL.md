@@ -343,9 +343,13 @@ See the [web conversion API guide](https://developers.e.qq.com/docs/guide/conver
 - The web guide currently prints the conversion endpoint with http. Confirm
   the production transport with Tencent before launch.
 
-Missing credentials or missing permission must produce a logged adapter
-skipped result. It must not fail checkout. Keep retry state and consent
-metadata in the hub. See [ad-conversion-hub](../ad-conversion-hub/SKILL.md).
+Missing credentials must produce a logged adapter `skipped` result. A missing
+or revoked User Actions permission surfaces as a Tencent API error response on
+an otherwise-enabled application, so it must produce a logged `failed` result
+instead — not `skipped` — per the hub adapter contract, so a permission change
+on a live integration cannot silently drop conversions. Neither result may
+fail checkout. Keep retry state and consent metadata in the hub. See
+[ad-conversion-hub](../ad-conversion-hub/SKILL.md).
 
 ## Official sources checked (2026-08-30)
 
