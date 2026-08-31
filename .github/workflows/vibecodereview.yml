@@ -2,7 +2,11 @@ name: vibecodereview
 on:
   pull_request:
     types: [opened, synchronize, review_requested]
-    paths-ignore: ["**.md", "docs/**"]
+    # No paths-ignore here. The fleet's code repos skip "**.md" because a
+    # README-only change does not need a council. In this repo markdown IS the
+    # product: 238 SKILL.md files out of 261 tracked files. That ignore list
+    # excluded everything, so this workflow never started and pull requests
+    # merged looking reviewed when only CodeRabbit and Kilo had run.
 concurrency:
   group: vibecodereview-${{ github.event.pull_request.number }}
   cancel-in-progress: true
@@ -10,6 +14,8 @@ jobs:
   vibecodereview:
     # Only review the repo owner's own PRs (cost + injection guard on public repos).
     if: github.event.pull_request.user.login == github.repository_owner
+    # Public repo: GitHub-hosted minutes are free here, so the fleet's
+    # Ubicloud rule (which covers the private repos) does not apply.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
