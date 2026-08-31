@@ -1,6 +1,6 @@
 ---
 name: mercadolibre-ads
-description: "Integrate Mercado Libre Ads campaign management and reporting through the official OAuth API. Product Ads supports seller-side activation; Display Ads uses Commercial Advisor access. Mercado Libre does not document a public browser tag or conversions API in the official Ads documentation checked."
+description: "Integrate Mercado Libre Ads advertiser lookup, campaign reporting, and activation through the official OAuth API. Product Ads supports seller-side activation; Display Ads uses Commercial Advisor access. Mercado Libre does not document a public browser tag, conversions API, or campaign-mutation endpoints in the official Ads documentation checked."
 ---
 
 # Mercado Libre Ads
@@ -24,7 +24,12 @@ Pair it with [ad-experiments](../ad-experiments/SKILL.md) for one-audience tests
 
 Mercado Libre uses OAuth 2.0 for access to private user resources. Its
 server-side authorization flow redirects the user to Mercado Libre, receives a
-code, then exchanges that code for an access token. See [Authentication and
+code, then exchanges that code for an access token. The same guide documents a
+`refresh_token` issued alongside the access token, used to renew access
+without repeating the redirect flow. Access tokens expire; do not assume the
+token exchanged once during onboarding stays valid indefinitely. Confirm the
+current refresh endpoint, parameters, and token lifetimes at the cited guide
+before relying on them in production. See [Authentication and
 Authorization](https://developers.mercadolivre.com.br/en_us/authentication-and-authorization).
 
 Create an application in the Mercado Libre DevCenter. The application form
@@ -42,8 +47,9 @@ is enabled by Commercial Advisors. Guaranteed Display campaigns are contracted
 directly with a Mercado Libre agent, and the operations team manages them. See
 [Display Ads access and campaign types](https://global-selling.mercadolibre.com/devsite/en_us/seller-campaign/display-gs).
 
-Use `MERCADOLIBRE_ADS_CLIENT_ID`, `MERCADOLIBRE_ADS_CLIENT_SECRET`, and
-`MERCADOLIBRE_ADS_ACCESS_TOKEN` for local OAuth configuration. Use
+Use `MERCADOLIBRE_ADS_CLIENT_ID`, `MERCADOLIBRE_ADS_CLIENT_SECRET`,
+`MERCADOLIBRE_ADS_ACCESS_TOKEN`, and `MERCADOLIBRE_ADS_REFRESH_TOKEN` for local
+OAuth configuration. Use
 `MERCADOLIBRE_ADVERTISER_ID`, `MERCADOLIBRE_SITE_ID`, and
 `MERCADOLIBRE_ADS_PRODUCT` for adapter state. These are local conventions;
 the documented product values are `PADS` and `DISPLAY`. See [Product Ads](https://global-selling.mercadolibre.com/devsite/new-product-ads)
@@ -239,8 +245,8 @@ See [Display attribution metrics](https://global-selling.mercadolibre.com/devsit
 - Do not claim click attribution without a documented campaign field. [Display Ads](https://global-selling.mercadolibre.com/devsite/en_us/seller-campaign/display-gs)
 - Do not claim Mercado Libre deduplicated a first-party event. [Product Ads](https://global-selling.mercadolibre.com/devsite/new-product-ads)
 
-Keep `MERCADOLIBRE_ADS_CLIENT_SECRET` and
-`MERCADOLIBRE_ADS_ACCESS_TOKEN` server-side. Never place them in browser
+Keep `MERCADOLIBRE_ADS_CLIENT_SECRET`, `MERCADOLIBRE_ADS_ACCESS_TOKEN`, and
+`MERCADOLIBRE_ADS_REFRESH_TOKEN` server-side. Never place them in browser
 bundles, URLs, logs, screenshots, or commits. Mercado Libre documents the
 client secret as secret and bearer authentication in the request header. See
 [Create application](https://developers.mercadolibre.com.ar/es_ar/es_ar/crea-una-aplicacion-en-mercado-libre-es)

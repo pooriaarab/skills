@@ -185,6 +185,13 @@ Content-Type: application/json
 }
 ~~~
 
+The captured `__CALLBACK__` value arrives URL-encoded from the click redirect.
+Decode it once to get the raw `cb` content, then percent-encode that value
+again with a URL builder when placing it in the `cb` query parameter. Do not
+concatenate the decoded value into the query string as literal text: if it
+contains `&`, `=`, or `#`, an unencoded insert corrupts the query and breaks
+attribution.
+
 Without a callback, Tencent documents this form:
 
 ~~~http
