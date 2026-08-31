@@ -93,9 +93,9 @@ create a Segment conversion group, attach it to the flight, and use the
 website conversion campaign flow. See [Website Conversion Campaign](https://help.dsp.samsungads.com/docs/website-conversion-campaign)
 and [CTV to Website Conversion Campaign](https://help.dsp.samsungads.com/docs/ctv-to-website-conversion-campaign).
 
-Use one Standard Segment per simple conversion action. Use one Universal
-Segment when URL rules, custom variables, or conversion revenue require the
-shared JavaScript tag. See [Segment Overview](https://help.dsp.samsungads.com/v1/docs/segments-pixels).
+Use one Standard Segment per simple conversion action, passing revenue through
+`AG_REV` when the action needs it. Use one Universal Segment when URL rules or
+custom variables require the shared JavaScript tag. See [Segment Overview](https://help.dsp.samsungads.com/v1/docs/segments-pixels).
 
 The table maps hub events to Samsung segment actions. Hub event names remain
 canonical; Samsung does not receive them as a documented JSON event field. [API documentation](https://help.dsp.samsungads.com/docs/api-documentation)
