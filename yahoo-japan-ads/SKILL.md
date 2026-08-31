@@ -120,7 +120,8 @@ time. If 13 digits are supplied, the API ignores the last three. `currency` is r
 `value`; the reference permits `JPY` or `USD`. [Conversion API reference](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
 
 `transaction_id` is optional, but use it for every conversion. It is a unique string up to 64
-characters. Allowed characters are `-_.!~*'();/?:@&=+$,%#`. Preserve it in browser and server paths.
+characters. Allowed characters are alphanumeric plus `-_.!~*'();/?:@&=+$,%#`. Preserve it in
+browser and server paths.
 [Conversion API reference](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
 
 A successful request returns `202`, but invalid or duplicate events can still be excluded. Handle
@@ -235,8 +236,10 @@ history](https://ads-help.yahoo-net.jp/s/article/H000054775?language=en_US)
   customer-list upload contract from this documentation. [CAPI reference](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html),
   [Tracking Tag scope](https://ads-developers.yahoo.co.jp/en/lytag/post/30590584.html)
 - Treat `202` as ingestion acceptance, not ad attribution. [CAPI response](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
-- Keep the adapter a logged no-op when the tag ID, token, consent, or payment
-  truth is unavailable. It must not fail checkout.
+- Keep the adapter a logged no-op per transport: skip the Tracking Tag when the
+  tag ID or consent is unavailable, and skip CAPI when the CAPI token, consent,
+  or payment truth is unavailable. A missing server token must not silence the
+  client-side tag, and neither path may fail checkout.
 
 ## Official sources checked (2026-08-31)
 
