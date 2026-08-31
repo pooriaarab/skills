@@ -1,7 +1,8 @@
 # Skill naming
 
-This library has 194 top-level skills. This page sets the naming rule and the
-plan for applying it.
+This library has 191 top-level skills (top-level directories with a
+`SKILL.md`; `docs/`, `brand/` and `organizer/` are not skills). This page sets
+the naming rule and the plan for applying it.
 
 ## Folders do not work, so the prefix is the folder
 
@@ -52,9 +53,9 @@ named ad hoc.
 named after the company rather than the product: `stackadapt`, `trade-desk` and
 `yandex-direct`.
 
-That places 137 skills in a family. The other 56 keep a bare name. Every skill
-listed above was checked against the tracked directories, so the counts are
-what is in the repository, not an estimate.
+That places 148 skills in a family (the table above sums to 148). The other 43
+keep a bare name. Every skill listed above was checked against the tracked
+directories, so the counts are what is in the repository, not an estimate.
 
 ## Order of work
 
