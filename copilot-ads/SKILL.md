@@ -1,88 +1,302 @@
 ---
 name: copilot-ads
-description: "Track Microsoft Copilot Ads availability and conversion measurement — current beta or waitlist status, the official advertiser entry point, the absence or reuse of a pixel and CAPI, and safe integration boundaries. Use when evaluating Microsoft Copilot Ads, joining an advertiser beta, or deciding whether an ad-conversion adapter exists."
+description: "Set up conversion measurement for ads that may serve in Microsoft Copilot through Microsoft Advertising UET and Conversions API. Use when checking Copilot eligibility, mapping UET goals, capturing msclkid, or deciding whether a Copilot-specific adapter exists."
 ---
 
 # Microsoft Copilot Ads
 
-This is a limited-availability stub. The product surface may change quickly.
-The checked official docs define the boundary below. They do not justify an
-invented endpoint, token, audience field, or browser tag.
+The official Copilot page describes ads in Copilot as ads served from eligible
+Microsoft Advertising campaigns. Microsoft says eligible campaigns and ad types
+are automatically opted in, ads are not guaranteed to serve, and
+Copilot-specific metrics are not currently available. [About ads in Copilot](https://learn.microsoft.com/en-us/advertising/msa-help/hlp_ba_conc_adsforcopilot)
 
-## Availability
+There is no documented Copilot-specific ads API, conversions API, browser tag,
+token, or click ID in the official Copilot documentation checked here. Microsoft
+says Copilot-specific metrics are not currently available, so do not design for
+a separate Copilot report. Use the parent Microsoft Advertising APIs and UET
+surfaces. The parent platform documents a Campaign Management API and a UET
+Conversions API. [About ads in Copilot](https://learn.microsoft.com/en-us/advertising/msa-help/hlp_ba_conc_adsforcopilot), [Campaign Management API](https://learn.microsoft.com/en-us/advertising/campaign-management-service/campaign-management-service-reference?view=bingads-13), [Conversions API](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
 
-Microsoft Advertising serves eligible existing campaigns in Copilot. Microsoft says advertisers cannot opt out and does not currently expose specific Copilot metrics. Tracking uses Microsoft Advertising UET and CAPI, not a separate Copilot API.
+Use [ad-conversion-hub](../ad-conversion-hub/SKILL.md) for the canonical event
+envelope, consent gate, identity rules, retry policy, and adapter contract.
+Pair it with [ad-experiments](../ad-experiments/SKILL.md) for one-audience tests,
+seed sizing, and PII-export authorization.
 
-Official entry point: [Microsoft Copilot Ads advertiser or product page](https://learn.microsoft.com/en-us/advertising/msa-help/hlp_ba_conc_adsforcopilot).
+## Account and access
 
-## The three-layer conversion model
+Microsoft Advertising has a self-serve account route. Microsoft’s API FAQ says
+to sign up for a Microsoft Advertising account, then obtain a developer token
+through the Developer Portal. [Microsoft Advertising API FAQ](https://learn.microsoft.com/en-us/advertising/guides/faq?view=bingads-13)
 
-1. **Client layer.** Use the vendor's official tag only when one exists.
-2. **Server layer.** Send the canonical event only through a documented API or
-approved partner connector.
-3. **Counting layer.** Read the product's reporting surface. Do not infer
-attribution from a landing-page visit or an accepted request.
+Copilot does not have a separate signup flow in the official Copilot page.
+Create or use the Microsoft Advertising account, then check whether the
+campaign and ad type is eligible to serve in Copilot. Eligible campaign and ad
+types are automatically opted in; advertisers cannot opt out. [About ads in Copilot](https://learn.microsoft.com/en-us/advertising/msa-help/hlp_ba_conc_adsforcopilot)
 
-## Client tag or app attribution
+The parent Campaign Management API can add, get, update, and delete campaign
+data. That API is the documented automation surface for Microsoft Advertising,
+not a Copilot-specific API. [Campaign Management API](https://learn.microsoft.com/en-us/advertising/campaign-management-service/campaign-management-service-reference?view=bingads-13)
 
-Copilot has no separate browser tag. Use the Microsoft Advertising UET tag on the advertiser site. [Official UET setup](https://learn.microsoft.com/en-us/advertising/msa-help/hlp_ba_conc_uet_setup_master).
+Microsoft Advertising API calls use OAuth. Requests use an OAuth access token,
+the `DeveloperToken` header, and account identifiers when the operation needs
+them. [Make your first API call](https://learn.microsoft.com/en-us/advertising/guides/authentication-oauth-quick-start?view=bingads-13)
 
-## Server-side conversion API
+The Microsoft OAuth scope for Bing Ads API access is
+`https://ads.microsoft.com/msads.manage`. Access tokens expire, and clients
+must use the documented refresh-token flow. [Get access and refresh tokens](https://learn.microsoft.com/en-us/advertising/guides/authentication-oauth-get-tokens?view=bingads-13)
 
-Use Microsoft Advertising Conversions API for the canonical event. Do not create a Copilot-specific endpoint. [Official Microsoft CAPI guide](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13).
+Store tokens in the server secret store under local names.
 
-> ⚠ UNVERIFIED — confirm whether the current account's Copilot-eligible campaign exposes any separate conversion report.
+## Client-side UET
 
-## Get access and validate it
+UET is the Microsoft Advertising tag for website activity. Microsoft says to
+create a UET tag and add its tracking code to every page before using
+conversion tracking or remarketing. [Universal Event Tracking](https://learn.microsoft.com/en-us/advertising/guides/universal-event-tracking?view=bingads-13)
 
-Use the Microsoft Advertising UET CAPI token and Microsoft Advertising OAuth credentials. Store them under the Microsoft adapter's names, not a second Copilot token. [OAuth guide](https://learn.microsoft.com/en-us/advertising/guides/authentication-oauth-get-tokens?view=bingads-13).
+Use the tracking code generated by Microsoft Advertising. Put it in the
+site-wide layout so eligible pages receive it. Do not create a Copilot pixel
+ID or load an unofficial Copilot script. Microsoft’s UET guide documents one
+UET tag for multiple conversion goals and remarketing lists. [Universal Event Tracking](https://learn.microsoft.com/en-us/advertising/guides/universal-event-tracking?view=bingads-13)
 
-```bash
-curl -sS https://clientcenter.api.ads.microsoft.com/Api/CustomerManagement/v13/Customers \
-  -H "DeveloperToken: $MICROSOFT_ADS_DEVELOPER_TOKEN" \
-  -H "AuthenticationToken: $MICROSOFT_ADS_OAUTH_ACCESS_TOKEN"
+UET is not required to be a Copilot-specific tag. The same parent-platform UET
+tag can support Microsoft Advertising conversion goals and CAPI events when
+the tag and goal configuration match. [Conversions API](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+
+## Rule setup and event mapping
+
+Create a Microsoft Advertising conversion goal for each action that the
+campaign should optimize or report. An `EventGoal` counts a specified website
+action and matches expressions for action, category, label, or value. [EventGoal data object](https://learn.microsoft.com/en-us/advertising/campaign-management-service/eventgoal?view=bingads-13)
+
+The table uses hub names as adapter labels. Microsoft does not prescribe these
+names. Set the goal’s action expression to the exact `eventName` sent for a
+custom event. [Conversions API](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13), [EventGoal data object](https://learn.microsoft.com/en-us/advertising/campaign-management-service/eventgoal?view=bingads-13)
+
+| Hub event | Microsoft event | Implementation rule |
+| --- | --- | --- |
+| `page_view` | `eventType: "pageLoad"` | Send one page-load event per page view or SPA navigation. |
+| `view_content` | `eventType: "custom"`, `eventName: "view_content"` | Create an EventGoal only if this action matters. |
+| `lead` | `eventType: "custom"`, `eventName: "lead"` | Send after the lead is accepted by your system. |
+| `signup` | `eventType: "custom"`, `eventName: "signup"` | Send after account creation succeeds. |
+| `begin_checkout` | `eventType: "custom"`, `eventName: "begin_checkout"` | Send when checkout begins. |
+| `purchase` | `eventType: "custom"`, `eventName: "purchase"` | Send after the payment provider confirms the charge. |
+| `subscription_start` | `eventType: "custom"`, `eventName: "subscription_start"` | Send after the paid subscription activates. |
+| `refund` | No new conversion event | Reconcile payment truth in the hub. Do not turn a refund into a purchase. |
+
+For a custom event, use the documented `eventType`, `eventId`, `eventName`,
+`eventTime`, `userData`, and `customData` fields. Use `eventCategory`,
+`eventLabel`, `eventValue`, `transactionId`, `value`, and `currency` only when
+the goal or reporting use case needs them. [Conversions API payload reference](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+
+Use the same `pageLoadId` when a custom event belongs to a page-load event.
+Microsoft documents `pageLoadId` as the link between the page context and its
+custom events. [Conversions API data schema](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+
+## Server-side Conversions API
+
+Microsoft Advertising has a real server-side Conversions API. It accepts
+website, CRM, offline, and mobile event data through the Microsoft Advertising
+UET measurement system. This is a parent-platform CAPI, not a Copilot-specific
+conversion endpoint. [Conversions API](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+
+Microsoft documents token retrieval in the Microsoft Advertising UI and through
+an API operation. The API operation warns that the feature is not available to
+everyone yet. Use the UI route when it is present, and do not enable this
+adapter until the account exposes a documented token flow. [Conversions API](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13), [GetUetTagAuthKey](https://learn.microsoft.com/en-us/advertising/campaign-management-service/getuettagauthkey?view=bingads-13)
+
+Microsoft documents this direct endpoint:
+
+```http
+POST https://capi.uet.microsoft.com/v1/{tagId}/events
+Authorization: Bearer <MICROSOFT_ADS_UET_CAPI_TOKEN>
+Content-Type: application/json
 ```
 
-⚠ UNVERIFIED — confirm the operation and required account headers at the current Microsoft API quick start.
+The URL contains the UET `tagId`. The bearer token is the authorization token
+for that UET tag. Microsoft documents HTTP 200 for a successful request and
+HTTP 400 or 401 for errors. [Conversions API endpoint](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
 
-## Audience, retargeting, and lookalike expansion
+Send the canonical event in the documented request shape:
 
-No public hashed-email customer-list, lookalike, or retargeting API is verified
-for this product entry. Do not upload customer data to a guessed endpoint.
+```json
+{
+  "data": [
+    {
+      "eventType": "custom",
+      "eventId": "<CANONICAL_EVENT_ID>",
+      "eventName": "purchase",
+      "eventTime": 1788091200,
+      "userData": {
+        "anonymousId": "<ANONYMOUS_ID>",
+        "msclkid": "<MSCLKID>",
+        "em": "<SHA256_EMAIL_HEX>"
+      },
+      "customData": {
+        "transactionId": "<PAYMENT_TRANSACTION_ID>",
+        "value": 25.00,
+        "currency": "USD"
+      }
+    }
+  ]
+}
+```
 
-> ⚠ UNVERIFIED — confirm audience availability, minimum list size, matching
-rules, and beta eligibility at [Microsoft Copilot Ads official docs](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13).
+`data` is the required list of events. `eventType` is `pageLoad` or `custom`.
+`eventTime` is Unix epoch UTC seconds and must be within the last seven days.
+`eventId` supports deduplication, and `eventName` identifies a custom action.
+`userData` carries matching identifiers, while `customData` carries conversion
+and business fields. [Conversions API core schema](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
 
-## Campaign launch rules
+Send events in real time when possible. Microsoft allows individual events or
+batches, with a maximum of 1,000 events per batch. Use the hub’s bounded retry
+and dead-letter policy. [Conversions API validation](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
 
-- Treat the product as beta, limited, or unavailable until the official console shows access.
-- Start with the smallest approved budget and one creative hypothesis.
-- Keep the canonical conversion event in the hub even when this adapter is disabled.
-- Do not promise platform attribution when the vendor exposes only aggregate views or clicks.
-- ⚠ UNVERIFIED — confirm bidding, budget, review, policy, and reporting behavior in the current console.
+By default, one invalid event makes the whole batch fail. Set
+`continueOnValidationError` to `true` only when the caller can reconcile the
+valid events and the rejected events. Microsoft documents HTTP 200 when at
+least one event remains valid and HTTP 400 when none are valid. [Conversions API validation](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+
+## Identity and consent
+
+Pass at least one supported identifier in `userData`. Microsoft lists
+`anonymousId`, `externalId`, `msclkid`, hashed email `em`, hashed phone `ph`,
+`idfa`, and `gaid` among the supported identifiers. [Conversions API user data](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+
+Require the hub’s `measurement: true` before sending Microsoft event data.
+Require `ad_user_data: true` before deriving or sending hashed email, hashed
+phone, external IDs, IP address, or other ad-user data. The hub owns that
+consent decision. [ad-conversion-hub](../ad-conversion-hub/SKILL.md)
+
+Microsoft’s CAPI default treats events as consent granted. Send explicit
+`adStorageConsent: "G"` for granted or `"D"` for denied. Microsoft says denied
+events are not used for advertising purposes, including conversion attribution
+and retargeting. [Conversions API consent signals](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+
+Normalize identifiers before hashing. For email, trim surrounding whitespace,
+remove dots from the user part, remove a `+alias`, lowercase the full address,
+then apply SHA-256 and send lowercase hexadecimal text. For phone, normalize to
+E.164 with country code, then apply SHA-256 and send lowercase hexadecimal
+text. [Conversions API hashed identifiers](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+
+Do not send raw email addresses, raw phone numbers, or real user IDs. Microsoft
+recommends a new UUID or a hash for user IDs. Send `clientUserAgent` and
+`clientIpAddress` only when permitted by the hub’s consent and privacy rules.
+[Conversions API user data](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+
+## Click ID and first-party cookie
+
+Microsoft’s click identifier is `msclkid`. With auto-tagging enabled, Microsoft
+Advertising appends it to the landing URL after an ad click. Capture it on the
+first request, store the most recent value in first-party storage or a
+server-side store, and overwrite it when a newer value arrives. [Conversions API MSCLKID](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+
+Microsoft suggests retaining the most recent `msclkid` for 90 days and documents
+it as a UUID. Treat 90 days as Microsoft’s suggestion, not a guarantee that a
+Copilot placement will receive attribution. [Conversions API MSCLKID](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+
+Microsoft does not document a Copilot-owned click parameter or cookie name.
+Do not create `copilot_click_id`, `copilot_id`, or another vendor-looking name.
+Use the literal `msclkid` field in CAPI and your own first-party storage key.
+[About ads in Copilot](https://learn.microsoft.com/en-us/advertising/msa-help/hlp_ba_conc_adsforcopilot), [Conversions API](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+
+## ID Sync and visitor identity
+
+Microsoft documents an optional authenticated or anonymous visitor mapping for
+server-side events. Its client-side ID Sync uses `Red3`, `VID`, and optional
+`UID` parameters at `https://c.bing.com/c.gif`; `Red3` uses the format
+`BACID_<CID>`, and `VID` should be an anonymous visitor ID. [Conversions API ID Sync](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+
+The `anonymousId` sent in CAPI should match the `VID` sent by ID Sync. Microsoft
+requires ID Sync for audience creation, remarketing, and dynamic remarketing,
+and recommends it for conversion measurement quality. [Conversions API ID Sync](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+
+## Deduplication
+
+When UET JavaScript and CAPI send the same conversion, use the same UET tag,
+stable event ID, and compatible event name. Microsoft documents the shared
+`eventId` as the deduplication value. [Conversions API deduplication](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+
+The browser UET event example uses `event_id`; the CAPI object uses `eventId`.
+Use the same hub `event_id` value in both representations:
+
+```js
+window.uetq.push("event", "purchase", {
+  event_id: canonicalEvent.event_id,
+});
+```
+
+```json
+{
+  "eventType": "custom",
+  "eventId": "<same canonical event ID>",
+  "eventName": "purchase"
+}
+```
+
+This protects against double counting when both delivery paths report one
+conversion. It does not create a Copilot-specific attribution report.
+[Conversions API deduplication](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13), [About ads in Copilot](https://learn.microsoft.com/en-us/advertising/msa-help/hlp_ba_conc_adsforcopilot)
+
+## Microsoft Advertising settings that override code
+
+- The UET tag must be attached to the conversion goal. The goal’s event
+  expressions must match the values sent by UET or CAPI. [EventGoal data object](https://learn.microsoft.com/en-us/advertising/campaign-management-service/eventgoal?view=bingads-13)
+- Adding or updating a conversion goal through the Microsoft Advertising web
+  application or Campaign Management API enables MSCLKID auto-tagging for the
+  relevant account scope. [EventGoal data object](https://learn.microsoft.com/en-us/advertising/campaign-management-service/eventgoal?view=bingads-13)
+- The CAPI token belongs to a UET tag. Use the tag that corresponds to the goal
+  and event you measure. [Conversions API authorization](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+- Eligible campaign and ad types are automatically opted into Copilot, and
+  advertisers cannot opt out. There is no guarantee that an eligible ad serves.
+  [About ads in Copilot](https://learn.microsoft.com/en-us/advertising/msa-help/hlp_ba_conc_adsforcopilot)
+- Negative keyword matching applies to Copilot in the same way as web searches
+  on the Microsoft Advertising Network. [About ads in Copilot](https://learn.microsoft.com/en-us/advertising/msa-help/hlp_ba_conc_adsforcopilot)
 
 ## Verification
 
-Use the official test-event tool or reporting surface only after the platform
-confirms access. Reconcile with payment-provider succeeded charges. A zero count
-before the adapter exists is expected. A real charge with no platform event is
-not evidence that an API should be guessed.
+1. **Request proof:** record the redacted CAPI response, HTTP status, canonical
+   event ID, UET tag ID, consent value, and dispatch record.
+2. **Schema proof:** check the response for validation errors and warnings.
+   Microsoft distinguishes invalid required fields from warnings that remove an
+   optional field. [Conversions API validation](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+3. **Reporting proof:** use the Microsoft Advertising conversion-goal and
+   Reporting surfaces. Microsoft documents Reporting API reports, but says it
+   does not currently support specific metrics for ads served in Copilot. [Reporting API guides](https://learn.microsoft.com/en-us/advertising/guides/reporting-guides?view=bingads-13), [About ads in Copilot](https://learn.microsoft.com/en-us/advertising/msa-help/hlp_ba_conc_adsforcopilot)
+4. **Business proof:** reconcile purchases and refunds with the payment
+   provider. Treat a successful CAPI request as delivery evidence, not proof of
+   Copilot attribution.
 
-## Hub conventions
+Microsoft’s API FAQ says clicks can take up to two hours and conversions up to
+three hours to become available for reporting. [Microsoft Advertising API FAQ](https://learn.microsoft.com/en-us/advertising/guides/faq?view=bingads-13)
 
-Pair this stub with `ad-conversion-hub` and `ad-experiments`. The hub keeps the
-canonical event, consent decision, hash policy, and payment-provider truth. An
-absent `COPILOT_ADS_TOKEN` or unavailable beta must be a logged no-op. It must not fail
-checkout. Use `meta-ads` or `microsoft-ads` when the official inventory routes
-through those platforms.
+## Common pitfalls and security
 
-## Security
+- Treating Copilot as a separate advertiser API or expecting a Copilot token.
+  Use Microsoft Advertising account, UET, CAPI, and Reporting surfaces. [About ads in Copilot](https://learn.microsoft.com/en-us/advertising/msa-help/hlp_ba_conc_adsforcopilot), [Conversions API](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+- Sending `eventTime` in milliseconds. Microsoft requires Unix epoch seconds
+  and accepts events only within the last seven days. [Conversions API core schema](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+- Sending `event_id` in the server payload. CAPI uses `eventId`; the browser
+  UET example uses `event_id`. [Conversions API deduplication](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+- Sending raw identifiers or hashing without consent. Use the hub gate and the
+  Microsoft normalization rules. [Conversions API hashed identifiers](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+- Assuming 90-day `msclkid` retention guarantees Copilot attribution. Microsoft
+  calls 90 days a suggested retention period. [Conversions API MSCLKID](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+- Treating the absence of a Copilot metric as zero conversions. Microsoft says
+  Copilot-specific metrics are not currently supported. [About ads in Copilot](https://learn.microsoft.com/en-us/advertising/msa-help/hlp_ba_conc_adsforcopilot)
+- Putting developer tokens, OAuth secrets, refresh tokens, or UET CAPI tokens
+  in browser bundles, URLs, logs, screenshots, or commits. Store them in the
+  server secret store and redact them from diagnostics. Microsoft’s OAuth guide
+  requires secure handling of access and refresh tokens. [Get access and refresh tokens](https://learn.microsoft.com/en-us/advertising/guides/authentication-oauth-get-tokens?view=bingads-13)
+- Letting unavailable CAPI access block checkout. Keep the canonical event in
+  the hub and return a logged `skipped` result when the Microsoft capability is
+  unavailable. [ad-conversion-hub](../ad-conversion-hub/SKILL.md)
 
-Do not load unofficial scripts. Keep approved tokens server-side. Never send raw
-email, phone, chat content, memory, or other sensitive context to an ad product.
-Apply the vendor's current ad and privacy policy before any activation.
+## Official sources checked (2026-08-31)
 
-## Official sources checked (2026-08-11)
-
-- https://learn.microsoft.com/en-us/advertising/msa-help/hlp_ba_conc_adsforcopilot
-- https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13
+- [About ads in Copilot](https://learn.microsoft.com/en-us/advertising/msa-help/hlp_ba_conc_adsforcopilot)
+- [Universal Event Tracking](https://learn.microsoft.com/en-us/advertising/guides/universal-event-tracking?view=bingads-13)
+- [Conversions API](https://learn.microsoft.com/en-us/advertising/guides/uet-conversion-api-integration?view=bingads-13)
+- [EventGoal data object](https://learn.microsoft.com/en-us/advertising/campaign-management-service/eventgoal?view=bingads-13)
+- [Campaign Management API](https://learn.microsoft.com/en-us/advertising/campaign-management-service/campaign-management-service-reference?view=bingads-13)
+- [OAuth authentication](https://learn.microsoft.com/en-us/advertising/guides/authentication-oauth?view=bingads-13) · [OAuth tokens](https://learn.microsoft.com/en-us/advertising/guides/authentication-oauth-get-tokens?view=bingads-13)
+- [Reporting API guides](https://learn.microsoft.com/en-us/advertising/guides/reporting-guides?view=bingads-13) · [API FAQ](https://learn.microsoft.com/en-us/advertising/guides/faq?view=bingads-13)
