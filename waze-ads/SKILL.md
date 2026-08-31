@@ -100,11 +100,17 @@ documents its own conversion measurement and API surfaces instead. See [Waze’s
 Google Ads integration announcement](https://www.waze.com/discuss/t/atencao-os-anuncios-do-waze-estao-de-volta/303496)
 and [Google Ads conversion management](https://developers.google.com/google-ads/api/docs/conversions/overview?authuser=50&hl=en).
 
-For website conversions, use the Google tag or Google Tag Manager route unless
-the account requires a server integration. Google documents enhanced conversions
-for web through the Google Ads API. Its example uploads a `ConversionAdjustment`
-with hashed user identifiers and an `order_id`; it also documents an optional
-conversion date and user agent. See [Upload enhanced conversions for web](https://developers.google.com/google-ads/api/samples/upload-enhanced-conversions-for-web).
+For website conversions, use the Google tag or Google Tag Manager route to
+record the original conversion. Google's enhanced conversions for web then
+supplement that already-recorded conversion: its example uploads a
+`ConversionAdjustment` with hashed user identifiers and an `order_id` matching
+the original conversion; it also documents an optional conversion date and
+user agent. See [Upload enhanced conversions for web](https://developers.google.com/google-ads/api/samples/upload-enhanced-conversions-for-web).
+A `ConversionAdjustment` enhances an existing conversion; it does not create
+one. A checkout flow where the Google tag never fires has no original
+conversion for the adjustment to match, so Google rejects or drops it. To
+create a conversion purely server-side instead, upload a click conversion
+keyed on `GCLID` — see [online conversion imports](https://developers.google.com/google-ads/api/docs/conversions/upload-online?hl=en).
 
 Google says an accepted import response does not necessarily mean that a
 conversion received attribution. Review the API diagnostics and Google Ads
