@@ -128,7 +128,7 @@ The checked web upload schema has no email, phone, browser identity, event ID, o
 
 Baidu documents two app collection routes. The app API sends click data to the advertiser or a monitoring platform, which matches app conversions and reports them back to Baidu at the fixed, documented callback host below. The app SDK uploads app events to Baidu directly. See [app collection overview](https://ocpx.baidu.com/developer/ocpc-doc/app/).
 
-Treat the inbound `callback_url` field as untrusted input, not as a destination to call. Build the callback request from the fixed `ocpc.baidu.com` host and path shown below; never issue an outbound request to a `callback_url` value taken verbatim from click data, since a forged click could point it at an internal address (SSRF).
+Treat the inbound `callback_url` field as untrusted input, not as a destination to call blindly: validate that its scheme, host, and path match the fixed `ocpc.baidu.com` `/ocpcapi/cb/actionCb` endpoint shown below, and drop the record if they do not — a forged click could otherwise point it at an internal address (SSRF). Once validated, keep its `s` and `ext_info` query values exactly as received; they are the click-specific identifiers Baidu needs to match the conversion, and rebuilding the URL from scratch without them causes a valid conversion to go unattributed. Only `a_type`, `a_value`, and `sign` are yours to add.
 
 For app API traffic, the documented monitoring request can include `idfa`, `imei_md5`, `oaid`, `click_id`, and `callback_url`. Baidu defines `imei_md5` as lowercase MD5 of the original IMEI, while `idfa` and `oaid` remain raw values. See [app API parameters](https://ocpx.baidu.com/developer/ocpc-doc/app/app-interface/README1.html).
 
