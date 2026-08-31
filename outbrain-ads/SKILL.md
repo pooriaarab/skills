@@ -13,6 +13,7 @@ and [server-to-server tracking](https://www.outbrain.com/help/advertisers/server
 
 Use [ad-conversion-hub](../ad-conversion-hub/SKILL.md) for the canonical event
 envelope, consent gate, identity rules, retry policy, and adapter contract.
+Pair it with [ad-experiments](../ad-experiments/SKILL.md) for one-audience tests, seed sizing, PII-export authorization, and payment-provider truth.
 
 ## Account and access
 

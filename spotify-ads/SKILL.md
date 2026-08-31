@@ -8,6 +8,7 @@ description: "Set up Spotify Ads Manager with the Spotify Pixel, Ads API v3 OAut
 Spotify Ads Manager exposes Ads API v3 for campaign management, measurement, audiences, and reporting. It also provides a browser Pixel and a tagless Conversions API (CAPI). See the [Ads API overview](https://developer.spotify.com/documentation/ads-api) and [Ads API guides](https://developer.spotify.com/documentation/ads-api/guides).
 
 Use [ad-conversion-hub](../ad-conversion-hub/SKILL.md) for the canonical event envelope, consent gate, identity rules, retry policy, and adapter contract.
+Pair it with [ad-experiments](../ad-experiments/SKILL.md) for one-audience tests, seed sizing, PII-export authorization, and payment-provider truth.
 
 ## Account and access
 
