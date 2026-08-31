@@ -18,7 +18,7 @@ The owner: a solo developer who ships products with coding agents as the main wo
 
 ## Explicitly not this
 
-- An application or an installable package. The root has no `package.json` and no source tree; every top-level entry is a skill directory. A runtime, a CLI binary, or an npm module does not belong here.
+- An application or an installable package. The root has no `package.json` and no source tree; aside from a handful of top-level docs (README, AGENTS, this file), every top-level entry is a skill directory. A runtime, a CLI binary, or an npm module does not belong here.
 - A platform ad skill with its own tracking scheme. The 49 platform skills take events, consent, hashing, deduplication, and failure isolation from `ad-conversion-hub`; a new platform skill must reuse that contract, not redefine it.
 - A rewrite of a live-verified step from vendor documentation. The commit log corrects skills from live submissions, real campaigns, and real portals; a live run outranks the doc the text came from.
 - A second entry point for a domain the repo already routes. CI starts at `ci-speed-diagnosis` and life organization starts at `life-organizer`; a parallel router for the same domain splits the path every new reader must start on.
