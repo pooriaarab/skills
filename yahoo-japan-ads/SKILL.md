@@ -1,104 +1,248 @@
 ---
 name: yahoo-japan-ads
-description: "Set up Yahoo Japan Ads tracking as a regional or CTV adapter — official token or partner access, client tag or app measurement, server conversion shape, audience limits, reporting verification, and explicit unverified boundaries. Use when evaluating Yahoo Japan Ads, planning a regional campaign, or deciding whether a production integration exists."
+description: "Implement Yahoo! JAPAN Ads web conversion tracking with the official Tracking Tag and Conversion API."
 ---
 
-# Yahoo Japan Ads
+# Yahoo! JAPAN Ads
 
-This is a breadth-first stub. It records the current official entry point and
-does not invent undocumented contracts. Product names, endpoints, access rules,
-and availability can vary by country and advertiser agreement.
+Yahoo! JAPAN Ads has a documented web Tracking Tag and Conversion API for LY Ads Display Ads and
+Search Ads (Shopping). CAPI accepts web events only. Do not treat this adapter as an app, CTV, or
+general-purpose LY measurement integration. [Tracking Tag scope](https://ads-developers.yahoo.co.jp/en/lytag/post/30590584.html),
+[Search Ads (Shopping) support](https://ads-developers.yahoo.co.jp/en/ads-api/announcement/26081801.html),
+[Conversion API reference](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
 
-## Availability and official scope
+Use [ad-conversion-hub](../ad-conversion-hub/SKILL.md) for the canonical event envelope, consent
+gate, identity rules, retry policy, and adapter contract. Pair it with
+[ad-experiments](../ad-experiments/SKILL.md) for one-audience tests, seed sizing, and PII-export authorization.
 
-LY Ads documents a server Conversion API at https://conversion-api.yahooapis.jp/v1, the X-TagAccessToken header, tag_id, channel_id, and transaction_id deduplication.
+## Account and access
 
-Official source: [Yahoo Japan Ads documentation](https://ads-developers.yahoo.co.jp/en/conversion-api/).
+Yahoo! JAPAN Ads has an account-creation path in the Campaign Management Tool. The official flow
+creates a Search Ads or Display Ads account, reviews the request, asks the user to confirm it, and
+then marks it Active. [Create an ad account](https://ads-help.yahoo-net.jp/s/article/H000044258?language=en_US)
 
-## The three-layer conversion model
+For the Tracking Tag and CAPI, connect the service account to an authenticated Business Manager,
+generate the tag, then open **Tools → Tracking tag** under **Access and data**. Generate the CAPI
+token there and save it before closing the view. [Tracking Tag startup](https://ads-developers.yahoo.co.jp/en/lytag/post/30590593.html),
+[CAPI access instructions](https://ads-help.yahoo-net.jp/s/article/H000055044?language=en_US)
 
-1. **Client or app layer.** Load the official tag, SDK, or CTV measurement source.
-2. **Server layer.** Send the canonical event through a documented API or approved partner.
-3. **Counting layer.** Read the platform's official reporting surface and reconcile it with payment truth.
+The token is shown only on the generation view. A connected Business Manager issues it in Business
+Manager. Otherwise, the account user generates it from the Tracking Tag view. [CAPI access instructions](https://ads-help.yahoo-net.jp/s/article/H000055044?language=en_US)
 
-## Client tag or app measurement
+The broader LY Ads API is a separate management surface. Its documented route requires API signup,
+application registration, and OAuth authorization. API signup requires root-MCC administrator access.
+An external ad-management tool user approves that tool instead. [API startup](https://ads-developers.yahoo.co.jp/en/ads-api/startup-guide/before_you_start.html),
+[API application](https://ads-developers.yahoo.co.jp/en/ads-api/startup-guide/apply-api-use.html),
+[OAuth API call](https://ads-developers.yahoo.co.jp/en/ads-api/startup-guide/api-call.html)
 
-LY Ads documents a tracking tag for Display Ads and Search Ads. Generate the tag in the Campaign Management Tool. [Official Developer Center](https://ads-developers.yahoo.co.jp/en/).
-
-## Server-side conversion API
-
-LY Ads documents the Conversion API server and header:
+These are local secret-store conventions, not Yahoo! configuration names:
 
 ```text
-POST https://conversion-api.yahooapis.jp/v1
-X-TagAccessToken: <tag-access-token>
+YAHOO_JAPAN_ADS_TAG_ID       Tracking Tag ID
+YAHOO_JAPAN_ADS_CAPI_TOKEN   X-TagAccessToken value
+YAHOO_JAPAN_ADS_ACCOUNT_ID   Local account identifier for dispatch records
+```
+
+Do not use the LY Ads API OAuth token as the CAPI token. CAPI documents `X-TagAccessToken`; the
+management API documents OAuth bearer access tokens. [CAPI headers](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html),
+[management API authentication](https://ads-developers.yahoo.co.jp/en/ads-api/startup-guide/api-call.html)
+
+## Client-side Tracking Tag
+
+Generate the tag from the authenticated Business Manager, then copy the vendor-generated global and
+event snippets. Install one global snippet on all eligible pages and an event snippet where the
+matching action occurs. Multiple global snippets must not be installed on one page. [Tracking Tag summary](https://ads-developers.yahoo.co.jp/en/lytag/post/30590584.html),
+[Tracking Tag startup](https://ads-developers.yahoo.co.jp/en/lytag/post/30590593.html)
+
+Use the vendor's generated code. Do not recreate its loader or invent a tag URL. The global process
+uses `type: "init"` and `tagId`; the event process uses `type: "event"`, `eventType`, and `tagId`.
+[Tracking Tag parameters](https://ads-developers.yahoo.co.jp/en/lytag/post/30590590.html)
+
+The global snippet can measure page views. Other events need an event snippet. Documented event
+configuration includes `snippetId`, `transactionId`, `value`, `currency`, `label`, `isTest`, and
+`items` where supported. [Tracking Tag summary](https://ads-developers.yahoo.co.jp/en/lytag/post/30590584.html),
+[Tracking Tag parameters](https://ads-developers.yahoo.co.jp/en/lytag/post/30590590.html)
+
+Tracking Tag event data can support conversion tracking and website-visitor audiences for supported
+products. Keep audience creation and activation in the Campaign Management Tool. [Tracking Tag summary](https://ads-developers.yahoo.co.jp/en/lytag/post/30590584.html)
+
+## Rule setup and event mapping
+
+For Display Ads, create **Web (Tracking tag)** in **Tools → Library → Conversion tracking**. Choose
+the Tracking Tag, purpose, conversion window, and filter. Filters are global snippet plus URL, event
+snippet plus event type, or event snippet plus event type and snippet ID. The window accepts 1–90 days.
+[Display Ads Tracking Tag conversion setup](https://ads-help.yahoo-net.jp/s/article/H000054774?language=en_US)
+
+Use the platform event type as the adapter value. The following mappings are
+recommended when the hub event has the same business meaning:
+
+| Hub event | LY Ads event type | Dispatch rule |
+| --- | --- | --- |
+| `page_view` | `page_view` | Global snippet only. |
+| `view_content` | `view_product` | Use only for an item-detail view. |
+| `begin_checkout` | `check_out` | Send when checkout starts. |
+| `lead` | `generate_lead` | Send after the lead is accepted. |
+| `signup` | `sign_up` | Send after registration completes. |
+| `purchase` | `purchase` | Send after payment confirmation. |
+| `subscription_start` | No exact listed type ([event list](https://ads-developers.yahoo.co.jp/en/lytag/post/30590587.html)) | Keep hub and billing truth. |
+| `refund` | No exact listed type ([event list](https://ads-developers.yahoo.co.jp/en/lytag/post/30590587.html)) | Reconcile in the payment system. |
+
+The list also includes `view_listing`, `view_cart`, `add_cart`, `search`, `login`, `reservation`,
+`payment_info`, and `add_wishlist`. It does not list `refund` or `subscription_start`. [Tracking Tag events](https://ads-developers.yahoo.co.jp/en/lytag/post/30590587.html)
+
+Use a conversion-setting-generated snippet when the filter includes a snippet
+ID. A generic event snippet does not satisfy that filter. [Get and install the
+Tracking Tag](https://ads-help.yahoo-net.jp/s/article/H000054773?language=en_US),
+[Display Ads Tracking Tag conversion setup](https://ads-help.yahoo-net.jp/s/article/H000054774?language=en_US)
+
+## Server-side conversions API
+
+The documented CAPI request is:
+
+```http
+POST https://conversion-api.yahooapis.jp/v1/
+X-TagAccessToken: <YAHOO_JAPAN_ADS_CAPI_TOKEN>
 Content-Type: application/json
 ```
 
-The request includes `tag_id`, and `transaction_id` is used for duplicate
-detection. [Official reference](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html).
-Confirm the full event body and event history flow before production use.
+The body requires `tag_id` and a `data` array with up to 1,000 event objects. Each event requires
+`event_type`, `event_time`, and `action_source`. `action_source` can only be `web`. Add at least one
+user parameter. [Conversion API reference](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
 
-## Get a token and validate it
+This is a minimal purchase payload. Every field below is documented by the vendor:
 
-1. Open the official Yahoo Japan Ads developer or advertiser site: [Yahoo Japan Ads](https://ads-developers.yahoo.co.jp/en/conversion-api/).
-2. Create the required advertiser, app, tag, or data connection in the official console.
-3. Request the API product or managed measurement access if the vendor gates it.
-4. Store the approved credential as `YAHOO_JAPAN_ADS_TOKEN`. Keep it server-side.
-
-LY Ads documents a server Conversion API at https://conversion-api.yahooapis.jp/v1, the X-TagAccessToken header, tag_id, channel_id, and transaction_id deduplication.
-
-Token validation:
-
-```bash
-curl -sS 'https://ads-developers.yahoo.co.jp/en/conversion-api/' -H "Authorization: Bearer $YAHOO_JAPAN_ADS_TOKEN"
+```json
+{"tag_id":"<TAG_ID>","data":[{"event":{"event_type":"purchase","event_time":1756600000,"action_source":"web","test_flag":false,"transaction_id":"<STABLE_TRANSACTION_ID>"},"user":{"hashed_email":"<SHA256_EMAIL_HEX>"},"custom":{"currency":"JPY","value":1000}}]}
 ```
 
-⚠ UNVERIFIED — this is a placeholder validation command unless the official
-source documents that exact read endpoint and bearer header. Replace it only
-with a verified official read operation.
+`event_time` is 10-digit UNIX time and may be from 90 days before the request through the current
+time. If 13 digits are supplied, the API ignores the last three. `currency` is required for monetary
+`value`; the reference permits `JPY` or `USD`. [Conversion API reference](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
 
-## Audience, retargeting, and lookalike expansion
+`transaction_id` is optional, but use it for every conversion. It is a unique string up to 64
+characters. Allowed characters are `-_.!~*'();/?:@&=+$,%#`. Preserve it in browser and server paths.
+[Conversion API reference](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
 
-LY Ads provides tracking tags and conversion APIs that can store audiences. Confirm the account's audience and retargeting surface. Customer-list and lookalike rules are not copied here without a current official source.
+A successful request returns `202`, but invalid or duplicate events can still be excluded. Handle
+`400`, `403`, `404`, `415`, `429`, `500`, and `503` with the hub retry and dead-letter policy.
+[Conversion API response](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
 
-## Deduplication and hub contract
+## Identity and consent
 
-- Use one stable payment transaction ID as the event ID when the platform supports deduplication.
-- Do not gate the server event on a click ID. Add the ID only when available.
-- Make `YAHOO_JAPAN_ADS_PIXEL_ID` and `YAHOO_JAPAN_ADS_TOKEN` absent-safe no-ops.
-- Store consent with the canonical event before dispatch.
-- Keep region-specific identifiers inside this adapter. The hub keeps one event taxonomy.
+The CAPI user object supports `hashed_phone_number`, `hashed_email`, `ly_su`, `ly_c`, `ly_r`, `ifa`,
+and `line_uid`. At least one user parameter is required. `channel_id` is required when `line_uid` is
+sent. [Conversion API identity fields](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
 
-## Small-budget launch
+Normalize before hashing:
 
-- Start with one region, one audience, one creative, and one conversion goal.
-- Disable broad expansion and automatic placements until the account's official defaults are known.
-- Use traffic or reach when no conversion signal exists. Move to conversion bidding only after real events land.
-- Confirm billing, review, currency, local policy, and reporting time zone before spend.
-- ⚠ UNVERIFIED — confirm current budget floors, bid rules, learning thresholds, and default placements at the official source.
+- Lowercase email before SHA-256 hashing.
+- Convert a Japanese phone number to international form, such as `090-0123-4567` to `+819001234567`,
+  then SHA-256 hash it.
+- Send the resulting hash as lowercase alphanumeric text.
+
+These transformations and field names come from the [CAPI reference](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html).
+
+Require the hub's `measurement: true` before sending any event. Require the
+hub's `ad_user_data: true` before sending email, phone, LINE, click, cookie, or
+other advertising identifiers. Keep normalized identifiers temporary. Do not
+send raw identifiers when the API requires hashed fields.
+
+## Click ID and first-party cookie
+
+The documented click identifier is `_ly_c`. CAPI accepts `ly_c` from the cookie or URL query
+parameter. A query value has no timestamp, so send it as `<timestamp>.<clickid>`. [Conversion API click identifier](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
+
+The site-user identifier `ly_su` comes from `_ly_su` in `<timestamp>.<suid>` form. `ly_r` comes from
+`_ly_r` in `<timestamp>.<random string>` form. [Conversion API identity fields](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
+
+Capture these values on the landing request and persist them in first-party storage after consent.
+Keep first-touch and latest values when required. Do not invent a cookie lifetime; the cited vendor references do not specify one. [Conversion API reference](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
+
+For cross-domain tracking, `autoLinkDomains` can add `_ly_c` and `_ly_rt` to URLs on the configured
+domain. [Tracking Tag parameters](https://ads-developers.yahoo.co.jp/en/lytag/post/30590590.html)
+
+## Deduplication
+
+Yahoo! JAPAN Ads uses account ID plus `transaction_id` as the deduplication key for seven days after
+counting. The same account and transaction ID from the Tracking Tag and CAPI are duplicates. [Tracking Tag deduplication](https://ads-developers.yahoo.co.jp/en/lytag/post/30590590.html),
+[Conversion API deduplication](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
+
+Implement deduplication as follows:
+
+1. Create one hub `event_id` after the business event is confirmed.
+2. Derive a stable, allowed, 64-character-or-shorter `transaction_id`.
+3. Pass that value as browser `config.transactionId`.
+4. Pass the same value as CAPI `event.transaction_id`.
+5. Store the dispatch result and never create a new ID on retry.
+
+If omitted, the vendor uses account ID plus `event_time` for deduplication. Do not rely on that
+fallback for payment events. [Tracking Tag deduplication](https://ads-developers.yahoo.co.jp/en/lytag/post/30590590.html)
+
+## Campaign Management Tool settings that override code
+
+- The conversion setting chooses the Tracking Tag and the conversion filter.
+  Code cannot make an event match a different filter. [Conversion setup](https://ads-help.yahoo-net.jp/s/article/H000054774?language=en_US)
+- The conversion window is configured in the conversion setting and accepts
+  1–90 days. [Conversion setup](https://ads-help.yahoo-net.jp/s/article/H000054774?language=en_US)
+- A snippet-ID filter requires the event snippet generated for that conversion
+  setting. [Get and install the Tracking Tag](https://ads-help.yahoo-net.jp/s/article/H000054773?language=en_US)
+- `isTest: true` excludes the event from tracking. Set it during testing, then
+  send `false` for production events. [Tracking Tag parameters](https://ads-developers.yahoo.co.jp/en/lytag/post/30590590.html)
+- Search Ads (Shopping) does not support call conversion tracking through the
+  Tracking Tag. Do not map call conversions to this web adapter. [Search Ads
+  (Shopping) announcement](https://ads-developers.yahoo.co.jp/en/ads-api/announcement/26081801.html)
+- Do not place a conventional conversion tag and a Tracking Tag for the same
+  Search Ads (Shopping) conversion. The vendor warns that this can count the
+  conversion more than once. [Search Ads (Shopping) announcement](https://ads-developers.yahoo.co.jp/en/ads-api/announcement/26081801.html)
 
 ## Verification
 
-Use the official test-event view, event history, postback response, or reporting
-API. Reconcile with payment-provider succeeded charges. A successful token call
-does not prove that a conversion can receive ad credit.
+Use the documented Event history view:
 
-> ⚠ UNVERIFIED — confirm the current event-test and reporting operation at the official source.
+1. Open the Display Ads or Search Ads (Shopping) account.
+2. Select **Tools → Tracking tag** under **Access and data**.
+3. Select the Tag ID when more than one tag exists.
+4. Inspect **Event history**.
 
-## Hub conventions
+Event history shows the sender, event type, snippet ID when applicable, last
+received time, and test flag. It distinguishes Tracking Tag events from CAPI
+events. [Check event history](https://ads-help.yahoo-net.jp/s/article/H000054775?language=en_US)
 
-Pair this stub with `ad-conversion-hub` and `ad-experiments`. Keep canonical
-events, consent, hash policy, secret names, and payment-provider truth in the
-hub. A partner gate or missing secret must produce a logged no-op. It must not
-fail checkout.
+Record the redacted CAPI response, canonical event ID, transaction ID, consent
+decision, and payment result. A `202` proves request acceptance only. Reconcile
+purchase and refund counts with payment-provider truth, then check the
+conversion report in the Campaign Management Tool. [Conversion API response](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html),
+[Display Ads conversion data](https://ads-help.yahoo-net.jp/s/article/H000044347?language=en_US)
 
-## Security
+Do not implement a guessed GET validation call. Yahoo! documents Event history
+as the verification surface for Tracking Tag and CAPI events. [Check event
+history](https://ads-help.yahoo-net.jp/s/article/H000054775?language=en_US)
 
-Load code only from the vendor's official HTTPS origin. Keep `YAHOO_JAPAN_ADS_TOKEN`
-server-side. Never log or commit credentials. Send only consented identifiers,
-hashed when the official platform requires hashing.
+## Common pitfalls and security
 
-## Official sources checked (2026-08-11)
+- Use `X-TagAccessToken` for CAPI. Do not substitute an OAuth bearer token. [CAPI headers](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
+- Keep `YAHOO_JAPAN_ADS_CAPI_TOKEN` in the server secret store. Never place it
+  in browser code, URLs, logs, screenshots, or commits.
+- Hash email and phone only after the hub consent gate. Never log raw or
+  normalized identifiers.
+- Use `event.transaction_id`, not a guessed `event_id` field. Use browser
+  `config.transactionId` for the Tracking Tag. [CAPI fields](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html),
+  [Tag fields](https://ads-developers.yahoo.co.jp/en/lytag/post/30590590.html)
+- Use 10-digit UNIX seconds for `event_time`, not milliseconds. [CAPI reference](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
+- Send `action_source: "web"`; the CAPI reference documents no other value. [CAPI reference](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
+- Do not assume `subscription_start` or `refund` is a Yahoo event type. [Event list](https://ads-developers.yahoo.co.jp/en/lytag/post/30590587.html)
+- Do not assume a click-ID lifetime, an app endpoint, a CTV endpoint, or a
+  customer-list upload contract from this documentation. [CAPI reference](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html),
+  [Tracking Tag scope](https://ads-developers.yahoo.co.jp/en/lytag/post/30590584.html)
+- Treat `202` as ingestion acceptance, not ad attribution. [CAPI response](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
+- Keep the adapter a logged no-op when the tag ID, token, consent, or payment
+  truth is unavailable. It must not fail checkout.
 
-- https://ads-developers.yahoo.co.jp/en/conversion-api/
+## Official sources checked (2026-08-31)
+
+- [Create an ad account](https://ads-help.yahoo-net.jp/s/article/H000044258?language=en_US) · [API startup](https://ads-developers.yahoo.co.jp/en/ads-api/startup-guide/before_you_start.html) · [Apply for API use](https://ads-developers.yahoo.co.jp/en/ads-api/startup-guide/apply-api-use.html)
+- [API application](https://ads-developers.yahoo.co.jp/en/ads-api/startup-guide/app-registration.html) · [API call and OAuth](https://ads-developers.yahoo.co.jp/en/ads-api/startup-guide/api-call.html)
+- [Tracking Tag summary](https://ads-developers.yahoo.co.jp/en/lytag/post/30590584.html) · [Tracking Tag startup](https://ads-developers.yahoo.co.jp/en/lytag/post/30590593.html) · [Tracking Tag parameters](https://ads-developers.yahoo.co.jp/en/lytag/post/30590590.html) · [Trackable events](https://ads-developers.yahoo.co.jp/en/lytag/post/30590587.html)
+- [Conversion API access](https://ads-help.yahoo-net.jp/s/article/H000055044?language=en_US) · [Conversion API reference](https://ads-developers.yahoo.co.jp/en/conversion-api/post/30590575.html)
+- [Display Ads Tracking Tag conversion setup](https://ads-help.yahoo-net.jp/s/article/H000054774?language=en_US) · [Event history](https://ads-help.yahoo-net.jp/s/article/H000054775?language=en_US) · [Display Ads conversion data](https://ads-help.yahoo-net.jp/s/article/H000044347?language=en_US)
+- [Search Ads (Shopping) Tracking Tag and CAPI support](https://ads-developers.yahoo.co.jp/en/ads-api/announcement/26081801.html) · [Get and install the Tracking Tag](https://ads-help.yahoo-net.jp/s/article/H000054773?language=en_US)
