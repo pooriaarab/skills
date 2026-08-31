@@ -125,7 +125,7 @@ Send the canonical event in the documented request shape:
       "eventType": "custom",
       "eventId": "<CANONICAL_EVENT_ID>",
       "eventName": "purchase",
-      "eventTime": "<CURRENT_UNIX_EPOCH_SECONDS>",
+      "eventTime": 1788091200,
       "userData": {
         "anonymousId": "<ANONYMOUS_ID>",
         "msclkid": "<MSCLKID>",
