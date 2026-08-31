@@ -52,7 +52,7 @@ See [OneTag for Retail Media Onsite](https://developers.criteo.com/retailer-inte
 ```html
 <script
   type="text/javascript"
-  src="//dynamic.criteo.com/js/ld/ld.js?a=<CRITEO_PARTNER_ID>"
+  src="https://dynamic.criteo.com/js/ld/ld.js?a=<CRITEO_PARTNER_ID>"
   async="true">
 </script>
 <script>
@@ -133,6 +133,8 @@ Authorization: Bearer <CRITEO_DELIVERY_TOKEN>
 The item, price, and quantity arrays must align.
 The API checklist marks `page-id`, `event-type`, `transaction-id`, `item`, `price`, and `quantity` as required for the transaction call.
 See [API call checklist](https://developers.criteo.com/retailer-integration/docs/api-calls-checklist).
+
+URL-encode each dynamic value before interpolating it into the query string. Preserve the literal `|` array separators; do not encode those.
 
 This Delivery API call is an ad request with transaction context.
 It is not a generic server conversion endpoint or a substitute for the hub's payment event.
@@ -236,6 +238,7 @@ See [OneTag troubleshooting](https://help.criteo.com/kb/guide/en/how-to-troubles
   Duplicate firing can create duplicate billable activity. See [Beacon types](https://developers.criteo.com/retailer-integration/docs/beacon-types).
 - Do not put bearer tokens or client secrets in browser code, URLs, logs, screenshots, or commits.
   Store them in the server secret store and use HTTPS for requests.
+- Load client code only from the vendor's official HTTPS origin. Never mirror the loader through your own CDN.
 - Do not fail checkout when Criteo is unavailable.
   Return the hub's adapter result and preserve payment-provider truth.
 
