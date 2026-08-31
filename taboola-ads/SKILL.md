@@ -95,9 +95,10 @@ Taboola allows a unique descriptive Event Name, and the name sent by S2S must
 match that field exactly. The Conversion Name is only descriptive.
 See [manual S2S rule setup](https://developers.taboola.com/pixel/docs/s2s-manual-integration).
 
-Create a distinct event-based rule for each event you measure. Keep the hub's
-canonical `event_id` internally; the documented S2S contract does not define it.
-See [S2S fields](https://developers.taboola.com/pixel/docs/bulk-submit-s2s-conversions).
+Create a distinct event-based rule for each non-`page_view` event you measure;
+`page_view` uses the URL-based rule from the base pixel load instead. Keep the
+hub's canonical `event_id` internally; the documented S2S contract does not
+define it. See [S2S fields](https://developers.taboola.com/pixel/docs/bulk-submit-s2s-conversions).
 
 ## Server-side conversions API
 
@@ -140,8 +141,9 @@ Demographic data requires user consent, and Taboola says not to submit any
 First Party Data when age is under 18.
 See [Submitting First Party Data](https://developers.taboola.com/pixel/docs/submitting-first-party-data).
 
-Lowercase email before hashing with SHA-256. Use the resulting hash in the
-pixel's `unified_id` parameter; do not send raw email in that field.
+Trim surrounding whitespace and lowercase email before hashing with SHA-256.
+Use the resulting hash in the pixel's `unified_id` parameter; do not send raw
+email in that field.
 See [Taboola hashing guidance](https://developers.taboola.com/pixel/docs/submitting-first-party-data).
 
 The S2S contract defines no identity fields. Require hub measurement consent
