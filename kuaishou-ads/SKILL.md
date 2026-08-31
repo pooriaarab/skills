@@ -193,9 +193,12 @@ and [the hub deduplication policy](../ad-conversion-hub/SKILL.md#client-and-serv
 
 Send activation and registration only once per product-defined user action,
 because the official event definitions say that activation and registration
-are first-time events. For network timeouts, use the hub's bounded retry and
-dead-letter policy. Do not replay an uncertain request as if Kuaishou had
-documented idempotency. See [the event definitions](https://open.kuaishou.com/miniGameDocs/operation/DSP/DSP-IAA#%E5%9B%9B%E3%80%81%E7%A3%81%E5%8A%9B%E6%99%BA%E6%8A%95%E6%95%B0%E6%8D%AE%E5%9B%9E%E4%BC%A0)
+are first-time events, and the callback documents no idempotency key. Retry
+only a failure known to occur before the request reached Kuaishou, such as a
+connection error. For a timeout or other ambiguous failure after the request
+was sent, dead-letter it for manual reconciliation instead of replaying it;
+Kuaishou gives no dedup rule to make an automatic replay of an uncertain
+first-time event safe. See [the event definitions](https://open.kuaishou.com/miniGameDocs/operation/DSP/DSP-IAA#%E5%9B%9B%E3%80%81%E7%A3%81%E5%8A%9B%E6%99%BA%E6%8A%95%E6%95%B0%E6%8D%AE%E5%9B%9E%E4%BC%A0)
 and [the hub retry policy](../ad-conversion-hub/SKILL.md#retry-policy).
 
 ## DSP and API settings that override code
