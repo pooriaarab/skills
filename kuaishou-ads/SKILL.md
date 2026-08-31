@@ -46,7 +46,10 @@ POST https://ad.e.kuaishou.com/rest/openapi/oauth2/authorize/refresh_token
 The guide documents `auth_code` as valid for 10 minutes and usable once, and
 `refresh_token` as valid for 30 days. It uses inconsistent wording for the
 access-token lifetime. Read the returned expiry and do not hard-code one day.
-Each refresh returns a new pair and invalidates the old pair. See [the token
+Each refresh returns a new pair and invalidates the old pair. Serialize refresh
+operations per account and persist the new pair only after recording the
+response, so two concurrent refreshes cannot invalidate each other's token or
+leave a stale pair stored. See [the token
 instructions](https://open.kuaishou.com/miniGameDocs/operation/DSP/DSP-IAA#%E4%BA%94%E3%80%81%E5%BC%80%E6%88%B7%E5%88%9B%E7%BC%96%E4%BD%93%E9%AA%8C).
 
 Use these local secret names. They are not Kuaishou parameter names:
