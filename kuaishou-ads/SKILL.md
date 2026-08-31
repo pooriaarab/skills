@@ -271,8 +271,10 @@ callback field list](https://open.kuaishou.com/miniGameDocs/operation/DSP/DSP-IA
 - Do not invent a website pixel, browser SDK, campaign endpoint, JSON body,
   hash field, or event parameter.
 - Send the complete launch-query `callback`; do not use a sample or truncation.
-- Keep `app_secret`, `access_token`, `refresh_token`, and callback values out of
-  client code, logs, screenshots, and commits.
+- Keep `app_secret`, `access_token`, and `refresh_token` out of client code,
+  logs, screenshots, and commits. The `callback` value is read from the client
+  launch query by design; forward it to the server without logging,
+  screenshotting, or committing it.
 - Do not make payment success depend on Kuaishou callback success. Return a
   platform-specific failed or skipped status through the hub.
 
