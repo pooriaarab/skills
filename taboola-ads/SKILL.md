@@ -179,6 +179,11 @@ See [conversion deduplication](https://developers.taboola.com/pixel/docs/convers
 
 The documented example deduplicates a repeated S2S event within one minute when
 Click ID, Event Name, and Order ID match. See [deduplication examples](https://developers.taboola.com/pixel/docs/conversion-dedup).
+Do not treat S2S as generally idempotent: a retry sent after that window (for
+example, a hub retry following a lost or timed-out postback response) is not
+guaranteed to be deduplicated and can be counted as a second conversion. Keep
+retries inside the documented window, or reconcile ambiguous double-sends
+against payment-provider truth instead of resending blindly.
 
 Use the same Click ID and Event Name across dispatches. Send `orderid` for
 purchase events when an order identifier exists. See [deduplication](https://developers.taboola.com/pixel/docs/conversion-dedup)
