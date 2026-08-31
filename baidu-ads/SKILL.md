@@ -25,6 +25,10 @@ BAIDU_OCPC_PRODUCTION  public value from the Baidu web code
 BAIDU_OCPC_BD_VID      first-party storage for the captured bd_vid
 ```
 
+`BAIDU_OCPC_BD_VID` is captured fresh per visitor and per landing page. Unlike
+the other two names, it is not a single static deployment secret — never bind
+one process-wide value and replay it on every `logidUrl`.
+
 Do not treat these local names as Baidu configuration. The vendor-defined names appear in the [web code](https://ocpx.baidu.com/developer/ocpc-doc/js/base-install/) and [upload schema](https://ocpx.baidu.com/developer/ocpc-doc/api/api-doc/api-interface/).
 
 Baidu also publishes a general Promotion API and a developer center for API permission management. Use the product-specific oCPC contract for conversion work. See [Baidu Promotion API](https://pd.baidu.com/Knowledge/1780.html).
@@ -34,18 +38,22 @@ Baidu also publishes a general Promotion API and a developer center for API perm
 Baidu's web route has a base SDK and conversion code. Install the base code in
 the page `<head>` before adding a conversion call. See [JS overview](https://ocpx.baidu.com/developer/ocpc-doc/js/) and [base installation](https://ocpx.baidu.com/developer/ocpc-doc/js/base-install/).
 
-Use the published production value and script URL exactly as documented:
+Copy the base code from the account's own oCPC console web-code page. Replace
+`production` with the account's `BAIDU_OCPC_PRODUCTION` value everywhere it
+appears, including the script URL query string — reusing Baidu's documentation
+sample value attributes every conversion to Baidu's sample account instead of
+the advertiser's:
 
 ```html
 <script>
   window._agl = window._agl || [];
   (function () {
-    _agl.push(['production', '_f7L2XwGXjyszb4d1e2oxPybgD']);
+    _agl.push(['production', '<BAIDU_OCPC_PRODUCTION>']);
     (function () {
       var agl = document.createElement('script');
       agl.type = 'text/javascript';
       agl.async = true;
-      agl.src = 'https://fxgate.baidu.com/angelia/fcagl.js?production=_f7L2XwGXjyszb4d1e2oxPybgD';
+      agl.src = 'https://fxgate.baidu.com/angelia/fcagl.js?production=<BAIDU_OCPC_PRODUCTION>';
       var s = document.getElementsByTagName('script')[0];
       s.parentNode.insertBefore(agl, s);
     })();
@@ -112,7 +120,7 @@ The documented optional fields are `deviceType`, `deviceId`, `isConvert`, `conve
 
 Read `header.status` from every response. Baidu defines `0` as success, `1` as partial success, `2` as total failure, `3` as token failure, and `4` as server error. See [response statuses](https://ocpx.baidu.com/developer/ocpc-doc/api/api-doc/api-interface/).
 
-Retry only transient failures under the hub's bounded policy. Baidu's sample retries transport failures and status `4`; it stops for other statuses. Record failed positions from a partial response before retrying. See [Baidu sample](https://ocpx.baidu.com/developer/ocpc-doc/api/api-doc/api-interface/) and [ad-conversion-hub](../ad-conversion-hub/SKILL.md).
+Retry only failures the hub can safely replay. Status `4` (server error) means Baidu did not accept the record, so retry it under the hub's bounded policy. A transport failure — no response received — is ambiguous: Baidu may have already accepted the record, and the checked schema defines no dedup key, so treat it as unknown and dead-letter it for reconciliation instead of retrying. Record failed positions from a partial response before retrying. See [Baidu sample](https://ocpx.baidu.com/developer/ocpc-doc/api/api-doc/api-interface/) and [ad-conversion-hub](../ad-conversion-hub/SKILL.md#retry-policy).
 
 The checked web upload schema has no email, phone, browser identity, event ID, or browser/server deduplication field. Do not add any. Use the hub's local dispatch record for idempotency. See [upload schema](https://ocpx.baidu.com/developer/ocpc-doc/api/api-doc/api-interface/).
 

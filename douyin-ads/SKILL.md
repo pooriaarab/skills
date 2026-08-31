@@ -78,9 +78,9 @@ the model's [`event_name` field](https://raw.githubusercontent.com/oceanengine/a
 | `page_view` | None in the public signal model | Keep first-party measurement |
 | `view_content` | None in the public signal model | Keep first-party measurement |
 | `lead` | None in the public signal model | Keep first-party measurement |
-| `signup` | `register` | Use only when the account maps registration to this signal |
+| `signup` | `register` | Send only when the account's documented return method is AdConvertSignal |
 | `begin_checkout` | None in the public signal model | Keep first-party measurement |
-| `purchase` | `purchase` | Send after payment confirmation |
+| `purchase` | `purchase` | Send only when the account's documented return method is AdConvertSignal |
 | `subscription_start` | None in the public signal model | Keep first-party measurement |
 | `refund` | None in the public signal model | Reconcile with payment truth |
 
@@ -127,10 +127,14 @@ Do not infer account-specific required fields from that generator output. Use
 only fields that the approved account and current product flow support.
 
 Do not treat this specialized route as a generic website CAPI. The reviewed
-official sources publish no generic website conversion contract. Standard app
-and web integrations use Event Management with DataFinder monitoring links. See
-[Event Management and API return](https://www.volcengine.com/docs/84129/1261611?lang=zh)
-and the [SDK API index](https://github.com/oceanengine/ad_open_sdk_java#api接口列表).
+official sources publish no generic website conversion contract, and this
+endpoint applies only to accounts whose documented Event Management return
+method is AdConvertSignal — confirm that return method in the console before
+sending `signup` or `purchase` here. When the account's documented return
+method is Event Management with DataFinder monitoring links instead, use that
+route rather than AdConvertSignal. See [Event Management and API
+return](https://www.volcengine.com/docs/84129/1261611?lang=zh) and the [SDK
+API index](https://github.com/oceanengine/ad_open_sdk_java#api接口列表).
 
 ## Identity and consent
 
