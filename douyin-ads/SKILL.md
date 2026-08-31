@@ -103,8 +103,16 @@ Access-Token: <server-token>
 Content-Type: application/json
 ```
 
-The SDK declares JSON input and a `200 OK` response for this operation. See
-the [signal API class](https://raw.githubusercontent.com/oceanengine/ad_open_sdk_java/main/src/main/java/com/bytedance/ads/api/AdConvertSignalV2Api.java).
+The SDK declares JSON input and a `200 OK` response for this operation. The
+response body itself carries `code`, `message`, `data`, and `request_id`
+fields. See the [signal API class](https://raw.githubusercontent.com/oceanengine/ad_open_sdk_java/main/src/main/java/com/bytedance/ads/api/AdConvertSignalV2Api.java)
+and [response model](https://raw.githubusercontent.com/oceanengine/ad_open_sdk_java/main/src/main/java/com/bytedance/ads/model/AdConvertSignalV2Response.java).
+
+An HTTP `200` proves the request reached Ocean Engine. It does not prove the
+signal was accepted — read the response body's `code` on every call and treat
+a non-success `code` as a failed dispatch under the hub's retry policy, the
+same way the response's HTTP status alone would be insufficient. Record the
+redacted `code`, `message`, and `request_id` in the dispatch log.
 
 The request model exposes these fields, among others:
 
@@ -207,7 +215,9 @@ console before launch.
 Use three proofs:
 
 1. **Request proof:** record a redacted response from OAuth, asset creation, or
-   `AdConvertSignal` dispatch. The SDK declares `200 OK` for the signal call.
+   `AdConvertSignal` dispatch, including the signal response's `code` and
+   `message`. The SDK declares `200 OK` for the signal call, but only a
+   success `code` in the body proves Ocean Engine accepted the record.
    See the [signal API class](https://raw.githubusercontent.com/oceanengine/ad_open_sdk_java/main/src/main/java/com/bytedance/ads/api/AdConvertSignalV2Api.java).
 2. **Platform proof:** use Event Management debugging and reporting to confirm
    the configured event and its received data. The official guide describes
@@ -228,8 +238,13 @@ attribution or optimization delivery.
 - Do not treat a configured event as attributed revenue. Reconcile through the [hub](../ad-conversion-hub/SKILL.md).
 - Keep app secrets, tokens, device IDs, and advertiser data server-side. See the [hub adapter contract](../ad-conversion-hub/SKILL.md#adapter-contract).
 - Redact tokens, identifiers, and event properties from logs and screenshots. See the [hub security rules](../ad-conversion-hub/SKILL.md#adapter-contract).
-- Return `skipped` when permission, account configuration, or required contract
-  details are absent. See [hub adapter behavior](../ad-conversion-hub/SKILL.md#adapter-contract).
+- Return `skipped` only when a required secret, account configuration, or
+  contract detail is absent before dispatch is attempted. Treat a
+  permission-denied response from the API (for example an expired token or a
+  revoked OAuth grant) as `failed`, not `skipped` — the hub's adapter contract
+  reserves `skipped` for known absent configuration and `failed` for a
+  rejected request, so an integration that loses permission stays visible
+  instead of going silently missing. See [hub adapter contract](../ad-conversion-hub/SKILL.md#adapter-contract).
 - Keep ad dispatch failures separate from payment webhook success.
 
 The last two behaviors follow the hub's failure-isolation rules. See the
