@@ -165,6 +165,63 @@ one is a real decision, not a shortcut.
 installed there.** Requiring a check the repo never runs blocks every pull request in it,
 permanently.
 
+## What makes a gate real
+
+A gate is real only when it reports **before** the merge and something **blocks** on
+its result. Miss either half and it is a record, not a gate.
+
+Three ways a gate stops being real:
+
+- It reports after the merge.
+- Nothing blocks on its result.
+- It reads green for a reason unrelated to what it checks. A check stuck in
+  `queued` for hours, sitting next to a commit status that says `success`, looks
+  green to anything that does not read both.
+
+On 2026-08-29 an unattended process holding the account token squash-merged six
+pull requests across `pooriaarab/skills` and `pooriaarab/agents-private`, at
+four-second intervals. One was skills#199. It carried four unaddressed CodeRabbit
+findings, two rated Major, one of them a documented command that does not exist.
+Every layer had run. Nothing blocked the merge.
+
+To keep a gate real:
+
+- Make the check required, wherever the plan allows it.
+- Where it cannot be required, name who merges and when. A named person is a
+  weaker gate than a required check and a far stronger one than nobody.
+- Never let an unattended process hold a merge token.
+
+The plan decides how much of this you can have. Rulesets and required status
+checks work on public repositories and return `403 Upgrade` on private ones. In
+this fleet that is 31 public repos that could be gated today at no cost and are
+not, against 74 private ones that cannot be until the plan changes. On the
+private half, red CI is a signal rather than a gate — which is exactly why the
+two local layers exist, and why bypassing them is a real decision.
+
+## What proof looks like, by kind of work
+
+The rule is one sentence: **show the thing a reader cannot otherwise check.** A
+reviewer can read your code. A reviewer cannot see your screen, run your query,
+open your email in Outlook, or watch your deploy.
+
+| Kind of work | What the reader cannot check | So show |
+|---|---|---|
+| Product UI | your screen | Before and after, same viewport, same data |
+| Landing or marketing page | the rendered page | The preview URL, plus a capture at every breakpoint you touched |
+| Design system or component | every state | The component in both themes, and the states you changed |
+| Ad or social copy | how the platform renders it | The platform's own preview, captured |
+| Email | how a client renders it | The rendered email in one dark and one light client |
+| API | what it answers | The request and the response, as a `curl` a reader can run |
+| Query, report or analytics | the numbers | The query, its output, and the row count |
+| Schema or migration | that it is reversible | Up and down, run against a copy, with the row counts either side |
+| Deploy or infrastructure | that it landed | The plan output, or the deployed SHA answering |
+| Backend logic | that it was broken before | The test that fails without the change and passes with it |
+| Docs prose | nothing — they can read it | The diff. `Proof: n/a` is right here |
+
+A screenshot of the result is not proof of a change. One image shows what the
+screen looks like now; it cannot show that your diff is why. That is why one
+attachment warns and two pass.
+
 ## Rolling it out
 
 ```bash
