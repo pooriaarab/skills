@@ -1,0 +1,9 @@
+Council: GPT-5.6 (Codex) [openai], Gemini 3 Pro [gemini], Kimi K3 [moonshot], Grok 4.5 [openrouter], GPT-5.6 (scope) [openrouter]
+- Kimi K3: moonshot returned 429; retrying via openrouter
+- GPT-5.6 (Codex) (30.9s): ok
+- Gemini 3 Pro (8.9s): ok
+- Kimi K3 (90.0s): SKIP/ERR moonshot HTTP 429, openrouter: timed out
+- Grok 4.5 (90.0s): SKIP/ERR timed out
+- GPT-5.6 (scope) (7.5s): ok
+Council wall time: 90.8s (timeout 90s)
+Wrote council-findings.md
