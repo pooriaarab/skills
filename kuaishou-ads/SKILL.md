@@ -221,6 +221,16 @@ The source places `access_token` and `app_id` in the query string. It defines
 `startTime`, `endTime`, `type`, `page`, and `pageSize` in the JSON body. It
 defines `result=1` as a successful response. See [the request definition](https://open.kuaishou.com/docs/develop/server/addata).
 
+This is a mini-program open-platform endpoint (`open.kuaishou.com`), a
+different host and API family from the MAPI advertiser OAuth documented under
+[Account and access](#account-and-access). The fetched source does not confirm
+whether its `access_token` and `app_id` are the same `KUAISHOU_AD_ACCESS_TOKEN`
+and `KUAISHOU_AD_APP_ID` obtained from the MAPI flow, or the separate
+mini-program credential referenced by `KUAISHOU_MINIAPP_ID`. Do not assume the
+MAPI advertiser token works here. Confirm the correct credential pair with
+Kuaishou or the current mini-program open-platform authentication guide before
+wiring this call.
+
 Use the source's exact field casing for `access_token`, `app_id`, `startTime`,
 `endTime`, `type`, `page`, `pageSize`, and `result`. See [the report parameter
 table](https://open.kuaishou.com/docs/develop/server/addata).
