@@ -41,6 +41,7 @@ See [authentication basics](https://developers.taboola.com/backstage-api/referen
 Install the base pixel in the `<head>` of every relevant page. Replace every
 `<account_id>` placeholder with the numeric Taboola Account ID.
 See [manual base-pixel installation](https://developers.taboola.com/pixel/docs/add-the-base-pixel-manually).
+
 ```html
 <!-- Taboola Pixel Code -->
 <script type="text/javascript">
@@ -58,6 +59,7 @@ See [manual base-pixel installation](https://developers.taboola.com/pixel/docs/a
 </script>
 <!-- End of Taboola Pixel Code -->
 ```
+
 Taboola recommends Google Tag Manager or a Shopify app for base-pixel setup.
 Manual installation requires custom development.
 See [pixel installation options](https://developers.taboola.com/pixel/docs/conversion-tracking-overview).
@@ -106,6 +108,7 @@ parameters are the case-sensitive Taboola Click ID and exact Event Name.
 ```text
 https://trc.taboola.com/actions-handler/log/3/s2s-action?click-id=CLICK_ID&name=EVENT_NAME
 ```
+
 Optional parameters are `revenue`, `currency`, `quantity`, and `orderid`.
 The postback uses a three-letter currency code, and the account default applies
 when `currency` is omitted.
@@ -116,6 +119,7 @@ The bulk endpoint is:
 POST https://trc.taboola.com/{account-id}/log/3/bulk-s2s-action
 Content-Type: application/json
 ```
+
 Its body contains one `actions` array. Each action requires `click-id`,
 `timestamp`, and `name`; `timestamp` is milliseconds since Unix Epoch.
 Optional fields are `revenue`, `currency`, `quantity`, and `orderid`.
