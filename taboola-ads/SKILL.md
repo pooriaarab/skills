@@ -112,6 +112,11 @@ parameters are the case-sensitive Taboola Click ID and exact Event Name.
 https://trc.taboola.com/actions-handler/log/3/s2s-action?click-id=CLICK_ID&name=EVENT_NAME
 ```
 
+URL-encode `click-id`, `name`, and every optional parameter value. An Event
+Name from a custom naming scheme or an `orderid` containing spaces, `&`, or
+other reserved characters will otherwise corrupt the query string or match the
+wrong Event Name.
+
 Optional parameters are `revenue`, `currency`, `quantity`, and `orderid`.
 The postback uses a three-letter currency code, and the account default applies
 when `currency` is omitted.
