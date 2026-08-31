@@ -233,4 +233,4 @@ Official references checked 2026-08-11:
 
 - [Meta Conversions API](https://developers.facebook.com/docs/marketing-api/conversions-api/)
 - [Meta Pixel](https://developers.facebook.com/docs/meta-pixel/)
-- [Custom Audiences](https://developers.facebook.com/docs/marketing-api/audiences-api/custom-audiences/)
+- [Custom Audiences](https://developers.facebook.com/docs/marketing-api/audiences/)

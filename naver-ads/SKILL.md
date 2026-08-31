@@ -39,8 +39,8 @@ separate setup. See the [GFA tracking management guide](https://ads.naver.com/he
 
 The Search Ads API manages ads and reports. It is not a conversion ingestion
 API. Apply in `Tools > API Usage Management`; Naver then issues an access
-license and secret key. It covers some products, including site-search ads. See
-the [API access guide](https://ads.naver.com/help/faq/302) and [documentation](https://naver.github.io/searchad-apidoc/).
+license and secret key. It covers some products, including site-search ads. Apply through the Naver Ads console; see the
+[Search Ads API documentation](https://naver.github.io/searchad-apidoc/).
 
 Use these adapter names. Naver does not define environment-variable names.
 
@@ -106,7 +106,7 @@ caps reported purchase values at 1 billion.
 
 Naver's public conversion contract is browser `wcs.trans()`. The [test guide](https://naver.github.io/conversion-tracking/pages/04_trans_script_test_guide/) shows `POST https://wcs.naver.com/b`, but does not document a server API.
 
-The public [Search Ads API](https://ads.naver.com/help/faq/302) documents ad management and reporting. It documents no
+The public [Search Ads API](https://naver.github.io/searchad-apidoc/) documents ad management and reporting. It documents no
 conversion upload, conversion identity fields, or server idempotency. Therefore:
 
 - Do not invent a Naver CAPI endpoint or bearer token.
