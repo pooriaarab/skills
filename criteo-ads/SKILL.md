@@ -60,7 +60,7 @@ See [OneTag for Retail Media Onsite](https://developers.criteo.com/retailer-inte
     { event: "setAccount", account: "<CRITEO_PARTNER_ID>" },
     { event: "setRetailerVisitorId", id: "<RETAILER_VISITOR_ID>" },
     { event: "setCustomerId", id: "<CUSTOMER_ID>" },
-    { event: "trackTransaction", id: "<ORDER_ID>", item: [
+    { event: "trackTransaction", id: "<ORDER_ID>", page_id: "<TRANSACTION_PAGE_ID>", item: [
       { id: "<SKU>", price: "49.99", quantity: "1" }
     ] }
   );

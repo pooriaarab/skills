@@ -113,8 +113,10 @@ Spotify CAPI accepts IP address, device ID, hashed email, and hashed phone
 identifiers. At least one identifier is required. Spotify recommends including
 IP address and device ID when possible. See the [CAPI identity guidance](https://developer.spotify.com/documentation/ads-api/guides).
 
-Hash email and phone with SHA-256 after trimming and lowercasing. Send the
-result in `hashed_emails` or `hashed_phone_number`; do not send raw values.
+Normalize before hashing: trim and lowercase email, and reduce phone to
+E.164 digits only (strip spaces, punctuation, and leading zeros, keep the
+country code). Hash each with SHA-256 and send the result in `hashed_emails`
+or `hashed_phone_number`; do not send raw values.
 See the [CAPI best practices](https://developer.spotify.com/documentation/ads-api/guides).
 
 Require the hub's measurement consent before sending Pixel or CAPI events.
