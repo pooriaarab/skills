@@ -117,6 +117,7 @@ For a Direct API integration, the documented transaction request uses these fiel
 
 ```text
 GET https://d.<region>.criteo.com/delivery/retailmedia
+Authorization: Bearer <CRITEO_DELIVERY_TOKEN>
   ?criteo-partner-id=<CRITEO_PARTNER_ID>
   &retailer-visitor-id=<RETAILER_VISITOR_ID>
   &customer-id=<CUSTOMER_ID>

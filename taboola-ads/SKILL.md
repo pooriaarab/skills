@@ -11,6 +11,7 @@ server-to-server (S2S) tracking. Use both when the funnel permits it. See the
 
 Use [ad-conversion-hub](../ad-conversion-hub/SKILL.md) for the canonical event
 envelope, consent gate, identity rules, retry policy, and adapter contract.
+
 ## Account and access
 
 Apply for an advertiser account through Taboola's account form. Backstage API
@@ -34,6 +35,7 @@ See [token response and notes](https://developers.taboola.com/backstage-api/refe
 Use the bearer token in the `Authorization` header for Backstage requests.
 Taboola's sample request also uses `Content-Type: application/json`.
 See [authentication basics](https://developers.taboola.com/backstage-api/reference/authentication-basics).
+
 ## Client-side Taboola Pixel
 
 Install the base pixel in the `<head>` of every relevant page. Replace every
@@ -66,6 +68,7 @@ and [event pixels](https://developers.taboola.com/pixel/docs/event-pixels).
 URL-based conversions need only the base pixel. Event-based conversions need
 an event pixel or the corresponding generated event code.
 See [event-pixel requirements](https://developers.taboola.com/pixel/docs/event-pixels).
+
 ## Rule setup and event mapping
 
 In Realize, select **Tracking → Conversions → + New Conversion**. Choose a URL
@@ -91,6 +94,7 @@ See [manual S2S rule setup](https://developers.taboola.com/pixel/docs/s2s-manual
 Create a distinct event-based rule for each event you measure. Keep the hub's
 canonical `event_id` internally; the documented S2S contract does not define it.
 See [S2S fields](https://developers.taboola.com/pixel/docs/bulk-submit-s2s-conversions).
+
 ## Server-side conversions API
 
 Taboola's documented direct server surface is manual S2S tracking, not a named
@@ -159,6 +163,7 @@ define no Taboola cookie name or Click ID retention period. Use hub policy inste
 S2S requires `click-id`. If no Click ID exists, keep the first-party event in
 the hub and do not send an invalid Taboola S2S request.
 See [postback required parameters](https://developers.taboola.com/pixel/docs/the-postback-url).
+
 ## Deduplication
 
 Taboola deduplicates within the same Click ID context. With dual-method
