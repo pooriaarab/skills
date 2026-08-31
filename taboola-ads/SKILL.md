@@ -11,6 +11,7 @@ server-to-server (S2S) tracking. Use both when the funnel permits it. See the
 
 Use [ad-conversion-hub](../ad-conversion-hub/SKILL.md) for the canonical event
 envelope, consent gate, identity rules, retry policy, and adapter contract.
+Pair it with [ad-experiments](../ad-experiments/SKILL.md) for one-audience tests, seed sizing, PII-export authorization, and payment-provider truth.
 
 ## Account and access
 
