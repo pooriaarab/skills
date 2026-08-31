@@ -57,7 +57,7 @@ cannot receive website information. See [Standard Segment](https://help.dsp.sams
 Use the exact tag copied from Samsung DSP. The public example is:
 
 ~~~html
-<img src="//rtb.adgrx.com/segments/XXXX/yyy.gif" width="1" height="1" border="0" />
+<img src="https://rtb.adgrx.com/segments/XXXX/yyy.gif" width="1" height="1" border="0" />
 ~~~
 
 The example comes from Samsung's Standard Segment guide. Do not replace the
