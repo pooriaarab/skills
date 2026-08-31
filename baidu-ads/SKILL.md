@@ -126,7 +126,9 @@ The checked web upload schema has no email, phone, browser identity, event ID, o
 
 ## App conversion routes
 
-Baidu documents two app collection routes. The app API sends click data to the advertiser or a monitoring platform, which matches app conversions and calls the supplied `callback_url`. The app SDK uploads app events to Baidu directly. See [app collection overview](https://ocpx.baidu.com/developer/ocpc-doc/app/).
+Baidu documents two app collection routes. The app API sends click data to the advertiser or a monitoring platform, which matches app conversions and reports them back to Baidu at the fixed, documented callback host below. The app SDK uploads app events to Baidu directly. See [app collection overview](https://ocpx.baidu.com/developer/ocpc-doc/app/).
+
+Treat the inbound `callback_url` field as untrusted input, not as a destination to call. Build the callback request from the fixed `ocpc.baidu.com` host and path shown below; never issue an outbound request to a `callback_url` value taken verbatim from click data, since a forged click could point it at an internal address (SSRF).
 
 For app API traffic, the documented monitoring request can include `idfa`, `imei_md5`, `oaid`, `click_id`, and `callback_url`. Baidu defines `imei_md5` as lowercase MD5 of the original IMEI, while `idfa` and `oaid` remain raw values. See [app API parameters](https://ocpx.baidu.com/developer/ocpc-doc/app/app-interface/README1.html).
 
@@ -228,6 +230,7 @@ raw returns, filtered reports, and the hub source event. See [report timing](htt
 - Do not send undocumented email, phone, event ID, or browser deduplication fields. See [upload schema](https://ocpx.baidu.com/developer/ocpc-doc/api/api-doc/api-interface/).
 - Keep tokens, `akey`, and device identifiers server-side. Do not log or commit them. See [API access](https://ocpx.baidu.com/developer/ocpc-doc/api/api-doc/api-interface/) and [app API parameters](https://ocpx.baidu.com/developer/ocpc-doc/app/app-interface/README1.html).
 - Keep payment and signup flows independent from Baidu. A missing Baidu match must not fail the business event. See [ad-conversion-hub](../ad-conversion-hub/SKILL.md).
+- Never call an outbound URL taken from inbound click or monitoring data. Call only the fixed, documented `ocpc.baidu.com` callback host. See [callback interface](https://ocpx.baidu.com/developer/ocpc-doc/app/app-interface/README1.html).
 
 ## Official sources checked (2026-08-29)
 
