@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pooria Photo"
+  short_description: "Create natural identity-faithful photos of Pooria Arab"
+  default_prompt: "Create a natural photo of Pooria for this specific use."
