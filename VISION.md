@@ -6,23 +6,23 @@ A collection of Claude Code skills for AI-aware development and life organizatio
 
 ## Who it is for
 
-The owner: a solo developer who ships products with coding agents as the main workforce and pays the token, CI, and runner bills personally. The skills assume that reader. `ci-cost-at-agent-scale` fixes repos "where agents open most of the pull requests". `delegate-implementation` plans with an expensive model and implements with a cheap one to cut cost. The organizer suite, the census skill, and the visa skill act on one person's files, preferences, and paperwork, and store no PII. A second reader — anyone who copies a skill into their own setup — benefits but does not drive design. <!-- CHECK -->
+The owner: a solo developer who ships products with coding agents as the main workforce and pays the token, CI, and runner bills personally. The skills assume that reader. `ci-cost-at-agent-scale` fixes repos "where agents open most of the pull requests". `delegate-implementation` plans with an expensive model and implements with a cheap one to cut cost. The organizer suite, the census skill, and the visa skill act on one person's files, preferences, and paperwork. The census and visa skills store no PII; the organizer suite does hold user data, because mirroring notes and contacts is what it is for. A second reader — anyone who copies a skill into their own setup — benefits but does not drive design.
 
 ## What good looks like
 
 - An agent completes a task end to end from one skill and stops where a human must act — the census skill fills the StatCan form and halts before submit.
-- A skill that meets the real platform gets corrected in place, and the commit names the live run — "Correct the Canva skill from a real portal submission".
+- A skill that a live run contradicts gets corrected in place, and the commit names that run — "Correct the Canva skill from a real portal submission".
 - A cost skill shows a before/after number on the owner's own usage: ~65% less token use (eco-mode), ~45% lower cost (agent-context-economy), 50–80% savings from delegated implementation.
 - A CI optimization lands only after a measurement names the constraint: latency versus machine seconds first, then the critical path, then cache health.
-- A life-admin skill handles personal data without storing any of it: "Zero PII stored".
+- A life-admin skill handles personal data without storing any of it. `canada-census` and `schengen-visa-application` both state "Zero PII stored".
 
 ## Explicitly not this
 
-- An application or an installable package. The root has no `package.json` and no source tree; aside from a handful of top-level docs (README, AGENTS, this file), every top-level entry is a skill directory. A runtime, a CLI binary, or an npm module does not belong here.
+- An application or an installable package. The root has no `package.json` and no source tree; every top-level entry is a skill directory, a top-level doc (README, AGENTS, this file), or a suite container that holds sub-skills rather than a `SKILL.md` of its own (`organizer/`, `brand/`, `docs/`, `coda-pack/`). A runtime, a CLI binary, or an npm module does not belong here.
 - A platform ad skill with its own tracking scheme. The 49 platform skills take events, consent, hashing, deduplication, and failure isolation from `ad-conversion-hub`; a new platform skill must reuse that contract, not redefine it.
 - A rewrite of a live-verified step from vendor documentation. The commit log corrects skills from live submissions, real campaigns, and real portals; a live run outranks the doc the text came from.
 - A second entry point for a domain the repo already routes. CI starts at `ci-speed-diagnosis` and life organization starts at `life-organizer`; a parallel router for the same domain splits the path every new reader must start on.
-- A life-admin skill that stores personal data. The census and visa skills state "Zero PII stored" and stop before irreversible steps; a skill that saves that data breaks the property they state. <!-- CHECK -->
+- A life-admin skill that stores personal data. The census and visa skills state "Zero PII stored" and stop before irreversible steps; a skill that saves that data breaks the property they state.
 
 ## How it pays for itself
 
@@ -30,4 +30,4 @@ Nobody sells this repo: the README names no product or price, and the commit log
 
 ## The current bet
 
-As of 2026-08-31, the bet is that this collection works as the operating manual for one operator's agents — real products, real hosts, real ad campaigns — and that live use keeps correcting it faster than the platforms drift; test it by 2026-11-30 against the commit log, where "Correct" commits should keep landing beside the adds. <!-- CHECK -->
+As of 2026-08-31, the bet is that this collection works as the operating manual for one operator's agents — real products, real hosts, real ad campaigns — and that live use keeps correcting it faster than the platforms drift; test it by 2026-11-30 against the commit log, where "Correct" commits should keep landing beside the adds.
