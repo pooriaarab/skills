@@ -4,8 +4,8 @@ Use this baseline for private repositories. Adapt the build and verification
 commands to the project. An authenticated app is incomplete until its real login
 flow runs against `steps.preview.outputs.preview_url`.
 
-Set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as secrets. Set
-`CLOUDFLARE_PREVIEW_HOST_SUFFIX` as a repository variable for custom domains.
+Set `CLOUDFLARE_API_TOKEN` as a repository secret. Set `CLOUDFLARE_ACCOUNT_ID`
+and `CLOUDFLARE_PREVIEW_HOST_SUFFIX` as repository variables.
 For example, use `preview.example.com`.
 
 Do not rename the head branch while the PR is open. If a rename is unavoidable,
@@ -49,7 +49,7 @@ jobs:
         env:
           BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           PREVIEW_HOST_SUFFIX: ${{ vars.CLOUDFLARE_PREVIEW_HOST_SUFFIX }}
         run: |
           set -euo pipefail
@@ -154,7 +154,7 @@ jobs:
         env:
           BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
           if [[ ! "$BRANCH_NAME" =~ ^[a-z]{2,4}-[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$ ]]; then

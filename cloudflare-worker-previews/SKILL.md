@@ -149,12 +149,12 @@ At least one host type must remain enabled.
 ## Configure credentials and test users
 
 Create a narrow Cloudflare token with Workers Scripts Write and only the resource
-permissions required by the Preview bindings. Store these GitHub Environment or
-repository secrets:
+permissions required by the Preview bindings. Store the token as a repository
+secret. Store the account ID as a repository variable:
 
 ```sh
 gh secret set CLOUDFLARE_API_TOKEN
-gh secret set CLOUDFLARE_ACCOUNT_ID
+gh variable set CLOUDFLARE_ACCOUNT_ID
 ```
 
 See [cloudflare-agent-credentials](../cloudflare-agent-credentials/SKILL.md) when
