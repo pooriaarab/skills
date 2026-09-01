@@ -134,24 +134,36 @@ jobs:
           fi
 
           preview_host="$(printf '%s\n' "$PREVIEW_URL" | sed -E 's#^https?://([^/]+).*#\1#')"
+          resolve_host() {
+            case "$1" in
+              http://*|https://*)
+                printf '%s\n' "$1" | sed -E 's#^https?://([^/]+).*#\1#'
+                ;;
+              //*)
+                printf '%s\n' "$1" | sed -E 's#^//([^/]+).*#\1#'
+                ;;
+              *)
+                # A path-relative URL resolves against the current
+                # (Preview) origin.
+                printf '%s\n' "$preview_host"
+                ;;
+            esac
+          }
           canonical_tag="$(grep -Eio '<link[^>]+>' "$page" | tr "'" '"' | grep -Ei 'rel="canonical"' | head -n1 || true)"
           canonical_href="$(sed -nE 's/.*href="([^"]*)".*/\1/p' <<<"$canonical_tag")"
           if [[ -n "$canonical_href" ]]; then
-            case "$canonical_href" in
-              http://*|https://*)
-                canonical_host="$(printf '%s\n' "$canonical_href" | sed -E 's#^https?://([^/]+).*#\1#')"
-                ;;
-              //*)
-                canonical_host="$(printf '%s\n' "$canonical_href" | sed -E 's#^//([^/]+).*#\1#')"
-                ;;
-              *)
-                # A path-relative href resolves against the current
-                # (Preview) origin, so treat it as the Preview host.
-                canonical_host="$preview_host"
-                ;;
-            esac
+            canonical_host="$(resolve_host "$canonical_href")"
             if [[ "${canonical_host,,}" == "${preview_host,,}" ]]; then
               echo "The root page exposes the Preview host as canonical" >&2
+              exit 1
+            fi
+          fi
+          link_header="$(grep -Ei '^link:' "$headers" | tr "'" '"' || true)"
+          if [[ -n "$link_header" ]] && grep -Eqi 'rel="?canonical"?' <<<"$link_header"; then
+            link_canonical_href="$(grep -Eo '<[^>]+>' <<<"$link_header" | head -n1 | tr -d '<>')"
+            link_canonical_host="$(resolve_host "$link_canonical_href")"
+            if [[ "${link_canonical_host,,}" == "${preview_host,,}" ]]; then
+              echo "The root page exposes the Preview host as an HTTP Link canonical" >&2
               exit 1
             fi
           fi
