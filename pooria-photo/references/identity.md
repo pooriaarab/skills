@@ -21,6 +21,10 @@ The current original set lives here:
 
 `~/Documents/Personal/pooriaarab/code/pooriaarab/apps/website/public/images/pooria/_originals/`
 
+If that path does not exist on this machine, ask the user for the current
+location of the original photos before continuing. Never substitute a
+generated image for a missing original.
+
 Prefer these views:
 
 - `avatar.jpg` for glasses, brows, hair, and beard density.
