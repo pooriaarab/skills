@@ -93,13 +93,18 @@ jobs:
           headers="$(mktemp)"
           page="$(mktemp)"
           robots="$(mktemp)"
-          http_status="$(curl --show-error --silent \
-            --retry 5 --retry-all-errors --retry-delay 3 \
-            --connect-timeout 10 --max-time 30 \
-            --dump-header "$health_headers" --output /dev/null \
-            --write-out '%{http_code}' \
-            "$PREVIEW_URL/api/health")"
-          curl_status=$?
+          curl_status=1
+          http_status=000
+          for attempt in 1 2 3 4 5 6; do
+            : > "$health_headers"
+            http_status="$(curl --show-error --silent \
+              --connect-timeout 10 --max-time 30 \
+              --dump-header "$health_headers" --output /dev/null \
+              --write-out '%{http_code}' "$PREVIEW_URL/api/health")"
+            curl_status=$?
+            [[ "$curl_status" == 0 && "$http_status" == 200 ]] && break
+            (( attempt < 6 )) && sleep 3
+          done
           page_status="$(curl --show-error --silent --connect-timeout 10 --max-time 30 \
             --dump-header "$headers" --output "$page" --write-out '%{http_code}' \
             "$PREVIEW_URL/")"
@@ -122,8 +127,18 @@ jobs:
             grep -Eiq "$pattern" "$headers"
             grep -Eiq "$pattern" "$robots_headers"
           done
-          robots_meta="$(grep -Eio '<meta[^>]+>' "$page" | tr "'" '"' | grep -Ei 'name="robots"')"
-          robots_content="$(sed -nE 's/.*content="([^"]*)".*/\1/p' <<<"$robots_meta")"
+          robots_content="$(node -e '
+            const fs = require("node:fs");
+            const html = fs.readFileSync(process.argv[1], "utf8")
+              .replace(/<!--[\s\S]*?-->/g, "");
+            for (const tag of html.match(/<meta\b[^>]*>/gi) || []) {
+              if (!/(?:^|\s)name\s*=\s*(["\x27])robots\1/i.test(tag)) continue;
+              const content = tag.match(/(?:^|\s)content\s*=\s*(["\x27])(.*?)\1/i);
+              if (content) process.stdout.write(content[2]);
+              process.exit(content ? 0 : 1);
+            }
+            process.exit(1);
+          ' "$page")"
           for directive in noindex nofollow noarchive nosnippet noimageindex; do
             grep -Eiq "(^|,[[:space:]]*)${directive}([[:space:]]*,|$)" <<<"$robots_content"
           done
@@ -212,8 +227,8 @@ jobs:
             "$marker" "$PREVIEW_URL" "$verification")"
           comment_id="$(gh api \
             "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100" \
-            --paginate --slurp \
-            --jq "[.[][] | select(.user.login == \"github-actions[bot]\") | select(.body | contains(\"$marker\"))][0].id // empty")"
+            --paginate | jq -sr --arg marker "$marker" \
+            '[.[][] | select(.user.login == "github-actions[bot]") | select(.body // "" | contains($marker))][0].id // empty')"
 
           if [[ -n "$comment_id" ]]; then
             gh api --method PATCH \
@@ -258,8 +273,8 @@ jobs:
             --name "$BRANCH_NAME" --skip-confirmation
           marker='<!-- cloudflare-worker-preview -->'
           comment_id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100" \
-            --paginate --slurp --jq \
-            "[.[][] | select(.user.login == \"github-actions[bot]\") | select(.body | contains(\"$marker\"))][0].id // empty")"
+            --paginate | jq -sr --arg marker "$marker" \
+            '[.[][] | select(.user.login == "github-actions[bot]") | select(.body // "" | contains($marker))][0].id // empty')"
           body="$(printf '%s\nPreview: expired\nCleanup: passed' "$marker")"
           if [[ -n "$comment_id" ]]; then
             gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" \
