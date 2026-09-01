@@ -96,12 +96,14 @@ jobs:
           http_status="$(curl --show-error --silent \
             --retry 5 --retry-all-errors --retry-delay 3 \
             --connect-timeout 10 --max-time 30 \
-            --output /dev/null --write-out '%{http_code}' \
+            --dump-header "$health_headers" --output /dev/null \
+            --write-out '%{http_code}' \
             "$PREVIEW_URL/api/health")"
           curl_status=$?
-          curl --show-error --silent --connect-timeout 10 --max-time 30 \
-            --dump-header "$headers" --output "$page" "$PREVIEW_URL/"
-          page_status=$?
+          page_status="$(curl --show-error --silent --connect-timeout 10 --max-time 30 \
+            --dump-header "$headers" --output "$page" --write-out '%{http_code}' \
+            "$PREVIEW_URL/")"
+          page_curl_status=$?
           robots_headers="$(mktemp)"
           robots_status="$(curl --show-error --silent --connect-timeout 10 \
             --max-time 30 --dump-header "$robots_headers" --output "$robots" \
@@ -110,12 +112,10 @@ jobs:
           set -e
           echo "http_status=$http_status" >> "$GITHUB_OUTPUT"
           test "$curl_status" = 0
-          test "$page_status" = 0
+          test "$page_curl_status" = 0
           test "$http_status" = 200
+          test "$page_status" = 200
           test "$robots_status" = 200
-          curl --show-error --silent --connect-timeout 10 --max-time 30 \
-            --dump-header "$health_headers" --output /dev/null \
-            "$PREVIEW_URL/api/health"
           for directive in noindex nofollow noarchive nosnippet noimageindex; do
             pattern="^x-robots-tag:([[:space:]]*[^,]+,)*[[:space:]]*${directive}([[:space:]]*,|[[:space:]]*$)"
             grep -Eiq "$pattern" "$health_headers"
@@ -134,10 +134,26 @@ jobs:
           fi
 
           preview_host="$(printf '%s\n' "$PREVIEW_URL" | sed -E 's#^https?://([^/]+).*#\1#')"
-          canonical_tags="$(grep -Eio '<link[^>]+>' "$page" | tr "'" '"' | grep -Ei 'rel="canonical"' || true)"
-          if grep -Fqi "$preview_host" <<<"$canonical_tags"; then
-            echo "The root page exposes the Preview host as canonical" >&2
-            exit 1
+          canonical_tag="$(grep -Eio '<link[^>]+>' "$page" | tr "'" '"' | grep -Ei 'rel="canonical"' | head -n1 || true)"
+          canonical_href="$(sed -nE 's/.*href="([^"]*)".*/\1/p' <<<"$canonical_tag")"
+          if [[ -n "$canonical_href" ]]; then
+            case "$canonical_href" in
+              http://*|https://*)
+                canonical_host="$(printf '%s\n' "$canonical_href" | sed -E 's#^https?://([^/]+).*#\1#')"
+                ;;
+              //*)
+                canonical_host="$(printf '%s\n' "$canonical_href" | sed -E 's#^//([^/]+).*#\1#')"
+                ;;
+              *)
+                # A path-relative href resolves against the current
+                # (Preview) origin, so treat it as the Preview host.
+                canonical_host="$preview_host"
+                ;;
+            esac
+            if [[ "${canonical_host,,}" == "${preview_host,,}" ]]; then
+              echo "The root page exposes the Preview host as canonical" >&2
+              exit 1
+            fi
           fi
           for path in sitemap.xml llms.txt llms-full.txt feed.xml rss.xml atom.xml indexnow; do
             body="$(mktemp)"
