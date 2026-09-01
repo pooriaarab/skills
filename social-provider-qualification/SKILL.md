@@ -19,7 +19,7 @@ Gates 1-4 apply to providers that require a developer app. For a provider that u
 2. Confirm its approval state and every approved scope.
 3. Confirm the production callback URL matches the deployed service.
 4. Confirm the required production secret names exist. Do not copy secret values.
-5. Connect a dedicated test account through the real OAuth flow.
+5. Connect a dedicated test account through the real OAuth flow, or through the provider's native account-authentication flow for a provider that uses one instead of OAuth.
 6. Publish only neutral test content. Do not name the product or customer unless the operator requests it.
 7. Delete each live test post immediately after its public result is verified.
 8. Test each supported shape: text, text with one image, multi-image carousel, video, and mixed image plus video when the provider supports it.
@@ -84,4 +84,4 @@ After every live probe, confirm deletion from the public provider page. Stop if 
 
 ## Outcome
 
-Mark a provider `READY` only after the approval, OAuth, publish, cleanup, and applicable engagement gates pass on production. Otherwise mark it `BLOCKED` and state the exact external gate.
+Mark a provider `READY` only after the approval, authentication (OAuth or native account-authentication), publish, cleanup, and applicable engagement gates pass on production. Otherwise mark it `BLOCKED` and state the exact external gate.
