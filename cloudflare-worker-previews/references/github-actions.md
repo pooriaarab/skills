@@ -50,8 +50,6 @@ jobs:
           BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
           PREVIEW_HOST_SUFFIX: ${{ vars.CLOUDFLARE_PREVIEW_HOST_SUFFIX }}
         run: |
           set -euo pipefail
@@ -157,6 +155,8 @@ jobs:
           BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
           if [[ ! "$BRANCH_NAME" =~ ^[a-z]{2,4}-[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
