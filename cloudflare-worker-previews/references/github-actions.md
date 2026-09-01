@@ -130,7 +130,8 @@ jobs:
           robots_content="$(node -e '
             const fs = require("node:fs");
             const html = fs.readFileSync(process.argv[1], "utf8")
-              .replace(/<!--[\s\S]*?-->/g, "");
+              .replace(/<!--[\s\S]*?-->/g, "")
+              .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "");
             for (const tag of html.match(/<meta\b[^>]*>/gi) || []) {
               if (!/(?:^|\s)name\s*=\s*(["\x27])robots\1/i.test(tag)) continue;
               const content = tag.match(/(?:^|\s)content\s*=\s*(["\x27])(.*?)\1/i);
@@ -164,8 +165,23 @@ jobs:
                 ;;
             esac
           }
-          canonical_tag="$(grep -Eio '<link[^>]+>' "$page" | tr "'" '"' | grep -Ei 'rel="canonical"' | head -n1 || true)"
-          canonical_href="$(sed -nE 's/.*href="([^"]*)".*/\1/p' <<<"$canonical_tag")"
+          canonical_href="$(node -e '
+            const fs = require("node:fs");
+            const html = fs.readFileSync(process.argv[1], "utf8")
+              .replace(/<!--[\s\S]*?-->/g, "")
+              .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "");
+            const canonicalTag = (html.match(/<link\b[^>]*>/gi) || []).find((tag) => {
+              const rel = tag.match(/\brel\s*=\s*(?:(["\x27])(.*?)\1|([^\s>]+))/i);
+              const relVal = rel ? (rel[2] ?? rel[3] ?? "") : "";
+              return /(?:^|\s)canonical(?:\s|$)/i.test(relVal);
+            });
+            if (canonicalTag) {
+              const href = canonicalTag.match(/\bhref\s*=\s*(?:(["\x27])(.*?)\1|([^\s>]+))/i);
+              const hrefVal = href ? (href[2] ?? href[3] ?? "") : "";
+              if (hrefVal) { process.stdout.write(hrefVal); process.exit(0); }
+            }
+            process.exit(1);
+          ' "$page" || true)"
           if [[ -n "$canonical_href" ]]; then
             canonical_host="$(resolve_host "$canonical_href")"
             if [[ "${canonical_host,,}" == "${preview_host,,}" ]]; then
@@ -173,9 +189,26 @@ jobs:
               exit 1
             fi
           fi
-          link_header="$(grep -Ei '^link:' "$headers" | tr "'" '"' || true)"
-          if [[ -n "$link_header" ]] && grep -Eqi 'rel="?canonical"?' <<<"$link_header"; then
-            link_canonical_href="$(grep -Eo '<[^>]+>' <<<"$link_header" | head -n1 | tr -d '<>')"
+          link_canonical_href="$(node -e '
+            const fs = require("node:fs");
+            const linkLine = fs.readFileSync(process.argv[1], "utf8")
+              .split(/\r?\n/)
+              .find((line) => /^link:/i.test(line));
+            if (!linkLine) process.exit(1);
+            const value = linkLine.slice(linkLine.indexOf(":") + 1);
+            for (const part of value.split(",")) {
+              const uri = part.match(/<([^>]*)>/);
+              if (!uri) continue;
+              const rel = part.match(/\brel\s*=\s*(?:(["\x27])(.*?)\1|([^\s,;]+))/i);
+              const relVal = rel ? (rel[2] ?? rel[3] ?? "") : "";
+              if (/(?:^|\s)canonical(?:\s|$)/i.test(relVal)) {
+                process.stdout.write(uri[1]);
+                process.exit(0);
+              }
+            }
+            process.exit(1);
+          ' "$headers" || true)"
+          if [[ -n "$link_canonical_href" ]]; then
             link_canonical_host="$(resolve_host "$link_canonical_href")"
             if [[ "${link_canonical_host,,}" == "${preview_host,,}" ]]; then
               echo "The root page exposes the Preview host as an HTTP Link canonical" >&2
