@@ -150,70 +150,53 @@ jobs:
           fi
 
           preview_host="$(printf '%s\n' "$PREVIEW_URL" | sed -E 's#^https?://([^/]+).*#\1#')"
-          resolve_host() {
-            case "$1" in
-              http://*|https://*)
-                printf '%s\n' "$1" | sed -E 's#^https?://([^/]+).*#\1#'
-                ;;
-              //*)
-                printf '%s\n' "$1" | sed -E 's#^//([^/]+).*#\1#'
-                ;;
-              *)
-                # A path-relative URL resolves against the current
-                # (Preview) origin.
-                printf '%s\n' "$preview_host"
-                ;;
-            esac
-          }
-          canonical_href="$(node -e '
+          if ! node -e '
             const fs = require("node:fs");
+            const previewHost = new URL(process.argv[2]).hostname.toLowerCase();
             const html = fs.readFileSync(process.argv[1], "utf8")
               .replace(/<!--[\s\S]*?-->/g, "")
               .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "");
-            const canonicalTag = (html.match(/<link\b[^>]*>/gi) || []).find((tag) => {
+            const canonicalTags = (html.match(/<link\b[^>]*>/gi) || []).filter((tag) => {
               const rel = tag.match(/\brel\s*=\s*(?:(["\x27])(.*?)\1|([^\s>]+))/i);
               const relVal = rel ? (rel[2] ?? rel[3] ?? "") : "";
               return /(?:^|\s)canonical(?:\s|$)/i.test(relVal);
             });
-            if (canonicalTag) {
-              const href = canonicalTag.match(/\bhref\s*=\s*(?:(["\x27])(.*?)\1|([^\s>]+))/i);
+            for (const tag of canonicalTags) {
+              const href = tag.match(/\bhref\s*=\s*(?:(["\x27])(.*?)\1|([^\s>]+))/i);
               const hrefVal = href ? (href[2] ?? href[3] ?? "") : "";
-              if (hrefVal) { process.stdout.write(hrefVal); process.exit(0); }
+              if (!hrefVal) continue;
+              let host;
+              try { host = new URL(hrefVal, process.argv[2]).hostname.toLowerCase(); } catch { continue; }
+              if (host === previewHost) process.exit(1);
             }
-            process.exit(1);
-          ' "$page" || true)"
-          if [[ -n "$canonical_href" ]]; then
-            canonical_host="$(resolve_host "$canonical_href")"
-            if [[ "${canonical_host,,}" == "${preview_host,,}" ]]; then
-              echo "The root page exposes the Preview host as canonical" >&2
-              exit 1
-            fi
+            process.exit(0);
+          ' "$page" "$PREVIEW_URL"; then
+            echo "The root page exposes the Preview host as canonical" >&2
+            exit 1
           fi
-          link_canonical_href="$(node -e '
+          if ! node -e '
             const fs = require("node:fs");
-            const linkLine = fs.readFileSync(process.argv[1], "utf8")
+            const previewHost = new URL(process.argv[2]).hostname.toLowerCase();
+            const linkLines = fs.readFileSync(process.argv[1], "utf8")
               .split(/\r?\n/)
-              .find((line) => /^link:/i.test(line));
-            if (!linkLine) process.exit(1);
-            const value = linkLine.slice(linkLine.indexOf(":") + 1);
-            for (const part of value.split(",")) {
-              const uri = part.match(/<([^>]*)>/);
-              if (!uri) continue;
-              const rel = part.match(/\brel\s*=\s*(?:(["\x27])(.*?)\1|([^\s,;]+))/i);
-              const relVal = rel ? (rel[2] ?? rel[3] ?? "") : "";
-              if (/(?:^|\s)canonical(?:\s|$)/i.test(relVal)) {
-                process.stdout.write(uri[1]);
-                process.exit(0);
+              .filter((line) => /^link:/i.test(line));
+            for (const line of linkLines) {
+              const value = line.slice(line.indexOf(":") + 1);
+              for (const part of value.split(",")) {
+                const uri = part.match(/<([^>]*)>/);
+                if (!uri) continue;
+                const rel = part.match(/\brel\s*=\s*(?:(["\x27])(.*?)\1|([^\s,;]+))/i);
+                const relVal = rel ? (rel[2] ?? rel[3] ?? "") : "";
+                if (!/(?:^|\s)canonical(?:\s|$)/i.test(relVal)) continue;
+                let host;
+                try { host = new URL(uri[1], process.argv[2]).hostname.toLowerCase(); } catch { continue; }
+                if (host === previewHost) process.exit(1);
               }
             }
-            process.exit(1);
-          ' "$headers" || true)"
-          if [[ -n "$link_canonical_href" ]]; then
-            link_canonical_host="$(resolve_host "$link_canonical_href")"
-            if [[ "${link_canonical_host,,}" == "${preview_host,,}" ]]; then
-              echo "The root page exposes the Preview host as an HTTP Link canonical" >&2
-              exit 1
-            fi
+            process.exit(0);
+          ' "$headers" "$PREVIEW_URL"; then
+            echo "The root page exposes the Preview host as an HTTP Link canonical" >&2
+            exit 1
           fi
           for path in sitemap.xml llms.txt llms-full.txt feed.xml rss.xml atom.xml indexnow; do
             body="$(mktemp)"
