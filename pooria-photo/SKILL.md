@@ -1,6 +1,6 @@
 ---
 name: pooria-photo
-description: Create or review natural, identity-faithful generated photos of Pooria Arab for websites, profiles, articles, and social posts.
+description: "Create or review natural, identity-faithful generated photos of Pooria Arab for websites, profiles, articles, and social posts. Use when generating or reviewing an AI image of Pooria Arab specifically, or checking one for identity drift before publishing."
 ---
 
 # Pooria Photo
