@@ -9,6 +9,18 @@ Use this skill when taking one Content Rabbit social provider to production.
 
 Do one provider at a time. Do not claim production readiness from secrets or unit tests alone.
 
+## Capability matrix
+
+Record every operation separately. Use `VERIFIED`, `UNSUPPORTED_BY_PROVIDER`, `NOT_IMPLEMENTED`, or `BLOCKED`.
+
+- Posts: create, read status, update, delete, schedule, and publish each supported media shape.
+- Comments: list, read thread, reply, like or react, hide or moderate, mark read, and delete.
+- Messages: list conversations, read messages, send, reply, attach media, delete, and use group conversations.
+- Authentication: connect, refresh, reconnect, disconnect, and handle revoked scopes.
+- Sync: paginate, deduplicate, retry, respect rate limits, and run through the production schedule.
+
+Test only operations that the provider exposes. Link official documentation for every `UNSUPPORTED_BY_PROVIDER` result. Treat `NOT_IMPLEMENTED` as a release blocker when the product promises that operation.
+
 ## Evidence gates
 
 Record each gate in the provider report.
@@ -74,7 +86,7 @@ After all applicable probes for each live post, confirm deletion from the public
 - X recent search consumes API credits. Disable recurring sync after a bounded test.
 - Treat a credit-depleted response as a provider billing blocker. Do not retry it repeatedly.
 - Sanitize provider error bodies before returning them through public endpoints.
-- X DMs are not implemented in Content Rabbit. Record this as unsupported, not failed.
+- X DMs are not implemented in Content Rabbit. Record this as `NOT_IMPLEMENTED` until the adapter ships.
 
 ## Scope boundaries
 
