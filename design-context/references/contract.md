@@ -160,11 +160,18 @@ Use repository-native commands first.
 These checks express the delivery contract:
 
 ```sh
-curl --fail --silent --show-error --dump-header headers.txt \
-  https://example.com/design.md --output live-design.md
+design_status=$(curl --silent --show-error --dump-header headers.txt \
+  --output live-design.md --write-out '%{http_code}' https://example.com/design.md)
+test "$design_status" = "200"
 cmp .agents/design.md live-design.md
-curl --fail --silent --show-error https://example.com/brand >/dev/null
+
+brand_status=$(curl --silent --show-error --output /dev/null \
+  --write-out '%{http_code}' https://example.com/brand)
+test "$brand_status" = "200"
 ```
+
+`curl --fail` only rejects 4xx/5xx responses — a 3xx redirect still exits `0`, so
+check `%{http_code}` explicitly rather than relying on `--fail` alone.
 
 Inspect the `Content-Type` header. Require `text/markdown` and UTF-8.
 
