@@ -157,6 +157,16 @@ jobs:
           preview_host="$(printf '%s\n' "$PREVIEW_URL" | sed -E 's#^https?://([^/]+).*#\1#')"
           if ! node -e '
             const fs = require("node:fs");
+            const decodeEntities = (s) => s.replace(
+              /&(#x[0-9a-f]+|#[0-9]+|amp|lt|gt|quot|apos);/gi,
+              (m, e) => {
+                if (e[0] !== "#") {
+                  return { amp: "&", lt: "<", gt: ">", quot: "\"", apos: "\x27" }[e.toLowerCase()];
+                }
+                const code = e[1].toLowerCase() === "x" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
+                return Number.isFinite(code) ? String.fromCodePoint(code) : m;
+              },
+            );
             const normalizeHost = (url) =>
               new URL(url).hostname.toLowerCase().replace(/\.$/, "");
             const previewHost = normalizeHost(process.argv[2]);
@@ -173,7 +183,7 @@ jobs:
               const hrefVal = href ? (href[2] ?? href[3] ?? "") : "";
               if (!hrefVal) continue;
               let host;
-              try { host = normalizeHost(new URL(hrefVal, process.argv[2])); } catch { continue; }
+              try { host = normalizeHost(new URL(decodeEntities(hrefVal), process.argv[2])); } catch { continue; }
               if (host === previewHost) process.exit(1);
             }
             process.exit(0);
