@@ -94,8 +94,14 @@ Treat a non-empty value as the canonical production home.
 
 Such repositories must expose:
 
-- `GET /design.md` as `text/markdown; charset=utf-8`.
-- `/brand` as a human-readable brand page.
+- `<product.url>/design.md` as `text/markdown; charset=utf-8`.
+- `<product.url>/brand` as a human-readable brand page.
+
+Append both paths to the full production home, including any base path.
+
+Remove a trailing slash from `product.url` first. Do not produce a double slash.
+
+For example, `https://example.com/tool` owns `/tool/design.md` and `/tool/brand`.
 
 Serve the tracked `.agents/design.md` content byte-for-byte at build time or request time.
 
@@ -107,12 +113,12 @@ Do not add a live route when the repository has no production URL.
 
 Run the repository's format, test, type-check, and build commands.
 
-For a production URL, also prove:
+For a production URL, also prove its appended routes:
 
-- `/design.md` returns HTTP 200.
+- `<product.url>/design.md` returns HTTP 200.
 - Its content type is Markdown with UTF-8.
 - Its response body matches `.agents/design.md` byte-for-byte.
-- `/brand` returns HTTP 200.
+- `<product.url>/brand` returns HTTP 200.
 - The brand page works at mobile and desktop widths.
 
 Use the deployment tied to the proposed commit. Do not test an older production release as proof.
