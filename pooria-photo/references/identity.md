@@ -31,6 +31,10 @@ Prefer these views:
 
 Inspect the files before use. Names can outlive their contents.
 
+If this path does not exist on the current machine, stop and ask the user for
+the current location of Pooria's original reference photos. Never generate or
+review an image without inspecting real originals first.
+
 ## Common generation failures
 
 - Rectangular acetate glasses replace the round wire frames.
