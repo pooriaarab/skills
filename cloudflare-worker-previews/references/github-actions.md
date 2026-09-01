@@ -89,16 +89,38 @@ jobs:
           PREVIEW_URL: ${{ steps.preview.outputs.preview_url }}
         run: |
           set +e
+          headers="$(mktemp)"
+          page="$(mktemp)"
+          robots="$(mktemp)"
           http_status="$(curl --show-error --silent \
             --retry 5 --retry-all-errors --retry-delay 3 \
             --connect-timeout 10 --max-time 30 \
             --output /dev/null --write-out '%{http_code}' \
             "$PREVIEW_URL/api/health")"
           curl_status=$?
+          curl --show-error --silent --connect-timeout 10 --max-time 30 \
+            --dump-header "$headers" --output "$page" "$PREVIEW_URL/"
+          page_status=$?
+          robots_status="$(curl --show-error --silent --connect-timeout 10 \
+            --max-time 30 --output "$robots" --write-out '%{http_code}' \
+            "$PREVIEW_URL/robots.txt")"
           set -e
           echo "http_status=$http_status" >> "$GITHUB_OUTPUT"
           test "$curl_status" = 0
+          test "$page_status" = 0
           test "$http_status" = 200
+          test "$robots_status" = 200
+          grep -Eiq '^x-robots-tag:.*noindex' "$headers"
+          grep -Eio '<meta[^>]+>' "$page" | grep -Eiq 'robots.*noindex|noindex.*robots'
+          grep -Eq '^User-agent: \*$' "$robots"
+          grep -Eq '^Disallow: /$' "$robots"
+
+          for path in sitemap.xml llms.txt; do
+            status="$(curl --show-error --silent --connect-timeout 10 \
+              --max-time 30 --output /dev/null --write-out '%{http_code}' \
+              "$PREVIEW_URL/$path")"
+            [[ "$status" == 404 || "$status" == 410 ]]
+          done
 
       # Add the repository's authenticated browser or API verification here.
       # Pass steps.preview.outputs.preview_url as its base URL.
