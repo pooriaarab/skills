@@ -47,13 +47,13 @@ Treat Facebook, Instagram, and Threads as separate release gates. Their shared M
 
 ## Local proof
 
-Run the read-only matrix before console work:
+Run the read-only matrix before console work, if the Content Rabbit repo provides one:
 
 ```bash
-/Users/parab/Documents/Personal/scripts/scripts/social-provider-qualification/qualification-matrix.sh x
+./scripts/qualification-matrix.sh x
 ```
 
-Replace `x` with the provider slug. The script checks named production secrets and the focused handler tests. It does not contact a social provider or create content.
+Run it from the Content Rabbit repo root. Replace `x` with the provider slug. The script checks named production secrets and the focused handler tests. It does not contact a social provider or create content. If the repo has no such script yet, skip this step and confirm secrets and handler tests by other means.
 
 For browser work, capture a screenshot before and after each irreversible console action. Keep credentials, tokens, and callback state out of screenshots and notes.
 
