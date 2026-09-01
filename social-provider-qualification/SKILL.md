@@ -84,4 +84,4 @@ After all applicable probes for each live post, confirm deletion from the public
 
 ## Outcome
 
-Mark a provider `READY` only after local proof passes, every applicable gate has recorded evidence, and the approval, authentication, publish, cleanup, and applicable engagement gates pass on production. Otherwise mark it `BLOCKED` and state the exact internal or external blocker.
+Mark a provider `READY` only after local proof passes, every applicable gate has recorded evidence, and the applicable approval, authentication, publish, cleanup, and engagement gates pass on production. Otherwise mark it `BLOCKED` and state the exact internal or external blocker.
