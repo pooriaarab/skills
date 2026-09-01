@@ -119,9 +119,10 @@ jobs:
             grep -Eiq "^x-robots-tag:.*\\b${directive}\\b" "$headers"
             grep -Eiq "^x-robots-tag:.*\\b${directive}\\b" "$robots_headers"
           done
-          grep -Eio '<meta[^>]+>' "$page" \
-            | grep -Ei 'name="robots"' \
-            | grep -Eiq 'content="[^"]*\bnoindex\b'
+          robots_meta="$(grep -Eio '<meta[^>]+>' "$page" | grep -Ei 'name="robots"')"
+          for directive in noindex nofollow noarchive nosnippet noimageindex; do
+            grep -Eiq "content=\"[^\"]*\\b${directive}\\b" <<<"$robots_meta"
+          done
           robots_body="$(grep -v '^[[:space:]]*$' "$robots" | tr -d '\r')"
           if [[ "$robots_body" != $'User-agent: *\nDisallow: /' ]]; then
             echo "robots.txt must contain exactly: User-agent: *, Disallow: /" >&2
@@ -131,17 +132,21 @@ jobs:
           preview_host="$(printf '%s\n' "$PREVIEW_URL" | sed -E 's#^https?://([^/]+).*#\1#')"
           for path in sitemap.xml llms.txt; do
             body="$(mktemp)"
+            path_headers="$(mktemp)"
             status="$(curl --show-error --silent --connect-timeout 10 \
-              --max-time 30 --output "$body" --write-out '%{http_code}' \
+              --max-time 30 --dump-header "$path_headers" --output "$body" \
+              --write-out '%{http_code}' \
               "$PREVIEW_URL/$path")"
             if [[ "$status" == 404 || "$status" == 410 ]]; then
               continue
             fi
-            if [[ "$status" == 200 ]] && ! grep -Fqi "$preview_host" "$body"; then
-              continue
+            if [[ "$status" != 200 ]] || grep -Fqi "$preview_host" "$body"; then
+              echo "$path must be absent (404/410) or omit the Preview host ($preview_host)" >&2
+              exit 1
             fi
-            echo "$path must be absent (404/410) or omit the Preview host ($preview_host)" >&2
-            exit 1
+            for directive in noindex nofollow noarchive nosnippet noimageindex; do
+              grep -Eiq "^x-robots-tag:.*\\b${directive}\\b" "$path_headers"
+            done
           done
 
       # Add the repository's authenticated browser or API verification here.
