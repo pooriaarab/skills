@@ -1,3 +1,8 @@
+---
+name: lora-video-hosting
+description: "Use when training a video LoRA and serving the results from a Cloudflare Workers app — picking a base model and GPU, curating a clip dataset, wiring Civitai and a rented-GPU endpoint, concatenating shots into a scene, and extracting a poster frame. Covers the local-dev traps that make a Workers video feed return an empty list."
+---
+
 # LoRA Video Training & Hosting — Skill
 
 > Generic pattern for synthetic video LoRAs. No explicit content. Use for wellness / character video.
@@ -25,9 +30,7 @@
 
 ## 4. Common Pitfalls
 
-- `.open-next/worker.js` 2.2K stub — run `./node_modules/.bin/opennextjs-cloudflare build` from `apps/web`, then `mv .open-next ../../.open-next` before `wrangler dev --local --port 8788`.
+- `.open-next/worker.js` 2.2K stub — run `opennextjs-cloudflare build` from the Next.js app directory, then move `.open-next` to the Worker root before `wrangler dev --local --port 8788`.
 - `next dev` has no D1/R2 bindings — use `wrangler dev` for feed, or detach via `start_new_session` to keep 8788 alive.
-- `CIVITAI_API_KEY` missing in `apps/web/.dev.vars` → empty LoRA list. Copy from root.
+- `CIVITAI_API_KEY` missing from the app's `.dev.vars` → empty LoRA list, with no error. Copy it from the repo root.
 
----
-Source: veilwick synthetic wellness feed + livestream (Next15 + OpenNext + CF Workers). See `apps/web/src/lib/wan.ts`, `civitai.ts`, `vast.ts`.
