@@ -7,7 +7,7 @@ description: Generate a 100%-fidelity, framework-free HTML/CSS prototype of a ne
 
 Build prototypes that look indistinguishable from the real app. The viewer should not be able to tell your HTML from a screenshot of production.
 
-The recipe was forged building Solo Payments (see [Mozilla-Ocho/solo-design](https://github.com/Mozilla-Ocho/solo-design) `html-clone/` for the worked example). This skill generalizes it across codebases.
+The recipe was forged building a production payments UI. This skill generalizes it across codebases.
 
 ## When to use
 
@@ -174,7 +174,7 @@ Live URL + a one-paragraph fidelity self-audit calling out any known gaps. If yo
 
 ## Lessons learned (from the worked example)
 
-These are the corrections that came up iterating on Solo Payments — bake them in from the start:
+These are the corrections that came up iterating on that UI — bake them in from the start:
 
 - **Identify the right chrome FIRST.** Putting an admin tool inside the canvas-editor chrome with a breadcrumb feels off. Use the admin/product-page chrome instead.
 - **Settings rows go in the sidebar; workflows go in modals on top.** A "Connect provider" flow is a multi-step modal layered on the canvas+sidebar — not a new page.

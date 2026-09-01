@@ -7,7 +7,7 @@ description: "Offload per-worktree dev work (installs, builds, dev server) to a 
 
 ## Work/personal split (generalized, 2026-08)
 
-The original scripts below were hardcoded to one work repo (solo-admin, Mozilla GCP). They are now generalized into a **work/personal split** so any private repo offloads to its OWN GCP project — personal repos must NEVER run on Mozilla infra (same confidentiality boundary as `claude-work`/`claude-personal`).
+The original scripts below were hardcoded to one work repo on a work GCP project. They are now generalized into a **work/personal split** so any private repo offloads to its OWN GCP project — personal repos must NEVER run on Mozilla infra (same confidentiality boundary as `claude-work`/`claude-personal`).
 
 **Canonical scripts:** `pooriaarab/agents-private` → `bin/crabbox/`. Installed to `~/.local/bin/` (on PATH) + configs to `~/.config/crabbox/`.
 
@@ -23,7 +23,7 @@ The original scripts below were hardcoded to one work repo (solo-admin, Mozilla 
 
 (Real project IDs / accounts live in the private `agents-private` configs, not here.) Verify a role never crosses: `crabbox-personal config show | grep -o 'project=[^ ]*'` must read your personal project, never the work one.
 
-**Auto-attach (zshrc `git worktree add` hook).** Work repos that carry their own `bin/` scripts run them with the global (Mozilla) config — unchanged. Repos under `~/Documents/Personal` or `~/code` with `.crabbox-default-on` run the central scripts under the PERSONAL config, selecting the gcloud config non-destructively via `CLOUDSDK_ACTIVE_CONFIG_NAME=personal` (never flips your active gcloud, never touches Mozilla).
+**Auto-attach (zshrc `git worktree add` hook).** Work repos that carry their own `bin/` scripts run them with the global work config — unchanged. Repos under `~/Documents/Personal` or `~/code` with `.crabbox-default-on` run the central scripts under the PERSONAL config, selecting the gcloud config non-destructively via `CLOUDSDK_ACTIVE_CONFIG_NAME=personal` (never flips your active gcloud, never touches Mozilla).
 
 **Enable any private repo:** `crabbox-enable [repo-root]` touches `.crabbox-default-on`. All `.crabbox-*` markers are gitignored globally, so they never get committed.
 
@@ -48,7 +48,7 @@ Both call one shared entrypoint, `crabbox-attach-personal.sh`, which exports `CR
 
 Preserve any existing `setup`/`run` entries — append the entrypoint, don't overwrite (e.g. a repo with `"run": ["bun run dev"]`).
 
-The sections below document the original single-repo baked-image design (still how the WORK/solo-admin side runs). The generalized personal side above trades the bake for a raw base + runtime install.
+The sections below document the original single-repo baked-image design (still how the work side runs). The generalized personal side above trades the bake for a raw base + runtime install.
 
 ## When to use
 
