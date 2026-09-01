@@ -36,9 +36,9 @@ Gates 1-4 apply to providers that require a developer app. For a provider that u
 7. Test each supported shape: text, text with one image, multi-image carousel, video, and mixed image plus video when the provider supports it.
 8. Verify the public provider page. An API success alone does not prove that media appeared.
 9. Test comment sync and reply when the product implements them.
-10. Delete test replies immediately after verification when the provider permits it.
+10. Delete each test reply after verification. Record the result. If deletion is unsupported, require an approved retention policy before `READY`.
 11. Delete each live test post after its public result and applicable engagement probes are verified. Confirm deletion completed.
-12. Test DMs only for providers with a DM adapter and an approved messaging scope.
+12. Test DMs only with a DM adapter and approved scope. Record cleanup or retention for each DM. Require an approved retention policy before `READY`.
 13. Record provider-console screenshots, external post URLs, request IDs, failures, and cleanup results.
 
 Never submit an app, publish a test post, reply to a comment, or send a DM without the account owner's approval. Stop when the console requires a password, MFA code, terms acceptance, payment, or final submission confirmation.
@@ -92,8 +92,11 @@ After all applicable probes for each live post, confirm deletion from the public
 
 - Comments are implemented for X, LinkedIn, Facebook, Instagram, Threads, and Bluesky. Verify each one separately.
 - DMs are implemented only for Facebook and Instagram. Do not promise DMs for other social providers.
-- A provider with no operator secret may use its own account-authentication model. Do not create an unnecessary developer app for Bluesky.
+- Use native authentication only after official documentation confirms that model. A missing operator secret is not evidence. Otherwise require app authentication or mark `BLOCKED`.
+- Do not create an unnecessary developer app for Bluesky.
 
 ## Outcome
 
-Mark a provider `READY` only after local proof passes, every applicable gate has recorded evidence, and the applicable approval, authentication, publish, cleanup, and engagement gates pass on production. Otherwise mark it `BLOCKED` and state the exact internal or external blocker.
+Mark a provider `READY` only when each applicable operation is `VERIFIED` or documented as `UNSUPPORTED_BY_PROVIDER`. Local proof and every applicable production gate must pass.
+
+Any `BLOCKED` operation blocks the provider. Any promised `NOT_IMPLEMENTED` operation also blocks it. State the exact internal or external blocker.
