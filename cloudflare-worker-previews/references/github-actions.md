@@ -89,12 +89,14 @@ jobs:
           PREVIEW_URL: ${{ steps.preview.outputs.preview_url }}
         run: |
           set +e
+          health_headers="$(mktemp)"
           headers="$(mktemp)"
           page="$(mktemp)"
           robots="$(mktemp)"
           http_status="$(curl --show-error --silent \
             --retry 5 --retry-all-errors --retry-delay 3 \
             --connect-timeout 10 --max-time 30 \
+            --dump-header "$health_headers" \
             --output /dev/null --write-out '%{http_code}' \
             "$PREVIEW_URL/api/health")"
           curl_status=$?
@@ -110,10 +112,18 @@ jobs:
           test "$page_status" = 0
           test "$http_status" = 200
           test "$robots_status" = 200
-          grep -Eiq '^x-robots-tag:.*noindex' "$headers"
-          grep -Eio '<meta[^>]+>' "$page" | grep -Eiq 'robots.*noindex|noindex.*robots'
-          grep -Eq '^User-agent: \*$' "$robots"
-          grep -Eq '^Disallow: /$' "$robots"
+          for directive in noindex nofollow noarchive nosnippet noimageindex; do
+            grep -Eiq "^x-robots-tag:.*\\b${directive}\\b" "$health_headers"
+            grep -Eiq "^x-robots-tag:.*\\b${directive}\\b" "$headers"
+          done
+          grep -Eio '<meta[^>]+>' "$page" \
+            | grep -Ei 'name="robots"' \
+            | grep -Eiq 'content="[^"]*\bnoindex\b'
+          robots_body="$(grep -v '^[[:space:]]*$' "$robots" | tr -d '\r')"
+          if [[ "$robots_body" != $'User-agent: *\nDisallow: /' ]]; then
+            echo "robots.txt must contain exactly: User-agent: *, Disallow: /" >&2
+            exit 1
+          fi
 
           for path in sitemap.xml llms.txt; do
             status="$(curl --show-error --silent --connect-timeout 10 \
