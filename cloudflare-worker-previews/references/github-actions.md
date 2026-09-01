@@ -103,8 +103,10 @@ jobs:
           curl --show-error --silent --connect-timeout 10 --max-time 30 \
             --dump-header "$headers" --output "$page" "$PREVIEW_URL/"
           page_status=$?
+          robots_headers="$(mktemp)"
           robots_status="$(curl --show-error --silent --connect-timeout 10 \
-            --max-time 30 --output "$robots" --write-out '%{http_code}' \
+            --max-time 30 --dump-header "$robots_headers" --output "$robots" \
+            --write-out '%{http_code}' \
             "$PREVIEW_URL/robots.txt")"
           set -e
           echo "http_status=$http_status" >> "$GITHUB_OUTPUT"
@@ -115,6 +117,7 @@ jobs:
           for directive in noindex nofollow noarchive nosnippet noimageindex; do
             grep -Eiq "^x-robots-tag:.*\\b${directive}\\b" "$health_headers"
             grep -Eiq "^x-robots-tag:.*\\b${directive}\\b" "$headers"
+            grep -Eiq "^x-robots-tag:.*\\b${directive}\\b" "$robots_headers"
           done
           grep -Eio '<meta[^>]+>' "$page" \
             | grep -Ei 'name="robots"' \
@@ -125,11 +128,20 @@ jobs:
             exit 1
           fi
 
+          preview_host="$(printf '%s\n' "$PREVIEW_URL" | sed -E 's#^https?://([^/]+).*#\1#')"
           for path in sitemap.xml llms.txt; do
+            body="$(mktemp)"
             status="$(curl --show-error --silent --connect-timeout 10 \
-              --max-time 30 --output /dev/null --write-out '%{http_code}' \
+              --max-time 30 --output "$body" --write-out '%{http_code}' \
               "$PREVIEW_URL/$path")"
-            [[ "$status" == 404 || "$status" == 410 ]]
+            if [[ "$status" == 404 || "$status" == 410 ]]; then
+              continue
+            fi
+            if [[ "$status" == 200 ]] && ! grep -Fqi "$preview_host" "$body"; then
+              continue
+            fi
+            echo "$path must be absent (404/410) or omit the Preview host ($preview_host)" >&2
+            exit 1
           done
 
       # Add the repository's authenticated browser or API verification here.
