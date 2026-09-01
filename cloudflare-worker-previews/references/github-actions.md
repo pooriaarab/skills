@@ -96,7 +96,6 @@ jobs:
           http_status="$(curl --show-error --silent \
             --retry 5 --retry-all-errors --retry-delay 3 \
             --connect-timeout 10 --max-time 30 \
-            --dump-header "$health_headers" \
             --output /dev/null --write-out '%{http_code}' \
             "$PREVIEW_URL/api/health")"
           curl_status=$?
@@ -114,14 +113,19 @@ jobs:
           test "$page_status" = 0
           test "$http_status" = 200
           test "$robots_status" = 200
+          curl --show-error --silent --connect-timeout 10 --max-time 30 \
+            --dump-header "$health_headers" --output /dev/null \
+            "$PREVIEW_URL/api/health"
           for directive in noindex nofollow noarchive nosnippet noimageindex; do
-            grep -Eiq "^x-robots-tag:.*\\b${directive}\\b" "$health_headers"
-            grep -Eiq "^x-robots-tag:.*\\b${directive}\\b" "$headers"
-            grep -Eiq "^x-robots-tag:.*\\b${directive}\\b" "$robots_headers"
+            pattern="^x-robots-tag:([[:space:]]*[^,]+,)*[[:space:]]*${directive}([[:space:]]*,|[[:space:]]*$)"
+            grep -Eiq "$pattern" "$health_headers"
+            grep -Eiq "$pattern" "$headers"
+            grep -Eiq "$pattern" "$robots_headers"
           done
-          robots_meta="$(grep -Eio '<meta[^>]+>' "$page" | grep -Ei 'name="robots"')"
+          robots_meta="$(grep -Eio '<meta[^>]+>' "$page" | tr "'" '"' | grep -Ei 'name="robots"')"
+          robots_content="$(sed -nE 's/.*content="([^"]*)".*/\1/p' <<<"$robots_meta")"
           for directive in noindex nofollow noarchive nosnippet noimageindex; do
-            grep -Eiq "content=\"[^\"]*\\b${directive}\\b" <<<"$robots_meta"
+            grep -Eiq "(^|,[[:space:]]*)${directive}([[:space:]]*,|$)" <<<"$robots_content"
           done
           robots_body="$(grep -v '^[[:space:]]*$' "$robots" | tr -d '\r')"
           if [[ "$robots_body" != $'User-agent: *\nDisallow: /' ]]; then
@@ -130,13 +134,22 @@ jobs:
           fi
 
           preview_host="$(printf '%s\n' "$PREVIEW_URL" | sed -E 's#^https?://([^/]+).*#\1#')"
-          for path in sitemap.xml llms.txt; do
+          canonical_tags="$(grep -Eio '<link[^>]+>' "$page" | tr "'" '"' | grep -Ei 'rel="canonical"' || true)"
+          if grep -Fqi "$preview_host" <<<"$canonical_tags"; then
+            echo "The root page exposes the Preview host as canonical" >&2
+            exit 1
+          fi
+          for path in sitemap.xml llms.txt llms-full.txt feed.xml rss.xml atom.xml indexnow; do
             body="$(mktemp)"
             path_headers="$(mktemp)"
             status="$(curl --show-error --silent --connect-timeout 10 \
               --max-time 30 --dump-header "$path_headers" --output "$body" \
               --write-out '%{http_code}' \
               "$PREVIEW_URL/$path")"
+            for directive in noindex nofollow noarchive nosnippet noimageindex; do
+              pattern="^x-robots-tag:([[:space:]]*[^,]+,)*[[:space:]]*${directive}([[:space:]]*,|[[:space:]]*$)"
+              grep -Eiq "$pattern" "$path_headers"
+            done
             if [[ "$status" == 404 || "$status" == 410 ]]; then
               continue
             fi
@@ -144,9 +157,6 @@ jobs:
               echo "$path must be absent (404/410) or omit the Preview host ($preview_host)" >&2
               exit 1
             fi
-            for directive in noindex nofollow noarchive nosnippet noimageindex; do
-              grep -Eiq "^x-robots-tag:.*\\b${directive}\\b" "$path_headers"
-            done
           done
 
       # Add the repository's authenticated browser or API verification here.
