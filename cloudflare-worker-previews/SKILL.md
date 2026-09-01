@@ -149,28 +149,39 @@ At least one host type must remain enabled.
 ## Configure credentials and test users
 
 Create a narrow Cloudflare token with Workers Scripts Write and only the resource
-permissions required by the Preview bindings. Store the token as a repository
-secret. Store the account ID as a repository variable:
+permissions required by the Preview bindings. Keep it outside any job that can
+execute pull-request code.
 
-```sh
-gh secret set CLOUDFLARE_API_TOKEN
-gh variable set CLOUDFLARE_ACCOUNT_ID
-```
+A same-repository pull request can add a workflow that names any repository or
+organization secret available to that repository. A later trusted `workflow_run`
+job does not remove that exposure. Do not store Preview credentials in the source
+repository when autonomous branches can change workflows.
+
+Use one of these credential boundaries:
+
+- A branch-restricted GitHub environment, when the repository plan supports it.
+- A trusted controller or broker outside the source repository.
+- A local trusted controller using OS-protected credentials.
+
+The source repository may store non-secret IDs as variables. It must hold no
+Cloudflare mutation, Access, application, staging, or production credentials
+when it lacks a branch-restricted environment.
 
 See [cloudflare-agent-credentials](../cloudflare-agent-credentials/SKILL.md) when
 the token does not exist. Verify the token before installing it.
 
-Preview application secrets never inherit production values. Set staging values
-in Preview Base configuration, or scope them to one Preview:
+Preview application secrets never inherit production values. Generate disposable,
+per-PR values where possible. Scope each value to one Preview:
 
 ```sh
-npx --yes wrangler@4.127.1 preview base-config secret put SECRET_NAME
 npx --yes wrangler@4.127.1 preview secret put SECRET_NAME --name "$BRANCH_NAME"
 ```
 
-Authenticated apps require a dedicated Preview test user in the staging identity
-store. It must be active, least privileged, resettable, and excluded from real
-customer data. Store its credentials as Preview verification secrets.
+Do not put a reusable secret in Preview Base. Every deployed PR could read it.
+
+Authenticated apps require a dedicated Preview test user. Prefer one generated
+identity per PR in that PR's isolated data store. Otherwise, use a least-privilege
+staging identity that is resettable and excluded from customer data.
 
 Exercise the complete authenticated flow against the live URL. Include sign-in,
 session persistence, and one permission-sensitive action. Test outer Cloudflare
@@ -218,8 +229,15 @@ Otherwise, the designated merger must treat a red or missing check as blocking.
 Add the live URL and verification result to the PR's `How I verified` section.
 The sticky comment does not replace that proof.
 
-Forked pull requests must not receive Cloudflare or test-user secrets. Skip Preview
-deployment for forks. Never use `pull_request_target` to run pull-request code.
+Treat same-repository pull requests as untrusted too. They can change workflows,
+helpers, dependencies, install scripts, and build configuration.
+
+Never expose Cloudflare, Access, GitHub write, or reusable application credentials
+to a job that executes PR-controlled content. Build without secrets. Deploy the
+final bundle through trusted code that treats it only as data.
+
+Forked pull requests must not receive secrets. Never use `pull_request_target` or
+privileged `workflow_run` jobs to execute pull-request code.
 
 ## Delete the Preview
 
