@@ -25,7 +25,8 @@ permissions:
 
 concurrency:
   group: worker-preview-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  # A close run must wait for an active deployment before deleting it.
+  cancel-in-progress: ${{ github.event.action != 'closed' }}
 
 env:
   WRANGLER_VERSION: 4.127.1
