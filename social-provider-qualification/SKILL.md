@@ -55,7 +55,7 @@ Run the read-only matrix before console work from the `pooriaarab/scripts` repo 
 ./scripts/social-provider-qualification/qualification-matrix.sh x
 ```
 
-Set `CONTENT_RABBIT_REPO` to the Content Rabbit checkout path. Replace `x` with the provider slug. The script checks named production secrets and focused handler tests. It does not contact a social provider or create content.
+Set `CONTENT_RABBIT_REPO` to the Content Rabbit checkout path. Replace `x` with the provider slug. The script checks named production secrets and focused handler tests. It does not contact a social provider or create content. If the `pooriaarab/scripts` checkout has no such script yet, skip this step and confirm secrets and handler tests by other means.
 
 For browser work, capture a screenshot before and after each irreversible console action. Keep credentials, tokens, and callback state out of screenshots and notes.
 
