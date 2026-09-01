@@ -9,10 +9,10 @@ description: "Use when training a video LoRA and serving the results from a Clou
 
 ## 1. Training
 
-- **Base:** Wan 2.4-14B (24GB) or Wan 2.2-T2V-A14B. Fits single RTX 4090. Use spot $0.30/hr Vast or Ubicloud managed.
+- **Base:** Wan 2.2-T2V-A14B (24GB). Fits single RTX 4090. Use spot $0.30/hr Vast or Ubicloud managed.
 - **LoRA type:** DreamBooth-style video LoRA. Civitai `types=LORA&baseModels=Wan Video 14B t2v`, `sort=Most Downloaded`.
 - **Dataset:** 15–30 short clips (3–5s each), captioned. Curate via Civitai collections API (`/api/v1/collections/{id}`) or manual picks. Top LoRAs: Detail enhancer, FusionX, 360 rotation — all generic.
-- **Train call:** `vast clone Wan` + `accelerate launch train_lora.py --base Wan-AI/Wan2.4-14B --lora_rank 32 --learning_rate 1e-4`. (`api.minimax.chat/v1/video_generation` is text-to-video generation, not training — it never produces a LoRA checkpoint.)
+- **Train call:** `vast clone Wan` + `accelerate launch train_lora.py --base Wan-AI/Wan2.2-T2V-A14B --lora_rank 32 --learning_rate 1e-4`. (`api.minimax.chat/v1/video_generation` is text-to-video generation, not training — it never produces a LoRA checkpoint.)
 - **Checkpoint:** Save as `lora-{category}-{id}.safetensors` to R2 `loras/`.
 
 ## 2. Hosting
