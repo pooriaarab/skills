@@ -155,8 +155,6 @@ jobs:
           BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
           if [[ ! "$BRANCH_NAME" =~ ^[a-z]{2,4}-[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
@@ -169,15 +167,6 @@ jobs:
           fi
           npx --yes "wrangler@$WRANGLER_VERSION" preview delete \
             --name "$BRANCH_NAME" --skip-confirmation
-          marker='<!-- cloudflare-worker-preview -->'
-          comment_id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100" \
-            --paginate --slurp --jq \
-            "[.[][] | select(.user.login == \"github-actions[bot]\") | select(.body | contains(\"$marker\"))][0].id // empty")"
-          if [[ -n "$comment_id" ]]; then
-            body="$(printf '%s\nPreview: expired\nCleanup: passed' "$marker")"
-            gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" \
-              -f body="$body" >/dev/null
-          fi
 ```
 
 Change `/api/health` to a route that proves the deployed Worker is ready.

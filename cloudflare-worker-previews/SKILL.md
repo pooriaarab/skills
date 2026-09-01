@@ -209,9 +209,6 @@ npx --yes wrangler@4.127.1 preview delete \
 Also delete any per-PR resources created outside the Preview system. Review exact
 resource names before deletion.
 
-A deleted custom Preview hostname can fall back to the base Worker and return 200.
-Use the successful delete command as proof. Mark the PR comment as expired.
-
 ## Source of truth
 
 These beta documents can change:
