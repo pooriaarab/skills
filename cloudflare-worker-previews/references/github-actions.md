@@ -157,21 +157,23 @@ jobs:
           preview_host="$(printf '%s\n' "$PREVIEW_URL" | sed -E 's#^https?://([^/]+).*#\1#')"
           if ! node -e '
             const fs = require("node:fs");
-            const previewHost = new URL(process.argv[2]).hostname.toLowerCase();
+            const normalizeHost = (url) =>
+              new URL(url).hostname.toLowerCase().replace(/\.$/, "");
+            const previewHost = normalizeHost(process.argv[2]);
             const html = fs.readFileSync(process.argv[1], "utf8")
               .replace(/<!--[\s\S]*?-->/g, "")
               .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "");
             const canonicalTags = (html.match(/<link\b[^>]*>/gi) || []).filter((tag) => {
-              const rel = tag.match(/\brel\s*=\s*(?:(["\x27])(.*?)\1|([^\s>]+))/i);
+              const rel = tag.match(/(?:^|\s)rel\s*=\s*(?:(["\x27])(.*?)\1|([^\s>]+))/i);
               const relVal = rel ? (rel[2] ?? rel[3] ?? "") : "";
               return /(?:^|\s)canonical(?:\s|$)/i.test(relVal);
             });
             for (const tag of canonicalTags) {
-              const href = tag.match(/\bhref\s*=\s*(?:(["\x27])(.*?)\1|([^\s>]+))/i);
+              const href = tag.match(/(?:^|\s)href\s*=\s*(?:(["\x27])(.*?)\1|([^\s>]+))/i);
               const hrefVal = href ? (href[2] ?? href[3] ?? "") : "";
               if (!hrefVal) continue;
               let host;
-              try { host = new URL(hrefVal, process.argv[2]).hostname.toLowerCase(); } catch { continue; }
+              try { host = normalizeHost(new URL(hrefVal, process.argv[2])); } catch { continue; }
               if (host === previewHost) process.exit(1);
             }
             process.exit(0);
@@ -181,7 +183,9 @@ jobs:
           fi
           if ! node -e '
             const fs = require("node:fs");
-            const previewHost = new URL(process.argv[2]).hostname.toLowerCase();
+            const normalizeHost = (url) =>
+              new URL(url).hostname.toLowerCase().replace(/\.$/, "");
+            const previewHost = normalizeHost(process.argv[2]);
             const linkLines = fs.readFileSync(process.argv[1], "utf8")
               .split(/\r?\n/)
               .filter((line) => /^link:/i.test(line));
@@ -192,11 +196,11 @@ jobs:
               for (const part of value.split(/,(?=\s*<)/)) {
                 const uri = part.match(/<([^>]*)>/);
                 if (!uri) continue;
-                const rel = part.match(/\brel\s*=\s*(?:(["\x27])(.*?)\1|([^\s,;]+))/i);
+                const rel = part.match(/(?:^|[;\s])rel\s*=\s*(?:(["\x27])(.*?)\1|([^\s,;]+))/i);
                 const relVal = rel ? (rel[2] ?? rel[3] ?? "") : "";
                 if (!/(?:^|\s)canonical(?:\s|$)/i.test(relVal)) continue;
                 let host;
-                try { host = new URL(uri[1], process.argv[2]).hostname.toLowerCase(); } catch { continue; }
+                try { host = normalizeHost(new URL(uri[1], process.argv[2])); } catch { continue; }
                 if (host === previewHost) process.exit(1);
               }
             }
@@ -250,8 +254,8 @@ jobs:
             "$marker" "$PREVIEW_URL" "$verification")"
           comment_id="$(gh api \
             "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100" \
-            --paginate | jq -sr --arg marker "$marker" \
-            '[.[][] | select(.user.login == "github-actions[bot]") | select(.body // "" | contains($marker))][0].id // empty')"
+            --paginate --slurp \
+            --jq "[.[][] | select(.user.login == \"github-actions[bot]\") | select(.body | contains(\"$marker\"))][0].id // empty")"
 
           if [[ -n "$comment_id" ]]; then
             gh api --method PATCH \
@@ -296,8 +300,8 @@ jobs:
             --name "$BRANCH_NAME" --skip-confirmation
           marker='<!-- cloudflare-worker-preview -->'
           comment_id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100" \
-            --paginate | jq -sr --arg marker "$marker" \
-            '[.[][] | select(.user.login == "github-actions[bot]") | select(.body // "" | contains($marker))][0].id // empty')"
+            --paginate --slurp --jq \
+            "[.[][] | select(.user.login == \"github-actions[bot]\") | select(.body | contains(\"$marker\"))][0].id // empty")"
           body="$(printf '%s\nPreview: expired\nCleanup: passed' "$marker")"
           if [[ -n "$comment_id" ]]; then
             gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" \
