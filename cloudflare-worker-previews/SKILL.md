@@ -184,18 +184,21 @@ production authentication merely because the staging test user is missing.
 Treat every Preview as public internet traffic unless Cloudflare Access protects it.
 Robots controls are not an authentication or authorization boundary.
 
-Return `X-Robots-Tag: noindex, nofollow, noarchive, nosnippet, noimageindex` on
-every Preview response. Render matching page metadata. Serve this `robots.txt`:
+Return `X-Robots-Tag: noindex, nofollow, noarchive, nosnippet, noimageindex,
+noai, noimageai` on every Preview response. Render matching page metadata. Serve
+this `robots.txt`:
 
 ```text
 User-agent: *
+Content-Signal: search=no, ai-input=no, ai-train=no
 Disallow: /
 ```
 
 Exclude Preview hosts from sitemaps, feeds, IndexNow, and canonical URL discovery.
-Do not publish Preview URLs in `llms.txt`. The wildcard robots rule also asks
-compliant AI crawlers not to fetch the Preview. Keep secrets and production data
-isolated because crawlers and attackers can ignore these voluntary controls.
+Do not publish Preview URLs in `llms.txt`. The robots rule and Content Signals ask
+compliant search and AI crawlers not to use the Preview. These controls are
+voluntary. Keep Cloudflare Access enabled, and keep secrets and production data
+isolated because crawlers and attackers can ignore them.
 
 Verify the response header, page metadata, and `robots.txt` against the live URL.
 Verify that `sitemap.xml`, feeds, `llms.txt`, and submission jobs omit Preview URLs.

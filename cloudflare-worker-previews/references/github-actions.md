@@ -123,7 +123,7 @@ jobs:
           test "$http_status" = 200
           test "$page_status" = 200
           test "$robots_status" = 200
-          for directive in noindex nofollow noarchive nosnippet noimageindex; do
+          for directive in noindex nofollow noarchive nosnippet noimageindex noai noimageai; do
             pattern="^x-robots-tag:([[:space:]]*[^,]+,)*[[:space:]]*${directive}([[:space:]]*,|[[:space:]]*$)"
             grep -Eiq "$pattern" "$health_headers"
             grep -Eiq "$pattern" "$headers"
@@ -145,12 +145,13 @@ jobs:
             }
             process.exit(1);
           ' "$page")"
-          for directive in noindex nofollow noarchive nosnippet noimageindex; do
+          for directive in noindex nofollow noarchive nosnippet noimageindex noai noimageai; do
             grep -Eiq "(^|,[[:space:]]*)${directive}([[:space:]]*,|$)" <<<"$robots_content"
           done
           robots_body="$(grep -v '^[[:space:]]*$' "$robots" | tr -d '\r')"
-          if [[ "$robots_body" != $'User-agent: *\nDisallow: /' ]]; then
-            echo "robots.txt must contain exactly: User-agent: *, Disallow: /" >&2
+          expected_robots=$'User-agent: *\nContent-Signal: search=no, ai-input=no, ai-train=no\nDisallow: /'
+          if [[ "$robots_body" != "$expected_robots" ]]; then
+            echo "robots.txt lacks the required Preview crawler controls" >&2
             exit 1
           fi
 
@@ -226,7 +227,7 @@ jobs:
               --max-time 30 --dump-header "$path_headers" --output "$body" \
               --write-out '%{http_code}' \
               "$PREVIEW_URL/$path")"
-            for directive in noindex nofollow noarchive nosnippet noimageindex; do
+            for directive in noindex nofollow noarchive nosnippet noimageindex noai noimageai; do
               pattern="^x-robots-tag:([[:space:]]*[^,]+,)*[[:space:]]*${directive}([[:space:]]*,|[[:space:]]*$)"
               grep -Eiq "$pattern" "$path_headers"
             done
