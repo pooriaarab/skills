@@ -114,10 +114,12 @@ jobs:
             --max-time 30 --dump-header "$robots_headers" --output "$robots" \
             --write-out '%{http_code}' \
             "$PREVIEW_URL/robots.txt")"
+          robots_curl_status=$?
           set -e
           echo "http_status=$http_status" >> "$GITHUB_OUTPUT"
           test "$curl_status" = 0
           test "$page_curl_status" = 0
+          test "$robots_curl_status" = 0
           test "$http_status" = 200
           test "$page_status" = 200
           test "$robots_status" = 200
@@ -133,9 +135,12 @@ jobs:
               .replace(/<!--[\s\S]*?-->/g, "")
               .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "");
             for (const tag of html.match(/<meta\b[^>]*>/gi) || []) {
-              if (!/(?:^|\s)name\s*=\s*(["\x27])robots\1/i.test(tag)) continue;
-              const content = tag.match(/(?:^|\s)content\s*=\s*(["\x27])(.*?)\1/i);
-              if (content) process.stdout.write(content[2]);
+              const name = tag.match(/(?:^|\s)name\s*=\s*(?:(["\x27])(.*?)\1|([^\s>]+))/i);
+              const nameVal = name ? (name[2] ?? name[3] ?? "") : "";
+              if (!/^robots$/i.test(nameVal)) continue;
+              const content = tag.match(/(?:^|\s)content\s*=\s*(?:(["\x27])(.*?)\1|([^\s>]+))/i);
+              const contentVal = content ? (content[2] ?? content[3] ?? "") : "";
+              if (content) process.stdout.write(contentVal);
               process.exit(content ? 0 : 1);
             }
             process.exit(1);
@@ -182,7 +187,9 @@ jobs:
               .filter((line) => /^link:/i.test(line));
             for (const line of linkLines) {
               const value = line.slice(line.indexOf(":") + 1);
-              for (const part of value.split(",")) {
+              // Split only on commas that separate link-values (RFC 8288), so a
+              // literal comma inside a URI-reference does not break it in two.
+              for (const part of value.split(/,(?=\s*<)/)) {
                 const uri = part.match(/<([^>]*)>/);
                 if (!uri) continue;
                 const rel = part.match(/\brel\s*=\s*(?:(["\x27])(.*?)\1|([^\s,;]+))/i);
