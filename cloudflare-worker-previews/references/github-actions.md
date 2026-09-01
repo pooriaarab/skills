@@ -8,6 +8,10 @@ Set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as secrets. Set
 `CLOUDFLARE_PREVIEW_HOST_SUFFIX` as a repository variable for custom domains.
 For example, use `preview.example.com`.
 
+Do not rename the head branch while the PR is open. If a rename is unavoidable,
+delete the Preview under the old name first. The close event carries only the new
+name and cannot clean up the old Preview.
+
 ```yaml
 name: Worker Preview
 

@@ -22,6 +22,7 @@ Use this Preview contract:
 - Use the complete PR branch name as `--name`.
 - Require the repository's PR-standard pattern before deployment.
 - Keep the URL stable across commits to the same branch.
+- Do not rename a branch while its Preview exists.
 - Use `<branch>.preview.example.com` when the Worker has a custom domain.
 - Use `<branch>.preview.staging.example.com` only when that hierarchy is intentional.
 - Verify the live URL, including authentication, before merge.
@@ -30,6 +31,9 @@ Use this Preview contract:
 
 For example, branch `or-111-fix-login` becomes
 `or-111-fix-login.preview.example.com`.
+
+If a branch must be renamed, delete the old Preview by its old branch name first.
+Later pull-request events expose only the new name and cannot infer the orphan.
 
 ## Configure Preview settings
 
