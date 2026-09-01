@@ -233,8 +233,29 @@ jobs:
             if [[ "$status" == 404 || "$status" == 410 ]]; then
               continue
             fi
-            if [[ "$status" != 200 ]] || grep -Fqi "$preview_host" "$body"; then
-              echo "$path must be absent (404/410) or omit the Preview host ($preview_host)" >&2
+            if [[ "$status" != 200 ]]; then
+              echo "$path must be absent (404/410) or return 200" >&2
+              exit 1
+            fi
+            if ! node -e '
+              const fs = require("node:fs");
+              const normalizeHost = (url) =>
+                new URL(url).hostname.toLowerCase().replace(/\.$/, "");
+              const previewHost = normalizeHost(process.argv[2]);
+              const body = fs.readFileSync(process.argv[1], "utf8");
+              const refs = new Set();
+              for (const m of body.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)) refs.add(m[1]);
+              for (const m of body.matchAll(/<link\b[^>]*\bhref\s*=\s*(["\x27])(.*?)\1[^>]*>/gi)) refs.add(m[2]);
+              for (const m of body.matchAll(/<link>\s*([^<\s]+)\s*<\/link>/gi)) refs.add(m[1]);
+              for (const m of body.matchAll(/\]\(([^)\s]+)\)/g)) refs.add(m[1]);
+              for (const ref of refs) {
+                let host;
+                try { host = normalizeHost(new URL(ref, process.argv[2])); } catch { continue; }
+                if (host === previewHost) process.exit(1);
+              }
+              process.exit(0);
+            ' "$body" "$PREVIEW_URL"; then
+              echo "$path must omit references to the Preview host ($preview_host), including relative links" >&2
               exit 1
             fi
           done
