@@ -13,6 +13,8 @@ Do one provider at a time. Do not claim production readiness from secrets or uni
 
 Record each gate in the provider report.
 
+Gates 1-4 apply to providers that require a developer app. For a provider that uses its own account-authentication model instead (see Scope boundaries), confirm the dedicated test account and its credentials in place of an app, approval state, callback URL, and secret names.
+
 1. Confirm the provider app exists in its developer console.
 2. Confirm its approval state and every approved scope.
 3. Confirm the production callback URL matches the deployed service.
