@@ -89,7 +89,7 @@ jobs:
           PREVIEW_URL: ${{ steps.preview.outputs.preview_url }}
         run: |
           set +e
-          http_status="$(curl --location --show-error --silent \
+          http_status="$(curl --show-error --silent \
             --retry 5 --retry-all-errors --retry-delay 3 \
             --connect-timeout 10 --max-time 30 \
             --output /dev/null --write-out '%{http_code}' \
