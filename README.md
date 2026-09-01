@@ -179,6 +179,7 @@ to the skill that holds the lever. The others assume you already know which job 
 | [stale-branches](stale-branches/SKILL.md) | List and clean up stale git branches (merged or inactive 30+ days). |
 | [branch-deploy-convention](branch-deploy-convention/SKILL.md) | Standardise branch names onto `main` (staging) and `release` (production) without breaking a deploy. The silent-dead-trigger defect class, an org-wide sweep, the safe rename order, and the four blockers to check first. |
 | [cloudflare-agent-credentials](cloudflare-agent-credentials/SKILL.md) | Get and manage Cloudflare API tokens for an agent fleet without asking a human each time. What cannot mint one (wrangler, OAuth, the MCP), the one permission that can, and minting narrow per-purpose tokens. |
+| [cloudflare-worker-previews](cloudflare-worker-previews/SKILL.md) | Configure private-beta Worker Previews for pull requests, with branch-based URLs, safe staging bindings, live verification, sticky comments, cleanup, and dedicated test users. |
 | [claude-handoff](claude-handoff/SKILL.md) | Hand off work to a background `claude` session and resume it cleanly. |
 | [git-guardrails-claude-code](git-guardrails-claude-code/SKILL.md) | Set up Claude Code hooks that block dangerous git commands (push, reset --hard, clean). |
 | [x-article-publisher](x-article-publisher/SKILL.md) | Publish X (Twitter) Articles from Markdown via browser automation. |
