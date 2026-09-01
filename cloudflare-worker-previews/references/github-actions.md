@@ -173,9 +173,12 @@ jobs:
           comment_id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100" \
             --paginate --slurp --jq \
             "[.[][] | select(.user.login == \"github-actions[bot]\") | select(.body | contains(\"$marker\"))][0].id // empty")"
+          body="$(printf '%s\nPreview: expired\nCleanup: passed' "$marker")"
           if [[ -n "$comment_id" ]]; then
-            body="$(printf '%s\nPreview: expired\nCleanup: passed' "$marker")"
             gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" \
+              -f body="$body" >/dev/null
+          else
+            gh api --method POST "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
               -f body="$body" >/dev/null
           fi
 ```
