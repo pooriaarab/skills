@@ -113,10 +113,10 @@ Run the repository's format, test, type-check, and build commands.
 
 For a production URL, also prove its appended routes:
 
-- `/design.md` returns HTTP 200.
+- `<product.url>/design.md` returns HTTP 200.
 - Its content type is Markdown with UTF-8.
 - Its response body matches `.agents/design.md` byte-for-byte.
-- `/brand` returns HTTP 200.
+- `<product.url>/brand` returns HTTP 200.
 - The brand page works at mobile and desktop widths.
 
 Use the deployment tied to the proposed commit. Do not test an older production release as proof.

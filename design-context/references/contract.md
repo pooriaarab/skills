@@ -165,6 +165,7 @@ These checks express the delivery contract:
 
 ```sh
 product_url=https://example.com/tool
+product_url=${product_url%/}
 design_status=$(curl --silent --show-error --dump-header headers.txt \
   --output live-design.md --write-out '%{http_code}' "$product_url/design.md")
 test "$design_status" = "200"
