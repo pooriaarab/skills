@@ -20,11 +20,11 @@ description: "Use when training a video LoRA and serving the results from a Clou
 - **GPU:** RTX 4090D 24GB ($0.11 spot) or 4090 $0.30 flat. Ubicloud alternative: managed K8s with same image `vastai/pytorch:2.6.0-cuda12.1-py310`.
 - **Endpoint:** Put the rented box behind TLS (Cloudflare Tunnel or a Caddy reverse proxy) and call `https://<tunnel-host>/v1/video` — the raw `http://<vast-ip>:8000` port sends prompts and generated video unencrypted across the public internet. Local fallback `HF_TOKEN` via `https://router.huggingface.co/hf-inference`.
 - **Secrets:** Keep in `.dev.vars` (wrangler reads it) + mirror to `~/.config/personal-os/secrets.env`. Keys: `HF_TOKEN`, `CIVITAI_API_KEY`, `VAST_API_KEY`, `UBICLOUD_API_KEY`. Never commit.
-- **Cache:** Civitai LoRAs cached 5m to `/tmp/civitai-loras.json`. KV `FLAGS` for feature gates, D1 `videos` table for status.
+- **Cache:** Civitai LoRAs cached 5m via Workers Cache API or KV (`/tmp` has no durable filesystem across Worker isolates). KV `FLAGS` for feature gates, D1 `videos` table for status.
 
 ## 3. Scene → Poster
 
-- **Scene:** ~40–60s episode = 4–6 shots (8–10s each) concatenated via ffmpeg. Prompt: `cinematic, character, soft lighting, 720x1280 vertical`.
+- **Scene:** ~40–60s episode = 5–6 shots (8–10s each) concatenated via ffmpeg. Prompt: `cinematic, character, soft lighting, 720x1280 vertical`.
 - **Poster:** Extract first frame at 1.2s via `ffmpeg -ss 1.2 -i scene.mp4 -vframes 1 -s 720x1280 poster.jpg`. Store `posterUrl` in D1 `episodes.posterUrl`, `videoUrl` points to R2 `videos/{series}/{episode}.mp4`.
 - **Checkpoints:** CP1 schema, CP2 poster pipeline, CP3 UI grid/modal.
 
