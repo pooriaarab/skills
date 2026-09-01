@@ -35,7 +35,6 @@ jobs:
   preview:
     if: >-
       github.event.action != 'closed' &&
-      github.event.pull_request.user.login == github.repository_owner &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubicloud-standard-2
     timeout-minutes: 10
@@ -142,7 +141,6 @@ jobs:
   cleanup:
     if: >-
       github.event.action == 'closed' &&
-      github.event.pull_request.user.login == github.repository_owner &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubicloud-standard-2
     timeout-minutes: 5
@@ -176,10 +174,9 @@ jobs:
             --paginate --slurp --jq \
             "[.[][] | select(.user.login == \"github-actions[bot]\") | select(.body | contains(\"$marker\"))][0].id // empty")"
           if [[ -n "$comment_id" ]]; then
+            body="$(printf '%s\nPreview: expired\nCleanup: passed' "$marker")"
             gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" \
-              -f body="$marker
-          Preview: expired
-          Cleanup: passed" >/dev/null
+              -f body="$body" >/dev/null
           fi
 ```
 
