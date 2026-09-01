@@ -89,16 +89,176 @@ jobs:
           PREVIEW_URL: ${{ steps.preview.outputs.preview_url }}
         run: |
           set +e
-          http_status="$(curl --show-error --silent \
-            --retry 5 --retry-all-errors --retry-delay 3 \
-            --connect-timeout 10 --max-time 30 \
-            --output /dev/null --write-out '%{http_code}' \
-            "$PREVIEW_URL/api/health")"
-          curl_status=$?
+          health_headers="$(mktemp)"
+          headers="$(mktemp)"
+          page="$(mktemp)"
+          robots="$(mktemp)"
+          curl_status=1
+          http_status=000
+          for attempt in 1 2 3 4 5 6; do
+            : > "$health_headers"
+            http_status="$(curl --show-error --silent \
+              --connect-timeout 10 --max-time 30 \
+              --dump-header "$health_headers" --output /dev/null \
+              --write-out '%{http_code}' "$PREVIEW_URL/api/health")"
+            curl_status=$?
+            [[ "$curl_status" == 0 && "$http_status" == 200 ]] && break
+            (( attempt < 6 )) && sleep 3
+          done
+          page_status="$(curl --show-error --silent --connect-timeout 10 --max-time 30 \
+            --dump-header "$headers" --output "$page" --write-out '%{http_code}' \
+            "$PREVIEW_URL/")"
+          page_curl_status=$?
+          robots_headers="$(mktemp)"
+          robots_status="$(curl --show-error --silent --connect-timeout 10 \
+            --max-time 30 --dump-header "$robots_headers" --output "$robots" \
+            --write-out '%{http_code}' \
+            "$PREVIEW_URL/robots.txt")"
+          robots_curl_status=$?
           set -e
           echo "http_status=$http_status" >> "$GITHUB_OUTPUT"
           test "$curl_status" = 0
+          test "$page_curl_status" = 0
+          test "$robots_curl_status" = 0
           test "$http_status" = 200
+          test "$page_status" = 200
+          test "$robots_status" = 200
+          for directive in noindex nofollow noarchive nosnippet noimageindex; do
+            pattern="^x-robots-tag:([[:space:]]*[^,]+,)*[[:space:]]*${directive}([[:space:]]*,|[[:space:]]*$)"
+            grep -Eiq "$pattern" "$health_headers"
+            grep -Eiq "$pattern" "$headers"
+            grep -Eiq "$pattern" "$robots_headers"
+          done
+          robots_content="$(node -e '
+            const fs = require("node:fs");
+            const html = fs.readFileSync(process.argv[1], "utf8")
+              .replace(/<!--[\s\S]*?-->/g, "")
+              .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "");
+            for (const tag of html.match(/<meta\b[^>]*>/gi) || []) {
+              const name = tag.match(/(?:^|\s)name\s*=\s*(?:(["\x27])(.*?)\1|([^\s>]+))/i);
+              const nameVal = name ? (name[2] ?? name[3] ?? "") : "";
+              if (!/^robots$/i.test(nameVal)) continue;
+              const content = tag.match(/(?:^|\s)content\s*=\s*(?:(["\x27])(.*?)\1|([^\s>]+))/i);
+              const contentVal = content ? (content[2] ?? content[3] ?? "") : "";
+              if (content) process.stdout.write(contentVal);
+              process.exit(content ? 0 : 1);
+            }
+            process.exit(1);
+          ' "$page")"
+          for directive in noindex nofollow noarchive nosnippet noimageindex; do
+            grep -Eiq "(^|,[[:space:]]*)${directive}([[:space:]]*,|$)" <<<"$robots_content"
+          done
+          robots_body="$(grep -v '^[[:space:]]*$' "$robots" | tr -d '\r')"
+          if [[ "$robots_body" != $'User-agent: *\nDisallow: /' ]]; then
+            echo "robots.txt must contain exactly: User-agent: *, Disallow: /" >&2
+            exit 1
+          fi
+
+          preview_host="$(printf '%s\n' "$PREVIEW_URL" | sed -E 's#^https?://([^/]+).*#\1#')"
+          if ! node -e '
+            const fs = require("node:fs");
+            const decodeEntities = (s) => s.replace(
+              /&(#x[0-9a-f]+|#[0-9]+|amp|lt|gt|quot|apos);/gi,
+              (m, e) => {
+                if (e[0] !== "#") {
+                  return { amp: "&", lt: "<", gt: ">", quot: "\"", apos: "\x27" }[e.toLowerCase()];
+                }
+                const code = e[1].toLowerCase() === "x" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
+                return Number.isFinite(code) ? String.fromCodePoint(code) : m;
+              },
+            );
+            const normalizeHost = (url) =>
+              new URL(url).hostname.toLowerCase().replace(/\.$/, "");
+            const previewHost = normalizeHost(process.argv[2]);
+            const html = fs.readFileSync(process.argv[1], "utf8")
+              .replace(/<!--[\s\S]*?-->/g, "")
+              .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "");
+            const canonicalTags = (html.match(/<link\b[^>]*>/gi) || []).filter((tag) => {
+              const rel = tag.match(/(?:^|\s)rel\s*=\s*(?:(["\x27])(.*?)\1|([^\s>]+))/i);
+              const relVal = rel ? (rel[2] ?? rel[3] ?? "") : "";
+              return /(?:^|\s)canonical(?:\s|$)/i.test(relVal);
+            });
+            for (const tag of canonicalTags) {
+              const href = tag.match(/(?:^|\s)href\s*=\s*(?:(["\x27])(.*?)\1|([^\s>]+))/i);
+              const hrefVal = href ? (href[2] ?? href[3] ?? "") : "";
+              if (!hrefVal) continue;
+              let host;
+              try { host = normalizeHost(new URL(decodeEntities(hrefVal), process.argv[2])); } catch { continue; }
+              if (host === previewHost) process.exit(1);
+            }
+            process.exit(0);
+          ' "$page" "$PREVIEW_URL"; then
+            echo "The root page exposes the Preview host as canonical" >&2
+            exit 1
+          fi
+          if ! node -e '
+            const fs = require("node:fs");
+            const normalizeHost = (url) =>
+              new URL(url).hostname.toLowerCase().replace(/\.$/, "");
+            const previewHost = normalizeHost(process.argv[2]);
+            const linkLines = fs.readFileSync(process.argv[1], "utf8")
+              .split(/\r?\n/)
+              .filter((line) => /^link:/i.test(line));
+            for (const line of linkLines) {
+              const value = line.slice(line.indexOf(":") + 1);
+              // Split only on commas that separate link-values (RFC 8288), so a
+              // literal comma inside a URI-reference does not break it in two.
+              for (const part of value.split(/,(?=\s*<)/)) {
+                const uri = part.match(/<([^>]*)>/);
+                if (!uri) continue;
+                const rel = part.match(/(?:^|[;\s])rel\s*=\s*(?:(["\x27])(.*?)\1|([^\s,;]+))/i);
+                const relVal = rel ? (rel[2] ?? rel[3] ?? "") : "";
+                if (!/(?:^|\s)canonical(?:\s|$)/i.test(relVal)) continue;
+                let host;
+                try { host = normalizeHost(new URL(uri[1], process.argv[2])); } catch { continue; }
+                if (host === previewHost) process.exit(1);
+              }
+            }
+            process.exit(0);
+          ' "$headers" "$PREVIEW_URL"; then
+            echo "The root page exposes the Preview host as an HTTP Link canonical" >&2
+            exit 1
+          fi
+          for path in sitemap.xml llms.txt llms-full.txt feed.xml rss.xml atom.xml indexnow; do
+            body="$(mktemp)"
+            path_headers="$(mktemp)"
+            status="$(curl --show-error --silent --connect-timeout 10 \
+              --max-time 30 --dump-header "$path_headers" --output "$body" \
+              --write-out '%{http_code}' \
+              "$PREVIEW_URL/$path")"
+            for directive in noindex nofollow noarchive nosnippet noimageindex; do
+              pattern="^x-robots-tag:([[:space:]]*[^,]+,)*[[:space:]]*${directive}([[:space:]]*,|[[:space:]]*$)"
+              grep -Eiq "$pattern" "$path_headers"
+            done
+            if [[ "$status" == 404 || "$status" == 410 ]]; then
+              continue
+            fi
+            if [[ "$status" != 200 ]]; then
+              echo "$path must be absent (404/410) or return 200" >&2
+              exit 1
+            fi
+            if ! node -e '
+              const fs = require("node:fs");
+              const normalizeHost = (url) =>
+                new URL(url).hostname.toLowerCase().replace(/\.$/, "");
+              const previewHost = normalizeHost(process.argv[2]);
+              const body = fs.readFileSync(process.argv[1], "utf8");
+              const refs = new Set();
+              for (const m of body.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)) refs.add(m[1]);
+              for (const m of body.matchAll(/<link\b[^>]*\bhref\s*=\s*(["\x27])(.*?)\1[^>]*>/gi)) refs.add(m[2]);
+              for (const m of body.matchAll(/<link>\s*([^<\s]+)\s*<\/link>/gi)) refs.add(m[1]);
+              for (const m of body.matchAll(/\]\(([^)\s]+)\)/g)) refs.add(m[1]);
+              for (const ref of refs) {
+                let host;
+                try { host = normalizeHost(new URL(ref, process.argv[2])); } catch { continue; }
+                if (host === previewHost) process.exit(1);
+              }
+              process.exit(0);
+            ' "$body" "$PREVIEW_URL"; then
+              echo "$path must omit references to the Preview host ($preview_host), including relative links" >&2
+              exit 1
+            fi
+          done
 
       # Add the repository's authenticated browser or API verification here.
       # Pass steps.preview.outputs.preview_url as its base URL.
