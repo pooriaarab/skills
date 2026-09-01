@@ -35,6 +35,7 @@ jobs:
   preview:
     if: >-
       github.event.action != 'closed' &&
+      github.event.pull_request.user.login == github.repository_owner &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubicloud-standard-2
     timeout-minutes: 10
@@ -89,16 +90,24 @@ jobs:
           PREVIEW_URL: ${{ steps.preview.outputs.preview_url }}
         run: |
           set +e
+          headers="$(mktemp)"
+          robots="$(mktemp)"
           http_status="$(curl --show-error --silent \
             --retry 5 --retry-all-errors --retry-delay 3 \
             --connect-timeout 10 --max-time 30 \
-            --output /dev/null --write-out '%{http_code}' \
+            --dump-header "$headers" --output /dev/null --write-out '%{http_code}' \
             "$PREVIEW_URL/api/health")"
           curl_status=$?
+          robots_status="$(curl --show-error --silent --connect-timeout 10 \
+            --max-time 30 --output "$robots" --write-out '%{http_code}' \
+            "$PREVIEW_URL/robots.txt")"
           set -e
           echo "http_status=$http_status" >> "$GITHUB_OUTPUT"
           test "$curl_status" = 0
           test "$http_status" = 200
+          test "$robots_status" = 200
+          grep -Eiq '^x-robots-tag:.*noindex' "$headers"
+          grep -Eq '^Disallow: /$' "$robots"
 
       # Add the repository's authenticated browser or API verification here.
       # Pass steps.preview.outputs.preview_url as its base URL.
@@ -141,6 +150,7 @@ jobs:
   cleanup:
     if: >-
       github.event.action == 'closed' &&
+      github.event.pull_request.user.login == github.repository_owner &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubicloud-standard-2
     timeout-minutes: 5
@@ -155,6 +165,8 @@ jobs:
           BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
           if [[ ! "$BRANCH_NAME" =~ ^[a-z]{2,4}-[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
@@ -167,6 +179,16 @@ jobs:
           fi
           npx --yes "wrangler@$WRANGLER_VERSION" preview delete \
             --name "$BRANCH_NAME" --skip-confirmation
+          marker='<!-- cloudflare-worker-preview -->'
+          comment_id="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100" \
+            --paginate --slurp --jq \
+            "[.[][] | select(.user.login == \"github-actions[bot]\") | select(.body | contains(\"$marker\"))][0].id // empty")"
+          if [[ -n "$comment_id" ]]; then
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" \
+              -f body="$marker
+          Preview: expired
+          Cleanup: passed" >/dev/null
+          fi
 ```
 
 Change `/api/health` to a route that proves the deployed Worker is ready.

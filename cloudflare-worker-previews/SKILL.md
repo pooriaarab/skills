@@ -179,6 +179,24 @@ Access separately from application authentication.
 Maintain separate smoke users for production checks. Never point a Preview at
 production authentication merely because the staging test user is missing.
 
+## Block indexing and discovery
+
+Treat every Preview as public internet traffic unless Cloudflare Access protects it.
+Robots controls are not an authentication or authorization boundary.
+
+Return `X-Robots-Tag: noindex, nofollow, noarchive, nosnippet, noimageindex` on
+every Preview response. Render matching page metadata. Serve this `robots.txt`:
+
+```text
+User-agent: *
+Disallow: /
+```
+
+Exclude Preview hosts from sitemaps, feeds, IndexNow, and canonical URL discovery.
+Do not publish Preview URLs in `llms.txt`. The wildcard robots rule also asks
+compliant AI crawlers not to fetch the Preview. Keep secrets and production data
+isolated because crawlers and attackers can ignore these voluntary controls.
+
 ## Automate and gate
 
 Read [references/github-actions.md](references/github-actions.md) when adding the
