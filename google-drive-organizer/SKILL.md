@@ -51,7 +51,7 @@ Do not skip this. Wrong assumptions = wrong structure.
    → Plan a personal/ or private/ folder.
 
 6. Are there files for multiple contexts (e.g., work + personal, or multiple clients)?
-   → Plan top-level folders per context (e.g., solo/, mozilla/, personal/)
+   → Plan top-level folders per context (e.g., work/, clients/, personal/)
 ```
 
 ---
@@ -383,8 +383,8 @@ Save fresh credentials immediately after: `cp ~/.config/gws/credentials.enc ~/.c
 gws does NOT share gcloud's account config — it has its own isolated credentials. Use separate config directories:
 
 ```bash
-~/.config/gws-work/      # <work-account>  — client_secret.json + credentials.enc + .encryption_key
-~/.config/gws-personal/  # <personal-account> — same files, different content
+~/.config/gws-work/      # <work-account>      — client_secret.json + credentials.enc + .encryption_key
+~/.config/gws-personal/  # <personal-account>  — same files, different content
 ```
 
 Switch with symlink:
