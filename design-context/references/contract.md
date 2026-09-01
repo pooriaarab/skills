@@ -114,6 +114,8 @@ Use the framework's native route or static asset pipeline.
 
 Append `/design.md` and `/brand` to the full `product.url`. Preserve any base path.
 
+Remove a trailing slash from `product.url` first. Do not produce a double slash.
+
 For example, `https://example.com/tool` maps to `/tool/design.md` and `/tool/brand`.
 
 ### Server-rendered frameworks

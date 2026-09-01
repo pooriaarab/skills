@@ -99,6 +99,8 @@ Such repositories must expose:
 
 Append both paths to the full production home, including any base path.
 
+Remove a trailing slash from `product.url` first. Do not produce a double slash.
+
 For example, `https://example.com/tool` owns `/tool/design.md` and `/tool/brand`.
 
 Serve the tracked `.agents/design.md` content byte-for-byte at build time or request time.
