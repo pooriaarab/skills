@@ -8,8 +8,8 @@ Use this contract for repository audits and changes.
 |---|---|---|
 | `.agents/brand.md` | Identity, audience, promise, voice, claims, naming | UI tokens, route code, component details |
 | `.agents/design.md` | Visual and interaction rules for one surface | Company strategy, unsupported claims |
-| `/design.md` | Byte-exact delivery of `.agents/design.md` | A second edited copy |
-| `/brand` | Human presentation of the same brand and design system | Private strategy or unverified claims |
+| `<product.url>/design.md` | Byte-exact delivery of `.agents/design.md` | A second edited copy |
+| `<product.url>/brand` | Human presentation of the same brand and design system | Private strategy or unverified claims |
 
 Lowercase, kebab-case paths are required.
 
@@ -112,6 +112,10 @@ Do not add empty keys. Do not duplicate every prose rule in YAML.
 
 Use the framework's native route or static asset pipeline.
 
+Append `/design.md` and `/brand` to the full `product.url`. Preserve any base path.
+
+For example, `https://example.com/tool` maps to `/tool/design.md` and `/tool/brand`.
+
 ### Server-rendered frameworks
 
 Read `.agents/design.md` from a deterministic repository-root path.
@@ -160,13 +164,14 @@ Use repository-native commands first.
 These checks express the delivery contract:
 
 ```sh
+product_url=https://example.com/tool
 design_status=$(curl --silent --show-error --dump-header headers.txt \
-  --output live-design.md --write-out '%{http_code}' https://example.com/design.md)
+  --output live-design.md --write-out '%{http_code}' "$product_url/design.md")
 test "$design_status" = "200"
 cmp .agents/design.md live-design.md
 
 brand_status=$(curl --silent --show-error --output /dev/null \
-  --write-out '%{http_code}' https://example.com/brand)
+  --write-out '%{http_code}' "$product_url/brand")
 test "$brand_status" = "200"
 ```
 
