@@ -21,11 +21,11 @@ Gates 1-4 apply to providers that require a developer app. For a provider that u
 4. Confirm the required production secret names exist. Do not copy secret values.
 5. Connect a dedicated test account through the real OAuth flow, or through the provider's native account-authentication flow for a provider that uses one instead of OAuth.
 6. Publish only neutral test content. Do not name the product or customer unless the operator requests it.
-7. Delete each live test post immediately after its public result is verified.
-8. Test each supported shape: text, text with one image, multi-image carousel, video, and mixed image plus video when the provider supports it.
-9. Verify the public provider page. An API success alone does not prove that media appeared.
-10. Test comment sync and reply when the product implements them.
-11. Delete test replies immediately after verification when the provider permits it.
+7. Test each supported shape: text, text with one image, multi-image carousel, video, and mixed image plus video when the provider supports it.
+8. Verify the public provider page. An API success alone does not prove that media appeared.
+9. Test comment sync and reply when the product implements them.
+10. Delete test replies immediately after verification when the provider permits it.
+11. Delete each live test post after its public result and applicable engagement probes are verified. Confirm deletion completed.
 12. Test DMs only for providers with a DM adapter and an approved messaging scope.
 13. Record provider-console screenshots, external post URLs, request IDs, failures, and cleanup results.
 
@@ -49,19 +49,19 @@ Treat Facebook, Instagram, and Threads as separate release gates. Their shared M
 
 ## Local proof
 
-Run the read-only matrix before console work, if the Content Rabbit repo provides one:
+Run the read-only matrix before console work from the `pooriaarab/scripts` repo root:
 
 ```bash
-./scripts/qualification-matrix.sh x
+./scripts/social-provider-qualification/qualification-matrix.sh x
 ```
 
-Run it from the Content Rabbit repo root. Replace `x` with the provider slug. The script checks named production secrets and the focused handler tests. It does not contact a social provider or create content. If the repo has no such script yet, skip this step and confirm secrets and handler tests by other means.
+Set `CONTENT_RABBIT_REPO` to the Content Rabbit checkout path. Replace `x` with the provider slug. The script checks named production secrets and focused handler tests. It does not contact a social provider or create content.
 
 For browser work, capture a screenshot before and after each irreversible console action. Keep credentials, tokens, and callback state out of screenshots and notes.
 
 Use a neutral marker such as `integration check <timestamp>`. Never use the product name by default.
 
-After every live probe, confirm deletion from the public provider page. Stop if deletion fails.
+After all applicable probes for each live post, confirm deletion from the public provider page. Stop if deletion fails.
 
 ## X qualification notes
 
@@ -84,4 +84,4 @@ After every live probe, confirm deletion from the public provider page. Stop if 
 
 ## Outcome
 
-Mark a provider `READY` only after the approval, authentication (OAuth or native account-authentication), publish, cleanup, and applicable engagement gates pass on production. Otherwise mark it `BLOCKED` and state the exact external gate.
+Mark a provider `READY` only after local proof passes, every applicable gate has recorded evidence, and the approval, authentication, publish, cleanup, and applicable engagement gates pass on production. Otherwise mark it `BLOCKED` and state the exact internal or external blocker.
