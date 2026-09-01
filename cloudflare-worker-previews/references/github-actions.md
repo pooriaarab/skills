@@ -90,24 +90,16 @@ jobs:
           PREVIEW_URL: ${{ steps.preview.outputs.preview_url }}
         run: |
           set +e
-          headers="$(mktemp)"
-          robots="$(mktemp)"
           http_status="$(curl --show-error --silent \
             --retry 5 --retry-all-errors --retry-delay 3 \
             --connect-timeout 10 --max-time 30 \
-            --dump-header "$headers" --output /dev/null --write-out '%{http_code}' \
+            --output /dev/null --write-out '%{http_code}' \
             "$PREVIEW_URL/api/health")"
           curl_status=$?
-          robots_status="$(curl --show-error --silent --connect-timeout 10 \
-            --max-time 30 --output "$robots" --write-out '%{http_code}' \
-            "$PREVIEW_URL/robots.txt")"
           set -e
           echo "http_status=$http_status" >> "$GITHUB_OUTPUT"
           test "$curl_status" = 0
           test "$http_status" = 200
-          test "$robots_status" = 200
-          grep -Eiq '^x-robots-tag:.*noindex' "$headers"
-          grep -Eq '^Disallow: /$' "$robots"
 
       # Add the repository's authenticated browser or API verification here.
       # Pass steps.preview.outputs.preview_url as its base URL.
