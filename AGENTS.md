@@ -1,5 +1,13 @@
 # AGENTS.md
 
+## Brand and design context
+
+Read `.agents/brand.md` before changing the repository identity, public copy,
+skill names, or claims.
+
+Read `.agents/design.md` before changing the README, documentation structure,
+or the presentation of a skill.
+
 <!-- pr-standards:start -->
 
 ## Pull requests
