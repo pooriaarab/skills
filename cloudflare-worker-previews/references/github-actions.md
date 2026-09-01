@@ -32,6 +32,7 @@ jobs:
       github.event.action != 'closed' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubicloud-standard-2
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
@@ -82,12 +83,17 @@ jobs:
         env:
           PREVIEW_URL: ${{ steps.preview.outputs.preview_url }}
         run: |
+          set +e
           http_status="$(curl --location --show-error --silent \
             --retry 5 --retry-all-errors --retry-delay 3 \
+            --connect-timeout 10 --max-time 30 \
             --output /dev/null --write-out '%{http_code}' \
             "$PREVIEW_URL/api/health")"
-          test "$http_status" = 200
+          curl_status=$?
+          set -e
           echo "http_status=$http_status" >> "$GITHUB_OUTPUT"
+          test "$curl_status" = 0
+          test "$http_status" = 200
 
       # Add the repository's authenticated browser or API verification here.
       # Pass steps.preview.outputs.preview_url as its base URL.
@@ -100,12 +106,18 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PREVIEW_URL: ${{ steps.preview.outputs.preview_url }}
-          VERIFY_RESULT: HTTP ${{ steps.verify.outputs.http_status }} passed
+          VERIFY_OUTCOME: ${{ steps.verify.outcome }}
+          HTTP_STATUS: ${{ steps.verify.outputs.http_status }}
         run: |
           set -euo pipefail
           marker='<!-- cloudflare-worker-preview -->'
+          if [[ "$VERIFY_OUTCOME" == success ]]; then
+            verification="passed (HTTP $HTTP_STATUS)"
+          else
+            verification="failed (HTTP ${HTTP_STATUS:-unavailable})"
+          fi
           body="$(printf '%s\nPreview: %s\nLive verification: %s' \
-            "$marker" "$PREVIEW_URL" "$VERIFY_RESULT")"
+            "$marker" "$PREVIEW_URL" "$verification")"
           comment_id="$(gh api \
             "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100" \
             --paginate --slurp \
@@ -126,6 +138,7 @@ jobs:
       github.event.action == 'closed' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubicloud-standard-2
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
