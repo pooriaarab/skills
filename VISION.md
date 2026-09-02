@@ -2,7 +2,7 @@
 
 ## What this is
 
-A collection of Claude Code skills for AI-aware development and life organization. Each top-level directory holds one skill: a Markdown playbook that teaches the agent one job. The collection holds about 190 of them. Forty-eight of the forty-nine ad-platform skills share one conversion-tracking contract, `ad-conversion-hub`, which owns events, consent, hashing, deduplication, and failure isolation; `google-ads` runs its own GA4-based scheme instead. A 25-skill organizer suite sorts files, notes, mail, calendars, contacts, photos, and code. Six CI skills diagnose speed, cost, and queueing on repos where agents open most pull requests. Standalone skills deploy an app to five targets (self-hosted, Cloudflare, GCP, AWS, Azure), walk it through vendor marketplaces and directory listings, and run personal admin such as the Canada census and a Schengen visa application.
+A collection of Claude Code skills for AI-aware development and life organization. Each top-level directory holds one skill: a Markdown playbook that teaches the agent one job. The collection holds about 190 of them. Forty-eight of the forty-nine ad-platform skills share one conversion-tracking contract, `ad-conversion-hub`, which owns events, consent, hashing, deduplication, and failure isolation; `ads-google` runs its own GA4-based scheme instead. A 25-skill organizer suite sorts files, notes, mail, calendars, contacts, photos, and code. Six CI skills diagnose speed, cost, and queueing on repos where agents open most pull requests. Standalone skills deploy an app to five targets (self-hosted, Cloudflare, GCP, AWS, Azure), walk it through vendor marketplaces and directory listings, and run personal admin such as the Canada census and a Schengen visa application.
 
 ## Who it is for
 
@@ -19,7 +19,7 @@ The owner: a solo developer who ships products with coding agents as the main wo
 ## Explicitly not this
 
 - An application or an installable package. The root has no `package.json` and no source tree; every top-level entry is a skill directory, a top-level doc (README, AGENTS, this file), or a directory that holds sub-skills or shared docs rather than a `SKILL.md` of its own (`organizer/`, `brand/`, `docs/`). A runtime, a CLI binary, or an npm module does not belong here.
-- A new platform ad skill with its own tracking scheme. `google-ads` is the sole existing exception, kept for its GA4 layering; every other platform skill takes events, consent, hashing, deduplication, and failure isolation from `ad-conversion-hub` and must reuse that contract, not redefine it.
+- A new platform ad skill with its own tracking scheme. `ads-google` is the sole existing exception, kept for its GA4 layering; every other platform skill takes events, consent, hashing, deduplication, and failure isolation from `ad-conversion-hub` and must reuse that contract, not redefine it.
 - A rewrite of a live-verified step from vendor documentation. The commit log corrects skills from live submissions, real campaigns, and real portals; a live run outranks the doc the text came from.
 - A second entry point for a domain the repo already routes. CI starts at `ci-speed-diagnosis` and life organization starts at `life-organizer`; a parallel router for the same domain splits the path every new reader must start on.
 - A life-admin skill that stores personal data. The census and visa skills state "Zero PII" and stop before irreversible steps; a skill that saves that data breaks the property they state.
