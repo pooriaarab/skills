@@ -1,5 +1,5 @@
 ---
-name: dispatch
+name: brand-dispatch
 description: "Use when applying the dispatch brand direction to any surface: website, X, LinkedIn, Instagram carousels, YouTube thumbnails and edits, podcast art, or decks. Newsprint, a heavy slab headline clamped between two rules, one red stamp struck at minus three degrees. Triggers: 'dispatch direction', 'wire report style', 'newsprint stamp brand', 'breaking news layout', 'apply dispatch to my launch post'."
 ---
 
@@ -17,8 +17,8 @@ used, and a stamp over a small update reads as a lie.**
 
 That avoid-when has a number attached. See **Cost to run** before you use this on anything.
 
-Contract: [`../_lib/surfaces.md`](../_lib/surfaces.md). Floor:
-[`../_lib/craft-floor.md`](../_lib/craft-floor.md).
+Contract: [`../_lib/surfaces.md`](../brand/_lib/surfaces.md). Floor:
+[`../_lib/craft-floor.md`](../brand/_lib/craft-floor.md).
 
 ---
 
@@ -208,7 +208,7 @@ rather than accidental.
 
 1200×627. The most conservative room the brand enters, and **dispatch is the one direction in this
 family that gains from it.** A ruled newsprint layout reads as seriousness to exactly the audience that
-finds [arcade](../arcade/SKILL.md) or [flyer](../flyer/SKILL.md) alarming.
+finds [arcade](../brand-arcade/SKILL.md) or [flyer](../brand-flyer/SKILL.md) alarming.
 
 Dial up rather than down, at 110%:
 
@@ -315,29 +315,29 @@ survivable: ration the stamp, not the format.
 
 ## Pairs with / clashes with
 
-**Pairs with** [buildspace](../buildspace/SKILL.md) as its standard partner. buildspace carries the
+**Pairs with** [buildspace](../brand-buildspace/SKILL.md) as its standard partner. buildspace carries the
 process, the doubt, and the week after; dispatch carries the moment the thing actually changed. Neither
 can do the other's job, and the handoff is legible to the reader.
-**Pairs with** [annual](../annual/SKILL.md) when the news is financial: file it in dispatch, then
+**Pairs with** [annual](../brand-annual/SKILL.md) when the news is financial: file it in dispatch, then
 substantiate it in annual.
-**Pairs with** [broadsheet](../broadsheet/SKILL.md), its long-form relative. Same print world, same
+**Pairs with** [broadsheet](../brand-broadsheet/SKILL.md), its long-form relative. Same print world, same
 seriousness, different lengths.
 
-**Clashes with** [stadium](../stadium/SKILL.md). Both announce, both shout, and run together in one week
+**Clashes with** [stadium](../brand/stadium/SKILL.md). Both announce, both shout, and run together in one week
 they read as panic rather than as news. Pick one per event.
-**Clashes with** [flyer](../flyer/SKILL.md), which is unsanctioned by design while dispatch depends on
+**Clashes with** [flyer](../brand-flyer/SKILL.md), which is unsanctioned by design while dispatch depends on
 being believed.
-**Clashes with** [arcade](../arcade/SKILL.md) and [aurora](../aurora/SKILL.md), whose whole surfaces
+**Clashes with** [arcade](../brand-arcade/SKILL.md) and [aurora](../brand-aurora/SKILL.md), whose whole surfaces
 contradict the claim that nobody had time to decorate this.
 
-Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand-router/SKILL.md):
-[broadsheet](../broadsheet/SKILL.md), [swiss](../swiss/SKILL.md), [manuscript](../manuscript/SKILL.md),
-[plaque](../plaque/SKILL.md), [annual](../annual/SKILL.md), [terminal](../terminal/SKILL.md),
-[blueprint](../blueprint/SKILL.md), [spec](../spec/SKILL.md), [oscilloscope](../oscilloscope/SKILL.md),
-[punchcard](../punchcard/SKILL.md), [buildspace](../buildspace/SKILL.md),
-[risograph](../risograph/SKILL.md), [stadium](../stadium/SKILL.md), [arcade](../arcade/SKILL.md),
-[flyer](../flyer/SKILL.md), dispatch, [dusk](../dusk/SKILL.md), [vellum](../vellum/SKILL.md),
-[aurora](../aurora/SKILL.md), [porcelain](../porcelain/SKILL.md).
+Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand/brand-router/SKILL.md):
+[broadsheet](../brand-broadsheet/SKILL.md), [swiss](../brand/swiss/SKILL.md), [manuscript](../brand-manuscript/SKILL.md),
+[plaque](../brand/plaque/SKILL.md), [annual](../brand-annual/SKILL.md), [terminal](../brand/terminal/SKILL.md),
+[blueprint](../brand-blueprint/SKILL.md), [spec](../brand/spec/SKILL.md), [oscilloscope](../brand-oscilloscope/SKILL.md),
+[punchcard](../brand/punchcard/SKILL.md), [buildspace](../brand-buildspace/SKILL.md),
+[risograph](../brand/risograph/SKILL.md), [stadium](../brand/stadium/SKILL.md), [arcade](../brand-arcade/SKILL.md),
+[flyer](../brand-flyer/SKILL.md), dispatch, [dusk](../brand-dusk/SKILL.md), [vellum](../brand/vellum/SKILL.md),
+[aurora](../brand-aurora/SKILL.md), [porcelain](../brand/porcelain/SKILL.md).
 
 ## The failure mode
 
@@ -356,4 +356,4 @@ and the reader feels the gap even when they cannot name it.
 
 The check before you publish: write the sentence "on [date], [thing] changed from X to Y". If you cannot
 fill in all four slots, drop the stamp. If you cannot fill in any of them, drop the direction and use
-[buildspace](../buildspace/SKILL.md), which is allowed to be uncertain.
+[buildspace](../brand-buildspace/SKILL.md), which is allowed to be uncertain.

@@ -13,7 +13,7 @@ description: "Use when the work should feel filed, dated and permanent: an archi
 
 **Use when** you want the work to feel filed, dated and permanent — an archive, a body of writing, a timeline, a year-end index.
 
-**Avoid when** the subject is speculative or unreleased. **Card stock implies the record already exists, so a roadmap set in punchcard reads as a lie.** Never run a roadmap, a waitlist, a "coming soon", or a prediction post in this direction. Those belong in [blueprint](../blueprint/SKILL.md), which promises the opposite.
+**Avoid when** the subject is speculative or unreleased. **Card stock implies the record already exists, so a roadmap set in punchcard reads as a lie.** Never run a roadmap, a waitlist, a "coming soon", or a prediction post in this direction. Those belong in [blueprint](../../brand-blueprint/SKILL.md), which promises the opposite.
 
 ---
 
@@ -130,7 +130,7 @@ Keep the clipped corner, the stock, the headline and one punched row. Headline A
 
 ## 8. Instagram carousel
 
-1080×1350 throughout. **The carousel is a card file, and the slides are numbered cards.** Every slide carries the clipped corner, the 80-column ruler and a `CARD n / N` stamp — that repeated furniture is what separates it from a [terminal](../terminal/SKILL.md) session, a [spec](../spec/SKILL.md) table or an [oscilloscope](../oscilloscope/SKILL.md) sweep. At x=72 margins, 936px / 80 = **11.7px per column**.
+1080×1350 throughout. **The carousel is a card file, and the slides are numbered cards.** Every slide carries the clipped corner, the 80-column ruler and a `CARD n / N` stamp — that repeated furniture is what separates it from a [terminal](../terminal/SKILL.md) session, a [spec](../spec/SKILL.md) table or an [oscilloscope](../../brand-oscilloscope/SKILL.md) sweep. At x=72 margins, 936px / 80 = **11.7px per column**.
 
 **Cover slide.** Manila `#e9dec4`, halftone at half strength, **top-left corner clipped 160px**. The ruler runs across the top at y=64 in Courier Prime 20px `#665834`. Title in Archivo 700 uppercase at **104px** `#201a10`, left at 72px, **max 6 words**, sitting on the lower third. Directly above the title, a `#b8301a` punched row **spanning the title's exact rendered width** — rectangles one column wide (11.7px), 28px tall, gapped 5px.
 
@@ -152,7 +152,7 @@ Keep the clipped corner, the stock, the headline and one punched row. Headline A
 
 Full-bleed manila `#e9dec4` with the column lattice visible and the **top-left corner clipped 120px**. Title in Archivo 700 uppercase, **92px**, `#201a10`, **max 6 words**, left-aligned at a 64px margin, sitting on the lower third. Directly above it, a row of `#b8301a` punched rectangles spanning the title's exact width.
 
-The face sits bottom-right, cropped square, printed as a **coarse 6px halftone in `#201a10` on the stock** — never full colour. At 210px the halftone dots merge into a grey portrait, which is the correct outcome: it still reads as a person, unlike the amber silhouette in [oscilloscope](../oscilloscope/SKILL.md) or the green cutout in [terminal](../terminal/SKILL.md).
+The face sits bottom-right, cropped square, printed as a **coarse 6px halftone in `#201a10` on the stock** — never full colour. At 210px the halftone dots merge into a grey portrait, which is the correct outcome: it still reads as a person, unlike the amber silhouette in [oscilloscope](../../brand-oscilloscope/SKILL.md) or the green cutout in [terminal](../terminal/SKILL.md).
 
 **Do not put the ruler on a thumbnail.** At 210px, 18px Courier Prime is 3px and reads as dirt along the top edge. The clipped corner and the punched row are the identity here.
 
@@ -208,15 +208,15 @@ The direction's real constraint is not cost, it is supply. **Punchcard can only 
 
 **Pairs with [terminal](../terminal/SKILL.md).** Terminal reports the session as it runs; punchcard files the record afterwards. Green-on-black beside manila is a strong contrast with no hue conflict, and the two split the timeline cleanly between now and then.
 
-**Pairs with [manuscript](../manuscript/SKILL.md) and [broadsheet](../broadsheet/SKILL.md)** — all three are print-native and warm-grounded, and punchcard supplies the index that the other two lack.
+**Pairs with [manuscript](../../brand-manuscript/SKILL.md) and [broadsheet](../../brand-broadsheet/SKILL.md)** — all three are print-native and warm-grounded, and punchcard supplies the index that the other two lack.
 
-**Pairs with [annual](../annual/SKILL.md)** for a year-in-review, where the filed record and the report share a purpose.
+**Pairs with [annual](../../brand-annual/SKILL.md)** for a year-in-review, where the filed record and the report share a purpose.
 
-**Clashes with [blueprint](../blueprint/SKILL.md)** on meaning, not on looks. Blueprint promises the building does not exist yet; punchcard insists the record already exists. In one kit the brand contradicts itself about time, and the audience will feel it without being able to name it.
+**Clashes with [blueprint](../../brand-blueprint/SKILL.md)** on meaning, not on looks. Blueprint promises the building does not exist yet; punchcard insists the record already exists. In one kit the brand contradicts itself about time, and the audience will feel it without being able to name it.
 
-**Clashes with [aurora](../aurora/SKILL.md) and [arcade](../arcade/SKILL.md)** — both are lit from within, and this direction is ink on stock that has never been lit by anything but a desk lamp.
+**Clashes with [aurora](../../brand-aurora/SKILL.md) and [arcade](../../brand-arcade/SKILL.md)** — both are lit from within, and this direction is ink on stock that has never been lit by anything but a desk lamp.
 
-**Note on the mono directions:** punchcard is **not** one of them, and this matters when picking a kit. [terminal](../terminal/SKILL.md), [spec](../spec/SKILL.md) and [oscilloscope](../oscilloscope/SKILL.md) each make a different argument for monospace. Punchcard's prose is Archivo, and Courier Prime appears only on the ruler, the IDs and the dates. That makes punchcard safe to pair with any one of the three, where those three are not safe to pair with each other.
+**Note on the mono directions:** punchcard is **not** one of them, and this matters when picking a kit. [terminal](../terminal/SKILL.md), [spec](../spec/SKILL.md) and [oscilloscope](../../brand-oscilloscope/SKILL.md) each make a different argument for monospace. Punchcard's prose is Archivo, and Courier Prime appears only on the ruler, the IDs and the dates. That makes punchcard safe to pair with any one of the three, where those three are not safe to pair with each other.
 
 ## The failure mode
 

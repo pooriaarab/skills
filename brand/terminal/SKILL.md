@@ -113,7 +113,7 @@ If the post is about hiring, culture, or a personal milestone, do not dial termi
 
 ## 8. Instagram carousel
 
-1080×1350 throughout. **The carousel is one session split across slides**: commands on top, output underneath, one colour, one font. That structure is what separates it from a [spec](../spec/SKILL.md) or [oscilloscope](../oscilloscope/SKILL.md) carousel.
+1080×1350 throughout. **The carousel is one session split across slides**: commands on top, output underneath, one colour, one font. That structure is what separates it from a [spec](../spec/SKILL.md) or [oscilloscope](../../brand-oscilloscope/SKILL.md) carousel.
 
 **Cover slide.** `#060b06`, scanlines at 5%. One `$` command, JetBrains Mono 700 lowercase at **128px**, max 6 words, left margin 72px, baseline at 58% height, closed by the block cursor. Nothing else — no date, no handle, no logo.
 
@@ -153,7 +153,7 @@ Recognisably his without being identical: the `$ ` prefix and the cursor are fix
 
 **Cold open (first 3 seconds).** Frames 1–45: black field, the command types on at 12 char/sec, cursor blinking behind it. Frame 46: one hard cut to the result, full frame, no title. The question and the answer both land before anyone hears your voice.
 
-**What this edit cannot do:** an emotional beat, a story about a person, a laugh. Run those in [dispatch](../dispatch/SKILL.md) or [dusk](../dusk/SKILL.md) and keep terminal for the technical inserts.
+**What this edit cannot do:** an emotional beat, a story about a person, a laugh. Run those in [dispatch](../../brand-dispatch/SKILL.md) or [dusk](../../brand-dusk/SKILL.md) and keep terminal for the technical inserts.
 
 ## 11. Podcast cover
 
@@ -187,13 +187,13 @@ The expensive part is not the design. **It is the writing.** The direction deman
 
 **Pairs with [spec](../spec/SKILL.md).** They are the two halves of a technical kit: terminal is the native-dark log of what happened, spec is the native-light reference for what is true. They share no font and no hue, so the pair never blurs. Ship the release post in terminal and the docs it links to in spec.
 
-**Pairs with [buildspace](../buildspace/SKILL.md)** when the same audience needs a warmer companion, and with [punchcard](../punchcard/SKILL.md) for the archive of shipped work.
+**Pairs with [buildspace](../../brand-buildspace/SKILL.md)** when the same audience needs a warmer companion, and with [punchcard](../punchcard/SKILL.md) for the archive of shipped work.
 
-**Clashes with [oscilloscope](../oscilloscope/SKILL.md).** Both are native-dark single-hue instrument worlds with a texture overlay on near-black. Side by side they read as one direction with a colour bug, not as two. Never put them in the same kit, deck or feed week.
+**Clashes with [oscilloscope](../../brand-oscilloscope/SKILL.md).** Both are native-dark single-hue instrument worlds with a texture overlay on near-black. Side by side they read as one direction with a colour bug, not as two. Never put them in the same kit, deck or feed week.
 
-**Clashes with [dusk](../dusk/SKILL.md), [vellum](../vellum/SKILL.md) and [porcelain](../porcelain/SKILL.md)** — each is built on warmth, and terminal has no register for it.
+**Clashes with [dusk](../../brand-dusk/SKILL.md), [vellum](../vellum/SKILL.md) and [porcelain](../porcelain/SKILL.md)** — each is built on warmth, and terminal has no register for it.
 
-**Telling the three mono directions apart.** terminal is phosphor green, JetBrains Mono for *everything*, scanlines, native dark. [spec](../spec/SKILL.md) is near-white paper, Inter Tight prose with IBM Plex Mono on **values only**, native light, indigo. [oscilloscope](../oscilloscope/SKILL.md) is amber-only, Saira Condensed labels with Share Tech Mono readouts, a real graticule, native dark. If three carousels from these three look alike, one of them broke a rule above.
+**Telling the three mono directions apart.** terminal is phosphor green, JetBrains Mono for *everything*, scanlines, native dark. [spec](../spec/SKILL.md) is near-white paper, Inter Tight prose with IBM Plex Mono on **values only**, native light, indigo. [oscilloscope](../../brand-oscilloscope/SKILL.md) is amber-only, Saira Condensed labels with Share Tech Mono readouts, a real graticule, native dark. If three carousels from these three look alike, one of them broke a rule above.
 
 ## The failure mode
 

@@ -1,5 +1,5 @@
 ---
-name: oscilloscope
+name: brand-oscilloscope
 description: "Use when one metric is the whole story: a growth chart, a benchmark, a live counter, a post that exists to make a single number legible. Applies the oscilloscope direction to every surface, not only the website. Triggers: 'oscilloscope direction', 'amber trace', 'graticule', 'one big number', 'growth chart post', 'instrument readout look', 'CRT amber'."
 ---
 
@@ -9,7 +9,7 @@ description: "Use when one metric is the whole story: a growth chart, a benchmar
 
 **Signature.** Amber and only amber. The direction commits to one trace colour the way an instrument does, and **nothing on the page is allowed a second hue**. Content sits inside a 10×8 division graticule with centre crosshairs, and every panel carries a corner readout in the instrument's own units — `2.4s/div`, `n=1,284`.
 
-**Mono earns its place on the readouts, and nowhere else.** Share Tech Mono sets values, units, per-division scales and sample counts. They are measurements, and **a measurement that shifts width as it updates is a broken instrument**. Headings are Saira Condensed; body is Saira. That split is what separates oscilloscope from [terminal](../terminal/SKILL.md), where monospace is everything, and from [spec](../spec/SKILL.md), where monospace marks a value inside a document rather than a reading on a device. Contract: [`../_lib/surfaces.md`](../_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../_lib/craft-floor.md). Chooser: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
+**Mono earns its place on the readouts, and nowhere else.** Share Tech Mono sets values, units, per-division scales and sample counts. They are measurements, and **a measurement that shifts width as it updates is a broken instrument**. Headings are Saira Condensed; body is Saira. That split is what separates oscilloscope from [terminal](../brand/terminal/SKILL.md), where monospace is everything, and from [spec](../brand/spec/SKILL.md), where monospace marks a value inside a document rather than a reading on a device. Contract: [`../_lib/surfaces.md`](../brand/_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../brand/_lib/craft-floor.md). Chooser: [`../brand-router/SKILL.md`](../brand/brand-router/SKILL.md).
 
 **Use when** one metric is the story — a growth chart, a benchmark, a live counter, a post that exists to make a single number legible.
 
@@ -122,7 +122,7 @@ Headline uppercase Saira Condensed 600 at 56px, max 8 words. The number in Share
 
 ## 8. Instagram carousel
 
-1080×1350 throughout, with the graticule at **10 across by 12 down** — the frame is taller than 4:3, so add divisions rather than stretching them. Divisions are 108px square. **The carousel is one instrument taking readings, one per slide.** That is what separates it from a [terminal](../terminal/SKILL.md) session or a [spec](../spec/SKILL.md) table: there is no prose column and no table, only a lit graticule and a number on the centre line.
+1080×1350 throughout, with the graticule at **10 across by 12 down** — the frame is taller than 4:3, so add divisions rather than stretching them. Divisions are 108px square. **The carousel is one instrument taking readings, one per slide.** That is what separates it from a [terminal](../brand/terminal/SKILL.md) session or a [spec](../brand/spec/SKILL.md) table: there is no prose column and no table, only a lit graticule and a number on the centre line.
 
 **Cover slide.** `#0a0903`, full graticule, crosshairs on. The label in Saira Condensed 600 uppercase at **56px**, `#f2e2b4`, centred in divisions 2–8, sitting two divisions above centre, **max 4 words**. The number in Share Tech Mono at **220px** `#ffb000`, **sitting exactly on the horizontal centre line** — its unit directly right at 62px in `#b09659`. **Max 6 characters including separators**, because at 220px one character is 110px and divisions 2 through 8 give you 648px. The trace runs edge to edge behind it.
 
@@ -132,7 +132,7 @@ Headline uppercase Saira Condensed 600 at 56px, max 8 words. The number in Share
 
 **Swipe cue.** The trace does not stop at the frame. It **exits the right edge mid-rise, clipped by the frame with no terminating point**, and the last two vertical divisions on the right carry no content at all. An unterminated sweep means the sweep is still running.
 
-**On faces: amber-only means you cannot put a photograph on these slides.** A face graded to a single hue is a silhouette, and a silhouette is not a portrait. If a slide needs your face, the direction is wrong for that carousel. Of the five technical directions this is the most hostile to a person appearing — more so than [terminal](../terminal/SKILL.md), which at least permits a green-mapped cutout.
+**On faces: amber-only means you cannot put a photograph on these slides.** A face graded to a single hue is a silhouette, and a silhouette is not a portrait. If a slide needs your face, the direction is wrong for that carousel. Of the five technical directions this is the most hostile to a person appearing — more so than [terminal](../brand/terminal/SKILL.md), which at least permits a green-mapped cutout.
 
 ## 9. YouTube thumbnail
 
@@ -146,7 +146,7 @@ Recognisably his without being identical: graticule, centre-line number, amber s
 
 ## 10. YouTube edit style
 
-**Oscilloscope is the strongest of the five technical directions for video, and it is still narrow.** Its motion is a linear sweep, which is a real temporal primitive, so unlike [spec](../spec/SKILL.md) it has something to do while time passes. But **it has one channel**, which means the video must be about one metric. A three-topic video breaks the direction in the first minute.
+**Oscilloscope is the strongest of the five technical directions for video, and it is still narrow.** Its motion is a linear sweep, which is a real temporal primitive, so unlike [spec](../brand/spec/SKILL.md) it has something to do while time passes. But **it has one channel**, which means the video must be about one metric. A three-topic video breaks the direction in the first minute.
 
 **Cut rhythm.** Metronomic. Set a division as a unit of time — **1 division = 2 seconds** — and land every cut on a whole number of divisions. That produces a 2/4/6/8-second grid the audience feels without noticing. Never cut during a sweep.
 
@@ -189,19 +189,19 @@ The real cost is **the metric**. This direction cannot run without a number, a s
 
 ## Pairs with / clashes with
 
-**Pairs with [swiss](../swiss/SKILL.md).** Swiss is neutral, achromatic and grid-disciplined, so it carries the prose that oscilloscope refuses to carry, and it does not compete for a hue.
+**Pairs with [swiss](../brand/swiss/SKILL.md).** Swiss is neutral, achromatic and grid-disciplined, so it carries the prose that oscilloscope refuses to carry, and it does not compete for a hue.
 
-**Pairs with [annual](../annual/SKILL.md)** for a year-in-review, where oscilloscope supplies the single headline figure and annual supplies the surrounding report.
+**Pairs with [annual](../brand-annual/SKILL.md)** for a year-in-review, where oscilloscope supplies the single headline figure and annual supplies the surrounding report.
 
-**Pairs with [dusk](../dusk/SKILL.md)** as a warm counterweight when a face has to appear somewhere in the same campaign.
+**Pairs with [dusk](../brand-dusk/SKILL.md)** as a warm counterweight when a face has to appear somewhere in the same campaign.
 
-**Clashes with [terminal](../terminal/SKILL.md).** Both are native-dark, single-hue instrument worlds with a lattice over near-black. Amber against green is one hue apart, and side by side they read as one direction with a colour bug rather than as two directions. Never in the same kit, deck or feed week.
+**Clashes with [terminal](../brand/terminal/SKILL.md).** Both are native-dark, single-hue instrument worlds with a lattice over near-black. Amber against green is one hue apart, and side by side they read as one direction with a colour bug rather than as two directions. Never in the same kit, deck or feed week.
 
-**Clashes with [blueprint](../blueprint/SKILL.md)** for the same reason: two measurement lattices on a dark ground, cyan against amber.
+**Clashes with [blueprint](../brand-blueprint/SKILL.md)** for the same reason: two measurement lattices on a dark ground, cyan against amber.
 
-**Clashes with [risograph](../risograph/SKILL.md) and [arcade](../arcade/SKILL.md)** — both are built on colour count, and this direction is built on colour scarcity.
+**Clashes with [risograph](../brand/risograph/SKILL.md) and [arcade](../brand-arcade/SKILL.md)** — both are built on colour count, and this direction is built on colour scarcity.
 
-**Telling the three mono directions apart.** oscilloscope is amber-only, with Saira Condensed labels, Share Tech Mono **readouts**, a real 10×8 graticule, native dark. [terminal](../terminal/SKILL.md) is phosphor green with JetBrains Mono on everything and scanlines. [spec](../spec/SKILL.md) is near-white paper with Inter Tight prose and IBM Plex Mono on values only, native light, indigo. The graticule is the fastest tell: no other direction in this suite has one.
+**Telling the three mono directions apart.** oscilloscope is amber-only, with Saira Condensed labels, Share Tech Mono **readouts**, a real 10×8 graticule, native dark. [terminal](../brand/terminal/SKILL.md) is phosphor green with JetBrains Mono on everything and scanlines. [spec](../brand/spec/SKILL.md) is near-white paper with Inter Tight prose and IBM Plex Mono on values only, native light, indigo. The graticule is the fastest tell: no other direction in this suite has one.
 
 ## The failure mode
 

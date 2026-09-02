@@ -218,7 +218,7 @@ words: "The index is at pooria.dev." Under it, the URL in Roboto Mono 28px. The 
 appears here as one full module square (90×90) in the bottom-right corner — the second
 and last red in the carousel.
 
-**Why this does not look like [broadsheet](../broadsheet/SKILL.md):** pure white against
+**Why this does not look like [broadsheet](../../brand-broadsheet/SKILL.md):** pure white against
 cream, a grotesque against a Baskerville, a visible twelve-column grid against column
 rules, one red module against a red kicker line, and no dateline anywhere. Set the two
 covers side by side and nobody has to be told.
@@ -319,18 +319,18 @@ you keep saying no, and it dies quietly the first time you do not.
 poster and one made as a document. Run swiss for the index and spec for the detail page
 and they read as one system.
 
-**Pairs with [annual](../annual/SKILL.md)** — swiss organises, annual reports. An annual
+**Pairs with [annual](../../brand-annual/SKILL.md)** — swiss organises, annual reports. An annual
 data slide drops into a swiss deck with only a palette swap, because both are
 grid-native and both refuse decoration.
 
-**Pairs with [blueprint](../blueprint/SKILL.md)** — a shared belief that a drawing is
+**Pairs with [blueprint](../../brand-blueprint/SKILL.md)** — a shared belief that a drawing is
 more honest than a picture, and neither needs warmth to be trusted.
 
-**Clashes with [manuscript](../manuscript/SKILL.md)** — a Garamond drop cap has no place
+**Clashes with [manuscript](../../brand-manuscript/SKILL.md)** — a Garamond drop cap has no place
 on a twelve-column grid, and the grid makes the drop cap look apologetic. These two want
 opposite reading speeds.
 
-**Clashes with [aurora](../aurora/SKILL.md)** — a gradient destroys a flat field. swiss
+**Clashes with [aurora](../../brand-aurora/SKILL.md)** — a gradient destroys a flat field. swiss
 depends on the field being one value so that one red can carry meaning. Introduce
 atmosphere and the red is just another colour.
 

@@ -14,8 +14,8 @@ two.
 **use when** you are announcing a launch, a number, a result, or a date. Anything with a winner and a
 scoreline.
 **avoid when** the content is reflective, uncertain, or long-form. **This direction cannot whisper and
-it cannot hold three paragraphs of nuance.** Send those to [buildspace](../buildspace/SKILL.md) or
-[manuscript](../manuscript/SKILL.md).
+it cannot hold three paragraphs of nuance.** Send those to [buildspace](../../brand-buildspace/SKILL.md) or
+[manuscript](../../brand-manuscript/SKILL.md).
 
 Treat the avoid-when as a hard gate, not a preference. Most of the failures in this file come from
 someone using stadium for a post that had no number in it.
@@ -182,7 +182,7 @@ usually wrong.
 
 The rule: **use stadium on LinkedIn only when the post carries a number.** A launch count, a revenue
 figure, a date, a result. The number justifies the scoreboard. Without one, switch to
-[annual](../annual/SKILL.md) or [swiss](../swiss/SKILL.md) and keep the credibility.
+[annual](../../brand-annual/SKILL.md) or [swiss](../swiss/SKILL.md) and keep the credibility.
 
 When you do use it, dial down like this:
 
@@ -206,7 +206,7 @@ vertically centred, flush left.** A green 115 degree rule 3px thick sits above i
 cover through the identical black, the identical angle, and the identical margin.
 
 If your content needs 60 words on a slide, **the carousel is not stadium**. Run it in
-[buildspace](../buildspace/SKILL.md), which was built to hold prose, and keep stadium for the cover of a
+[buildspace](../../brand-buildspace/SKILL.md), which was built to hold prose, and keep stadium for the cover of a
 results post. Stretching it here produces a deck of black slides with lonely sentences on them, and
 readers drop at slide three.
 
@@ -265,8 +265,8 @@ filling at least half the slide height. Green is used once per slide and never t
 
 ## Cost to run
 
-**Moderate.** Cheaper than [risograph](../risograph/SKILL.md) or [flyer](../flyer/SKILL.md), more
-expensive than [buildspace](../buildspace/SKILL.md).
+**Moderate.** Cheaper than [risograph](../risograph/SKILL.md) or [flyer](../../brand-flyer/SKILL.md), more
+expensive than [buildspace](../../brand-buildspace/SKILL.md).
 
 There is no per-asset craft step: no texture to hand-tune, no halftone, no knock-out. Once you build one
 template with the 115 degree band and the clipping mask, most assets are a type swap. A thumbnail is 10
@@ -279,28 +279,28 @@ and results posts: maybe 15 to 20 uses a year.
 
 ## Pairs with / clashes with
 
-**Pairs with** [buildspace](../buildspace/SKILL.md) as the standard kit. buildspace holds the process
+**Pairs with** [buildspace](../../brand-buildspace/SKILL.md) as the standard kit. buildspace holds the process
 and the doubt; stadium lands the result. The handoff is clean because they never try to do each other's
 job.
-**Pairs with** [annual](../annual/SKILL.md) when the number needs auditing rather than announcing.
-**Pairs with** [dispatch](../dispatch/SKILL.md) for news, though keep them apart in time: both are loud,
+**Pairs with** [annual](../../brand-annual/SKILL.md) when the number needs auditing rather than announcing.
+**Pairs with** [dispatch](../../brand-dispatch/SKILL.md) for news, though keep them apart in time: both are loud,
 and used together in one week they read as panic.
 
-**Clashes with** [manuscript](../manuscript/SKILL.md) and [vellum](../vellum/SKILL.md), which are built
+**Clashes with** [manuscript](../../brand-manuscript/SKILL.md) and [vellum](../vellum/SKILL.md), which are built
 for reflection, and stadium cannot be reflective at any setting.
-**Clashes with** [arcade](../arcade/SKILL.md): two maximal, saturated, dark-field directions that fight
+**Clashes with** [arcade](../../brand-arcade/SKILL.md): two maximal, saturated, dark-field directions that fight
 for the same attention and cancel each other.
 **Clashes with** [swiss](../swiss/SKILL.md), because a neutral grid next to a clipped 216px headline
 makes the swiss page look unfinished.
 
 Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand-router/SKILL.md):
-[broadsheet](../broadsheet/SKILL.md), [swiss](../swiss/SKILL.md), [manuscript](../manuscript/SKILL.md),
-[plaque](../plaque/SKILL.md), [annual](../annual/SKILL.md), [terminal](../terminal/SKILL.md),
-[blueprint](../blueprint/SKILL.md), [spec](../spec/SKILL.md), [oscilloscope](../oscilloscope/SKILL.md),
-[punchcard](../punchcard/SKILL.md), [buildspace](../buildspace/SKILL.md),
-[risograph](../risograph/SKILL.md), stadium, [arcade](../arcade/SKILL.md), [flyer](../flyer/SKILL.md),
-[dispatch](../dispatch/SKILL.md), [dusk](../dusk/SKILL.md), [vellum](../vellum/SKILL.md),
-[aurora](../aurora/SKILL.md), [porcelain](../porcelain/SKILL.md).
+[broadsheet](../../brand-broadsheet/SKILL.md), [swiss](../swiss/SKILL.md), [manuscript](../../brand-manuscript/SKILL.md),
+[plaque](../plaque/SKILL.md), [annual](../../brand-annual/SKILL.md), [terminal](../terminal/SKILL.md),
+[blueprint](../../brand-blueprint/SKILL.md), [spec](../spec/SKILL.md), [oscilloscope](../../brand-oscilloscope/SKILL.md),
+[punchcard](../punchcard/SKILL.md), [buildspace](../../brand-buildspace/SKILL.md),
+[risograph](../risograph/SKILL.md), stadium, [arcade](../../brand-arcade/SKILL.md), [flyer](../../brand-flyer/SKILL.md),
+[dispatch](../../brand-dispatch/SKILL.md), [dusk](../../brand-dusk/SKILL.md), [vellum](../vellum/SKILL.md),
+[aurora](../../brand-aurora/SKILL.md), [porcelain](../porcelain/SKILL.md).
 
 ## The failure mode
 
