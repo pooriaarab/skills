@@ -152,13 +152,13 @@ Do this before the first feature branch. A repo is non-conforming from the start
 
 Add the repo and a 2 to 4 letter lowercase prefix to `pooriaarab/scripts/repo-prefixes.json` before running the rollouts. The prefix lives in one place so the rollout does not derive it from the repo name. Deriving it twice is how two repos get the same prefix.
 
-Run `pr-standards-rollout --apply` from a checkout of `pooriaarab/scripts`. It writes its files from `pr-standards-templates/` in the same checkout.
+Run `pr-standards-rollout --repo <new> --apply` from a checkout of `pooriaarab/scripts`. It writes its files from `pr-standards-templates/` in the same checkout. Naming the repo explicitly matters: run without `--repo`, and there is nothing to say this rollout means the repo you just created rather than any other repo eligible for it.
 
-`issue-standards-rollout --apply` does less. It creates the labels and prints the plan for everything else, because forms, the `AGENTS.md` block and the stub are a code change and go through one issue and one pull request like any other. Copy them from `issue-standards-templates/` yourself and open that pull request.
+`issue-standards-rollout --repo <new> --apply` does less. It creates the labels and prints the plan for everything else, because forms, the `AGENTS.md` block and the stub are a code change and go through one issue and one pull request like any other. Copy them from `issue-standards-templates/` yourself and open that pull request.
 
 Do not vendor either set of templates into this skill's own directory as a persistent second copy — that copy drifts, and the fleet has already paid for that drift three times. Copying the destination files themselves into the new repo, the way the adoption pull request above does, is the required delivery mechanism, not the drift this warns against.
 
-Run `pr-standards-rollout` first. `issue-standards-rollout` reads the prefix from `.github/pr-standards.json` to name the adoption branch.
+Run `pr-standards-rollout --repo <new>` first. `issue-standards-rollout --repo <new>` reads the prefix from `.github/pr-standards.json` to name the adoption branch.
 
 A conforming repo has all of these. The first rollout (`pr-standards-rollout`) writes item 1. `issue-standards-rollout --apply` creates item 4. Items 2, 3, and 5 arrive through the adoption pull request:
 
