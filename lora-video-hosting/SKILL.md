@@ -1,0 +1,36 @@
+---
+name: lora-video-hosting
+description: "Use when training a video LoRA and serving the results from a Cloudflare Workers app — picking a base model and GPU, curating a clip dataset, wiring Civitai and a rented-GPU endpoint, concatenating shots into a scene, and extracting a poster frame. Covers the local-dev traps that make a Workers video feed return an empty list."
+---
+
+# LoRA Video Training & Hosting — Skill
+
+> Generic pattern for synthetic video LoRAs. No explicit content. Use for wellness / character video.
+
+## 1. Training
+
+- **Base:** Wan 2.2-T2V-A14B — MoE, ~27B total params (14B active). Full bf16 weights alone exceed 24GB, so a single RTX 4090 only works for LoRA training if you quantize the frozen base to fp8 and/or use block-swap/CPU offload; without that, use a 48GB+ card (A6000/L40S). Use spot $0.30/hr Vast or Ubicloud managed.
+- **LoRA type:** DreamBooth-style video LoRA. Civitai `types=LORA&baseModels=Wan Video 14B t2v`, `sort=Most Downloaded`.
+- **Dataset:** 15–30 short clips (3–5s each), captioned. Curate via Civitai collections API (`/api/v1/collections/{id}`) or manual picks. Top LoRAs: Detail enhancer, FusionX, 360 rotation — all generic.
+- **Train call:** `vast clone Wan` + `accelerate launch train_lora.py --base Wan-AI/Wan2.2-T2V-A14B --lora_rank 32 --learning_rate 1e-4`
+- **Checkpoint:** Save as `lora-{category}-{id}.safetensors` to R2 `loras/`.
+
+## 2. Hosting
+
+- **GPU:** RTX 4090D 24GB ($0.11 spot) or 4090 $0.30 flat. Ubicloud alternative: managed K8s with same image `vastai/pytorch:2.6.0-cuda12.1-py310`.
+- **Endpoint:** Put the rented box behind TLS (Cloudflare Tunnel or a Caddy reverse proxy) and call `https://<tunnel-host>/v1/video` — the raw `http://<vast-ip>:8000` port sends prompts and generated video unencrypted across the public internet. Local fallback `HF_TOKEN` via `https://router.huggingface.co/hf-inference`.
+- **Secrets:** Keep in `.dev.vars` (wrangler reads it) + mirror to a local secrets file outside the repo. Keys: `HF_TOKEN`, `CIVITAI_API_KEY`, `VAST_API_KEY`, `UBICLOUD_API_KEY`. Never commit.
+- **Cache:** Civitai LoRAs cached 5m via Workers Cache API or KV (`/tmp` has no durable filesystem across Worker isolates). KV `FLAGS` for feature gates, D1 `videos` table for status.
+
+## 3. Scene → Poster
+
+- **Scene:** Episode length is the sum of shot durations — chain 6–8 shots (8–10s each) to land near 60s, concatenated via ffmpeg. Prompt: `cinematic, character, soft lighting, 720x1280 vertical`.
+- **Poster:** Extract first frame at 1.2s via `ffmpeg -ss 1.2 -i scene.mp4 -vframes 1 -s 720x1280 poster.jpg`. Store `posterUrl` in D1 `episodes.posterUrl`, `videoUrl` points to R2 `videos/{series}/{episode}.mp4`.
+- **Checkpoints:** CP1 schema, CP2 poster pipeline, CP3 UI grid/modal.
+
+## 4. Common Pitfalls
+
+- `.open-next/worker.js` 2.2K stub — run `opennextjs-cloudflare build` from the Next.js app directory, then move `.open-next` to the Worker root before `wrangler dev --local --port 8788`.
+- `next dev` has no D1/R2 bindings — use `wrangler dev` for feed, or detach via `start_new_session` to keep 8788 alive.
+- `CIVITAI_API_KEY` missing from the app's `.dev.vars` → empty LoRA list, with no error. Copy it from the repo root.
+
