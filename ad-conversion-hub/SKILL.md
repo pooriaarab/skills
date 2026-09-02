@@ -241,7 +241,7 @@ dispatch. Record consent and retention decisions with the event metadata.
 
 Use the platform-specific `*-ads` skill for vendor endpoints and console steps.
 Use `ad-experiments` for hypothesis design, seed sizing, and budget control.
-Use `ads-google`, `ads-meta`, and `reddit-ads` as detailed examples of adapter
+Use `ads-google`, `ads-meta`, and `ads-reddit` as detailed examples of adapter
 pitfalls and server-side verification.
 
 ## Shipped as a package: adscapi
