@@ -1,5 +1,5 @@
 ---
-name: blueprint
+name: brand-blueprint
 description: "Use when you are showing how something is put together: architecture posts, product teardowns, system diagrams, a roadmap that must look thought through rather than dreamt up. Applies the blueprint direction to every surface, not only the website. Triggers: 'blueprint direction', 'drafting sheet', 'dimension lines', 'architecture post', 'product teardown', 'technical drawing look', 'annotate the design'."
 ---
 
@@ -9,11 +9,11 @@ description: "Use when you are showing how something is put together: architectu
 
 **Signature.** Nothing floats. Every element ties to something else by a dimension line with real arrowheads, or by a callout leader with a 45-degree elbow. The number in the gap is the element's actual measurement — 1440, 72px, 8pt. The page annotates itself the way a drafting sheet does.
 
-**Mono is load-bearing, not decorative.** Roboto Mono sets the dimension callouts and coordinates only. `1440` and `1441` must occupy identical width or the drawing lies. Prose is never monospace here — that is what separates blueprint from [terminal](../terminal/SKILL.md). Contract: [`../_lib/surfaces.md`](../_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../_lib/craft-floor.md). Chooser: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
+**Mono is load-bearing, not decorative.** Roboto Mono sets the dimension callouts and coordinates only. `1440` and `1441` must occupy identical width or the drawing lies. Prose is never monospace here — that is what separates blueprint from [terminal](../brand/terminal/SKILL.md). Contract: [`../_lib/surfaces.md`](../brand/_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../brand/_lib/craft-floor.md). Chooser: [`../brand-router/SKILL.md`](../brand/brand-router/SKILL.md).
 
 **Use when** you are showing how something is put together: architecture posts, product teardowns, a roadmap that has to look thought through rather than dreamt up.
 
-**Avoid when** the thing is finished and shipping. **A blueprint promises the building does not exist yet, so it undercuts a launch.** Never run a launch announcement, a "we're live" carousel, or a shipped-product video in blueprint. Ship in [terminal](../terminal/SKILL.md) or [punchcard](../punchcard/SKILL.md) and keep blueprint for the drawing you made first.
+**Avoid when** the thing is finished and shipping. **A blueprint promises the building does not exist yet, so it undercuts a launch.** Never run a launch announcement, a "we're live" carousel, or a shipped-product video in blueprint. Ship in [terminal](../brand/terminal/SKILL.md) or [punchcard](../brand/punchcard/SKILL.md) and keep blueprint for the drawing you made first.
 
 ---
 
@@ -122,7 +122,7 @@ Headline uppercase Barlow Condensed 600 at 58px, max 9 words. Body, if any, Barl
 
 ## 8. Instagram carousel
 
-1080×1350 throughout. **The carousel is a drawing set: one sheet per slide, and the slides are numbered as sheets.** That is what separates it from a [terminal](../terminal/SKILL.md) session or a [spec](../spec/SKILL.md) table.
+1080×1350 throughout. **The carousel is a drawing set: one sheet per slide, and the slides are numbered as sheets.** That is what separates it from a [terminal](../brand/terminal/SKILL.md) session or a [spec](../brand/spec/SKILL.md) table.
 
 **Cover slide.** `#071a2e`, 96px grid on, corner ticks inset 40px. Headline uppercase Barlow Condensed 600 at **116px**, max 5 words, left at 80px, sitting on the third major gridline from the top. One dimension line directly under it spans the headline's exact rendered width, with that width in px as the number: `— 872px —` in Roboto Mono 500 at 26px, `#4fd4ee`. Bottom-left title block: `SHT 1 OF 7`.
 
@@ -184,7 +184,7 @@ Every slide carries the 96px grid, the corner ticks, and the title block with `S
 
 ## Cost to run
 
-**Moderate.** Higher than [terminal](../terminal/SKILL.md), lower than a photographic direction.
+**Moderate.** Higher than [terminal](../brand/terminal/SKILL.md), lower than a photographic direction.
 
 The grid, ticks and title block are template furniture: build them once and every asset inherits them for free. The cost is the **dimension line**, because the rule says the number must be real. Every asset needs one true measurement, which means measuring something before you publish — the rendered width of a headline, the length of a video, the duration of a sprint. That is 5–10 minutes per asset, and it is the tax that keeps the direction honest.
 
@@ -192,13 +192,13 @@ The avatar is the one genuinely expensive asset: a duotone photograph needs a de
 
 ## Pairs with / clashes with
 
-**Pairs with [spec](../spec/SKILL.md).** Blueprint draws the system, spec tabulates its parameters. Different fonts, different grounds, different jobs, no overlap — a strong two-direction kit for a technical product.
+**Pairs with [spec](../brand/spec/SKILL.md).** Blueprint draws the system, spec tabulates its parameters. Different fonts, different grounds, different jobs, no overlap — a strong two-direction kit for a technical product.
 
-**Pairs with [annual](../annual/SKILL.md)** for a report where the diagram and the figures share a page, and with [swiss](../swiss/SKILL.md) when you need a neutral companion for long reading.
+**Pairs with [annual](../brand-annual/SKILL.md)** for a report where the diagram and the figures share a page, and with [swiss](../brand/swiss/SKILL.md) when you need a neutral companion for long reading.
 
-**Clashes with [punchcard](../punchcard/SKILL.md)** on meaning, not on looks. Punchcard says the record already exists; blueprint says the building does not exist yet. Put them in the same kit and the brand contradicts itself about time.
+**Clashes with [punchcard](../brand/punchcard/SKILL.md)** on meaning, not on looks. Punchcard says the record already exists; blueprint says the building does not exist yet. Put them in the same kit and the brand contradicts itself about time.
 
-**Clashes with [oscilloscope](../oscilloscope/SKILL.md).** Two instrument worlds with a printed measurement lattice over a dark ground. Cyan against amber is only a hue apart, and readers will see one direction that changed colour.
+**Clashes with [oscilloscope](../brand-oscilloscope/SKILL.md).** Two instrument worlds with a printed measurement lattice over a dark ground. Cyan against amber is only a hue apart, and readers will see one direction that changed colour.
 
 **Distinguish it from the mono directions.** Blueprint is *not* one of them. Its prose is Barlow, a proportional sans; monospace appears only inside dimension callouts and title blocks. If a paragraph on a blueprint asset is monospace, the asset is wrong.
 

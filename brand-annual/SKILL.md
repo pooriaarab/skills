@@ -1,5 +1,5 @@
 ---
-name: annual
+name: brand-annual
 description: "Use when the reader wants the number and where it came from: investor updates, results, a track record, revenue posts, a year in review, anything with a table or a chart in it. Navy institutional, tabular figures, ruled tables, a 6px bleed strip as the section index. Reach for this over swiss when there is real data rather than structure, and over broadsheet when the piece reports figures rather than events. Triggers: 'investor update', 'year in review', 'annual report look', 'my revenue numbers post', 'make my metrics look credible', 'financial brand', 'data-heavy deck'."
 ---
 
@@ -18,8 +18,8 @@ wants the number and where it came from.
 direction makes optimism sound like a filing.
 
 **Native mode:** light. **Family:** editorial. Router:
-[brand-router](../brand-router/SKILL.md). Contract: [the twelve
-surfaces](../_lib/surfaces.md) and [the craft floor](../_lib/craft-floor.md).
+[brand-router](../brand/brand-router/SKILL.md). Contract: [the twelve
+surfaces](../brand/_lib/surfaces.md) and [the craft floor](../brand/_lib/craft-floor.md).
 
 ---
 
@@ -84,7 +84,7 @@ tabular figures, so no digit ever shifts sideways while it runs and the decimal 
 stays nailed in place. Every other number on the page is already at rest when the page
 paints.
 
-**Build it as an odometer, not a text swap.** The [craft floor](../_lib/craft-floor.md)
+**Build it as an odometer, not a text swap.** The [craft floor](../brand/_lib/craft-floor.md)
 requires motion from an already-visible resting state, so the DOM holds the **final**
 figure from the first frame and the roll is a `transform: translateY()` on an
 `aria-hidden` digit strip above it. A number that reads `0` in a screenshot or to a
@@ -350,25 +350,25 @@ because you do not have new numbers daily.
 
 ## Pairs with / clashes with
 
-**Pairs with [swiss](../swiss/SKILL.md)** — both grid-native, both allergic to
+**Pairs with [swiss](../brand/swiss/SKILL.md)** — both grid-native, both allergic to
 decoration. swiss organises the index, annual reports the results, and an annual data
 slide drops into a swiss deck with only a palette swap.
 
-**Pairs with [broadsheet](../broadsheet/SKILL.md)** — a results letter set in annual
+**Pairs with [broadsheet](../brand-broadsheet/SKILL.md)** — a results letter set in annual
 sits inside a broadsheet page without argument. Both treat a figure as something you
 have to source.
 
-**Pairs with [spec](../spec/SKILL.md)** — the same institutional register, one for
+**Pairs with [spec](../brand/spec/SKILL.md)** — the same institutional register, one for
 numbers and one for behaviour: spec documents, annual measures.
 
-**Lends to [plaque](../plaque/SKILL.md) and [manuscript](../manuscript/SKILL.md)** —
+**Lends to [plaque](../brand/plaque/SKILL.md) and [manuscript](../brand-manuscript/SKILL.md)** —
 both are bad at data and both say so. Borrow the annual chart, keep the host's field
 colour, change nothing else.
 
-**Clashes with [buildspace](../buildspace/SKILL.md)** — buildspace is the energy of a
+**Clashes with [buildspace](../brand-buildspace/SKILL.md)** — buildspace is the energy of a
 thing not yet measured, which is the opposite claim.
 
-**Clashes with [risograph](../risograph/SKILL.md)** — a misregistered chart is one you
+**Clashes with [risograph](../brand/risograph/SKILL.md)** — a misregistered chart is one you
 cannot read a value off, and reading the value is why this direction exists.
 
 ## The failure mode

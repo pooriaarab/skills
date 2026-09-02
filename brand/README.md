@@ -27,25 +27,25 @@ what breaks when you ignore it.
 | Skill | Family | Use when | Cost |
 |---|---|---|---|
 | [`brand-router`](brand-router/SKILL.md) | meta | "pick a brand direction", "what style should my brand be" | — |
-| [`broadsheet`](broadsheet/SKILL.md) | editorial | It has a byline and a date. Essays, reporting. | cheap |
+| [`broadsheet`](../brand-broadsheet/SKILL.md) | editorial | It has a byline and a date. Essays, reporting. | cheap |
 | [`swiss`](swiss/SKILL.md) | editorial | Strong content that needs organising, not selling. | cheap |
-| [`manuscript`](manuscript/SKILL.md) | editorial | Long essays, a letter, a thesis. | cheap |
+| [`manuscript`](../brand-manuscript/SKILL.md) | editorial | Long essays, a letter, a thesis. | cheap |
 | [`plaque`](plaque/SKILL.md) | editorial | A portfolio or archive. The work is the thing. | cheap |
-| [`annual`](annual/SKILL.md) | editorial | Investor updates, results, a track record. | moderate |
+| [`annual`](../brand-annual/SKILL.md) | editorial | Investor updates, results, a track record. | moderate |
 | [`terminal`](terminal/SKILL.md) | technical | Technical reader, verifiable claim. Changelogs, benchmarks. | cheap |
-| [`blueprint`](blueprint/SKILL.md) | technical | Showing how something is built. Teardowns, roadmaps. | moderate |
+| [`blueprint`](../brand-blueprint/SKILL.md) | technical | Showing how something is built. Teardowns, roadmaps. | moderate |
 | [`spec`](spec/SKILL.md) | technical | Pricing, comparisons, reference writing. | cheap |
-| [`oscilloscope`](oscilloscope/SKILL.md) | technical | One metric is the story. | moderate |
+| [`oscilloscope`](../brand-oscilloscope/SKILL.md) | technical | One metric is the story. | moderate |
 | [`punchcard`](punchcard/SKILL.md) | technical | Work that should feel filed and permanent. Archives. | moderate |
-| [`buildspace`](buildspace/SKILL.md) | expressive | Founders talked to, not sold to. Community, newsletter. | cheap |
+| [`buildspace`](../brand-buildspace/SKILL.md) | expressive | Founders talked to, not sold to. Community, newsletter. | cheap |
 | [`risograph`](risograph/SKILL.md) | expressive | A zine, a drop, small-batch work. | expensive |
 | [`stadium`](stadium/SKILL.md) | expressive | A launch, a result, a date. | moderate |
-| [`arcade`](arcade/SKILL.md) | expressive | Playful work, a launch that wants a crowd. | expensive |
-| [`flyer`](flyer/SKILL.md) | expressive | Manifestos, open calls, picking a fight. | expensive |
-| [`dispatch`](dispatch/SKILL.md) | expressive | Real news that cannot wait. | moderate |
-| [`dusk`](dusk/SKILL.md) | atmospheric | Reflection written after the fact. Letters, post-mortems. | moderate |
+| [`arcade`](../brand-arcade/SKILL.md) | expressive | Playful work, a launch that wants a crowd. | expensive |
+| [`flyer`](../brand-flyer/SKILL.md) | expressive | Manifestos, open calls, picking a fight. | expensive |
+| [`dispatch`](../brand-dispatch/SKILL.md) | expressive | Real news that cannot wait. | moderate |
+| [`dusk`](../brand-dusk/SKILL.md) | atmospheric | Reflection written after the fact. Letters, post-mortems. | moderate |
 | [`vellum`](vellum/SKILL.md) | atmospheric | Work with versions that should stay visible. | moderate |
-| [`aurora`](aurora/SKILL.md) | atmospheric | One serious claim needs the whole page. | expensive |
+| [`aurora`](../brand-aurora/SKILL.md) | atmospheric | One serious claim needs the whole page. | expensive |
 | [`porcelain`](porcelain/SKILL.md) | atmospheric | One claim taken seriously with no help from design. | cheap |
 
 ## How this differs from `saas-brand-system`
