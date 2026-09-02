@@ -36,3 +36,37 @@ Read `pooriaarab/master-template-cloudflare`'s own `README.md` and `AGENTS.md` f
 ## Security — template provenance
 
 `master-template-cloudflare` is the author's own public starter repo, not a verified vendor product. Before running its setup you are executing its code, so **review the template's `package.json` scripts and any `postinstall`/setup steps first**, and pin to a known-good commit rather than tracking its default branch blindly. Treat its `README`/`AGENTS.md` as guidance to read, not instructions to auto-execute.
+
+## Adopt the fleet PR and issue standards
+
+Do this before the first feature branch, after the template's own Quick Start passes and its workflows are re-pointed. A repo is non-conforming from the start if these are missing, and fixing them later means editing the same workflows a second time.
+
+Add the repo and a 2 to 4 letter lowercase prefix to `pooriaarab/scripts/repo-prefixes.json` before running the rollouts. The prefix lives in one place so the rollout does not derive it from the repo name. Deriving it twice is how two repos get the same prefix.
+
+Run `pr-standards-rollout --apply` from a checkout of `pooriaarab/scripts`. It writes its files from `pr-standards-templates/` in the same checkout.
+
+`issue-standards-rollout --apply` does less. It creates the labels and prints the plan for everything else, because forms, the `AGENTS.md` block and the stub are a code change and go through one issue and one pull request like any other. Copy them from `issue-standards-templates/` yourself and open that pull request.
+
+Do not copy either set of templates into this skill or into the new repo. A second copy drifts, and the fleet has already paid for that drift three times.
+
+Run `pr-standards-rollout` first. `issue-standards-rollout` reads the prefix from `.github/pr-standards.json` to name the adoption branch.
+
+A conforming repo has all of these. The first rollout writes items 1 and 2; the rest arrive through the adoption pull request:
+
+1. `.github/pr-standards.json` with the registered prefix. The same rollout also writes `.github/pull_request_template.md` and `.github/workflows/pr-standards.yml` and inserts the `<!-- pr-standards:start -->` block into `AGENTS.md`.
+
+2. The `<!-- issue-standards:start -->` block in `AGENTS.md`.
+
+3. The four issue forms in `.github/ISSUE_TEMPLATE/`: `bug.yml`, `feature.yml`, `chore.yml`, `epic.yml`; plus `config.yml`.
+
+4. The 13 labels:
+
+| Group | Labels |
+|---|---|
+| Kind | `bug` `feature` `chore` `epic` |
+| Size | `mini` `standard` `deep` |
+| Route | `route:mechanical` `route:scoped` `route:judgement` |
+| State | `triage` `ready-for-agent` `needs-info` `blocked` |
+
+5. The `.agents/issues.md` stub from `issue-standards-templates/issues.md.stub`. Leave the TODOs. The stub asks for the repo's analytics helper and high-stakes paths, and neither exists before the product has real code. A guessed answer is worse than an empty one because the next agent will search for it and conclude the code is broken.
+
