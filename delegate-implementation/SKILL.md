@@ -282,6 +282,12 @@ Send `17*23` through each route and require `391` in the output. It is the
 cheapest question that separates a working route from a polite one. Do it on a
 fresh session, after any CLI upgrade, and before fanning out a batch.
 
+Arithmetic alone still passes the CLI from the third failure above: it can
+compute `391` and still refuse every write in non-interactive mode. Pair the
+question with a write — have the route create a file in the workspace and put
+`391` in it, then read the file back yourself. A route that can't produce that
+file isn't a working route, whatever it said back.
+
 Report an exhausted quota as its own state, distinct from broken. One needs
 waiting, the other needs fixing, and conflating them wastes an hour on whichever
 you guessed.
@@ -318,9 +324,9 @@ unknown id", not "handles errors"; "exit 1 when the body has no `Closes #`", not
 Copying a file mid-run to hold a baseline for a revert-check, then restoring
 from that copy, deletes whatever the worker finished in between.
 
-Wait for the worker to stop. Confirm it has by diffing the file against itself
-after a pause, not by reading its log — a log line saying "done" is written
-before the process exits.
+Wait for the worker to stop. Confirm it has by diffing two snapshots of the
+file taken a pause apart, not by reading its log — a log line saying "done" is
+written before the process exits.
 
 ### 14. Read the author column before assuming a peer pushed
 
