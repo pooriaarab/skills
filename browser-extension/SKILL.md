@@ -255,3 +255,72 @@ Review takes days–weeks. Set a **durable cloud schedule** (claude.ai routine +
 - [ ] Content-script insertion (§9): activate the field, insert via `execCommand('insertText')` (not `textContent`), and confirm the target's Post/Send button actually **enables**.
 - [ ] Session state (§10): tokens in `storage.local` not `sync`; concurrent auto-sign-ups de-duped via one in-flight promise; self-heal (clear + re-auth) on 401/403.
 - [ ] QA (§11): loaded via `chrome://extensions` (not `--load-extension`); target app activated deterministically before automation; screenshot→click coordinates scaled; test HTTP calls send a browser UA + `Origin`.
+
+---
+
+## 13. CI publish via Chrome Web Store API (GitHub Actions)
+
+Once an extension is stable enough to ship from CI, use the Chrome Web Store Publish API so every `release` push publishes both the Worker backend and the extension from the same commit.
+
+### Workflow pattern (see [`publish-extension.yml`](https://github.com/pooriaarab/replytosocial/tree/main/.github/workflows/publish-extension.yml) for a working example)
+
+```yaml
+name: Publish extension
+on:
+  push:
+    branches: [release]
+    paths:
+      - 'apps/extension/**'
+      - '.github/workflows/publish-extension.yml'
+
+jobs:
+  publish:
+    runs-on: ubicloud-standard-4
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install && bun run build
+      - name: Package
+        run: cd build && zip -qrX ../extension.zip .
+      - name: Upload and publish
+        env:
+          CHROME_WEBSTORE_EXTENSION_ID: ${{ vars.CHROME_WEBSTORE_EXTENSION_ID }}
+          CHROME_WEBSTORE_CLIENT_ID: ${{ secrets.CHROME_WEBSTORE_CLIENT_ID }}
+          CHROME_WEBSTORE_CLIENT_SECRET: ${{ secrets.CHROME_WEBSTORE_CLIENT_SECRET }}
+          CHROME_WEBSTORE_REFRESH_TOKEN: ${{ secrets.CHROME_WEBSTORE_REFRESH_TOKEN }}
+          EXTENSION_ZIP: extension.zip
+        run: node scripts/publish-extension.mjs
+```
+
+### Credentials
+
+| Name | Kind | Purpose |
+|------|------|--------|
+| `CHROME_WEBSTORE_EXTENSION_ID` | repository **variable** | public item id from the store URL |
+| `CHROME_WEBSTORE_CLIENT_ID` | **secret** | OAuth Desktop app client id |
+| `CHROME_WEBSTORE_CLIENT_SECRET` | **secret** | OAuth Desktop app client secret |
+| `CHROME_WEBSTORE_REFRESH_TOKEN` | **secret** | long-lived token from the consent flow |
+
+Minting the OAuth triple is a one-time browser session — the consent screen cannot be automated:
+
+1. Enable **Chrome Web Store API** in Google Cloud Console.
+2. Create an **OAuth client ID** of type **Desktop app**. (A Web client will be refused — Google shut down `urn:ietf:wg:oauth:2.0:oob`.)
+3. Start a local listener (`nc -l 8080`) and open the auth URL in the browser signed in as the listing owner. Include `&access_type=offline&prompt=consent` — without `prompt=consent` the refresh token is returned only on the very first authorization.
+4. The redirect dumps `?code=...` into `nc`. Exchange it:
+   ```sh
+   curl -s https://oauth2.googleapis.com/token \
+     -d client_id=<ID> -d client_secret=<SECRET> \
+     -d code=<CODE> -d grant_type=authorization_code \
+     -d redirect_uri=http://localhost:8080
+   ```
+5. Store the four values with `gh secret set` / `gh variable set`.
+
+The refresh token does not expire on a timer but is revoked if the owner changes their password or removes the app's access. When the job starts failing at "OAuth token exchange", repeat from step 3.
+
+### Idempotency (skip when version matches)
+
+The publish script reads the store's current version before uploading. If it matches the built version the job is a no-op — a `release` push that only changes the backend stays green instead of failing on "version already exists". Bump `manifest.json` to publish again.
+
+### Version landmine
+
+If your build toolchain injects a four-part version like `${version}.${Date.now()}` into the built manifest (e.g. a watch-mode reloader), Chrome will reject it — the fourth part exceeds the 65535-per-part limit. Guard: check the built manifest version shape (1–4 dot-separated integers, each between 0 and 65535, no leading zeros on non-zero components) before uploading, so bad builds fail locally with a readable error instead of remotely with a status code.
