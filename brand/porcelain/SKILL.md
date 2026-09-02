@@ -207,7 +207,7 @@ Every asset is one rectangle, one vertical line at 33%, and at most three text e
 
 ## Pairs with / clashes with
 
-**Pairs with [`../aurora/SKILL.md`](../aurora/SKILL.md).** Both reduce by subtraction, both refuse fills, both put content in one left-aligned column with no cards. porcelain is the lit room with one line; aurora is the dark room with one light. Run porcelain on the pages that must be believed and aurora on the essays, and the two read as one person.
+**Pairs with [`../aurora/SKILL.md`](../../brand-aurora/SKILL.md).** Both reduce by subtraction, both refuse fills, both put content in one left-aligned column with no cards. porcelain is the lit room with one line; aurora is the dark room with one light. Run porcelain on the pages that must be believed and aurora on the essays, and the two read as one person.
 
 **Pairs with [`../swiss/SKILL.md`](../swiss/SKILL.md).** Shared grid rigour and shared flush-left discipline. The difference is how much grid is visible: swiss shows the whole system, porcelain shows exactly one column of it. Use swiss where content is genuinely parallel and porcelain where it is singular.
 

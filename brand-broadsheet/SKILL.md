@@ -1,5 +1,5 @@
 ---
-name: broadsheet
+name: brand-broadsheet
 description: "Use when the piece has a byline and a date and the reader may cite it later: essays, reporting, results write-ups, corrections, long posts that argue a case. Ink on newsprint, real columns, one ink-red kicker. Reach for this over swiss when the content is prose rather than a system, and over manuscript when the piece is reported rather than contemplative. Triggers: 'make this look like a newspaper', 'editorial brand', 'newsprint', 'I write essays and want a serious identity', 'byline and dateline', 'give my long posts a house style'."
 ---
 
@@ -18,8 +18,8 @@ reader will cite later.
 in a hurry.
 
 **Native mode:** light. **Family:** editorial. Router:
-[brand-router](../brand-router/SKILL.md). Contract: [the twelve
-surfaces](../_lib/surfaces.md) and [the craft floor](../_lib/craft-floor.md).
+[brand-router](../brand/brand-router/SKILL.md). Contract: [the twelve
+surfaces](../brand/_lib/surfaces.md) and [the craft floor](../brand/_lib/craft-floor.md).
 
 ---
 
@@ -295,22 +295,22 @@ this direction will expose that in four weeks.
 
 ## Pairs with / clashes with
 
-**Pairs with [dispatch](../dispatch/SKILL.md)** — the same newsroom, different desk.
+**Pairs with [dispatch](../brand-dispatch/SKILL.md)** — the same newsroom, different desk.
 broadsheet is the considered piece, dispatch is the wire copy. Use broadsheet for the
 essay and dispatch for the short update, and the two read as one publication.
 
-**Pairs with [annual](../annual/SKILL.md)** — a results letter set in annual slots into
+**Pairs with [annual](../brand-annual/SKILL.md)** — a results letter set in annual slots into
 a broadsheet page without argument. Both treat a figure as something you have to source.
 
-**Clashes with [risograph](../risograph/SKILL.md)** — riso's misregistration is the
+**Clashes with [risograph](../brand/risograph/SKILL.md)** — riso's misregistration is the
 opposite claim about print. broadsheet says the press is exact; riso says it is
 charmingly not. Pick one.
 
-**Clashes with [stadium](../stadium/SKILL.md) and [arcade](../arcade/SKILL.md)** — a
+**Clashes with [stadium](../brand/stadium/SKILL.md) and [arcade](../brand-arcade/SKILL.md)** — a
 stadium headline on newsprint is a tabloid, and a tabloid is a different brand with
 different credibility.
 
-**Careful next to [manuscript](../manuscript/SKILL.md)** — same paper family, and at a
+**Careful next to [manuscript](../brand-manuscript/SKILL.md)** — same paper family, and at a
 glance they can read as one direction. They only coexist if broadsheet holds the
 reported work and manuscript holds the essays, and the split is visible.
 

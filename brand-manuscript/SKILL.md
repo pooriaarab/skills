@@ -1,5 +1,5 @@
 ---
-name: manuscript
+name: brand-manuscript
 description: "Use when a reader will give the piece eight uninterrupted minutes: long essays, a letter, a thesis, a book chapter, a considered argument with sources. A 66-character measure, a three-line rubric drop cap, and every source set as a real numbered footnote. Reach for this over broadsheet when the piece is contemplative rather than reported, and over vellum when the object is a bound book rather than a material surface. Triggers: 'make my essays feel like a book', 'literary brand', 'drop cap', 'footnotes not links', 'Garamond', 'long-form reading experience', 'I write letters not posts'."
 ---
 
@@ -18,8 +18,8 @@ eight uninterrupted minutes to.
 beats reading.
 
 **Native mode:** light. **Family:** editorial. Router:
-[brand-router](../brand-router/SKILL.md). Contract: [the twelve
-surfaces](../_lib/surfaces.md) and [the craft floor](../_lib/craft-floor.md).
+[brand-router](../brand/brand-router/SKILL.md). Contract: [the twelve
+surfaces](../brand/_lib/surfaces.md) and [the craft floor](../brand/_lib/craft-floor.md).
 
 ---
 
@@ -81,7 +81,7 @@ indent over 640ms, the way type settles around a set initial. Only the first par
 of the page gets this, and never again on scroll.
 
 **Deviation from the source, on purpose.** The direction file has the drop cap fade in
-from `opacity: 0`. The [craft floor](../_lib/craft-floor.md) forbids that — the drop cap
+from `opacity: 0`. The [craft floor](../brand/_lib/craft-floor.md) forbids that — the drop cap
 is the paragraph's first letter, so an opacity reveal makes the word unreadable in a
 screenshot, a print, or to a crawler. The letter is fully painted from the first frame
 and only the wrap animates. Respect `prefers-reduced-motion`: the lines start indented.
@@ -234,7 +234,7 @@ rubric initial opening one sentence in Cormorant Garamond 500 at 64px: "The full
 runs to four thousand words." Beneath it the URL in Courier Prime 26px, and the final
 footnote of the sequence.
 
-**Do not let this collide with [vellum](../vellum/SKILL.md).** manuscript is a bound
+**Do not let this collide with [vellum](../brand/vellum/SKILL.md).** manuscript is a bound
 book: an initial, a measure, numbered notes. A slide with no initial, no measure
 discipline and no note is not manuscript — it is warm paper, and vellum owns that.
 
@@ -308,7 +308,7 @@ beneath. Date in Courier Prime 26px, bottom-left.
 **Data slide.** manuscript is bad at data and should admit it. One number, set in
 Cormorant Garamond 500 at 220px, with a single sentence of prose beneath it at 34px
 explaining what it counts, and a footnote in Courier Prime 20px giving the source. If
-the talk needs three charts, use [annual](../annual/SKILL.md) for the deck and keep
+the talk needs three charts, use [annual](../brand-annual/SKILL.md) for the deck and keep
 manuscript for the writing.
 
 **Slides with a lot of words.** Prose slides only — **no bullets, ever**. One paragraph
@@ -330,28 +330,28 @@ numbering has to hold across slides.
 
 Budget 90 minutes per carousel and 20 minutes per single card. **This is viable at one
 long piece a fortnight and not viable daily.** If you post daily, run manuscript for the
-essays only and put a cheaper direction — [swiss](../swiss/SKILL.md) or
-[dispatch](../dispatch/SKILL.md) — on the daily work.
+essays only and put a cheaper direction — [swiss](../brand/swiss/SKILL.md) or
+[dispatch](../brand-dispatch/SKILL.md) — on the daily work.
 
 ## Pairs with / clashes with
 
-**Pairs with [broadsheet](../broadsheet/SKILL.md)** — the same paper, different tempo.
+**Pairs with [broadsheet](../brand-broadsheet/SKILL.md)** — the same paper, different tempo.
 broadsheet files the reported piece, manuscript writes the considered one. Keep the
 split visible: broadsheet always carries a dateline, manuscript never does.
 
-**Pairs with [plaque](../plaque/SKILL.md)** — both defer to the work. A manuscript essay
+**Pairs with [plaque](../brand/plaque/SKILL.md)** — both defer to the work. A manuscript essay
 about a body of work, with plaque captioning the work itself, is a coherent two-surface
 kit.
 
-**Clashes with [vellum](../vellum/SKILL.md)** — the closest collision in the whole set.
+**Clashes with [vellum](../brand/vellum/SKILL.md)** — the closest collision in the whole set.
 Both are warm paper. Running both reads as one direction executed twice with different
 fonts. Choose: manuscript is a bound book with an initial and notes; vellum is material
 and light. Never both in one kit.
 
-**Clashes with [swiss](../swiss/SKILL.md)** — the grid makes the drop cap look
+**Clashes with [swiss](../brand/swiss/SKILL.md)** — the grid makes the drop cap look
 apologetic, and the drop cap makes the grid look inhuman. Opposite reading speeds.
 
-**Clashes with [terminal](../terminal/SKILL.md) and [arcade](../arcade/SKILL.md)** —
+**Clashes with [terminal](../brand/terminal/SKILL.md) and [arcade](../brand-arcade/SKILL.md)** —
 both are machines, and manuscript's claim is that a person sat with this for a while.
 
 ## The failure mode

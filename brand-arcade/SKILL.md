@@ -1,5 +1,5 @@
 ---
-name: arcade
+name: brand-arcade
 description: "Use when applying the arcade brand direction to any surface: website, X, LinkedIn, Instagram carousels, YouTube thumbnails and edits, podcast art, or decks. CRT tube, pixel type, cyan and magenta at full saturation, scanlines over everything. Triggers: 'arcade direction', 'CRT pixel style', 'retro game brand', 'scanline design', 'apply arcade to my thumbnail'."
 ---
 
@@ -13,11 +13,11 @@ at full saturation, and horizontal scanlines running through every surface inclu
 **use when** the work is playful, a side project, a game, a launch that wants a crowd. Anywhere a bit of
 noise is the correct answer.
 **avoid when** anyone is reading for longer than a minute, or the audience is institutional. **Pixel
-type at paragraph length is a punishment.** Send long reads to [manuscript](../manuscript/SKILL.md) and
-institutional work to [annual](../annual/SKILL.md).
+type at paragraph length is a punishment.** Send long reads to [manuscript](../brand-manuscript/SKILL.md) and
+institutional work to [annual](../brand-annual/SKILL.md).
 
-Contract: [`../_lib/surfaces.md`](../_lib/surfaces.md). Floor:
-[`../_lib/craft-floor.md`](../_lib/craft-floor.md).
+Contract: [`../_lib/surfaces.md`](../brand/_lib/surfaces.md). Floor:
+[`../_lib/craft-floor.md`](../brand/_lib/craft-floor.md).
 
 ---
 
@@ -205,7 +205,7 @@ Dial arcade **down about 50%**, and accept that it is still loud:
 - Body in Barlow at 24px, not VT323. This is the one surface where the mono body does not earn it, because the tube is gone and the argument goes with it.
 
 If that list feels like it removes the direction, that is the honest reading. Use arcade on LinkedIn for
-a game, a side project, or a launch with a crowd. For anything else, run [swiss](../swiss/SKILL.md).
+a game, a side project, or a launch with a crowd. For anything else, run [swiss](../brand/swiss/SKILL.md).
 
 ## 8. Instagram carousel
 
@@ -295,32 +295,32 @@ thumbnail is 25 minutes. A LinkedIn post is a different asset entirely, per the 
 does not reuse.
 
 **Not viable weekly for one person.** Run it for a game, a side project, or a launch that wants a crowd:
-6 to 12 times a year. Let [buildspace](../buildspace/SKILL.md) carry the rest.
+6 to 12 times a year. Let [buildspace](../brand-buildspace/SKILL.md) carry the rest.
 
 ## Pairs with / clashes with
 
-**Pairs with** [buildspace](../buildspace/SKILL.md), which carries the weeks arcade cannot afford and
+**Pairs with** [buildspace](../brand-buildspace/SKILL.md), which carries the weeks arcade cannot afford and
 reads as the same person being quieter.
-**Pairs with** [terminal](../terminal/SKILL.md), its serious sibling: both are monospace and
+**Pairs with** [terminal](../brand/terminal/SKILL.md), its serious sibling: both are monospace and
 screen-native, so a technical write-up in terminal next to an arcade launch reads as one system with two
 volumes.
-**Pairs with** [punchcard](../punchcard/SKILL.md) for the same reason, with a colder register.
+**Pairs with** [punchcard](../brand/punchcard/SKILL.md) for the same reason, with a colder register.
 
-**Clashes with** [stadium](../stadium/SKILL.md): two maximal saturated dark-field directions competing
+**Clashes with** [stadium](../brand/stadium/SKILL.md): two maximal saturated dark-field directions competing
 for the same eye, and neither wins.
-**Clashes with** [flyer](../flyer/SKILL.md), because both are noise-forward and the combination reads as
+**Clashes with** [flyer](../brand-flyer/SKILL.md), because both are noise-forward and the combination reads as
 a person with no editing instinct.
-**Clashes with** [porcelain](../porcelain/SKILL.md) and [swiss](../swiss/SKILL.md), whose whole argument
+**Clashes with** [porcelain](../brand/porcelain/SKILL.md) and [swiss](../brand/swiss/SKILL.md), whose whole argument
 is restraint.
 
-Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand-router/SKILL.md):
-[broadsheet](../broadsheet/SKILL.md), [swiss](../swiss/SKILL.md), [manuscript](../manuscript/SKILL.md),
-[plaque](../plaque/SKILL.md), [annual](../annual/SKILL.md), [terminal](../terminal/SKILL.md),
-[blueprint](../blueprint/SKILL.md), [spec](../spec/SKILL.md), [oscilloscope](../oscilloscope/SKILL.md),
-[punchcard](../punchcard/SKILL.md), [buildspace](../buildspace/SKILL.md),
-[risograph](../risograph/SKILL.md), [stadium](../stadium/SKILL.md), arcade, [flyer](../flyer/SKILL.md),
-[dispatch](../dispatch/SKILL.md), [dusk](../dusk/SKILL.md), [vellum](../vellum/SKILL.md),
-[aurora](../aurora/SKILL.md), [porcelain](../porcelain/SKILL.md).
+Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand/brand-router/SKILL.md):
+[broadsheet](../brand-broadsheet/SKILL.md), [swiss](../brand/swiss/SKILL.md), [manuscript](../brand-manuscript/SKILL.md),
+[plaque](../brand/plaque/SKILL.md), [annual](../brand-annual/SKILL.md), [terminal](../brand/terminal/SKILL.md),
+[blueprint](../brand-blueprint/SKILL.md), [spec](../brand/spec/SKILL.md), [oscilloscope](../brand-oscilloscope/SKILL.md),
+[punchcard](../brand/punchcard/SKILL.md), [buildspace](../brand-buildspace/SKILL.md),
+[risograph](../brand/risograph/SKILL.md), [stadium](../brand/stadium/SKILL.md), arcade, [flyer](../brand-flyer/SKILL.md),
+[dispatch](../brand-dispatch/SKILL.md), [dusk](../brand-dusk/SKILL.md), [vellum](../brand/vellum/SKILL.md),
+[aurora](../brand-aurora/SKILL.md), [porcelain](../brand/porcelain/SKILL.md).
 
 ## The failure mode
 
