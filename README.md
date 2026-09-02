@@ -14,30 +14,30 @@ consent, hashing, deduplication, and failure isolation.
 |---|---|
 | [ads-google](ads-google/SKILL.md) | Google Ads + GA4 |
 | [ads-meta](ads-meta/SKILL.md) | Meta |
-| [reddit-ads](reddit-ads/SKILL.md) | Reddit |
+| [ads-reddit](ads-reddit/SKILL.md) | Reddit |
 | [brand](brand/README.md) | **Suite of 21.** Run a whole brand from one visual direction — voice, landing page, avatar, OG card, LinkedIn banner, Instagram carousels, YouTube thumbnails and edit style, podcast cover, decks. Start with [`brand-router`](brand/brand-router/SKILL.md): it surveys what you actually publish and recommends a kit of three registers rather than one style. |
 | [ads-microsoft](ads-microsoft/SKILL.md) | Microsoft Advertising |
 | [ads-amazon](ads-amazon/SKILL.md) | Amazon Ads |
-| [tiktok-ads](tiktok-ads/SKILL.md) | TikTok |
+| [ads-tiktok](ads-tiktok/SKILL.md) | TikTok |
 | [ads-linkedin](ads-linkedin/SKILL.md) | LinkedIn |
-| [pinterest-ads](pinterest-ads/SKILL.md) | Pinterest |
-| [snapchat-ads](snapchat-ads/SKILL.md) | Snapchat |
-| [x-ads](x-ads/SKILL.md) | X |
+| [ads-pinterest](ads-pinterest/SKILL.md) | Pinterest |
+| [ads-snapchat](ads-snapchat/SKILL.md) | Snapchat |
+| [ads-x](ads-x/SKILL.md) | X |
 | [ads-apple-search](ads-apple-search/SKILL.md) | Apple Search Ads |
 
 ### Tier 2: DSP and native
 
 | Skill | Platform |
 |---|---|
-| [taboola-ads](taboola-ads/SKILL.md) | Taboola |
+| [ads-taboola](ads-taboola/SKILL.md) | Taboola |
 | [ads-outbrain](ads-outbrain/SKILL.md) | Outbrain Amplify |
 | [ads-criteo](ads-criteo/SKILL.md) | Criteo |
-| [trade-desk](trade-desk/SKILL.md) | The Trade Desk |
-| [quora-ads](quora-ads/SKILL.md) | Quora |
-| [spotify-ads](spotify-ads/SKILL.md) | Spotify |
+| [ads-trade-desk](ads-trade-desk/SKILL.md) | The Trade Desk |
+| [ads-quora](ads-quora/SKILL.md) | Quora |
+| [ads-spotify](ads-spotify/SKILL.md) | Spotify |
 | [ads-nextdoor](ads-nextdoor/SKILL.md) | Nextdoor |
-| [yelp-ads](yelp-ads/SKILL.md) | Yelp |
-| [stackadapt](stackadapt/SKILL.md) | StackAdapt |
+| [ads-yelp](ads-yelp/SKILL.md) | Yelp |
+| [ads-stackadapt](ads-stackadapt/SKILL.md) | StackAdapt |
 
 ### Tier 3: AI and emerging
 
@@ -53,30 +53,30 @@ consent, hashing, deduplication, and failure isolation.
 | Skill | Platform |
 |---|---|
 | [ads-baidu](ads-baidu/SKILL.md) | Baidu |
-| [tencent-ads](tencent-ads/SKILL.md) | Tencent |
+| [ads-tencent](ads-tencent/SKILL.md) | Tencent |
 | [ads-douyin](ads-douyin/SKILL.md) | Douyin / Ocean Engine |
-| [weibo-ads](weibo-ads/SKILL.md) | Weibo |
-| [xiaohongshu-ads](xiaohongshu-ads/SKILL.md) | Xiaohongshu |
+| [ads-weibo](ads-weibo/SKILL.md) | Weibo |
+| [ads-xiaohongshu](ads-xiaohongshu/SKILL.md) | Xiaohongshu |
 | [ads-kuaishou](ads-kuaishou/SKILL.md) | Kuaishou |
 | [ads-bilibili](ads-bilibili/SKILL.md) | Bilibili |
-| [yandex-direct](yandex-direct/SKILL.md) | Yandex Direct |
-| [vk-ads](vk-ads/SKILL.md) | VK |
+| [ads-yandex-direct](ads-yandex-direct/SKILL.md) | Yandex Direct |
+| [ads-vk](ads-vk/SKILL.md) | VK |
 | [ads-naver](ads-naver/SKILL.md) | Naver |
 | [ads-kakao](ads-kakao/SKILL.md) | Kakao Moment |
-| [yahoo-japan-ads](yahoo-japan-ads/SKILL.md) | Yahoo Japan / LY Ads |
+| [ads-yahoo-japan](ads-yahoo-japan/SKILL.md) | Yahoo Japan / LY Ads |
 | [ads-line](ads-line/SKILL.md) | LINE Ads |
-| [sharechat-ads](sharechat-ads/SKILL.md) | ShareChat |
+| [ads-sharechat](ads-sharechat/SKILL.md) | ShareChat |
 | [ads-moj](ads-moj/SKILL.md) | Moj |
-| [shopee-ads](shopee-ads/SKILL.md) | Shopee |
+| [ads-shopee](ads-shopee/SKILL.md) | Shopee |
 | [ads-hotstar](ads-hotstar/SKILL.md) | Hotstar |
 | [ads-mercadolibre](ads-mercadolibre/SKILL.md) | Mercado Libre |
-| [twitch-ads](twitch-ads/SKILL.md) | Twitch |
-| [roku-ads](roku-ads/SKILL.md) | Roku |
-| [samsung-ads](samsung-ads/SKILL.md) | Samsung Ads |
+| [ads-twitch](ads-twitch/SKILL.md) | Twitch |
+| [ads-roku](ads-roku/SKILL.md) | Roku |
+| [ads-samsung](ads-samsung/SKILL.md) | Samsung Ads |
 | [ads-lg](ads-lg/SKILL.md) | LG Ads |
-| [strava-ads](strava-ads/SKILL.md) | Strava |
+| [ads-strava](ads-strava/SKILL.md) | Strava |
 | [ads-discord](ads-discord/SKILL.md) | Discord |
-| [waze-ads](waze-ads/SKILL.md) | Waze |
+| [ads-waze](ads-waze/SKILL.md) | Waze |
 
 ## Skills
 
@@ -153,10 +153,10 @@ to the skill that holds the lever. The others assume you already know which job 
 | [agentic-commerce](agentic-commerce/SKILL.md) | Let an agent buy things safely: human approves every spend, hard caps live outside the prompt, payment rails are capability-routed and inert-by-default, credentials come from a selected integration (never env), secrets never leak. Covers the 2026 rails — x402, MPP, Stripe SPT/Link, Issuing, Projects, browser-checkout. |
 | [social-launch-post](social-launch-post/SKILL.md) | Draft and cross-post a launch announcement with video across X/LinkedIn/Threads/Bluesky/Mastodon via the Typefully API — the presigned-upload header trap, per-platform post-shape differences (LinkedIn = single post only), and why X blocks automated publishing of link-containing posts (don't try to route around it). |
 | [product-hunt-launch](product-hunt-launch/SKILL.md) | Prepare a Product Hunt launch or relaunch package — eligibility checks, submission copy, maker handles, review docs, real-UI assets, browser-assisted draft entry, launch-day monitoring, and recap. |
-| [reddit-ads](reddit-ads/SKILL.md) | Set up Reddit Ads pixel tracking and server-side Conversions API (CAPI) purchase attribution — Developer Portal app creation, the Conversion Access Token vs OAuth token distinction, the CAPI v3 endpoint shape, and client/server event dedup. |
+| [ads-reddit](ads-reddit/SKILL.md) | Set up Reddit Ads pixel tracking and server-side Conversions API (CAPI) purchase attribution — Developer Portal app creation, the Conversion Access Token vs OAuth token distinction, the CAPI v3 endpoint shape, and client/server event dedup. |
 | [ads-google](ads-google/SKILL.md) | Wire up Google Ads + GA4 conversion tracking — the three layers (GA4 client gtag, server-side Measurement Protocol, Ads conversion import from GA4), the MP `api_secret` that silently no-ops a server purchase when unset (distinct from the `G-XXXX` measurement id), importing/enabling/marking-Primary the GA4 conversion action, Google Ads API launch nuances (`containsEuPoliticalAdvertising` now required, text-only search ads, OAuth-project enablement), and server-side verification via the GA4 Data API + GAQL + the MP `/debug/mp/collect` endpoint. |
 | [ads-meta](ads-meta/SKILL.md) | Set up Meta (Facebook) Pixel + server-side Conversions API (CAPI) purchase tracking — client Pixel and server CAPI shipped together with a shared `event_id` dedup key, the CAPI access token that silently no-ops when unset, why you fire on hashed-email match (not on `fbclid`) so organic purchases still report, advanced matching for match quality, the app-capability 400s (Advanced Access for `ads_management`, promotable Page), and server-side verification via the Graph `stats`/`last_fired_time` endpoints. |
-| [ad-experiments](ad-experiments/SKILL.md) | Run paid-ad experiments on a small budget so you learn *which* variable drives signups and *why* — hyper-specific one-audience×geo×creative experiments from a written hypothesis, proving the cheapest conversion (free signup) before the expensive one, and judging on server-side truth reconciled against payment-provider ground truth, not dashboard vanity. Platform-agnostic; pairs with `ads-google`/`ads-meta`/`reddit-ads`. |
+| [ad-experiments](ad-experiments/SKILL.md) | Run paid-ad experiments on a small budget so you learn *which* variable drives signups and *why* — hyper-specific one-audience×geo×creative experiments from a written hypothesis, proving the cheapest conversion (free signup) before the expensive one, and judging on server-side truth reconciled against payment-provider ground truth, not dashboard vanity. Platform-agnostic; pairs with `ads-google`/`ads-meta`/`ads-reddit`. |
 | [ad-auto-optimizer](ad-auto-optimizer/SKILL.md) | Operate live paid-ad experiments as a scheduled autonomous loop — read every channel, then adjust within hard guardrails, auto-applying only safe/reversible levers and *recommending* the learning-resetting ones. The lever tree (creative kill-gate, audience widen, LP test, budget/bid tilt, feature-utilization audit), anti-thrash + cap guardrails, loud escalation on the events that matter, and the operating truths that only surface after many cycles: platform reporting is unreliable (verify before acting), delivery-solved ≠ conversion-solved, you can't optimize what you can't measure, and budget optimizers concentrate spend. Pairs with `ad-experiments`. |
 | [ad-creative-generation](ad-creative-generation/SKILL.md) | Generate photoreal ad-creative *images* with an AI image model (gpt-image-1 style) — `generations` vs `edits`, feeding a brand logo + a competitor ad as STYLE references (recreate the style, never clone marks/faces), photoreal lifestyle/product-in-context/UGC prompt patterns, the hard rule that image models garble exact text/logos/UI (those are templates, not gen), a vision-model VISUAL-QA loop that catches garbled text / warped hands-faces-objects / wrong logos and auto-regenerates failures, and batch/library organization. |
 | [ad-creative-templates](ad-creative-templates/SKILL.md) | Pixel-perfect, text-precise, on-brand ad creatives at scale via HTML/CSS template → headless screenshot (many data-driven versions from one template) — when to template vs AI-gen, a catalog of high-performing styles (testimonial+pills, iMessage/social-native, bold-text-on-color, product-UI-in-context, discount/offer, founder/UGC, review-card, big-stat), Playwright/Puppeteer render at feed (1080×1080) and story (1080×1920) sizes, keeping logo/colors/fonts exact, and the truthfulness rule (real testimonials/reviews/stats/features only). |
