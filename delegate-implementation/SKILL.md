@@ -187,6 +187,12 @@ When the same implementer was relaunched with the plan committed at `docs/plans/
 
 **Always commit the plan into the worktree before spawning the implementer.**
 
+The same sandbox applies to *output*. A later session put work packets in
+`/tmp/`, told the implementer to write its results there, and got nothing —
+twice — because the CLI confines writes to the workspace. This rule was already
+written down and went unread, which is the argument for reading the skill before
+the fan-out rather than after it.
+
 ### 2. Commit per file pair on the implementer
 
 Long-running implementer sessions are prone to mid-stream errors: network blips, model-output corruption ("Invalid stream"), OAuth token expiry. One observed Gemini run lost 30 minutes of partial work because all the changes were uncommitted when the stream errored.
@@ -259,6 +265,76 @@ git worktree add ~/worktrees/feature-pr-N -b feature/pr-N origin/main
 ```
 
 The orchestrator stays in its own session, never inside an implementer's worktree.
+
+### 10. Verify a route with arithmetic, not "reply OK"
+
+Four of five delegate CLIs exit 0 having changed nothing, each for a different
+reason: a shell wrapper whose helper functions exist only in an interactive
+login shell; a key assigned but never exported, because `source` in a subshell
+does not export; a CLI that refuses every write in non-interactive mode without
+a permission flag *and still exits 0*; a key that resolves through a nested
+login shell needing the binary on PATH.
+
+Every one of them answers pleasantly. A reply proves a process started and
+nothing else.
+
+Send `17*23` through each route and require `391` in the output. It is the
+cheapest question that separates a working route from a polite one. Do it on a
+fresh session, after any CLI upgrade, and before fanning out a batch.
+
+Arithmetic alone still passes the CLI from the third failure above: it can
+compute `391` and still refuse every write in non-interactive mode. Pair the
+question with a write — have the route create a file in the workspace and put
+`391` in it, then read the file back yourself. A route that can't produce that
+file isn't a working route, whatever it said back.
+
+Report an exhausted quota as its own state, distinct from broken. One needs
+waiting, the other needs fixing, and conflating them wastes an hour on whichever
+you guessed.
+
+### 11. Verify a fix by reverting it, not by watching the suite go green
+
+A test written in the same pass as its fix tends to agree with the fix rather
+than with the bug. Take the fix back out; the test must fail. Put it back; it
+must pass.
+
+Five tests in one session passed with their fix removed. One had been written
+specifically to pin a bug it could not detect: it asserted an exit code, and
+both the crash and the clean failure exited non-zero. What separated them was
+which one wrote a report file, and the test never looked.
+
+This is the cheapest check available and it catches a class nothing else does.
+
+### 12. Put the number in the spec or you will not get the number
+
+A delegate asked to make a test fixture run "under 15 seconds" returned
+345s → 151s, every test passing, and asked for the timing to be checked. A 2.3x
+improvement, and ten times over the bar.
+
+Without the number in the text that lands as "made it faster" and merges. With
+it, the miss is arithmetic and the work goes back with a measurement rather than
+an opinion.
+
+Same for everything else a delegate could satisfy loosely: "returns 404 for an
+unknown id", not "handles errors"; "exit 1 when the body has no `Closes #`", not
+"validates the body".
+
+### 13. Do not snapshot a file a worker still owns
+
+Copying a file mid-run to hold a baseline for a revert-check, then restoring
+from that copy, deletes whatever the worker finished in between.
+
+Wait for the worker to stop. Confirm it has by diffing two snapshots of the
+file taken a pause apart, not by reading its log — a log line saying "done" is
+written before the process exits.
+
+### 14. Read the author column before assuming a peer pushed
+
+Three commits appearing on a shared branch were read as a teammate's work, and a
+real commit was dropped to avoid a collision that did not exist. They were the
+review bot's.
+
+`git log --format='%h %an'` costs nothing. Ask who, not just what.
 
 ## Case study — AI Interview Mode (May 2026)
 
