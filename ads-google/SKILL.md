@@ -3,7 +3,7 @@ name: ads-google
 description: "Wire up Google Ads + GA4 conversion tracking for a web app — the three layers (GA4 client gtag, GA4 server-side Measurement Protocol, Google Ads conversion import from GA4), the Measurement Protocol api_secret that silently no-ops a server purchase when unset, importing/enabling/marking-Primary a GA4 conversion action in Google Ads, Google Ads API launch nuances (containsEuPoliticalAdvertising, text-only search ads, OAuth-project enablement), and server-side verification via the GA4 Data API and GAQL. Also covers audience expansion via Customer Match (crm_based_user_list + OfflineUserDataJob, since classic similar-audiences was deprecated, ~1,000-member serve floor), a gtag page_view ordering bug that silently zeroes GA4 pageviews, and small-budget Search campaign setup — the defaults that burn budget (Display Network/Search partners on by default, All-languages targeting, missing negative keywords), bid-strategy choice when you have no conversion history (Manual CPC / Maximize Clicks vs a Smart Bidding learning phase), long-tail vs unaffordable head terms, and a pre-spend search-volume check. Use when setting up a Google Ads search campaign, launching a small paid test, setting up Google Ads purchase tracking, debugging 0 conversions, or validating an MP secret without waiting."
 ---
 
-# google-ads
+# ads-google
 
 Google Ads conversion tracking for a web app has **three layers**, and they stack — get the lower ones right or the top one has nothing to count:
 
