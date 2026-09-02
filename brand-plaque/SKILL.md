@@ -1,5 +1,5 @@
 ---
-name: plaque
+name: brand-plaque
 description: "Use when the work is the thing and the brand's only job is to caption it: a portfolio, an archive, a single case study, a gallery of projects. Native dark charcoal wall, type that never shouts, 18% margins, one hairline under the title. Reach for this over swiss when you want silence rather than structure, and over dusk when the mood is a gallery rather than an evening. Triggers: 'portfolio site', 'let the work speak', 'gallery wall label', 'museum caption style', 'quiet dark brand', 'archive of my projects', 'minimal dark portfolio'."
 ---
 
@@ -19,7 +19,7 @@ volume knob.**
 
 **Native mode: dark.** **Family:** editorial. Router:
 [brand-router](../brand-router/SKILL.md). Contract: [the twelve
-surfaces](../_lib/surfaces.md) and [the craft floor](../_lib/craft-floor.md).
+surfaces](../brand-router/_lib/surfaces.md) and [the craft floor](../brand-router/_lib/craft-floor.md).
 
 ---
 
@@ -221,7 +221,7 @@ purpose.
   plaque.
 
 Never add a photograph of yourself, a logo, a chart, or a colour. If the post needs a
-chart, use [annual](../../brand-annual/SKILL.md) for that post.
+chart, use [annual](../brand-annual/SKILL.md) for that post.
 
 ## 8. Instagram carousel
 
@@ -230,7 +230,7 @@ Rendered near-native on a phone, so the scaling law gives title **60px**, mono *
 Grain on every slide.
 
 **Be honest about the trade.** This is the quietest carousel of the twenty. It loses
-reach against [stadium](../stadium/SKILL.md) or [flyer](../../brand-flyer/SKILL.md) by a wide
+reach against [stadium](../brand-stadium/SKILL.md) or [flyer](../brand-flyer/SKILL.md) by a wide
 margin. Right when the audience is small and the work is good; wrong when the job is
 growth.
 
@@ -327,7 +327,7 @@ name. No title, no rule, no image.
 
 **Data slide.** One work per slide. The image takes the **top 60%** with a 10% margin
 and **never bleeds**. Caption block bottom-left at 62px with a hairline above. If the
-talk needs a real chart, plaque cannot hold it — borrow an [annual](../../brand-annual/SKILL.md)
+talk needs a real chart, plaque cannot hold it — borrow an [annual](../brand-annual/SKILL.md)
 slide and keep the charcoal field.
 
 **Slides with a lot of words.** There are none. Four sentences is the ceiling on any
@@ -353,23 +353,23 @@ dies.
 
 ## Pairs with / clashes with
 
-**Pairs with [porcelain](../porcelain/SKILL.md)** — the same restraint from the opposite
+**Pairs with [porcelain](../brand-porcelain/SKILL.md)** — the same restraint from the opposite
 end of the value scale. porcelain is the daylight gallery, plaque the darkened room. Run
 porcelain on the marketing surfaces and plaque on the archive, with no seam.
 
-**Pairs with [manuscript](../../brand-manuscript/SKILL.md)** — both defer to something outside
+**Pairs with [manuscript](../brand-manuscript/SKILL.md)** — both defer to something outside
 themselves. manuscript writes about the work, plaque captions it.
 
-**Pairs with [dusk](../../brand-dusk/SKILL.md)** — both native dark and both quiet, but keep the
+**Pairs with [dusk](../brand-dusk/SKILL.md)** — both native dark and both quiet, but keep the
 jobs apart: dusk carries mood, plaque carries information. If a plaque label starts
 having atmosphere, dusk has eaten it.
 
-**Clashes with [swiss](../swiss/SKILL.md)** — both claim restraint, so together they
+**Clashes with [swiss](../brand-swiss/SKILL.md)** — both claim restraint, so together they
 read as indecision rather than range. swiss's single red breaks plaque's silence, and
 plaque's charcoal mutes swiss's grid.
 
-**Clashes with [stadium](../stadium/SKILL.md), [arcade](../../brand-arcade/SKILL.md) and
-[flyer](../../brand-flyer/SKILL.md)** — all three exist to raise volume, and plaque has no knob
+**Clashes with [stadium](../brand-stadium/SKILL.md), [arcade](../brand-arcade/SKILL.md) and
+[flyer](../brand-flyer/SKILL.md)** — all three exist to raise volume, and plaque has no knob
 to meet them with.
 
 ## The failure mode

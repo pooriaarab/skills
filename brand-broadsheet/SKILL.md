@@ -18,8 +18,8 @@ reader will cite later.
 in a hurry.
 
 **Native mode:** light. **Family:** editorial. Router:
-[brand-router](../brand/brand-router/SKILL.md). Contract: [the twelve
-surfaces](../brand/_lib/surfaces.md) and [the craft floor](../brand/_lib/craft-floor.md).
+[brand-router](../brand-router/SKILL.md). Contract: [the twelve
+surfaces](../brand-router/_lib/surfaces.md) and [the craft floor](../brand-router/_lib/craft-floor.md).
 
 ---
 
@@ -302,11 +302,11 @@ essay and dispatch for the short update, and the two read as one publication.
 **Pairs with [annual](../brand-annual/SKILL.md)** — a results letter set in annual slots into
 a broadsheet page without argument. Both treat a figure as something you have to source.
 
-**Clashes with [risograph](../brand/risograph/SKILL.md)** — riso's misregistration is the
+**Clashes with [risograph](../brand-risograph/SKILL.md)** — riso's misregistration is the
 opposite claim about print. broadsheet says the press is exact; riso says it is
 charmingly not. Pick one.
 
-**Clashes with [stadium](../brand/stadium/SKILL.md) and [arcade](../brand-arcade/SKILL.md)** — a
+**Clashes with [stadium](../brand-stadium/SKILL.md) and [arcade](../brand-arcade/SKILL.md)** — a
 stadium headline on newsprint is a tabloid, and a tabloid is a different brand with
 different credibility.
 

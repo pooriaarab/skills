@@ -1,5 +1,5 @@
 ---
-name: terminal
+name: brand-terminal
 description: "Use when the subject is technical and verifiable and the evidence should be the design: changelogs, build logs, benchmarks, dev-tool launches. Applies the terminal direction to every surface, not only the website. Triggers: 'terminal direction', 'phosphor green', 'make it look like a shell', 'changelog page', 'benchmark post', 'build log aesthetic', 'brand my carousel in terminal'."
 ---
 
@@ -9,7 +9,7 @@ description: "Use when the subject is technical and verifiable and the evidence 
 
 **Signature.** A solid block cursor holds its place at the end of the last line of type. Every glyph sits on the same monospace grid, so headline, body and data share one advance width and the page reads as a single session rather than a designed layout.
 
-**Mono is not costume here.** The page *is* a transcript. The type must align in columns to prove it. That is the argument that earns monospace body copy, and it is the only one that does. Contract: [`../_lib/surfaces.md`](../_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../_lib/craft-floor.md). Chooser: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
+**Mono is not costume here.** The page *is* a transcript. The type must align in columns to prove it. That is the argument that earns monospace body copy, and it is the only one that does. Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md). Chooser: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
 
 **Use when** the reader is technical and the claim is verifiable — a changelog, a build log, a benchmark, an engineering post where the evidence is the design.
 
@@ -109,11 +109,11 @@ Put the single prompt line at **x = 440**, baseline **y = 180**, `#6f9a76` JetBr
 2. **Green once.** One `#3bf07a` element per image — the prompt glyph *or* the number, never both. Everything else is `#cdeccd` on `#060b06`.
 3. **Type up, words down.** Title at 56px, max 10 words, plus one `#6f9a76` line at 26px.
 
-If the post is about hiring, culture, or a personal milestone, do not dial terminal down — change direction. [spec](../spec/SKILL.md) gives the same restraint with a human register.
+If the post is about hiring, culture, or a personal milestone, do not dial terminal down — change direction. [spec](../brand-spec/SKILL.md) gives the same restraint with a human register.
 
 ## 8. Instagram carousel
 
-1080×1350 throughout. **The carousel is one session split across slides**: commands on top, output underneath, one colour, one font. That structure is what separates it from a [spec](../spec/SKILL.md) or [oscilloscope](../../brand-oscilloscope/SKILL.md) carousel.
+1080×1350 throughout. **The carousel is one session split across slides**: commands on top, output underneath, one colour, one font. That structure is what separates it from a [spec](../brand-spec/SKILL.md) or [oscilloscope](../brand-oscilloscope/SKILL.md) carousel.
 
 **Cover slide.** `#060b06`, scanlines at 5%. One `$` command, JetBrains Mono 700 lowercase at **128px**, max 6 words, left margin 72px, baseline at 58% height, closed by the block cursor. Nothing else — no date, no handle, no logo.
 
@@ -153,7 +153,7 @@ Recognisably his without being identical: the `$ ` prefix and the cursor are fix
 
 **Cold open (first 3 seconds).** Frames 1–45: black field, the command types on at 12 char/sec, cursor blinking behind it. Frame 46: one hard cut to the result, full frame, no title. The question and the answer both land before anyone hears your voice.
 
-**What this edit cannot do:** an emotional beat, a story about a person, a laugh. Run those in [dispatch](../../brand-dispatch/SKILL.md) or [dusk](../../brand-dusk/SKILL.md) and keep terminal for the technical inserts.
+**What this edit cannot do:** an emotional beat, a story about a person, a laugh. Run those in [dispatch](../brand-dispatch/SKILL.md) or [dusk](../brand-dusk/SKILL.md) and keep terminal for the technical inserts.
 
 ## 11. Podcast cover
 
@@ -185,15 +185,15 @@ The expensive part is not the design. **It is the writing.** The direction deman
 
 ## Pairs with / clashes with
 
-**Pairs with [spec](../spec/SKILL.md).** They are the two halves of a technical kit: terminal is the native-dark log of what happened, spec is the native-light reference for what is true. They share no font and no hue, so the pair never blurs. Ship the release post in terminal and the docs it links to in spec.
+**Pairs with [spec](../brand-spec/SKILL.md).** They are the two halves of a technical kit: terminal is the native-dark log of what happened, spec is the native-light reference for what is true. They share no font and no hue, so the pair never blurs. Ship the release post in terminal and the docs it links to in spec.
 
-**Pairs with [buildspace](../../brand-buildspace/SKILL.md)** when the same audience needs a warmer companion, and with [punchcard](../punchcard/SKILL.md) for the archive of shipped work.
+**Pairs with [buildspace](../brand-buildspace/SKILL.md)** when the same audience needs a warmer companion, and with [punchcard](../brand-punchcard/SKILL.md) for the archive of shipped work.
 
-**Clashes with [oscilloscope](../../brand-oscilloscope/SKILL.md).** Both are native-dark single-hue instrument worlds with a texture overlay on near-black. Side by side they read as one direction with a colour bug, not as two. Never put them in the same kit, deck or feed week.
+**Clashes with [oscilloscope](../brand-oscilloscope/SKILL.md).** Both are native-dark single-hue instrument worlds with a texture overlay on near-black. Side by side they read as one direction with a colour bug, not as two. Never put them in the same kit, deck or feed week.
 
-**Clashes with [dusk](../../brand-dusk/SKILL.md), [vellum](../vellum/SKILL.md) and [porcelain](../porcelain/SKILL.md)** — each is built on warmth, and terminal has no register for it.
+**Clashes with [dusk](../brand-dusk/SKILL.md), [vellum](../brand-vellum/SKILL.md) and [porcelain](../brand-porcelain/SKILL.md)** — each is built on warmth, and terminal has no register for it.
 
-**Telling the three mono directions apart.** terminal is phosphor green, JetBrains Mono for *everything*, scanlines, native dark. [spec](../spec/SKILL.md) is near-white paper, Inter Tight prose with IBM Plex Mono on **values only**, native light, indigo. [oscilloscope](../../brand-oscilloscope/SKILL.md) is amber-only, Saira Condensed labels with Share Tech Mono readouts, a real graticule, native dark. If three carousels from these three look alike, one of them broke a rule above.
+**Telling the three mono directions apart.** terminal is phosphor green, JetBrains Mono for *everything*, scanlines, native dark. [spec](../brand-spec/SKILL.md) is near-white paper, Inter Tight prose with IBM Plex Mono on **values only**, native light, indigo. [oscilloscope](../brand-oscilloscope/SKILL.md) is amber-only, Saira Condensed labels with Share Tech Mono readouts, a real graticule, native dark. If three carousels from these three look alike, one of them broke a rule above.
 
 ## The failure mode
 

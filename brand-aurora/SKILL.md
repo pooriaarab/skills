@@ -15,7 +15,7 @@ aurora is organised by **absence**: no cards, no panels, no fills, no icons and 
 
 **Avoid aurora when** the page has many parallel items — a directory, a pricing grid, a link list. With no cards and no borders, parallel content has nothing to sit in.
 
-Contract: [`../_lib/surfaces.md`](../brand/_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../brand/_lib/craft-floor.md). Picker: [`../brand-router/SKILL.md`](../brand/brand-router/SKILL.md).
+Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md). Picker: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
 
 ## Tokens
 
@@ -86,7 +86,7 @@ aurora's field is 17.55 against its text, so type survives everywhere. **Two thi
 
 400×400 on flat `#05070b` with **no wash** — at 48px a wash is grey mud. Face centred, shoulders cropped, lit only by a `#6ff0bb` rim along the subject's left edge, falling off to nothing by the jaw. That rim is the light source and it is the whole avatar. No circle border, no text.
 
-**Honest note on the rim width.** The source authors the rim at 6px, which renders **0.72px** at 48px — sub-pixel, so it aliases into a faint green fringe, not a rim. For the 48px render, **promote the rim from 6px to 16px** (renders 1.9px) and keep the same falloff. This is the same promotion logic [`../dusk/SKILL.md`](../brand-dusk/SKILL.md) and [`../porcelain/SKILL.md`](../brand/porcelain/SKILL.md) declare for their small exports. Keep 6px at any render 200px or wider.
+**Honest note on the rim width.** The source authors the rim at 6px, which renders **0.72px** at 48px — sub-pixel, so it aliases into a faint green fringe, not a rim. For the 48px render, **promote the rim from 6px to 16px** (renders 1.9px) and keep the same falloff. This is the same promotion logic [`../dusk/SKILL.md`](../brand-dusk/SKILL.md) and [`../porcelain/SKILL.md`](../brand-porcelain/SKILL.md) declare for their small exports. Keep 6px at any render 200px or wider.
 
 ## 4. X header and YouTube banner
 
@@ -193,13 +193,13 @@ Budget one companion direction that handles parallel content, and decide which o
 
 ## Pairs with / clashes with
 
-**Pairs with [`../porcelain/SKILL.md`](../brand/porcelain/SKILL.md).** Both reduce by subtraction and both refuse fills. aurora is the discipline in a dark room lit from one edge; porcelain is the same discipline in a lit room with one line. Running aurora for the essays and porcelain for the pages that need to be taken seriously reads as one person, not two.
+**Pairs with [`../porcelain/SKILL.md`](../brand-porcelain/SKILL.md).** Both reduce by subtraction and both refuse fills. aurora is the discipline in a dark room lit from one edge; porcelain is the same discipline in a lit room with one line. Running aurora for the essays and porcelain for the pages that need to be taken seriously reads as one person, not two.
 
 **Pairs with [`../oscilloscope/SKILL.md`](../brand-oscilloscope/SKILL.md).** Shared instrument-lit field, shared green signal on near-black, shared refusal to decorate a measurement.
 
-**Clashes with [`../stadium/SKILL.md`](../brand/stadium/SKILL.md).** Stadium is built from fills and aurora is built from their absence. Side by side, aurora reads as an unstyled page rather than as a decision.
+**Clashes with [`../stadium/SKILL.md`](../brand-stadium/SKILL.md).** Stadium is built from fills and aurora is built from their absence. Side by side, aurora reads as an unstyled page rather than as a decision.
 
-**Clashes with [`../risograph/SKILL.md`](../brand/risograph/SKILL.md).** Risograph lives on misregistration and visible ink; aurora needs the field unbroken and the wash exact. Every risograph virtue is an aurora defect.
+**Clashes with [`../risograph/SKILL.md`](../brand-risograph/SKILL.md).** Risograph lives on misregistration and visible ink; aurora needs the field unbroken and the wash exact. Every risograph virtue is an aurora defect.
 
 ## The failure mode
 
