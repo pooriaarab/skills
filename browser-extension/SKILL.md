@@ -323,4 +323,4 @@ The publish script reads the store's current version before uploading. If it mat
 
 ### Version landmine
 
-If your build toolchain injects a four-part version like `${version}.${Date.now()}` into the built manifest (e.g. a watch-mode reloader), Chrome will reject it — the fourth part exceeds the 65535-per-part limit. Guard: check the built manifest version shape (three dot-separated integers < 65536) before uploading, so bad builds fail locally with a readable error instead of remotely with a status code.
+If your build toolchain injects a four-part version like `${version}.${Date.now()}` into the built manifest (e.g. a watch-mode reloader), Chrome will reject it — the fourth part exceeds the 65535-per-part limit. Guard: check the built manifest version shape (1–4 dot-separated integers, each between 0 and 65535, no leading zeros on non-zero components) before uploading, so bad builds fail locally with a readable error instead of remotely with a status code.

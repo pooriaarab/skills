@@ -266,13 +266,13 @@ PREVIEW_BYOK_ENCRYPTION_KEY, then re-run."
 Every downstream step is guarded with `if: steps.preview_gate.outputs.configured == 'true'`.
 A `::notice` is used rather than `::warning` or `::error` so the job stays green.
 Also guard against forks so the workflow never attempts to provision resources it
-could not authenticate to:
+could not authenticate to. Replace `<your-org>` with the actual GitHub org:
 
 ```yaml
 if: >-
   github.event.action != 'closed' &&
   github.event.pull_request.head.repo.full_name == github.repository &&
-  github.repository_owner == 'pooriaarab'
+  github.repository_owner == '<your-org>'
 ```
 
 See the `replytosocial` [`worker-preview.yml`](https://github.com/pooriaarab/replytosocial/tree/main/.github/workflows/worker-preview.yml)
