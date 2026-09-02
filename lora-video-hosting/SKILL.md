@@ -9,7 +9,7 @@ description: "Use when training a video LoRA and serving the results from a Clou
 
 ## 1. Training
 
-- **Base:** Wan 2.2-T2V-A14B (24GB). Fits single RTX 4090. Use spot $0.30/hr Vast or Ubicloud managed.
+- **Base:** Wan 2.2-T2V-A14B — MoE, ~27B total params (14B active). Full bf16 weights alone exceed 24GB, so a single RTX 4090 only works for LoRA training if you quantize the frozen base to fp8 and/or use block-swap/CPU offload; without that, use a 48GB+ card (A6000/L40S). Use spot $0.30/hr Vast or Ubicloud managed.
 - **LoRA type:** DreamBooth-style video LoRA. Civitai `types=LORA&baseModels=Wan Video 14B t2v`, `sort=Most Downloaded`.
 - **Dataset:** 15–30 short clips (3–5s each), captioned. Curate via Civitai collections API (`/api/v1/collections/{id}`) or manual picks. Top LoRAs: Detail enhancer, FusionX, 360 rotation — all generic.
 - **Train call:** `vast clone Wan` + `accelerate launch train_lora.py --base Wan-AI/Wan2.2-T2V-A14B --lora_rank 32 --learning_rate 1e-4`
