@@ -221,7 +221,7 @@ purpose.
   plaque.
 
 Never add a photograph of yourself, a logo, a chart, or a colour. If the post needs a
-chart, use [annual](../annual/SKILL.md) for that post.
+chart, use [annual](../../brand-annual/SKILL.md) for that post.
 
 ## 8. Instagram carousel
 
@@ -230,7 +230,7 @@ Rendered near-native on a phone, so the scaling law gives title **60px**, mono *
 Grain on every slide.
 
 **Be honest about the trade.** This is the quietest carousel of the twenty. It loses
-reach against [stadium](../stadium/SKILL.md) or [flyer](../flyer/SKILL.md) by a wide
+reach against [stadium](../stadium/SKILL.md) or [flyer](../../brand-flyer/SKILL.md) by a wide
 margin. Right when the audience is small and the work is good; wrong when the job is
 growth.
 
@@ -327,7 +327,7 @@ name. No title, no rule, no image.
 
 **Data slide.** One work per slide. The image takes the **top 60%** with a 10% margin
 and **never bleeds**. Caption block bottom-left at 62px with a hairline above. If the
-talk needs a real chart, plaque cannot hold it — borrow an [annual](../annual/SKILL.md)
+talk needs a real chart, plaque cannot hold it — borrow an [annual](../../brand-annual/SKILL.md)
 slide and keep the charcoal field.
 
 **Slides with a lot of words.** There are none. Four sentences is the ceiling on any
@@ -357,10 +357,10 @@ dies.
 end of the value scale. porcelain is the daylight gallery, plaque the darkened room. Run
 porcelain on the marketing surfaces and plaque on the archive, with no seam.
 
-**Pairs with [manuscript](../manuscript/SKILL.md)** — both defer to something outside
+**Pairs with [manuscript](../../brand-manuscript/SKILL.md)** — both defer to something outside
 themselves. manuscript writes about the work, plaque captions it.
 
-**Pairs with [dusk](../dusk/SKILL.md)** — both native dark and both quiet, but keep the
+**Pairs with [dusk](../../brand-dusk/SKILL.md)** — both native dark and both quiet, but keep the
 jobs apart: dusk carries mood, plaque carries information. If a plaque label starts
 having atmosphere, dusk has eaten it.
 
@@ -368,8 +368,8 @@ having atmosphere, dusk has eaten it.
 read as indecision rather than range. swiss's single red breaks plaque's silence, and
 plaque's charcoal mutes swiss's grid.
 
-**Clashes with [stadium](../stadium/SKILL.md), [arcade](../arcade/SKILL.md) and
-[flyer](../flyer/SKILL.md)** — all three exist to raise volume, and plaque has no knob
+**Clashes with [stadium](../stadium/SKILL.md), [arcade](../../brand-arcade/SKILL.md) and
+[flyer](../../brand-flyer/SKILL.md)** — all three exist to raise volume, and plaque has no knob
 to meet them with.
 
 ## The failure mode

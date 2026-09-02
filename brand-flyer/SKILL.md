@@ -1,5 +1,5 @@
 ---
-name: flyer
+name: brand-flyer
 description: "Use when applying the flyer brand direction to any surface: website, X, LinkedIn, Instagram carousels, YouTube thumbnails and edits, podcast art, or decks. Coarse black halftone, ransom-note caps at jumping sizes, rotated blocks, tape and torn edges. Triggers: 'flyer direction', 'photocopied poster style', 'ransom note type', 'halftone punk brand', 'apply flyer to my manifesto'."
 ---
 
@@ -14,14 +14,14 @@ the corners.
 **use when** you are picking a fight, announcing something unsanctioned, or writing against the grain of
 an industry. Manifestos, rants, open calls.
 **avoid when** you need to be trusted with money or data. **The whole point of this direction is that
-nobody approved it.** Send those to [annual](../annual/SKILL.md).
+nobody approved it.** Send those to [annual](../brand-annual/SKILL.md).
 
-**Not [risograph](../risograph/SKILL.md).** flyer is coarse black toner on grey paper, mixed-size caps,
+**Not [risograph](../brand/risograph/SKILL.md).** flyer is coarse black toner on grey paper, mixed-size caps,
 rotation, tape, torn edges. riso is two aligned fluorescent inks, lowercase, and nothing rotates. They
 look adjacent in a moodboard and they are opposites in every rule below.
 
-Contract: [`../_lib/surfaces.md`](../_lib/surfaces.md). Floor:
-[`../_lib/craft-floor.md`](../_lib/craft-floor.md).
+Contract: [`../_lib/surfaces.md`](../brand/_lib/surfaces.md). Floor:
+[`../_lib/craft-floor.md`](../brand/_lib/craft-floor.md).
 
 ---
 
@@ -201,7 +201,7 @@ room.
 Be honest about the trade: **flyer on LinkedIn is a deliberate cost.** It buys attention from people who
 agree with you and it spends credibility with people who do not. Only run it when the post is an
 argument against an industry habit, which is the same condition as the use-when. For anything else, use
-[swiss](../swiss/SKILL.md) or [broadsheet](../broadsheet/SKILL.md).
+[swiss](../brand/swiss/SKILL.md) or [broadsheet](../brand-broadsheet/SKILL.md).
 
 When you do run it, dial down about 35%:
 
@@ -301,33 +301,33 @@ minutes and does not transfer to the next photograph.
 
 **Not viable weekly for one person, and not viable monthly either if you also want the writing to be
 good.** This is a manifesto direction. Use it 3 to 6 times a year, on the piece that is genuinely
-picking a fight, and let [buildspace](../buildspace/SKILL.md) hold the other 46 weeks. A flyer that
+picking a fight, and let [buildspace](../brand-buildspace/SKILL.md) hold the other 46 weeks. A flyer that
 appears every Tuesday is a newsletter, and a newsletter is not unsanctioned.
 
 ## Pairs with / clashes with
 
-**Pairs with** [buildspace](../buildspace/SKILL.md), which is warm and cheap and carries the ordinary
+**Pairs with** [buildspace](../brand-buildspace/SKILL.md), which is warm and cheap and carries the ordinary
 weeks. The contrast makes the flyer weeks land harder.
-**Pairs with** [broadsheet](../broadsheet/SKILL.md): both are print-native and argument-shaped, and a
+**Pairs with** [broadsheet](../brand-broadsheet/SKILL.md): both are print-native and argument-shaped, and a
 broadsheet essay under a flyer cover reads as a pamphlet with a serious inside.
-**Pairs with** [dispatch](../dispatch/SKILL.md) when the fight has a date.
+**Pairs with** [dispatch](../brand-dispatch/SKILL.md) when the fight has a date.
 
-**Clashes with** [risograph](../risograph/SKILL.md) worst of all. They share a print reference and
+**Clashes with** [risograph](../brand/risograph/SKILL.md) worst of all. They share a print reference and
 contradict each other in every rule: aligned against rotated, fluorescent against toner, lowercase
 against caps. Side by side, one looks like a failed version of the other.
-**Clashes with** [porcelain](../porcelain/SKILL.md) and [annual](../annual/SKILL.md), which exist to be
+**Clashes with** [porcelain](../brand/porcelain/SKILL.md) and [annual](../brand-annual/SKILL.md), which exist to be
 trusted.
-**Clashes with** [arcade](../arcade/SKILL.md): both are noise-forward, and together they read as a
+**Clashes with** [arcade](../brand-arcade/SKILL.md): both are noise-forward, and together they read as a
 person with no editing instinct.
 
-Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand-router/SKILL.md):
-[broadsheet](../broadsheet/SKILL.md), [swiss](../swiss/SKILL.md), [manuscript](../manuscript/SKILL.md),
-[plaque](../plaque/SKILL.md), [annual](../annual/SKILL.md), [terminal](../terminal/SKILL.md),
-[blueprint](../blueprint/SKILL.md), [spec](../spec/SKILL.md), [oscilloscope](../oscilloscope/SKILL.md),
-[punchcard](../punchcard/SKILL.md), [buildspace](../buildspace/SKILL.md),
-[risograph](../risograph/SKILL.md), [stadium](../stadium/SKILL.md), [arcade](../arcade/SKILL.md), flyer,
-[dispatch](../dispatch/SKILL.md), [dusk](../dusk/SKILL.md), [vellum](../vellum/SKILL.md),
-[aurora](../aurora/SKILL.md), [porcelain](../porcelain/SKILL.md).
+Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand/brand-router/SKILL.md):
+[broadsheet](../brand-broadsheet/SKILL.md), [swiss](../brand/swiss/SKILL.md), [manuscript](../brand-manuscript/SKILL.md),
+[plaque](../brand/plaque/SKILL.md), [annual](../brand-annual/SKILL.md), [terminal](../brand/terminal/SKILL.md),
+[blueprint](../brand-blueprint/SKILL.md), [spec](../brand/spec/SKILL.md), [oscilloscope](../brand-oscilloscope/SKILL.md),
+[punchcard](../brand/punchcard/SKILL.md), [buildspace](../brand-buildspace/SKILL.md),
+[risograph](../brand/risograph/SKILL.md), [stadium](../brand/stadium/SKILL.md), [arcade](../brand-arcade/SKILL.md), flyer,
+[dispatch](../brand-dispatch/SKILL.md), [dusk](../brand-dusk/SKILL.md), [vellum](../brand/vellum/SKILL.md),
+[aurora](../brand-aurora/SKILL.md), [porcelain](../brand/porcelain/SKILL.md).
 
 ## The failure mode
 
@@ -342,5 +342,5 @@ the tilt is the fun part. The page stops being readable, the reader stops finish
 dies inside its own styling.
 
 The check before you publish: name the opponent in one sentence, and name what you personally lose by
-saying it out loud. If nothing is at stake, take the tape off and use [swiss](../swiss/SKILL.md). An
+saying it out loud. If nothing is at stake, take the tape off and use [swiss](../brand/swiss/SKILL.md). An
 honest neutral page beats a staged riot.
