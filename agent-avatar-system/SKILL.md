@@ -86,9 +86,7 @@ lib(name, { traits: { hue: BRAND_HUES.map((d) => d / 360) } });
 ```
 
 **Measure it, do not assume it.** Render a few hundred names, collect the fill colours,
-and assert the distinct count never exceeds the set size. Colours repeating across names
-is expected once you render more names than you have hues — the claim being tested is
-the bound, not per-colour uniqueness; test whole-avatar collisions separately (§7).
+and assert the distinct count is bounded and the collision count is zero.
 
 ## 3. Reach every surface by changing two files
 
