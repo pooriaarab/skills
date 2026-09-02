@@ -15,7 +15,7 @@ consent, hashing, deduplication, and failure isolation.
 | [ads-google](ads-google/SKILL.md) | Google Ads + GA4 |
 | [ads-meta](ads-meta/SKILL.md) | Meta |
 | [ads-reddit](ads-reddit/SKILL.md) | Reddit |
-| [brand](brand/README.md) | **Suite of 21.** Run a whole brand from one visual direction — voice, landing page, avatar, OG card, LinkedIn banner, Instagram carousels, YouTube thumbnails and edit style, podcast cover, decks. Start with [`brand-router`](brand/brand-router/SKILL.md): it surveys what you actually publish and recommends a kit of three registers rather than one style. |
+| [brand](brand-router/README.md) | **Suite of 21.** Run a whole brand from one visual direction — voice, landing page, avatar, OG card, LinkedIn banner, Instagram carousels, YouTube thumbnails and edit style, podcast cover, decks. Start with [`brand-router`](brand-router/SKILL.md): it surveys what you actually publish and recommends a kit of three registers rather than one style. |
 | [ads-microsoft](ads-microsoft/SKILL.md) | Microsoft Advertising |
 | [ads-amazon](ads-amazon/SKILL.md) | Amazon Ads |
 | [ads-tiktok](ads-tiktok/SKILL.md) | TikTok |

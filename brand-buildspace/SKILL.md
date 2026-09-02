@@ -16,8 +16,8 @@ newsletter, anything with a door open.
 Both cases belong to [annual](../brand-annual/SKILL.md).
 
 This is the everyday core. It must survive weekly publishing for a year. Its voice does more work than
-its colour. Contract: [`../_lib/surfaces.md`](../brand/_lib/surfaces.md). Floor:
-[`../_lib/craft-floor.md`](../brand/_lib/craft-floor.md).
+its colour. Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
+[`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
 
 ---
 
@@ -259,20 +259,20 @@ in it is lowercase and provisional, so dispatch carries the launch date.
 [manuscript](../brand-manuscript/SKILL.md) is a quiet long-read companion; both are warm and paper-based, so
 the switch does not jar.
 
-**Clashes with** [stadium](../brand/stadium/SKILL.md), its direct opposite — all caps, present tense, certain.
+**Clashes with** [stadium](../brand-stadium/SKILL.md), its direct opposite — all caps, present tense, certain.
 On one page the two read as two different people.
-**Clashes with** [terminal](../brand/terminal/SKILL.md), because monospace body against Inter body reads as
-two products, not two moods. **Clashes with** [porcelain](../brand/porcelain/SKILL.md), whose precision makes
+**Clashes with** [terminal](../brand-terminal/SKILL.md), because monospace body against Inter body reads as
+two products, not two moods. **Clashes with** [porcelain](../brand-porcelain/SKILL.md), whose precision makes
 buildspace look sloppy instead of honest.
 
-Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand/brand-router/SKILL.md):
-[broadsheet](../brand-broadsheet/SKILL.md), [swiss](../brand/swiss/SKILL.md), [manuscript](../brand-manuscript/SKILL.md),
-[plaque](../brand/plaque/SKILL.md), [annual](../brand-annual/SKILL.md), [terminal](../brand/terminal/SKILL.md),
-[blueprint](../brand-blueprint/SKILL.md), [spec](../brand/spec/SKILL.md), [oscilloscope](../brand-oscilloscope/SKILL.md),
-[punchcard](../brand/punchcard/SKILL.md), buildspace, [risograph](../brand/risograph/SKILL.md),
-[stadium](../brand/stadium/SKILL.md), [arcade](../brand-arcade/SKILL.md), [flyer](../brand-flyer/SKILL.md),
-[dispatch](../brand-dispatch/SKILL.md), [dusk](../brand-dusk/SKILL.md), [vellum](../brand/vellum/SKILL.md),
-[aurora](../brand-aurora/SKILL.md), [porcelain](../brand/porcelain/SKILL.md).
+Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand-router/SKILL.md):
+[broadsheet](../brand-broadsheet/SKILL.md), [swiss](../brand-swiss/SKILL.md), [manuscript](../brand-manuscript/SKILL.md),
+[plaque](../brand-plaque/SKILL.md), [annual](../brand-annual/SKILL.md), [terminal](../brand-terminal/SKILL.md),
+[blueprint](../brand-blueprint/SKILL.md), [spec](../brand-spec/SKILL.md), [oscilloscope](../brand-oscilloscope/SKILL.md),
+[punchcard](../brand-punchcard/SKILL.md), buildspace, [risograph](../brand-risograph/SKILL.md),
+[stadium](../brand-stadium/SKILL.md), [arcade](../brand-arcade/SKILL.md), [flyer](../brand-flyer/SKILL.md),
+[dispatch](../brand-dispatch/SKILL.md), [dusk](../brand-dusk/SKILL.md), [vellum](../brand-vellum/SKILL.md),
+[aurora](../brand-aurora/SKILL.md), [porcelain](../brand-porcelain/SKILL.md).
 
 ## The failure mode
 
@@ -286,4 +286,4 @@ heading, which is a background and not a marker. The numbers round up. The admis
 it is the hardest part to write and the easiest to cut.
 
 The check before you publish: point at the sentence that cost something to say. If there is none, do not
-ship it as buildspace. Ship it as [swiss](../brand/swiss/SKILL.md), which is honest about being neutral.
+ship it as buildspace. Ship it as [swiss](../brand-swiss/SKILL.md), which is honest about being neutral.

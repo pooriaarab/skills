@@ -13,7 +13,7 @@ One ember horizon rule at 62% height that every page shares. Above it the field 
 
 **Avoid dusk when** the page is a call to action, a pricing table, or a launch. dusk reads as looking back, so it makes a live offer feel already over. That is not a soft preference — see [The failure mode](#the-failure-mode).
 
-Contract: [`../_lib/surfaces.md`](../brand/_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../brand/_lib/craft-floor.md). Picker: [`../brand-router/SKILL.md`](../brand/brand-router/SKILL.md).
+Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md). Picker: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
 
 ## Tokens
 
@@ -185,11 +185,11 @@ dusk is viable for one person publishing weekly. It is not viable if that person
 
 ## Pairs with / clashes with
 
-**Pairs with [`../vellum/SKILL.md`](../brand/vellum/SKILL.md).** Both are warm, unhurried, and native to work with a history. dusk is the reflection at the end of the day; vellum is the stack of drafts that produced it. The ember `#f2a25c` and the vermilion `#a8331f` sit in the same warm quadrant, so a kit that runs dusk for essays and vellum for changelogs holds together.
+**Pairs with [`../vellum/SKILL.md`](../brand-vellum/SKILL.md).** Both are warm, unhurried, and native to work with a history. dusk is the reflection at the end of the day; vellum is the stack of drafts that produced it. The ember `#f2a25c` and the vermilion `#a8331f` sit in the same warm quadrant, so a kit that runs dusk for essays and vellum for changelogs holds together.
 
 **Pairs with [`../broadsheet/SKILL.md`](../brand-broadsheet/SKILL.md).** Shared long-form register, shared single column. Broadsheet takes the reported piece; dusk takes the personal one.
 
-**Clashes with [`../stadium/SKILL.md`](../brand/stadium/SKILL.md).** Stadium is the present tense at volume; dusk is the past tense at a murmur. Run both on one account in one week and the reader cannot tell whether anything is currently happening.
+**Clashes with [`../stadium/SKILL.md`](../brand-stadium/SKILL.md).** Stadium is the present tense at volume; dusk is the past tense at a murmur. Run both on one account in one week and the reader cannot tell whether anything is currently happening.
 
 **Clashes with [`../arcade/SKILL.md`](../brand-arcade/SKILL.md).** Arcade is now, lit and loud; dusk is after, dim and slow. No surface is right for both.
 

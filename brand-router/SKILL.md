@@ -10,9 +10,9 @@ skill decides *which* direction fits, then hands you to that direction's skill.
 It does not do the design itself. That keeps each direction independently
 maintainable.
 
-- Catalog: [`../README.md`](../README.md)
-- The twelve surfaces every direction answers: [`../_lib/surfaces.md`](../_lib/surfaces.md)
-- Shared non-negotiables: [`../_lib/craft-floor.md`](../_lib/craft-floor.md)
+- Catalog: [`../README.md`](README.md)
+- The twelve surfaces every direction answers: [`../_lib/surfaces.md`](_lib/surfaces.md)
+- Shared non-negotiables: [`../_lib/craft-floor.md`](_lib/craft-floor.md)
 
 ---
 
@@ -147,41 +147,41 @@ Lowercase names are house style. Full detail in each skill.
 
 | Direction | Use when | Avoid when |
 |---|---|---|
-| [broadsheet](../../brand-broadsheet/SKILL.md) | It has a byline and a date. Essays, reporting, anything cited later. | One product, one button. Or a reader on a phone in a hurry. |
-| [swiss](../swiss/SKILL.md) | Content is already strong and needs organising, not selling. | You need warmth, or a photo of a person must carry the page. |
-| [manuscript](../../brand-manuscript/SKILL.md) | Long essays, a letter, a thesis. Eight uninterrupted minutes. | Product pages, forms, dashboards. Anywhere scanning beats reading. |
-| [plaque](../plaque/SKILL.md) | A portfolio or archive. The work is the thing; the site captions it. | You need to convert or persuade. It has no volume knob. |
-| [annual](../../brand-annual/SKILL.md) | Investor updates, results, a track record. | The audience is a community. It makes optimism sound like a filing. |
+| [broadsheet](../brand-broadsheet/SKILL.md) | It has a byline and a date. Essays, reporting, anything cited later. | One product, one button. Or a reader on a phone in a hurry. |
+| [swiss](../brand-swiss/SKILL.md) | Content is already strong and needs organising, not selling. | You need warmth, or a photo of a person must carry the page. |
+| [manuscript](../brand-manuscript/SKILL.md) | Long essays, a letter, a thesis. Eight uninterrupted minutes. | Product pages, forms, dashboards. Anywhere scanning beats reading. |
+| [plaque](../brand-plaque/SKILL.md) | A portfolio or archive. The work is the thing; the site captions it. | You need to convert or persuade. It has no volume knob. |
+| [annual](../brand-annual/SKILL.md) | Investor updates, results, a track record. | The audience is a community. It makes optimism sound like a filing. |
 
 ### Technical — the evidence is the design
 
 | Direction | Use when | Avoid when |
 |---|---|---|
-| [terminal](../terminal/SKILL.md) | Reader is technical, claim is verifiable. Changelogs, benchmarks. | A face, a story, an emotional ask. Warmth here reads as cosplay. |
-| [blueprint](../../brand-blueprint/SKILL.md) | Showing how something is built. Teardowns, architecture, roadmaps. | The thing ships today. A blueprint implies it does not exist yet. |
-| [spec](../spec/SKILL.md) | Reader came for an answer. Pricing, comparisons, reference writing. | You want them to feel something. A manifesto in spec reads as terms of service. |
-| [oscilloscope](../../brand-oscilloscope/SKILL.md) | One metric is the story. A chart, a benchmark, a counter. | Several equal subjects. This instrument has one channel. |
-| [punchcard](../punchcard/SKILL.md) | The work should feel filed, dated, permanent. Archives, timelines. | The subject is speculative. Card stock implies the record exists. |
+| [terminal](../brand-terminal/SKILL.md) | Reader is technical, claim is verifiable. Changelogs, benchmarks. | A face, a story, an emotional ask. Warmth here reads as cosplay. |
+| [blueprint](../brand-blueprint/SKILL.md) | Showing how something is built. Teardowns, architecture, roadmaps. | The thing ships today. A blueprint implies it does not exist yet. |
+| [spec](../brand-spec/SKILL.md) | Reader came for an answer. Pricing, comparisons, reference writing. | You want them to feel something. A manifesto in spec reads as terms of service. |
+| [oscilloscope](../brand-oscilloscope/SKILL.md) | One metric is the story. A chart, a benchmark, a counter. | Several equal subjects. This instrument has one channel. |
+| [punchcard](../brand-punchcard/SKILL.md) | The work should feel filed, dated, permanent. Archives, timelines. | The subject is speculative. Card stock implies the record exists. |
 
 ### Expressive — the volume is the design
 
 | Direction | Use when | Avoid when |
 |---|---|---|
-| [buildspace](../../brand-buildspace/SKILL.md) | Founders should feel talked to, not sold to. Community, cohort, newsletter. | Investors are the primary reader, or a lawyer signs the number. |
-| [risograph](../risograph/SKILL.md) | A zine, a drop, small-batch work. The seams should show. | A price, a legal term, a data table. Misregistration reads as error. |
-| [stadium](../stadium/SKILL.md) | A launch, a result, a date. Anything with a scoreline. | Reflective or long-form. It cannot whisper or hold three paragraphs. |
-| [arcade](../../brand-arcade/SKILL.md) | Playful work, a side project, a launch that wants a crowd. | Anyone reads for over a minute, or the audience is institutional. |
-| [flyer](../../brand-flyer/SKILL.md) | Picking a fight. Manifestos, open calls, writing against the grain. | You must be trusted with money or data. Nobody approved this. |
-| [dispatch](../../brand-dispatch/SKILL.md) | Real news that cannot wait. A date, a reversal, a number that changed. | Nothing happened. A stamp over a small update reads as a lie. |
+| [buildspace](../brand-buildspace/SKILL.md) | Founders should feel talked to, not sold to. Community, cohort, newsletter. | Investors are the primary reader, or a lawyer signs the number. |
+| [risograph](../brand-risograph/SKILL.md) | A zine, a drop, small-batch work. The seams should show. | A price, a legal term, a data table. Misregistration reads as error. |
+| [stadium](../brand-stadium/SKILL.md) | A launch, a result, a date. Anything with a scoreline. | Reflective or long-form. It cannot whisper or hold three paragraphs. |
+| [arcade](../brand-arcade/SKILL.md) | Playful work, a side project, a launch that wants a crowd. | Anyone reads for over a minute, or the audience is institutional. |
+| [flyer](../brand-flyer/SKILL.md) | Picking a fight. Manifestos, open calls, writing against the grain. | You must be trusted with money or data. Nobody approved this. |
+| [dispatch](../brand-dispatch/SKILL.md) | Real news that cannot wait. A date, a reversal, a number that changed. | Nothing happened. A stamp over a small update reads as a lie. |
 
 ### Atmospheric — the light is the design
 
 | Direction | Use when | Avoid when |
 |---|---|---|
-| [dusk](../../brand-dusk/SKILL.md) | Long-form reflection written after the fact. Letters, post-mortems. | A live offer. Dusk looks back, so it makes an offer feel already over. |
-| [vellum](../vellum/SKILL.md) | The work has versions and they should stay visible. Changelogs, drafts. | One message, one action. A stack implies more underneath. |
-| [aurora](../../brand-aurora/SKILL.md) | One serious claim needs the whole page. A thesis, a research note. | Many parallel items. With no cards, parallel content has nothing to sit in. |
-| [porcelain](../porcelain/SKILL.md) | One claim taken seriously with no help from design. An investor memo. | The page needs energy or a second level of hierarchy. |
+| [dusk](../brand-dusk/SKILL.md) | Long-form reflection written after the fact. Letters, post-mortems. | A live offer. Dusk looks back, so it makes an offer feel already over. |
+| [vellum](../brand-vellum/SKILL.md) | The work has versions and they should stay visible. Changelogs, drafts. | One message, one action. A stack implies more underneath. |
+| [aurora](../brand-aurora/SKILL.md) | One serious claim needs the whole page. A thesis, a research note. | Many parallel items. With no cards, parallel content has nothing to sit in. |
+| [porcelain](../brand-porcelain/SKILL.md) | One claim taken seriously with no help from design. An investor memo. | The page needs energy or a second level of hierarchy. |
 
 ---
 
@@ -204,12 +204,12 @@ identity at 48px.
 
 **The kit:**
 
-- **Core — [buildspace](../../brand-buildspace/SKILL.md).** Lowercase, warm, talks to
+- **Core — [buildspace](../brand-buildspace/SKILL.md).** Lowercase, warm, talks to
   founders rather than at them. Cheap to run, which is what makes it survive
   contact with a real schedule.
-- **Authority — [annual](../../brand-annual/SKILL.md).** Exactly where buildspace refuses
+- **Authority — [annual](../brand-annual/SKILL.md).** Exactly where buildspace refuses
   to go: numbers a lawyer signs. Investor updates and results only.
-- **Launch — [stadium](../stadium/SKILL.md).** Announcements only, roughly one
+- **Launch — [stadium](../brand-stadium/SKILL.md).** Announcements only, roughly one
   in twenty posts. It reads as an event because it is rare.
 
 **Why it holds together:** buildspace and annual both align flush left and both

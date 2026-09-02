@@ -4,7 +4,7 @@ A suite for running a whole brand — voice, website, and every social surface �
 from one chosen visual direction. Twenty directions, each a complete world, each
 answering the same twelve surfaces so they stay comparable and swappable.
 
-**Where to start:** run [`brand-router`](brand-router/SKILL.md). It surveys what
+**Where to start:** run [`brand-router`](SKILL.md). It surveys what
 you actually publish, applies three filters, and recommends a kit.
 
 **Architecture:** see [`DESIGN.md`](DESIGN.md).
@@ -26,27 +26,27 @@ what breaks when you ignore it.
 
 | Skill | Family | Use when | Cost |
 |---|---|---|---|
-| [`brand-router`](brand-router/SKILL.md) | meta | "pick a brand direction", "what style should my brand be" | — |
+| [`brand-router`](SKILL.md) | meta | "pick a brand direction", "what style should my brand be" | — |
 | [`broadsheet`](../brand-broadsheet/SKILL.md) | editorial | It has a byline and a date. Essays, reporting. | cheap |
-| [`swiss`](swiss/SKILL.md) | editorial | Strong content that needs organising, not selling. | cheap |
+| [`swiss`](../brand-swiss/SKILL.md) | editorial | Strong content that needs organising, not selling. | cheap |
 | [`manuscript`](../brand-manuscript/SKILL.md) | editorial | Long essays, a letter, a thesis. | cheap |
-| [`plaque`](plaque/SKILL.md) | editorial | A portfolio or archive. The work is the thing. | cheap |
+| [`plaque`](../brand-plaque/SKILL.md) | editorial | A portfolio or archive. The work is the thing. | cheap |
 | [`annual`](../brand-annual/SKILL.md) | editorial | Investor updates, results, a track record. | moderate |
-| [`terminal`](terminal/SKILL.md) | technical | Technical reader, verifiable claim. Changelogs, benchmarks. | cheap |
+| [`terminal`](../brand-terminal/SKILL.md) | technical | Technical reader, verifiable claim. Changelogs, benchmarks. | cheap |
 | [`blueprint`](../brand-blueprint/SKILL.md) | technical | Showing how something is built. Teardowns, roadmaps. | moderate |
-| [`spec`](spec/SKILL.md) | technical | Pricing, comparisons, reference writing. | cheap |
+| [`spec`](../brand-spec/SKILL.md) | technical | Pricing, comparisons, reference writing. | cheap |
 | [`oscilloscope`](../brand-oscilloscope/SKILL.md) | technical | One metric is the story. | moderate |
-| [`punchcard`](punchcard/SKILL.md) | technical | Work that should feel filed and permanent. Archives. | moderate |
+| [`punchcard`](../brand-punchcard/SKILL.md) | technical | Work that should feel filed and permanent. Archives. | moderate |
 | [`buildspace`](../brand-buildspace/SKILL.md) | expressive | Founders talked to, not sold to. Community, newsletter. | cheap |
-| [`risograph`](risograph/SKILL.md) | expressive | A zine, a drop, small-batch work. | expensive |
-| [`stadium`](stadium/SKILL.md) | expressive | A launch, a result, a date. | moderate |
+| [`risograph`](../brand-risograph/SKILL.md) | expressive | A zine, a drop, small-batch work. | expensive |
+| [`stadium`](../brand-stadium/SKILL.md) | expressive | A launch, a result, a date. | moderate |
 | [`arcade`](../brand-arcade/SKILL.md) | expressive | Playful work, a launch that wants a crowd. | expensive |
 | [`flyer`](../brand-flyer/SKILL.md) | expressive | Manifestos, open calls, picking a fight. | expensive |
 | [`dispatch`](../brand-dispatch/SKILL.md) | expressive | Real news that cannot wait. | moderate |
 | [`dusk`](../brand-dusk/SKILL.md) | atmospheric | Reflection written after the fact. Letters, post-mortems. | moderate |
-| [`vellum`](vellum/SKILL.md) | atmospheric | Work with versions that should stay visible. | moderate |
+| [`vellum`](../brand-vellum/SKILL.md) | atmospheric | Work with versions that should stay visible. | moderate |
 | [`aurora`](../brand-aurora/SKILL.md) | atmospheric | One serious claim needs the whole page. | expensive |
-| [`porcelain`](porcelain/SKILL.md) | atmospheric | One claim taken seriously with no help from design. | cheap |
+| [`porcelain`](../brand-porcelain/SKILL.md) | atmospheric | One claim taken seriously with no help from design. | cheap |
 
 ## How this differs from `saas-brand-system`
 

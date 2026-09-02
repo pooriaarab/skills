@@ -17,8 +17,8 @@ used, and a stamp over a small update reads as a lie.**
 
 That avoid-when has a number attached. See **Cost to run** before you use this on anything.
 
-Contract: [`../_lib/surfaces.md`](../brand/_lib/surfaces.md). Floor:
-[`../_lib/craft-floor.md`](../brand/_lib/craft-floor.md).
+Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
+[`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
 
 ---
 
@@ -323,21 +323,21 @@ substantiate it in annual.
 **Pairs with** [broadsheet](../brand-broadsheet/SKILL.md), its long-form relative. Same print world, same
 seriousness, different lengths.
 
-**Clashes with** [stadium](../brand/stadium/SKILL.md). Both announce, both shout, and run together in one week
+**Clashes with** [stadium](../brand-stadium/SKILL.md). Both announce, both shout, and run together in one week
 they read as panic rather than as news. Pick one per event.
 **Clashes with** [flyer](../brand-flyer/SKILL.md), which is unsanctioned by design while dispatch depends on
 being believed.
 **Clashes with** [arcade](../brand-arcade/SKILL.md) and [aurora](../brand-aurora/SKILL.md), whose whole surfaces
 contradict the claim that nobody had time to decorate this.
 
-Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand/brand-router/SKILL.md):
-[broadsheet](../brand-broadsheet/SKILL.md), [swiss](../brand/swiss/SKILL.md), [manuscript](../brand-manuscript/SKILL.md),
-[plaque](../brand/plaque/SKILL.md), [annual](../brand-annual/SKILL.md), [terminal](../brand/terminal/SKILL.md),
-[blueprint](../brand-blueprint/SKILL.md), [spec](../brand/spec/SKILL.md), [oscilloscope](../brand-oscilloscope/SKILL.md),
-[punchcard](../brand/punchcard/SKILL.md), [buildspace](../brand-buildspace/SKILL.md),
-[risograph](../brand/risograph/SKILL.md), [stadium](../brand/stadium/SKILL.md), [arcade](../brand-arcade/SKILL.md),
-[flyer](../brand-flyer/SKILL.md), dispatch, [dusk](../brand-dusk/SKILL.md), [vellum](../brand/vellum/SKILL.md),
-[aurora](../brand-aurora/SKILL.md), [porcelain](../brand/porcelain/SKILL.md).
+Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand-router/SKILL.md):
+[broadsheet](../brand-broadsheet/SKILL.md), [swiss](../brand-swiss/SKILL.md), [manuscript](../brand-manuscript/SKILL.md),
+[plaque](../brand-plaque/SKILL.md), [annual](../brand-annual/SKILL.md), [terminal](../brand-terminal/SKILL.md),
+[blueprint](../brand-blueprint/SKILL.md), [spec](../brand-spec/SKILL.md), [oscilloscope](../brand-oscilloscope/SKILL.md),
+[punchcard](../brand-punchcard/SKILL.md), [buildspace](../brand-buildspace/SKILL.md),
+[risograph](../brand-risograph/SKILL.md), [stadium](../brand-stadium/SKILL.md), [arcade](../brand-arcade/SKILL.md),
+[flyer](../brand-flyer/SKILL.md), dispatch, [dusk](../brand-dusk/SKILL.md), [vellum](../brand-vellum/SKILL.md),
+[aurora](../brand-aurora/SKILL.md), [porcelain](../brand-porcelain/SKILL.md).
 
 ## The failure mode
 
