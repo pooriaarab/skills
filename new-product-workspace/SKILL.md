@@ -156,11 +156,11 @@ Run `pr-standards-rollout --apply` from a checkout of `pooriaarab/scripts`. It w
 
 `issue-standards-rollout --apply` does less. It creates the labels and prints the plan for everything else, because forms, the `AGENTS.md` block and the stub are a code change and go through one issue and one pull request like any other. Copy them from `issue-standards-templates/` yourself and open that pull request.
 
-Do not copy either set of templates into this skill or into the new repo. A second copy drifts, and the fleet has already paid for that drift three times.
+Do not vendor either set of templates into this skill's own directory as a persistent second copy — that copy drifts, and the fleet has already paid for that drift three times. Copying the destination files themselves into the new repo, the way the adoption pull request above does, is the required delivery mechanism, not the drift this warns against.
 
 Run `pr-standards-rollout` first. `issue-standards-rollout` reads the prefix from `.github/pr-standards.json` to name the adoption branch.
 
-A conforming repo has all of these. The first rollout writes items 1 and 2; the rest arrive through the adoption pull request:
+A conforming repo has all of these. The first rollout (`pr-standards-rollout`) writes item 1. `issue-standards-rollout --apply` creates item 4. Items 2, 3, and 5 arrive through the adoption pull request:
 
 1. `.github/pr-standards.json` with the registered prefix. The same rollout also writes `.github/pull_request_template.md` and `.github/workflows/pr-standards.yml` and inserts the `<!-- pr-standards:start -->` block into `AGENTS.md`.
 
@@ -168,7 +168,7 @@ A conforming repo has all of these. The first rollout writes items 1 and 2; the 
 
 3. The four issue forms in `.github/ISSUE_TEMPLATE/`: `bug.yml`, `feature.yml`, `chore.yml`, `epic.yml`; plus `config.yml`.
 
-4. The 13 labels:
+4. The 14 labels:
 
 | Group | Labels |
 |---|---|
