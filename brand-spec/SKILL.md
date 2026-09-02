@@ -1,5 +1,5 @@
 ---
-name: spec
+name: brand-spec
 description: "Use when the reader came for an answer and should leave with it: pricing, comparisons, API-shaped writing, documentation, anything where a table beats a paragraph. Applies the spec direction to every surface, not only the website. Triggers: 'spec direction', 'reference documentation look', 'pricing page', 'comparison post', 'make it look like docs', 'parameter table', 'API-shaped writing'."
 ---
 
@@ -9,7 +9,7 @@ description: "Use when the reader came for an answer and should leave with it: p
 
 **Signature.** Prose is proportional; every value is monospace. A page is mostly tables — parameter, type, default, description — and the eye can scan the value column because the figures are tabular and the column never reflows.
 
-**Mono is not a skin here, and its scope is the whole discipline.** IBM Plex Mono exists so `1.00` and `10.0` line their decimal points up, and **it appears on nothing that is not a value**: types, defaults, status codes, prices, durations, versions, counts. Never a heading. Never a sentence. Never a label. That single rule is what separates spec from [terminal](../terminal/SKILL.md), where monospace is everything, and from [oscilloscope](../../brand-oscilloscope/SKILL.md), where monospace is confined to instrument readouts. Contract: [`../_lib/surfaces.md`](../_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../_lib/craft-floor.md). Chooser: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
+**Mono is not a skin here, and its scope is the whole discipline.** IBM Plex Mono exists so `1.00` and `10.0` line their decimal points up, and **it appears on nothing that is not a value**: types, defaults, status codes, prices, durations, versions, counts. Never a heading. Never a sentence. Never a label. That single rule is what separates spec from [terminal](../brand-terminal/SKILL.md), where monospace is everything, and from [oscilloscope](../brand-oscilloscope/SKILL.md), where monospace is confined to instrument readouts. Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md). Chooser: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
 
 **Use when** the reader came for an answer and will leave with it: pricing, comparisons, API-shaped writing, anything where a table beats a paragraph.
 
@@ -118,11 +118,11 @@ Nothing in the bottom strip. If a fourth cell will not fit beside the photo hole
 
 Use the light mode. Title in Inter Tight 600 at 52px, max 10 words. Under it, a **four-row table**: labels `#575c6b` Inter 26px, values IBM Plex Mono 32px `#14161c`, right-aligned in a fixed column. One status pill top-left. Row stripe off, because LinkedIn's JPEG pass renders a 0.028-alpha stripe as banding.
 
-If the post is a personal milestone, spec will make it read as an audit. Use [dispatch](../../brand-dispatch/SKILL.md) or [buildspace](../../brand-buildspace/SKILL.md) instead. This is a register problem, not a colour problem.
+If the post is a personal milestone, spec will make it read as an audit. Use [dispatch](../brand-dispatch/SKILL.md) or [buildspace](../brand-buildspace/SKILL.md) instead. This is a register problem, not a colour problem.
 
 ## 8. Instagram carousel
 
-1080×1350 throughout. **The carousel is one table, split one row per slide.** That structure is what separates it from a [terminal](../terminal/SKILL.md) session or an [oscilloscope](../../brand-oscilloscope/SKILL.md) sweep — and on every slide, **only the value is monospace.**
+1080×1350 throughout. **The carousel is one table, split one row per slide.** That structure is what separates it from a [terminal](../brand-terminal/SKILL.md) session or an [oscilloscope](../brand-oscilloscope/SKILL.md) sweep — and on every slide, **only the value is monospace.**
 
 **Cover slide.** `#fcfcfd`. A status pill at the top left (x=72, y=96): `#3538cd`, 8px radius, `#ffffff` Plex Mono 26px, one uppercase word. The question below it as a heading, Inter Tight 600 at **96px**, sentence case, max 10 words, left at 72px. No table on the cover — the cover asks, the interiors answer.
 
@@ -192,17 +192,17 @@ The cost is upstream and it is real: **spec needs numbers you actually have.** A
 
 ## Pairs with / clashes with
 
-**Pairs with [terminal](../terminal/SKILL.md).** The two halves of a technical kit: terminal is the native-dark log of what happened, spec is the native-light reference for what is true. No shared font, no shared hue, no ambiguity about which one you are looking at. Ship the release note in terminal and the docs in spec.
+**Pairs with [terminal](../brand-terminal/SKILL.md).** The two halves of a technical kit: terminal is the native-dark log of what happened, spec is the native-light reference for what is true. No shared font, no shared hue, no ambiguity about which one you are looking at. Ship the release note in terminal and the docs in spec.
 
-**Pairs with [swiss](../swiss/SKILL.md) and [annual](../../brand-annual/SKILL.md)** — all three are grid-disciplined and quiet, and spec supplies the value column those two lack.
+**Pairs with [swiss](../brand-swiss/SKILL.md) and [annual](../brand-annual/SKILL.md)** — all three are grid-disciplined and quiet, and spec supplies the value column those two lack.
 
-**Pairs with [blueprint](../../brand-blueprint/SKILL.md)**: blueprint draws the system, spec tabulates its parameters.
+**Pairs with [blueprint](../brand-blueprint/SKILL.md)**: blueprint draws the system, spec tabulates its parameters.
 
-**Clashes with [arcade](../../brand-arcade/SKILL.md), [stadium](../stadium/SKILL.md) and [flyer](../../brand-flyer/SKILL.md).** Those directions exist to raise a pulse; spec exists to lower one. In one kit they read as two brands with one logo.
+**Clashes with [arcade](../brand-arcade/SKILL.md), [stadium](../brand-stadium/SKILL.md) and [flyer](../brand-flyer/SKILL.md).** Those directions exist to raise a pulse; spec exists to lower one. In one kit they read as two brands with one logo.
 
-**Clashes with [manuscript](../../brand-manuscript/SKILL.md)** in voice: manuscript is argument, spec is answer, and a page cannot be both.
+**Clashes with [manuscript](../brand-manuscript/SKILL.md)** in voice: manuscript is argument, spec is answer, and a page cannot be both.
 
-**Telling the three mono directions apart.** spec is near-white paper, Inter Tight prose with IBM Plex Mono on **values only**, native light, indigo accent. [terminal](../terminal/SKILL.md) is phosphor green with JetBrains Mono on *everything*, scanlines, native dark. [oscilloscope](../../brand-oscilloscope/SKILL.md) is amber-only with Saira Condensed labels, Share Tech Mono readouts, and a real graticule, native dark. If a spec asset has a monospace heading, it has stopped being spec.
+**Telling the three mono directions apart.** spec is near-white paper, Inter Tight prose with IBM Plex Mono on **values only**, native light, indigo accent. [terminal](../brand-terminal/SKILL.md) is phosphor green with JetBrains Mono on *everything*, scanlines, native dark. [oscilloscope](../brand-oscilloscope/SKILL.md) is amber-only with Saira Condensed labels, Share Tech Mono readouts, and a real graticule, native dark. If a spec asset has a monospace heading, it has stopped being spec.
 
 ## The failure mode
 
@@ -210,6 +210,6 @@ The cost is upstream and it is real: **spec needs numbers you actually have.** A
 
 The guard is the **one-number rule**: every asset carries one figure that is genuinely surprising, and that figure is the largest thing on the surface. A table of unsurprising values is a form. A table with one number that changes someone's decision is an argument.
 
-The second symptom is **mono creep**. The direction's whole discipline is that monospace marks a value and nothing else. Once a heading goes mono, then a label, then a caption, spec has quietly become [terminal](../terminal/SKILL.md) in the wrong colours — and it has lost the thing that made the value column scannable, because nothing is special any more. Audit every asset by asking, of each monospace string: is this a value someone could look up? If not, it is Inter.
+The second symptom is **mono creep**. The direction's whole discipline is that monospace marks a value and nothing else. Once a heading goes mono, then a label, then a caption, spec has quietly become [terminal](../brand-terminal/SKILL.md) in the wrong colours — and it has lost the thing that made the value column scannable, because nothing is special any more. Audit every asset by asking, of each monospace string: is this a value someone could look up? If not, it is Inter.
 
 The third is **using it to persuade**. A manifesto in spec is a terms-of-service page. The direction will not stop you, and it will make the writing worse without making it look wrong, which is the hardest failure to catch in review.

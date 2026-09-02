@@ -1,5 +1,5 @@
 ---
-name: risograph
+name: brand-risograph
 description: "Use when applying the risograph brand direction to any surface: website, X, LinkedIn, Instagram carousels, YouTube thumbnails and edits, podcast art, or decks. Two flat inks on warm paper, fluorescent pink over federal blue, deliberate misregistration. Triggers: 'risograph direction', 'riso print style', 'two-ink zine brand', 'misregistration design', 'apply risograph to my carousel'."
 ---
 
@@ -14,15 +14,15 @@ only dark colour in the system.
 **use when** the work is a zine, a drop, an essay, or a small-batch thing made by hand. Anywhere the
 seams should show and the reader should feel a person set the type.
 **avoid when** the page carries a price, a legal term, or a data table. Misregistration reads as an
-error when the content has to be exact. Send those to [annual](../../brand-annual/SKILL.md) or
-[spec](../spec/SKILL.md).
+error when the content has to be exact. Send those to [annual](../brand-annual/SKILL.md) or
+[spec](../brand-spec/SKILL.md).
 
-**Not [flyer](../../brand-flyer/SKILL.md).** riso is flat, aligned, and lowercase, on clean warm paper. Nothing
+**Not [flyer](../brand-flyer/SKILL.md).** riso is flat, aligned, and lowercase, on clean warm paper. Nothing
 rotates. Nothing is torn. The misregistration is a press tolerance, not damage. flyer is the opposite on
 all four counts.
 
-Contract: [`../_lib/surfaces.md`](../_lib/surfaces.md). Floor:
-[`../_lib/craft-floor.md`](../_lib/craft-floor.md).
+Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
+[`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
 
 ---
 
@@ -118,7 +118,7 @@ Hero: lowercase headline in Archivo Black at 81px, leading 0.94, three lines max
 sits behind the final line only, with the blue plate 3px off it. Body at 17px Space Grotesk underneath.
 
 The element that carries the direction is the plate offset on the hero block. Nothing rotates anywhere
-on the page. A rotated element here is [flyer](../../brand-flyer/SKILL.md), not this.
+on the page. A rotated element here is [flyer](../brand-flyer/SKILL.md), not this.
 
 ## 3. X / Twitter avatar
 
@@ -262,7 +262,7 @@ exactly two flat tones and check that no third tone crept in. You duplicate ever
 copy, and set the overlap to multiply. You then check every violet overlap by eye, because multiply on
 top of a warm paper does not always land where the preview said.
 
-Real numbers: a carousel is 60 to 90 minutes, against 15 for [buildspace](../../brand-buildspace/SKILL.md). A
+Real numbers: a carousel is 60 to 90 minutes, against 15 for [buildspace](../brand-buildspace/SKILL.md). A
 thumbnail is 25 minutes. The two-ink portrait treatment is 20 minutes per photograph and it does not
 batch, because the tone split depends on the individual image.
 
@@ -273,27 +273,27 @@ the most common way a personal brand dies.
 
 ## Pairs with / clashes with
 
-**Pairs with** [buildspace](../../brand-buildspace/SKILL.md) as its everyday partner. Both are warm,
+**Pairs with** [buildspace](../brand-buildspace/SKILL.md) as its everyday partner. Both are warm,
 lowercase-leaning, and paper-based, and buildspace is cheap enough to carry the weeks risograph cannot.
-**Pairs with** [manuscript](../../brand-manuscript/SKILL.md) for a long essay, since both treat the page as a
-physical object. **Pairs with** [annual](../../brand-annual/SKILL.md) when the drop needs a price list, because
+**Pairs with** [manuscript](../brand-manuscript/SKILL.md) for a long essay, since both treat the page as a
+physical object. **Pairs with** [annual](../brand-annual/SKILL.md) when the drop needs a price list, because
 risograph must never set a price itself.
 
-**Clashes with** [flyer](../../brand-flyer/SKILL.md) hardest of all. They look adjacent and they are opposites:
+**Clashes with** [flyer](../brand-flyer/SKILL.md) hardest of all. They look adjacent and they are opposites:
 riso is aligned and flat, flyer is rotated and torn. Side by side, one of them looks like a broken
 version of the other.
-**Clashes with** [porcelain](../porcelain/SKILL.md), whose whole argument is that nothing is off by a
-pixel. **Clashes with** [swiss](../swiss/SKILL.md), because a grid this exact makes the offset read as
+**Clashes with** [porcelain](../brand-porcelain/SKILL.md), whose whole argument is that nothing is off by a
+pixel. **Clashes with** [swiss](../brand-swiss/SKILL.md), because a grid this exact makes the offset read as
 an error.
 
 Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand-router/SKILL.md):
-[broadsheet](../../brand-broadsheet/SKILL.md), [swiss](../swiss/SKILL.md), [manuscript](../../brand-manuscript/SKILL.md),
-[plaque](../plaque/SKILL.md), [annual](../../brand-annual/SKILL.md), [terminal](../terminal/SKILL.md),
-[blueprint](../../brand-blueprint/SKILL.md), [spec](../spec/SKILL.md), [oscilloscope](../../brand-oscilloscope/SKILL.md),
-[punchcard](../punchcard/SKILL.md), [buildspace](../../brand-buildspace/SKILL.md), risograph,
-[stadium](../stadium/SKILL.md), [arcade](../../brand-arcade/SKILL.md), [flyer](../../brand-flyer/SKILL.md),
-[dispatch](../../brand-dispatch/SKILL.md), [dusk](../../brand-dusk/SKILL.md), [vellum](../vellum/SKILL.md),
-[aurora](../../brand-aurora/SKILL.md), [porcelain](../porcelain/SKILL.md).
+[broadsheet](../brand-broadsheet/SKILL.md), [swiss](../brand-swiss/SKILL.md), [manuscript](../brand-manuscript/SKILL.md),
+[plaque](../brand-plaque/SKILL.md), [annual](../brand-annual/SKILL.md), [terminal](../brand-terminal/SKILL.md),
+[blueprint](../brand-blueprint/SKILL.md), [spec](../brand-spec/SKILL.md), [oscilloscope](../brand-oscilloscope/SKILL.md),
+[punchcard](../brand-punchcard/SKILL.md), [buildspace](../brand-buildspace/SKILL.md), risograph,
+[stadium](../brand-stadium/SKILL.md), [arcade](../brand-arcade/SKILL.md), [flyer](../brand-flyer/SKILL.md),
+[dispatch](../brand-dispatch/SKILL.md), [dusk](../brand-dusk/SKILL.md), [vellum](../brand-vellum/SKILL.md),
+[aurora](../brand-aurora/SKILL.md), [porcelain](../brand-porcelain/SKILL.md).
 
 ## The failure mode
 
@@ -302,7 +302,7 @@ everything else is exact. The moment a margin is off, a baseline drifts, or a ph
 three tones instead of two, the reader stops seeing a press tolerance and starts seeing a mistake. There
 is no middle state. The direction is either printed or broken.
 
-The second failure is drift toward [flyer](../../brand-flyer/SKILL.md). Someone rotates a block two degrees "for
+The second failure is drift toward [flyer](../brand-flyer/SKILL.md). Someone rotates a block two degrees "for
 energy". Someone adds a torn edge. Someone sets a word in caps. Each is a small, reasonable-looking
 move, and three of them turn a quiet zine into a photocopied poster with a pink accent.
 
