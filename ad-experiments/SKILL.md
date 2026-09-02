@@ -1,11 +1,11 @@
 ---
 name: ad-experiments
-description: "Run paid-ad experiments on a small budget so you learn WHICH variable drives signups and WHY — hyper-specific one-audience×one-geo×one-creative experiments driven by a written hypothesis, proving the cheapest measurable conversion (free signup) before the expensive one (paid), and judging results on server-side truth reconciled against payment-provider ground truth rather than dashboard vanity metrics. Also covers sizing the budget to the metric you can actually read (a $50 test reads CPC/CTR, not a conversion rate), a controlled UTM taxonomy for landing-page attribution, seeding platform lookalikes from your own hashed-email user list (minimum sizes, match-loss, graceful under-size handling), and the human-authorization boundary around exporting user PII to an ad network. Platform-agnostic methodology that pairs with the google-ads, meta-ads, and reddit-ads tracking/setup skills. Use when planning a paid-ad test, structuring ad experiments, sizing a budget, building a lookalike/seed audience, or deciding what to measure and how to read the result."
+description: "Run paid-ad experiments on a small budget so you learn WHICH variable drives signups and WHY — hyper-specific one-audience×one-geo×one-creative experiments driven by a written hypothesis, proving the cheapest measurable conversion (free signup) before the expensive one (paid), and judging results on server-side truth reconciled against payment-provider ground truth rather than dashboard vanity metrics. Also covers sizing the budget to the metric you can actually read (a $50 test reads CPC/CTR, not a conversion rate), a controlled UTM taxonomy for landing-page attribution, seeding platform lookalikes from your own hashed-email user list (minimum sizes, match-loss, graceful under-size handling), and the human-authorization boundary around exporting user PII to an ad network. Platform-agnostic methodology that pairs with the ads-google, ads-meta, and reddit-ads tracking/setup skills. Use when planning a paid-ad test, structuring ad experiments, sizing a budget, building a lookalike/seed audience, or deciding what to measure and how to read the result."
 ---
 
 # ad-experiments
 
-How to run paid-ad experiments on a small budget so you learn *which* variable drives signups and *why*, instead of dumping the budget into one broad campaign and reading a dashboard. Platform-agnostic — pairs with the `google-ads`, `meta-ads`, and `reddit-ads` skills, which cover the tracking and campaign setup for each channel.
+How to run paid-ad experiments on a small budget so you learn *which* variable drives signups and *why*, instead of dumping the budget into one broad campaign and reading a dashboard. Platform-agnostic — pairs with the `ads-google`, `ads-meta`, and `reddit-ads` skills, which cover the tracking and campaign setup for each channel.
 
 ## Run hyper-specific experiments
 
@@ -72,7 +72,7 @@ A controlled vocabulary so every lead is machine-parseable and experiments stay 
 
 You can't build a platform "lookalike" from nothing — you upload a seed list of your own users (hashed emails) and the platform finds similar people.
 
-- **Meta** = Custom Audience → Lookalike. **Google** = Customer Match list + optimized targeting / value-based Smart Bidding (Google's classic "similar audiences" was deprecated, so there is no lookalike *object* — expansion is a bidding behavior). **Reddit has no usable email-match audience product — skip it for lookalikes.** Per-platform wiring lives in `meta-ads` / `google-ads`; the methodology is here.
+- **Meta** = Custom Audience → Lookalike. **Google** = Customer Match list + optimized targeting / value-based Smart Bidding (Google's classic "similar audiences" was deprecated, so there is no lookalike *object* — expansion is a bidding behavior). **Reddit has no usable email-match audience product — skip it for lookalikes.** Per-platform wiring lives in `ads-meta` / `ads-google`; the methodology is here.
 - **Hash every email identically before upload: trim → lowercase → SHA-256 hex.** Mismatched normalization silently tanks the match rate.
 - **Minimum sizes gate serving, and match loss shrinks your seed below its raw count.** Meta needs ≥100 *matched* users (a raw seed near 100 usually fails after a ~50-70% match rate); Google Customer Match needs ~1,000 members to serve. A tiny high-value seed (paying customers only) is often too small to serve at all — a larger high-intent segment (signups, trials) is the better practical seed. Size the seed to clear the floor *after* match loss.
 - **Handle under-size per-segment, never abort the run.** Create the audience anyway, catch the lookalike/serve rejection as a per-segment warning, and keep going — one small segment must not abort a multi-segment upload.
@@ -84,4 +84,4 @@ Seeding a lookalike sends your customers' (hashed) emails to a third party, and 
 - **Build the machinery inert** — an empty seed produces zero outbound calls — and expose a **human-run one-off trigger script** for the actual export. Never wire the export into an endpoint, cron, or startup path.
 - If the ad-ops service must read your product's user warehouse to build the seed, grant **least-privilege and cross-project**: dataset-level READER on the source warehouse + a job-runner role on the consumer's *own* project. A project-wide grant is more access than the job needs.
 
-See the per-platform skills for wiring up that server-side tracking and campaign setup: `google-ads`, `meta-ads`, `reddit-ads`.
+See the per-platform skills for wiring up that server-side tracking and campaign setup: `ads-google`, `ads-meta`, `reddit-ads`.
