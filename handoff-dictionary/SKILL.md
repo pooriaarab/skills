@@ -31,3 +31,28 @@ _Usage:_
 "Planning session is getting heavy — should I just keep going?"
 
 "Do a handoff. Write the decisions to a doc, clear, start the implementation in a fresh session reading from it."
+
+## Applying it
+
+**The test.** Read the handoff as if you had never seen the work. Can you take the next action without asking a question that has no one left to answer? If not, it is not finished.
+
+**Carry the why, not just the what.** Relitigation is the failure mode, and it is caused by recording conclusions without their reasons. Every rejected alternative you do not write down is one the next session will re-propose. "Chose D1 over Postgres" invites the argument again; "chose D1 over Postgres because the Worker cannot hold a TCP pool" ends it.
+
+**Say what was tried and failed.** A dead end that is not recorded gets walked again, at full cost. This is the highest-value line in most handoffs and the one most often left out.
+
+**Reference, do not duplicate.** Point at issues, PRs, commits, plans and ADRs by number or path. A copy in the handoff is a second source of truth that starts drifting immediately.
+
+**Name what is in flight.** Open PRs, running background jobs, an unpushed branch, a worktree with uncommitted work, a review waiting on a reply. Anything a fresh session cannot see by looking at `main` has to be stated.
+
+**Redact.** The artifact may be committed, pasted into a prompt, or read by another account's agent. No keys, tokens, or personal data.
+
+## Picking a mechanism
+
+- **Written artifact** when the decisions matter, several sessions will read it, or you want to correct it before anything depends on it. Use the `handoff` skill.
+- **Compaction** when it is one successor, the work is mechanical, and nobody needs to audit the carry.
+- **Neither** when there is genuinely nothing to transfer — that is clearing, and it is a valid choice, not a failed handoff.
+
+## Related
+
+- `handoff` — writes the artifact to a file
+- `claude-handoff` — writes the summary and launches a background agent seeded with it
