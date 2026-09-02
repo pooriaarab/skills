@@ -1,5 +1,5 @@
 ---
-name: porcelain
+name: brand-porcelain
 description: "Use when you apply the porcelain brand direction to any surface: landing page, X avatar, OG card, LinkedIn banner, Instagram carousel, YouTube thumbnail or edit, podcast cover, deck. porcelain is a single 1px hairline at the 33% column with content hung off its right and metadata off its left, and nothing else drawn at all. Triggers: 'porcelain direction', 'apply porcelain', '33% hairline', 'brand this as porcelain', 'porcelain thumbnail', 'porcelain carousel'."
 ---
 
@@ -15,7 +15,7 @@ porcelain is the most restrained direction in the suite, and the restraint is en
 
 **Avoid porcelain when** the page needs energy, or it needs to hold more than one idea at a time. porcelain has no way to raise its voice and no second level of hierarchy.
 
-Contract: [`../_lib/surfaces.md`](../_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../_lib/craft-floor.md). Picker: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
+Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md). Picker: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
 
 ## Tokens
 
@@ -207,13 +207,13 @@ Every asset is one rectangle, one vertical line at 33%, and at most three text e
 
 ## Pairs with / clashes with
 
-**Pairs with [`../aurora/SKILL.md`](../../brand-aurora/SKILL.md).** Both reduce by subtraction, both refuse fills, both put content in one left-aligned column with no cards. porcelain is the lit room with one line; aurora is the dark room with one light. Run porcelain on the pages that must be believed and aurora on the essays, and the two read as one person.
+**Pairs with [`../aurora/SKILL.md`](../brand-aurora/SKILL.md).** Both reduce by subtraction, both refuse fills, both put content in one left-aligned column with no cards. porcelain is the lit room with one line; aurora is the dark room with one light. Run porcelain on the pages that must be believed and aurora on the essays, and the two read as one person.
 
-**Pairs with [`../swiss/SKILL.md`](../swiss/SKILL.md).** Shared grid rigour and shared flush-left discipline. The difference is how much grid is visible: swiss shows the whole system, porcelain shows exactly one column of it. Use swiss where content is genuinely parallel and porcelain where it is singular.
+**Pairs with [`../swiss/SKILL.md`](../brand-swiss/SKILL.md).** Shared grid rigour and shared flush-left discipline. The difference is how much grid is visible: swiss shows the whole system, porcelain shows exactly one column of it. Use swiss where content is genuinely parallel and porcelain where it is singular.
 
-**Clashes with [`../stadium/SKILL.md`](../stadium/SKILL.md).** Stadium is built from fills, and porcelain's entire system is the refusal to fill. There is no shared asset and no transition between them that is not a rupture.
+**Clashes with [`../stadium/SKILL.md`](../brand-stadium/SKILL.md).** Stadium is built from fills, and porcelain's entire system is the refusal to fill. There is no shared asset and no transition between them that is not a rupture.
 
-**Clashes with [`../risograph/SKILL.md`](../risograph/SKILL.md).** Risograph needs visible ink, misregistration and texture. porcelain declines texture on purpose, so a risograph pass over porcelain reads as a printing fault rather than a style.
+**Clashes with [`../risograph/SKILL.md`](../brand-risograph/SKILL.md).** Risograph needs visible ink, misregistration and texture. porcelain declines texture on purpose, so a risograph pass over porcelain reads as a printing fault rather than a style.
 
 ## The failure mode
 

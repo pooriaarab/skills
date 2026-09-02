@@ -16,8 +16,8 @@ noise is the correct answer.
 type at paragraph length is a punishment.** Send long reads to [manuscript](../brand-manuscript/SKILL.md) and
 institutional work to [annual](../brand-annual/SKILL.md).
 
-Contract: [`../_lib/surfaces.md`](../brand/_lib/surfaces.md). Floor:
-[`../_lib/craft-floor.md`](../brand/_lib/craft-floor.md).
+Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
+[`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
 
 ---
 
@@ -205,7 +205,7 @@ Dial arcade **down about 50%**, and accept that it is still loud:
 - Body in Barlow at 24px, not VT323. This is the one surface where the mono body does not earn it, because the tube is gone and the argument goes with it.
 
 If that list feels like it removes the direction, that is the honest reading. Use arcade on LinkedIn for
-a game, a side project, or a launch with a crowd. For anything else, run [swiss](../brand/swiss/SKILL.md).
+a game, a side project, or a launch with a crowd. For anything else, run [swiss](../brand-swiss/SKILL.md).
 
 ## 8. Instagram carousel
 
@@ -301,26 +301,26 @@ does not reuse.
 
 **Pairs with** [buildspace](../brand-buildspace/SKILL.md), which carries the weeks arcade cannot afford and
 reads as the same person being quieter.
-**Pairs with** [terminal](../brand/terminal/SKILL.md), its serious sibling: both are monospace and
+**Pairs with** [terminal](../brand-terminal/SKILL.md), its serious sibling: both are monospace and
 screen-native, so a technical write-up in terminal next to an arcade launch reads as one system with two
 volumes.
-**Pairs with** [punchcard](../brand/punchcard/SKILL.md) for the same reason, with a colder register.
+**Pairs with** [punchcard](../brand-punchcard/SKILL.md) for the same reason, with a colder register.
 
-**Clashes with** [stadium](../brand/stadium/SKILL.md): two maximal saturated dark-field directions competing
+**Clashes with** [stadium](../brand-stadium/SKILL.md): two maximal saturated dark-field directions competing
 for the same eye, and neither wins.
 **Clashes with** [flyer](../brand-flyer/SKILL.md), because both are noise-forward and the combination reads as
 a person with no editing instinct.
-**Clashes with** [porcelain](../brand/porcelain/SKILL.md) and [swiss](../brand/swiss/SKILL.md), whose whole argument
+**Clashes with** [porcelain](../brand-porcelain/SKILL.md) and [swiss](../brand-swiss/SKILL.md), whose whole argument
 is restraint.
 
-Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand/brand-router/SKILL.md):
-[broadsheet](../brand-broadsheet/SKILL.md), [swiss](../brand/swiss/SKILL.md), [manuscript](../brand-manuscript/SKILL.md),
-[plaque](../brand/plaque/SKILL.md), [annual](../brand-annual/SKILL.md), [terminal](../brand/terminal/SKILL.md),
-[blueprint](../brand-blueprint/SKILL.md), [spec](../brand/spec/SKILL.md), [oscilloscope](../brand-oscilloscope/SKILL.md),
-[punchcard](../brand/punchcard/SKILL.md), [buildspace](../brand-buildspace/SKILL.md),
-[risograph](../brand/risograph/SKILL.md), [stadium](../brand/stadium/SKILL.md), arcade, [flyer](../brand-flyer/SKILL.md),
-[dispatch](../brand-dispatch/SKILL.md), [dusk](../brand-dusk/SKILL.md), [vellum](../brand/vellum/SKILL.md),
-[aurora](../brand-aurora/SKILL.md), [porcelain](../brand/porcelain/SKILL.md).
+Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand-router/SKILL.md):
+[broadsheet](../brand-broadsheet/SKILL.md), [swiss](../brand-swiss/SKILL.md), [manuscript](../brand-manuscript/SKILL.md),
+[plaque](../brand-plaque/SKILL.md), [annual](../brand-annual/SKILL.md), [terminal](../brand-terminal/SKILL.md),
+[blueprint](../brand-blueprint/SKILL.md), [spec](../brand-spec/SKILL.md), [oscilloscope](../brand-oscilloscope/SKILL.md),
+[punchcard](../brand-punchcard/SKILL.md), [buildspace](../brand-buildspace/SKILL.md),
+[risograph](../brand-risograph/SKILL.md), [stadium](../brand-stadium/SKILL.md), arcade, [flyer](../brand-flyer/SKILL.md),
+[dispatch](../brand-dispatch/SKILL.md), [dusk](../brand-dusk/SKILL.md), [vellum](../brand-vellum/SKILL.md),
+[aurora](../brand-aurora/SKILL.md), [porcelain](../brand-porcelain/SKILL.md).
 
 ## The failure mode
 
