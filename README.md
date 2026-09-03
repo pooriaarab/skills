@@ -80,9 +80,9 @@ consent, hashing, deduplication, and failure isolation.
 
 ## Skills
 
-### Life organization (`organizer/`)
+### Life organization (`org-life-organizer`)
 
-A coordinated suite for organizing across every digital surface — files, notes, mail, calendars, contacts, photos, social bookmarks, code. Run [`life-organizer`](organizer/life-organizer/SKILL.md) first to survey preferences and get a recommended sequence. See [`organizer/README.md`](organizer/README.md) for the full catalog (21 sub-skills) and [`organizer/DESIGN.md`](organizer/DESIGN.md) for architecture.
+A coordinated suite for organizing across every digital surface — files, notes, mail, calendars, contacts, photos, social bookmarks, code. Run [`life-organizer`](org-life-organizer/SKILL.md) first to survey preferences and get a recommended sequence. See [`organizer/README.md`](organizer/README.md) for the full catalog (21 sub-skills) and [`organizer/DESIGN.md`](organizer/DESIGN.md) for architecture.
 
 ### CI and runners
 
@@ -202,10 +202,10 @@ Via the [skills CLI](https://skills.sh). Skills live in this monorepo, so paths 
 npx skills add pooriaarab/skills
 
 # Life organizer suite (parent — installs all sub-skills)
-npx skills add pooriaarab/skills/organizer
+npx skills add pooriaarab/skills/org-life-organizer
 
 # An individual organizer sub-skill (see organizer/README.md for the full list)
-npx skills add pooriaarab/skills/organizer/apple-notes
+npx skills add pooriaarab/skills/org-apple-notes
 
 # An individual standalone skill — swap in any name from the table above
 npx skills add pooriaarab/skills/eco-mode
