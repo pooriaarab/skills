@@ -70,6 +70,8 @@ The credentials already reach the Box inside the root `.env.local`, but nothing 
 - `box env set-file <env> <in-box-path> --from <local file>` — writes a gitignored env file in.
 - `box env set-var <env> KEY=VALUE` — sets an environment variable.
 
+Create one named `box env` per repo. It carries `TURBO_API`, `TURBO_TOKEN`, and `TURBO_TEAM`. Verify the Box receives them in its environment.
+
 Credentials are two separate switches, and they deserve opposite answers:
 
 - `--box-credentials false` — always. These let a Box create and control other Boxes, which is the escalation that actually matters.
@@ -100,7 +102,7 @@ The shim pins the Box to the repo's environment (for example `replytosocial` v5)
 
 ### 5. Stop reinstalling what the base image already has
 
-The base image ships `node` 24, `bun` 1.3.14, `git`, `gh`, `gcc`, `make`, `python3`, `pkg-config`, `rg`, `jq`, `docker`, `ffmpeg`, Chrome, plus Go, Rust, Java, Ruby and PHP. It looks like crabbox wastes time apt-installing that on every attach. It does not: the step is guarded by `command -v curl / git / gcc`, all three are present, and it never fires. Verified on a real Box. There is nothing to cut here, and it is worth recording because it is the obvious-looking optimisation that turns out not to exist.
+crabbox apt-installs `curl git build-essential python3 pkg-config` and then installs bun. The base image ships `node` 24, `bun` 1.3.14, `git`, `gh`, `gcc`, `make`, `python3`, `pkg-config`, `rg`, `jq`, `docker`, `ffmpeg`, Chrome, plus Go, Rust, Java, Ruby and PHP. It looks like crabbox wastes time apt-installing that on every attach. It does not: the step is guarded by `command -v curl / git / gcc`, all three are present, and it never fires. Verified on a real Box. There is nothing to cut here, and it is worth recording because it is the obvious-looking optimisation that turns out not to exist.
 
 ### 6. Build the warm snapshot (scrubbed)
 
