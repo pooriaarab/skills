@@ -205,7 +205,7 @@ npx skills add pooriaarab/skills
 npx skills add pooriaarab/skills/organizer
 
 # An individual organizer sub-skill (see organizer/README.md for the full list)
-npx skills add pooriaarab/skills/organizer/apple-notes
+npx skills add pooriaarab/skills/org-apple-notes
 
 # An individual standalone skill — swap in any name from the table above
 npx skills add pooriaarab/skills/eco-mode
