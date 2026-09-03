@@ -121,4 +121,4 @@ It gracefully no-ops until `setup` has been run.
 
 - [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
 - [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
-- [`../notion/SKILL.md`](../organizer/notion/SKILL.md) — preferred destination for structured bookmark library
+- [`../organizer/notion/SKILL.md`](../organizer/notion/SKILL.md) — preferred destination for structured bookmark library

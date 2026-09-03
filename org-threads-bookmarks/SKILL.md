@@ -41,5 +41,5 @@ Process Threads saved posts.
 
 - [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
 - [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
-- [`../notion/SKILL.md`](../organizer/notion/SKILL.md)
+- [`../organizer/notion/SKILL.md`](../organizer/notion/SKILL.md)
 - [`../instagram-saved/SKILL.md`](../org-instagram-saved/SKILL.md) — shares Meta auth
