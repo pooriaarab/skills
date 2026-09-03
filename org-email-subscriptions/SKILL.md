@@ -1,5 +1,5 @@
 ---
-name: email-subscriptions
+name: org-email-subscriptions
 description: "Use when the user wants an unsubscribe pass on email — identifying senders the user no longer reads, mass-unsubscribing via List-Unsubscribe headers, archiving historical mail from those senders. Companion to gmail-organizer. Triggers: 'unsubscribe from newsletters', 'stop email spam'."
 ---
 
@@ -40,6 +40,6 @@ Mass-unsubscribe pass on Gmail (or any IMAP-accessible mailbox).
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../_lib/patterns.md)
-- [`../gmail/SKILL.md`](../gmail/SKILL.md) — runs the broader Gmail pass; this is the focused unsubscribe slice
+- [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
+- [`../gmail/SKILL.md`](../org-gmail/SKILL.md) — runs the broader Gmail pass; this is the focused unsubscribe slice

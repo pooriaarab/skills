@@ -1,12 +1,12 @@
 # Organizer Suite — Design
 
-A coordinated set of skills for organizing a person's digital life across every surface (files, notes, mail, calendars, contacts, social bookmarks, etc.). Each surface is a self-contained skill; a master skill (`life-organizer`) surveys preferences and dispatches the right ones in the right order.
+A coordinated set of skills for organizing a person's digital life across every surface (files, notes, mail, calendars, contacts, social bookmarks, etc.). Each surface is a self-contained skill; a master skill (`org-life-organizer`) surveys preferences and dispatches the right ones in the right order.
 
 ## Goals
 
 1. **Portable taxonomy** — one folder/label scheme that works across local files, iCloud, Drive, Notes, Gmail, GitHub, etc.
 2. **Self-contained skills** — every surface skill works on its own, no shared state required.
-3. **Composability** — `life-organizer` can sequence sub-skills for a first-time setup or ongoing maintenance.
+3. **Composability** — `org-life-organizer` can sequence sub-skills for a first-time setup or ongoing maintenance.
 4. **Safety** — every skill follows dry-run → batch-approve → execute, with a journal for undo where possible.
 
 ## Directory Layout
@@ -55,9 +55,9 @@ organizer/
 
 ## Shared Taxonomy
 
-See [`_lib/taxonomy.md`](_lib/taxonomy.md). The default lowercase single-word categories (`personal`, `people`, `ideas`, `finances`, `health`, `legal`, `drafts`, `reference`, `archive`) work across most surfaces. Each sub-skill maps surface-native concepts (Notes folders, Gmail labels, GitHub topics) to this shared vocabulary.
+See [`_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md). The default lowercase single-word categories (`personal`, `people`, `ideas`, `finances`, `health`, `legal`, `drafts`, `reference`, `archive`) work across most surfaces. Each sub-skill maps surface-native concepts (Notes folders, Gmail labels, GitHub topics) to this shared vocabulary.
 
-## Master Skill: `life-organizer`
+## Master Skill: `org-life-organizer`
 
 **Flavor: survey + dispatch.**
 

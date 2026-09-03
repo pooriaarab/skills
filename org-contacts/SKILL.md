@@ -1,5 +1,5 @@
 ---
-name: contacts
+name: org-contacts
 description: "Use when the user wants to organize, dedupe, or clean up Contacts.app on macOS/iOS — merging duplicate entries (especially phone-format dupes), filling missing fields, grouping into Lists, mirroring Google contact groups, reconciling cross-store identity with Google Contacts. Triggers: 'dedupe my contacts', 'fix my address book', 'mirror my Google groups to iCloud'."
 ---
 
@@ -134,7 +134,7 @@ Run **before** `organizer/gmail/` and `organizer/apple-notes/people/`. Clean con
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../_lib/patterns.md) — Plan → Approve → Apply, journaling
-- [`../google-contacts/SKILL.md`](../google-contacts/SKILL.md) — Google-side counterpart; **coordinate, don't run independently**
-- [`../gmail/SKILL.md`](../gmail/SKILL.md) — runs after this
+- [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md) — Plan → Approve → Apply, journaling
+- [`../google-contacts/SKILL.md`](../org-google-contacts/SKILL.md) — Google-side counterpart; **coordinate, don't run independently**
+- [`../gmail/SKILL.md`](../org-gmail/SKILL.md) — runs after this

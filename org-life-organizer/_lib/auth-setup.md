@@ -363,4 +363,4 @@ After all the relevant auths are green, any session can:
 # ... etc
 ```
 
-Or invoke the `life-organizer` master skill to get a recommended sequence.
+Or invoke the `org-life-organizer` master skill to get a recommended sequence.

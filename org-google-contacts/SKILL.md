@@ -1,11 +1,11 @@
 ---
-name: google-contacts
-description: "Use when the user wants to organize Google Contacts (the cloud-side address book behind Gmail autocomplete) — dedupe, missing-field enrichment, contact group / starred curation, tagging-by-relationship. Distinct from the iCloud-side `contacts` skill: Google-only via the People API. Triggers: 'dedupe gmail contacts', 'contact groups in google'."
+name: org-google-contacts
+description: "Use when the user wants to organize Google Contacts (the cloud-side address book behind Gmail autocomplete) — dedupe, missing-field enrichment, contact group / starred curation, tagging-by-relationship. Distinct from the iCloud-side `org-contacts` skill: Google-only via the People API. Triggers: 'dedupe gmail contacts', 'contact groups in google'."
 ---
 
 # Google Contacts Organizer
 
-Triage Google Contacts via the **People API** — dedupe near-identical entries, fill missing names/emails/phones, and curate contact groups (the People API equivalent of Gmail labels for people). Two-phase plan → approve → apply, mirroring `gmail-organizer`.
+Triage Google Contacts via the **People API** — dedupe near-identical entries, fill missing names/emails/phones, and curate contact groups (the People API equivalent of Gmail labels for people). Two-phase plan → approve → apply, mirroring `org-gmail`.
 
 This skill is the **Google-side** counterpart to `organizer/contacts/` (which handles iCloud Contacts.app). Run them in either order. If the user keeps both stores in sync via [Apple's Add Account → Google](https://support.apple.com/guide/contacts/use-icloud-and-other-internet-accounts-cnt5b08a32a/mac), pick one as authoritative and clean it first.
 
@@ -15,7 +15,7 @@ Pick whichever access path is convenient:
 
 **Path A — `gog` CLI** (recommended; works with the `work`/`personal` shell switcher)
 - [`gog`](https://github.com/openclaw/gogcli) — `brew install steipete/tap/gogcli`
-- Account authenticated with the `contacts` and `people` services:
+- Account authenticated with the `org-contacts` and `people` services:
   - `gog auth add <your-personal>@gmail.com --services contacts,people`
   - `gog auth add <your-work>@<work-domain> --services contacts,people`
 - People API enabled on the OAuth project (one-click in [GCP console](https://console.developers.google.com/apis/api/people.googleapis.com/overview))
@@ -211,7 +211,7 @@ Gmail's autocomplete continuously adds entries as you correspond with new addres
 
 ## Cross-surface coordination
 
-When run alongside `gmail-organizer`:
+When run alongside `org-gmail`:
 
 1. **Contacts before Gmail.** Cleaning people first means Gmail's "label by sender" can use canonical contact identities instead of stray email addresses (`john@x.com` and `john.smith@x.com` get the same label).
 2. **Use contact groups as Gmail label hints.** If a contact is in the `family` group, the Gmail apply phase can route their messages to a `personal/family` label without re-classification.
