@@ -80,5 +80,5 @@ This skill describes the contract; keep any executable helper (e.g. a capture-an
 - [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md) — shared category vocabulary
 - [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md) — dry-run → batch-approve → apply, journaling
 - [`../notion/SKILL.md`](../organizer/notion/SKILL.md) — preferred destination for a structured saved-items library
-- [`../slack-dm/SKILL.md`](../org-slack-dm/SKILL.md) — sibling skill for DM threads + notification tuning
-- [`../../slack-mcp-browser-auth/SKILL.md`](../slack-mcp-browser-auth/SKILL.md) — browser-session auth for Slack when API tokens fail (Enterprise Grid)
+- [`../org-slack-dm/SKILL.md`](../org-slack-dm/SKILL.md) — sibling skill for DM threads + notification tuning
+- [`../slack-mcp-browser-auth/SKILL.md`](../slack-mcp-browser-auth/SKILL.md) — browser-session auth for Slack when API tokens fail (Enterprise Grid)

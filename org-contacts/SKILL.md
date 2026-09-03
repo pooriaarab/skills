@@ -136,5 +136,5 @@ Run **before** `org-gmail` and `org-apple-notes` (its `people/` folder pass). Cl
 
 - [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
 - [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md) — Plan → Approve → Apply, journaling
-- [`../google-contacts/SKILL.md`](../org-google-contacts/SKILL.md) — Google-side counterpart; **coordinate, don't run independently**
-- [`../gmail/SKILL.md`](../org-gmail/SKILL.md) — runs after this
+- [`../org-google-contacts/SKILL.md`](../org-google-contacts/SKILL.md) — Google-side counterpart; **coordinate, don't run independently**
+- [`../org-gmail/SKILL.md`](../org-gmail/SKILL.md) — runs after this

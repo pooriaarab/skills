@@ -19,6 +19,12 @@ Ask these questions, **one at a time**, before recommending anything:
 
 Multi-select. Common options (default = all of "Personal essentials"):
 
+Names prefixed `org-` are top-level, independently loadable skills. Bare names
+(`mac`, `notion`, `google-drive`, `apple-reminders`, `gtasks`, `icloud-calendar`,
+`icloud-photos`, `spotify-playlist`, `github`, and the social-bookmark skills)
+are still nested under `organizer/<surface>/SKILL.md` pending the second half
+of the flatten — invoke them by that full path.
+
 **Personal essentials**
 - [ ] Local Mac (Downloads / Desktop / Documents / caches) → `mac`
 - [ ] Apple Notes (iCloud) → `org-apple-notes`

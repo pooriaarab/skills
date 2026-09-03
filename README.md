@@ -201,7 +201,11 @@ Via the [skills CLI](https://skills.sh). Skills live in this monorepo, so paths 
 # Everything in this repo
 npx skills add pooriaarab/skills
 
-# Life organizer suite (parent — installs all sub-skills)
+# Life organizer suite entry point
+npx skills add pooriaarab/skills/org-life-organizer
+
+# Sub-skills still nested under organizer/ (see organizer/README.md for the full catalog —
+# eleven others have moved to top-level org-* skills and install individually)
 npx skills add pooriaarab/skills/organizer
 
 # An individual organizer sub-skill (see organizer/README.md for the full list)
