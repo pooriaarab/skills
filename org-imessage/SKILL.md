@@ -1,5 +1,5 @@
 ---
-name: imessage
+name: org-imessage
 description: "Use when the user wants to clean up iMessage / Messages.app on macOS — archiving stale conversations, identifying unread-but-irrelevant threads, exporting important conversations, and reducing clutter. Triggers: 'organize Messages', 'my Messages is overwhelming'."
 ---
 
@@ -41,6 +41,6 @@ Clean up Messages.app on macOS.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../_lib/patterns.md)
-- [`../mac/SKILL.md`](../mac/SKILL.md) — for attachment disk cleanup
+- [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
+- [`../mac/SKILL.md`](../organizer/mac/SKILL.md) — for attachment disk cleanup

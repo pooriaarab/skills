@@ -1,5 +1,5 @@
 ---
-name: apple-notes
+name: org-apple-notes
 description: "Use when the user wants to organize, restructure, or clean up Apple Notes (iCloud Notes). Works via AppleScript on macOS. Triggers: 'organize my Notes', 'clean up Apple Notes', 'organize iCloud Notes', 'my Notes app is a mess'."
 ---
 
@@ -289,6 +289,6 @@ The 3 sub-folders + parent appear together in iOS/macOS Notes UI. Useful for kee
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../_lib/taxonomy.md) — shared default taxonomy
-- [`../_lib/patterns.md`](../_lib/patterns.md) — patterns reused across sub-skills (especially "AppleScript Helpers")
-- [`../notion/SKILL.md`](../notion/SKILL.md) — for CRM-style structured data, prefer Notion over Notes
+- [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md) — shared default taxonomy
+- [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md) — patterns reused across sub-skills (especially "AppleScript Helpers")
+- [`../notion/SKILL.md`](../organizer/notion/SKILL.md) — for CRM-style structured data, prefer Notion over Notes
