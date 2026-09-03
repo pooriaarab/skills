@@ -21,7 +21,7 @@ The owner: a solo developer who ships products with coding agents as the main wo
 - An application or an installable package. The root has no `package.json` and no source tree; every top-level entry is a skill directory, a top-level doc (README, AGENTS, this file), or a directory that holds sub-skills or shared docs rather than a `SKILL.md` of its own (`organizer/`, `brand/`, `docs/`). A runtime, a CLI binary, or an npm module does not belong here.
 - A new platform ad skill with its own tracking scheme. `ads-google` is the sole existing exception, kept for its GA4 layering; every other platform skill takes events, consent, hashing, deduplication, and failure isolation from `ad-conversion-hub` and must reuse that contract, not redefine it.
 - A rewrite of a live-verified step from vendor documentation. The commit log corrects skills from live submissions, real campaigns, and real portals; a live run outranks the doc the text came from.
-- A second entry point for a domain the repo already routes. CI starts at `ci-speed-diagnosis` and life organization starts at `life-organizer`; a parallel router for the same domain splits the path every new reader must start on.
+- A second entry point for a domain the repo already routes. CI starts at `ci-speed-diagnosis` and life organization starts at `org-life-organizer`; a parallel router for the same domain splits the path every new reader must start on.
 - A life-admin skill that stores personal data. The census and visa skills state "Zero PII" and stop before irreversible steps; a skill that saves that data breaks the property they state.
 
 ## How it pays for itself

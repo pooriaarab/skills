@@ -1,5 +1,5 @@
 ---
-name: life-organizer
+name: org-life-organizer
 description: "Use when the user wants to organize their entire digital life across multiple surfaces at once, or asks where to start. Surveys preferences and recommends which sub-skill to run in what order. Triggers: 'organize my life', 'where do I start', 'clean up everything', 'organize across all my apps', 'set up a personal knowledge graph'."
 ---
 
@@ -7,7 +7,7 @@ description: "Use when the user wants to organize their entire digital life acro
 
 Master skill for organizing across surfaces. **Survey + dispatch model:** asks scoping questions, recommends a sequence based on dependencies, and tells you which sub-skill to run for each step. Does not invoke sub-skills directly — that keeps each one independently maintainable.
 
-For the catalog of available sub-skills, see [`../README.md`](../README.md). For the shared taxonomy, see [`../_lib/taxonomy.md`](../_lib/taxonomy.md).
+For the catalog of available sub-skills, see [`../README.md`](../organizer/README.md). For the shared taxonomy, see [`../_lib/taxonomy.md`](_lib/taxonomy.md).
 
 ---
 
@@ -19,22 +19,28 @@ Ask these questions, **one at a time**, before recommending anything:
 
 Multi-select. Common options (default = all of "Personal essentials"):
 
+Names prefixed `org-` are top-level, independently loadable skills. Bare names
+(`mac`, `notion`, `google-drive`, `apple-reminders`, `gtasks`, `icloud-calendar`,
+`icloud-photos`, `spotify-playlist`, `github`, and the social-bookmark skills)
+are still nested under `organizer/<surface>/SKILL.md` pending the second half
+of the flatten — invoke them by that full path.
+
 **Personal essentials**
 - [ ] Local Mac (Downloads / Desktop / Documents / caches) → `mac`
-- [ ] Apple Notes (iCloud) → `apple-notes`
+- [ ] Apple Notes (iCloud) → `org-apple-notes`
 - [ ] Notion → `notion`
 - [ ] Google Drive → `google-drive`
-- [ ] Gmail → `gmail`
-- [ ] Contacts.app → `contacts`
-- [ ] Calendars (Google + iCloud) → `gcal`, `icloud-calendar`
+- [ ] Gmail → `org-gmail`
+- [ ] Contacts.app → `org-contacts`
+- [ ] Calendars (Google + iCloud) → `org-gcal`, `icloud-calendar`
 - [ ] Reminders.app → `apple-reminders`
 - [ ] Google Tasks → `gtasks`
 
 **Communication**
-- [ ] iMessage → `imessage`
-- [ ] Slack DMs → `slack-dm`
-- [ ] Slack Later / saved messages → `slack-later`
-- [ ] Email subscriptions / unsubscribe pass → `email-subscriptions`
+- [ ] iMessage → `org-imessage`
+- [ ] Slack DMs → `org-slack-dm`
+- [ ] Slack Later / saved messages → `org-slack-later`
+- [ ] Email subscriptions / unsubscribe pass → `org-email-subscriptions`
 
 **Media**
 - [ ] iCloud Photos → `icloud-photos`
@@ -48,7 +54,7 @@ Multi-select. Common options (default = all of "Personal essentials"):
 
 **Code**
 - [ ] GitHub repos / stars / orgs → `github`
-- [ ] Browser bookmarks (Chrome / Arc / Safari) → `browser-bookmarks`
+- [ ] Browser bookmarks (Chrome / Arc / Safari) → `org-browser-bookmarks`
 
 ### Q2. Work / personal split?
 
@@ -58,7 +64,7 @@ Multi-select. Common options (default = all of "Personal essentials"):
 
 ### Q3. Taxonomy preference?
 
-Pick one — see [`../_lib/taxonomy.md`](../_lib/taxonomy.md) for definitions:
+Pick one — see [`../_lib/taxonomy.md`](_lib/taxonomy.md) for definitions:
 
 - **Default lowercase** — `personal`, `people`, `ideas`, `finances`, `health`, `legal`, `drafts`, `reference`, `archive` (Recommended for first-time users).
 - **PARA** — Projects / Areas / Resources / Archive (Tiago Forte).
@@ -118,11 +124,11 @@ Based on the answers, output a checklist with cross-surface dependencies honored
 
 | If you run... | Run this first | Why |
 |---|---|---|
-| `gmail` | `contacts` | Better person-based labeling |
+| `org-gmail` | `org-contacts` | Better person-based labeling |
 | `google-drive` | `mac` | Local cleanup before sync upstream |
-| `email-subscriptions` | `gmail` | Same surface, do label cleanup first |
-| `browser-bookmarks` | `notion` | Bookmarks often belong in Notion as reference |
-| `apple-notes` | (none) | Independent |
+| `org-email-subscriptions` | `org-gmail` | Same surface, do label cleanup first |
+| `org-browser-bookmarks` | `notion` | Bookmarks often belong in Notion as reference |
+| `org-apple-notes` | (none) | Independent |
 | `notion` | (none) | Independent |
 | `github` | (none) | Independent |
 
@@ -169,7 +175,7 @@ The sub-skill's Step 1 will re-confirm with the user; that's fine — overlap is
 
 ## See also
 
-- [`../README.md`](../README.md) — full catalog of sub-skills
-- [`../DESIGN.md`](../DESIGN.md) — architecture decisions
-- [`../_lib/taxonomy.md`](../_lib/taxonomy.md) — shared default taxonomy
-- [`../_lib/patterns.md`](../_lib/patterns.md) — implementation patterns reused across sub-skills
+- [`../README.md`](../organizer/README.md) — full catalog of sub-skills
+- [`../DESIGN.md`](../organizer/DESIGN.md) — architecture decisions
+- [`../_lib/taxonomy.md`](_lib/taxonomy.md) — shared default taxonomy
+- [`../_lib/patterns.md`](_lib/patterns.md) — implementation patterns reused across sub-skills

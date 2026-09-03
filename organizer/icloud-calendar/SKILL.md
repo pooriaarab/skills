@@ -39,6 +39,6 @@ Clean up Calendar.app / iCloud Calendar via AppleScript or EventKit.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../_lib/patterns.md)
-- [`../gcal/SKILL.md`](../gcal/SKILL.md)
+- [`../_lib/taxonomy.md`](../../org-life-organizer/_lib/taxonomy.md)
+- [`../_lib/patterns.md`](../../org-life-organizer/_lib/patterns.md)
+- [`../gcal/SKILL.md`](../../org-gcal/SKILL.md)

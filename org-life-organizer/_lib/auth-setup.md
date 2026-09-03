@@ -358,9 +358,9 @@ After all the relevant auths are green, any session can:
 # Pick a surface and follow the corresponding skill
 # organizer/spotify-playlist/SKILL.md
 # organizer/x-bookmarks/SKILL.md
-# organizer/imessage/SKILL.md
-# organizer/gcal/SKILL.md
+# org-imessage/SKILL.md
+# org-gcal/SKILL.md
 # ... etc
 ```
 
-Or invoke the `life-organizer` master skill to get a recommended sequence.
+Or invoke the `org-life-organizer` master skill to get a recommended sequence.

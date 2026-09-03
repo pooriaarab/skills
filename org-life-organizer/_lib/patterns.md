@@ -86,10 +86,10 @@ If a fragment matches multiple items unexpectedly (`AMBIG: Memories (3 hits)`), 
 
 ## 11. Cross-Surface Coordination
 
-When two sub-skills can act on overlapping content (e.g. `gmail` labels by sender and `contacts` deduplicates the senders), prefer to run the foundational skill first:
+When two sub-skills can act on overlapping content (e.g. `org-gmail` labels by sender and `org-contacts` deduplicates the senders), prefer to run the foundational skill first:
 
-1. `contacts` before `gmail` (clean people first, then label by person).
+1. `org-contacts` before `org-gmail` (clean people first, then label by person).
 2. `mac` before `google-drive` (local cleanup before pushing changes upstream).
-3. `apple-notes` and `notion` are independent; can run in either order.
+3. `org-apple-notes` and `notion` are independent; can run in either order.
 
-The `life-organizer` skill encodes these dependencies in its recommended sequence.
+The `org-life-organizer` skill encodes these dependencies in its recommended sequence.

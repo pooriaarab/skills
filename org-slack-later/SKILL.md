@@ -1,5 +1,5 @@
 ---
-name: slack-later
+name: org-slack-later
 description: "Use when the user wants to organize their Slack 'Later' / saved-for-later queue (the bookmark/reminder list, In progress / Archived / Completed tabs) — capturing every saved message in full, categorizing it (action items, references, links, reading), mirroring the keepers into a knowledge base (e.g. Notion), and marking saved items complete so the queue clears down. Triggers: 'organize my Slack Later', 'process my Slack saved messages', 'clean up my Slack bookmarks', 'sort my saved-for-later queue'."
 ---
 
@@ -7,13 +7,13 @@ description: "Use when the user wants to organize their Slack 'Later' / saved-fo
 
 Turn the Slack **Later** queue (saved messages / bookmarks) into a categorized, mirrored, cleared-down list: read every saved item in full, sort into action items vs references vs links vs drop, copy the keepers into a durable knowledge base, then mark the saved items complete.
 
-Related but distinct from [`slack-dm`](../slack-dm/SKILL.md) (DM threads + notification tuning). This skill is specifically the **Later / saved queue**.
+Related but distinct from [`org-slack-dm`](../org-slack-dm/SKILL.md) (DM threads + notification tuning). This skill is specifically the **Later / saved queue**.
 
 ## Requirements
 
 - A **logged-in Slack session in an automatable browser** (e.g. an `agent-browser` / Playwright session where the user has completed SSO). This is the reliable path.
 - **Enterprise Grid caveat:** user/bot tokens (`xoxc`/`xoxd`, or a `bookmarks:read` app token) frequently return `invalid_auth` on Grid workspaces, and there is **no public API for the personal "Later" queue** — so browser automation is the practical path. Don't burn time on tokens first; confirm whether the workspace is Grid.
-- A **destination knowledge base** for keepers — e.g. Notion via MCP (see [`../notion/SKILL.md`](../notion/SKILL.md)), Apple Notes, or a markdown vault.
+- A **destination knowledge base** for keepers — e.g. Notion via MCP (see [`../notion/SKILL.md`](../organizer/notion/SKILL.md)), Apple Notes, or a markdown vault.
 - The user completes any **SSO / MFA** login themselves; the agent cannot.
 
 ## Step 1 — Ask the User First
@@ -77,8 +77,8 @@ This skill describes the contract; keep any executable helper (e.g. a capture-an
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../_lib/taxonomy.md) — shared category vocabulary
-- [`../_lib/patterns.md`](../_lib/patterns.md) — dry-run → batch-approve → apply, journaling
-- [`../notion/SKILL.md`](../notion/SKILL.md) — preferred destination for a structured saved-items library
-- [`../slack-dm/SKILL.md`](../slack-dm/SKILL.md) — sibling skill for DM threads + notification tuning
-- [`../../slack-mcp-browser-auth/SKILL.md`](../../slack-mcp-browser-auth/SKILL.md) — browser-session auth for Slack when API tokens fail (Enterprise Grid)
+- [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md) — shared category vocabulary
+- [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md) — dry-run → batch-approve → apply, journaling
+- [`../notion/SKILL.md`](../organizer/notion/SKILL.md) — preferred destination for a structured saved-items library
+- [`../org-slack-dm/SKILL.md`](../org-slack-dm/SKILL.md) — sibling skill for DM threads + notification tuning
+- [`../slack-mcp-browser-auth/SKILL.md`](../slack-mcp-browser-auth/SKILL.md) — browser-session auth for Slack when API tokens fail (Enterprise Grid)
