@@ -44,4 +44,4 @@ Process Instagram saved posts and collections.
 
 - [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
 - [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
-- [`../organizer/notion/SKILL.md`](../organizer/notion/SKILL.md)
+- [`../notion-organizer/SKILL.md`](../notion-organizer/SKILL.md)

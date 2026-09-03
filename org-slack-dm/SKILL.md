@@ -44,4 +44,4 @@ Triage Slack DMs and the Saved Items queue.
 
 - [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
 - [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
-- [`../organizer/notion/SKILL.md`](../organizer/notion/SKILL.md) — destination for saved items worth keeping
+- [`../notion-organizer/SKILL.md`](../notion-organizer/SKILL.md) — destination for saved items worth keeping
