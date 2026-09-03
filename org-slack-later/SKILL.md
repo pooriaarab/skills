@@ -7,7 +7,7 @@ description: "Use when the user wants to organize their Slack 'Later' / saved-fo
 
 Turn the Slack **Later** queue (saved messages / bookmarks) into a categorized, mirrored, cleared-down list: read every saved item in full, sort into action items vs references vs links vs drop, copy the keepers into a durable knowledge base, then mark the saved items complete.
 
-Related but distinct from [`slack-dm`](../org-slack-dm/SKILL.md) (DM threads + notification tuning). This skill is specifically the **Later / saved queue**.
+Related but distinct from [`org-slack-dm`](../org-slack-dm/SKILL.md) (DM threads + notification tuning). This skill is specifically the **Later / saved queue**.
 
 ## Requirements
 
