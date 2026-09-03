@@ -11,46 +11,57 @@ A coordinated set of skills for organizing a person's digital life across every 
 
 ## Directory Layout
 
+Every sub-skill is a top-level `org-<surface>/SKILL.md` — the loader only sees
+top-level `<name>/SKILL.md`, so nothing here can live nested under `organizer/`.
+`organizer/` itself holds only this design doc, the catalog, and three skills
+still pending a naming collision fix (tracked in #325):
+
 ```
 organizer/
 ├── DESIGN.md              ← this file
 ├── README.md              ← catalog of sub-skills (when to use which)
-├── _lib/
-│   ├── taxonomy.md        ← the shared lowercase folder/label convention
-│   └── patterns.md        ← common patterns (dry-run, batch-approve, AppleScript, OAuth)
-├── life-organizer/        ← master skill (survey + dispatch)
-│
-│   # Knowledge / files
-├── apple-notes/           ← iCloud Notes (AppleScript)
-├── notion/                ← Notion (MCP)
-├── google-drive/          ← Drive (gws CLI / Drive API)
-├── mac/                   ← local Mac (Downloads, Desktop, Documents, caches)
-├── browser-bookmarks/     ← Chrome / Arc / Safari bookmarks
-│
-│   # Communication
-├── gmail/                 ← Gmail (gws CLI)
-├── email-subscriptions/   ← unsubscribe pass
-├── imessage/              ← iMessage cleanup
-├── slack-dm/              ← Slack DMs / saved items
-│
-│   # People / time
-├── contacts/              ← Contacts.app (dedupe, group, fill missing fields)
-├── gcal/                  ← Google Calendar
-├── icloud-calendar/       ← iCloud Calendar
-├── apple-reminders/       ← Reminders.app
-│
-│   # Media
-├── icloud-photos/         ← iCloud Photos (albums, faces, recents cleanup)
-├── spotify-playlist/      ← Spotify playlists
-│
-│   # Social
-├── x-bookmarks/           ← X / Twitter bookmarks
-├── linkedin-bookmarks/    ← LinkedIn saved
-├── instagram-saved/       ← Instagram saved
-├── threads-bookmarks/     ← Threads saved
-│
-│   # Code
-└── github/                ← GitHub repos, stars, organization membership
+├── google-drive/          ← Drive (gws CLI / Drive API) — pending rename, see #325
+├── mac/                   ← local Mac (Downloads, Desktop, Documents, caches) — pending rename, see #325
+└── notion/                ← Notion (MCP) — pending rename, see #325
+
+org-life-organizer/        ← master skill (survey + dispatch)
+└── _lib/
+    ├── auth-setup.md      ← one-time CLI auth runbook
+    ├── taxonomy.md        ← the shared lowercase folder/label convention
+    └── patterns.md        ← common patterns (dry-run, batch-approve, AppleScript, OAuth)
+
+# Knowledge / files
+org-apple-notes/           ← iCloud Notes (AppleScript)
+org-browser-bookmarks/     ← Chrome / Arc / Safari bookmarks
+
+# Communication
+org-gmail/                 ← Gmail (gws CLI)
+org-email-subscriptions/   ← unsubscribe pass
+org-imessage/               ← iMessage cleanup
+org-slack-dm/               ← Slack DMs / saved items
+org-slack-later/            ← Slack Later / saved-for-later queue
+
+# People / time
+org-contacts/               ← Contacts.app (dedupe, group, fill missing fields)
+org-google-contacts/        ← Google Contacts (People API)
+org-gcal/                   ← Google Calendar
+org-icloud-calendar/        ← iCloud Calendar
+org-apple-reminders/        ← Reminders.app
+org-gtasks/                 ← Google Tasks
+
+# Media
+org-icloud-photos/          ← iCloud Photos (albums, faces, recents cleanup)
+org-google-photos/          ← Google Photos
+org-spotify-playlist/       ← Spotify playlists
+
+# Social
+org-x-bookmarks/            ← X / Twitter bookmarks
+org-linkedin-bookmarks/     ← LinkedIn saved
+org-instagram-saved/        ← Instagram saved
+org-threads-bookmarks/      ← Threads saved
+
+# Code
+org-github/                 ← GitHub repos, stars, organization membership
 ```
 
 ## Shared Taxonomy
@@ -71,7 +82,7 @@ What it does:
 
 Every organizer sub-skill should:
 
-1. Have frontmatter with `name` and `description` matching the trigger conventions of existing skills (see `notion/SKILL.md`, `gmail/SKILL.md` for reference).
+1. Have frontmatter with `name` and `description` matching the trigger conventions of existing skills (see `org-gmail/SKILL.md` for reference).
 2. Include a **Step 1 — Ask the User These Questions First** section. Wrong assumptions = wrong structure.
 3. Follow **Phase 1 — read-only scan/plan** then **Phase 2 — apply with approval**. No silent destructive writes.
 4. Document a **journal** or **undo** path where the surface allows it (some surfaces — e.g. Notes — only support 30-day Recently Deleted recovery).
@@ -79,12 +90,12 @@ Every organizer sub-skill should:
 
 ## Cross-Surface References
 
-Sub-skills should reference each other via relative paths (`../contacts/SKILL.md`) when one logically depends on another. Examples:
+Sub-skills should reference each other via relative paths (`../org-contacts/SKILL.md`) when one logically depends on another. Examples:
 
-- `gmail/` references `contacts/` (label-by-person works better with clean contacts)
-- `apple-notes/` references `notion/` (use Notion for CRM-style structured data, Notes for prose/snippets)
-- `github/` references `mac/` (local repo cleanup is in mac-organizer)
+- `org-gmail/` references `org-contacts/` (label-by-person works better with clean contacts)
+- `org-apple-notes/` references `notion/` (use Notion for CRM-style structured data, Notes for prose/snippets)
+- `org-github/` references `mac/` (local repo cleanup is in mac-organizer)
 
 ## Maintenance
 
-When adding a new surface, follow the contract above and update both `README.md` and the dispatch sequence in `life-organizer/SKILL.md`.
+When adding a new surface, follow the contract above and update both `README.md` and the dispatch sequence in `org-life-organizer/SKILL.md`.
