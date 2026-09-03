@@ -20,12 +20,13 @@ Ask these questions, **one at a time**, before recommending anything:
 Multi-select. Common options (default = all of "Personal essentials"):
 
 **Personal essentials**
-- [ ] Local Mac (Downloads / Desktop / Documents / caches) → `mac`
+- [ ] Local Mac (Downloads / Desktop / Documents / caches) → `mac-organizer`
 - [ ] Apple Notes (iCloud) → `org-apple-notes`
-- [ ] Notion → `notion`
-- [ ] Google Drive → `google-drive`
+- [ ] Notion → `notion-organizer`
+- [ ] Google Drive → `google-drive-organizer`
 - [ ] Gmail → `org-gmail`
 - [ ] Contacts.app → `org-contacts`
+- [ ] Google Contacts → `org-google-contacts`
 - [ ] Calendars (Google + iCloud) → `org-gcal`, `org-icloud-calendar`
 - [ ] Reminders.app → `org-apple-reminders`
 - [ ] Google Tasks → `org-gtasks`
@@ -38,6 +39,7 @@ Multi-select. Common options (default = all of "Personal essentials"):
 
 **Media**
 - [ ] iCloud Photos → `org-icloud-photos`
+- [ ] Google Photos → `org-google-photos`
 - [ ] Spotify playlists → `org-spotify-playlist`
 
 **Social bookmarks**
@@ -87,30 +89,32 @@ Based on the answers, output a checklist with cross-surface dependencies honored
 ### Default sequence (first-time, all surfaces selected)
 
 ```
-1. mac                     ← clean local first; everything else syncs from here
+1. mac-organizer           ← clean local first; everything else syncs from here
 2. org-contacts            ← clean people foundation; gmail/messages depend on this
-3. org-apple-notes         ← topical organization, no dependencies
-4. notion                  ← independent of Notes
-5. google-drive            ← after local Documents is clean
-6. org-gmail               ← after contacts is clean (label-by-person works better)
-7. org-email-subscriptions ← right after gmail; same surface
-8. org-icloud-calendar + org-gcal  ← independent of others
-9. org-apple-reminders     ← independent
-10. org-github             ← code surfaces last (lower urgency for daily flow)
-11. org-browser-bookmarks  ← after notion (move research-link bookmarks → notion or reference)
-12. org-icloud-photos      ← independent, time-consuming
-13. org-spotify-playlist   ← low priority
-14. org-x-bookmarks / org-linkedin-bookmarks / org-instagram-saved / org-threads-bookmarks  ← review and prune; keep what's actionable, archive the rest
-15. org-imessage / org-slack-dm / org-slack-later  ← cleanup last; slack-later mirrors keepers to notion, then clears the queue
+3. org-google-contacts     ← Google-side counterpart to org-contacts, run either order
+4. org-apple-notes         ← topical organization, no dependencies
+5. notion-organizer        ← independent of Notes
+6. google-drive-organizer  ← after local Documents is clean
+7. org-gmail               ← after contacts is clean (label-by-person works better)
+8. org-email-subscriptions ← right after gmail; same surface
+9. org-icloud-calendar + org-gcal  ← independent of others
+10. org-apple-reminders    ← independent
+11. org-github             ← code surfaces last (lower urgency for daily flow)
+12. org-browser-bookmarks  ← after notion (move research-link bookmarks → notion or reference)
+13. org-icloud-photos      ← independent, time-consuming
+14. org-google-photos      ← independent, time-consuming
+15. org-spotify-playlist   ← low priority
+16. org-x-bookmarks / org-linkedin-bookmarks / org-instagram-saved / org-threads-bookmarks  ← review and prune; keep what's actionable, archive the rest
+17. org-imessage / org-slack-dm / org-slack-later  ← cleanup last; slack-later mirrors keepers to notion, then clears the queue
 ```
 
 ### Maintenance sequence
 
 ```
-1. mac (downloads + desktop only)
+1. mac-organizer (downloads + desktop only)
 2. org-gmail (last 7 days)
 3. org-apple-notes (notes added since last run)
-4. notion (untitled pages)
+4. notion-organizer (untitled pages)
 5. org-browser-bookmarks (last 30 days)
 ```
 
@@ -119,11 +123,12 @@ Based on the answers, output a checklist with cross-surface dependencies honored
 | If you run... | Run this first | Why |
 |---|---|---|
 | `org-gmail` | `org-contacts` | Better person-based labeling |
-| `google-drive` | `mac` | Local cleanup before sync upstream |
+| `google-drive-organizer` | `mac-organizer` | Local cleanup before sync upstream |
 | `org-email-subscriptions` | `org-gmail` | Same surface, do label cleanup first |
-| `org-browser-bookmarks` | `notion` | Bookmarks often belong in Notion as reference |
+| `org-browser-bookmarks` | `notion-organizer` | Bookmarks often belong in Notion as reference |
 | `org-apple-notes` | (none) | Independent |
-| `notion` | (none) | Independent |
+| `notion-organizer` | (none) | Independent |
+| `org-google-contacts` | `org-contacts` | Pick one store as authoritative if synced |
 | `org-github` | (none) | Independent |
 
 ---
@@ -135,7 +140,7 @@ Output to the user:
 ```
 Recommended sequence:
 
-1. Run mac-organizer:       /run mac
+1. Run mac-organizer:       /run mac-organizer
 2. Run org-contacts:        /run org-contacts
 3. Run org-apple-notes:     /run org-apple-notes
    ...
