@@ -206,7 +206,7 @@ Safety:
 
 ## Still open
 
-- Content Rabbit has no warm snapshot. Its repo is not connected to the ascii GitHub app; once it is, seed the snapshot directly from a Box.
+- Content Rabbit has no warm snapshot. The GitHub connection now works (clone in 3.23s), so seed the snapshot directly from a Box.
 - The 49s rsync is untouched. It is the dominant cost by a wide margin. A snapshot that already contains the repo checkout would turn the full sync into a delta. That is the next real win, and it is bigger than the install saving just banked.
 - The shim is not yet wired into `crabbox-attach.sh` for every repo.
 
