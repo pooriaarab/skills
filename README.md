@@ -82,7 +82,7 @@ consent, hashing, deduplication, and failure isolation.
 
 ### Life organization (`org-life-organizer`)
 
-A coordinated suite for organizing across every digital surface — files, notes, mail, calendars, contacts, photos, social bookmarks, code. Run [`org-life-organizer`](org-life-organizer/SKILL.md) first to survey preferences and get a recommended sequence. See [`organizer/README.md`](organizer/README.md) for the full catalog (21 sub-skills) and [`organizer/DESIGN.md`](organizer/DESIGN.md) for architecture.
+A coordinated suite for organizing across every digital surface — files, notes, mail, calendars, contacts, photos, social bookmarks, code. Run [`org-life-organizer`](org-life-organizer/SKILL.md) first to survey preferences and get a recommended sequence. See [`organizer/README.md`](organizer/README.md) for the full catalog (24 sub-skills) and [`organizer/DESIGN.md`](organizer/DESIGN.md) for architecture.
 
 ### CI and runners
 
