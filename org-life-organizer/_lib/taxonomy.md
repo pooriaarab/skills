@@ -58,7 +58,7 @@ Users can swap the default for:
 - **GTD**: Inbox / Next / Waiting / Someday / Reference / Archive
 - **Custom**: any flat list of lowercase categories
 
-The `life-organizer` skill asks the user to pick during its survey phase, then passes the chosen vocabulary to each sub-skill.
+The `org-life-organizer` skill asks the user to pick during its survey phase, then passes the chosen vocabulary to each sub-skill.
 
 ## Adding a category
 

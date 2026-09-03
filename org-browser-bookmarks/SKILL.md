@@ -1,5 +1,5 @@
 ---
-name: browser-bookmarks
+name: org-browser-bookmarks
 description: "Use when the user wants to organize browser bookmarks across Chrome, Arc, or Safari — folder taxonomy, dead-link detection, exporting research bookmarks to Notion/Notes, deduplication, pruning stale bookmarks. Triggers: 'organize my bookmarks', 'too many Safari bookmarks'."
 ---
 
@@ -42,7 +42,7 @@ Organize bookmarks in Chrome, Arc, or Safari.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../_lib/patterns.md)
-- [`../notion/SKILL.md`](../notion/SKILL.md) — destination for research-link bookmarks
-- [`../apple-notes/SKILL.md`](../apple-notes/SKILL.md) — alternative destination for reference URLs
+- [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
+- [`../notion/SKILL.md`](../organizer/notion/SKILL.md) — destination for research-link bookmarks
+- [`../apple-notes/SKILL.md`](../org-apple-notes/SKILL.md) — alternative destination for reference URLs
