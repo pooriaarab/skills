@@ -92,4 +92,4 @@ When two sub-skills can act on overlapping content (e.g. `gmail` labels by sende
 2. `mac` before `google-drive` (local cleanup before pushing changes upstream).
 3. `apple-notes` and `notion` are independent; can run in either order.
 
-The `life-organizer` skill encodes these dependencies in its recommended sequence.
+The `org-life-organizer` skill encodes these dependencies in its recommended sequence.
