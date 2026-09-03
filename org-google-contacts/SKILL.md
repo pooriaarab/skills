@@ -1,13 +1,13 @@
 ---
 name: org-google-contacts
-description: "Use when the user wants to organize Google Contacts (the cloud-side address book behind Gmail autocomplete) — dedupe, missing-field enrichment, contact group / starred curation, tagging-by-relationship. Distinct from the iCloud-side `contacts` skill: Google-only via the People API. Triggers: 'dedupe gmail contacts', 'contact groups in google'."
+description: "Use when the user wants to organize Google Contacts (the cloud-side address book behind Gmail autocomplete) — dedupe, missing-field enrichment, contact group / starred curation, tagging-by-relationship. Distinct from the iCloud-side `org-contacts` skill: Google-only via the People API. Triggers: 'dedupe gmail contacts', 'contact groups in google'."
 ---
 
 # Google Contacts Organizer
 
-Triage Google Contacts via the **People API** — dedupe near-identical entries, fill missing names/emails/phones, and curate contact groups (the People API equivalent of Gmail labels for people). Two-phase plan → approve → apply, mirroring `gmail-organizer`.
+Triage Google Contacts via the **People API** — dedupe near-identical entries, fill missing names/emails/phones, and curate contact groups (the People API equivalent of Gmail labels for people). Two-phase plan → approve → apply, mirroring `org-gmail`.
 
-This skill is the **Google-side** counterpart to `organizer/contacts/` (which handles iCloud Contacts.app). Run them in either order. If the user keeps both stores in sync via [Apple's Add Account → Google](https://support.apple.com/guide/contacts/use-icloud-and-other-internet-accounts-cnt5b08a32a/mac), pick one as authoritative and clean it first.
+This skill is the **Google-side** counterpart to `org-contacts` (which handles iCloud Contacts.app). Run them in either order. If the user keeps both stores in sync via [Apple's Add Account → Google](https://support.apple.com/guide/contacts/use-icloud-and-other-internet-accounts-cnt5b08a32a/mac), pick one as authoritative and clean it first.
 
 ## Requirements
 
@@ -163,7 +163,7 @@ The `.md` file groups proposed merges by confidence so the user can scan a scree
 
 ## Step 3 — Bulk Approval per Cluster Bucket
 
-Same UX as gmail-organizer: present each bucket with one prompt.
+Same UX as org-gmail: present each bucket with one prompt.
 
 ```
 High-confidence merges: 47 clusters → 47 merges, ~98 contacts collapsing to 47.
@@ -211,12 +211,12 @@ Gmail's autocomplete continuously adds entries as you correspond with new addres
 
 ## Cross-surface coordination
 
-When run alongside `gmail-organizer`:
+When run alongside `org-gmail`:
 
 1. **Contacts before Gmail.** Cleaning people first means Gmail's "label by sender" can use canonical contact identities instead of stray email addresses (`john@x.com` and `john.smith@x.com` get the same label).
 2. **Use contact groups as Gmail label hints.** If a contact is in the `family` group, the Gmail apply phase can route their messages to a `personal/family` label without re-classification.
 
-When run alongside `organizer/contacts/` (iCloud):
+When run alongside `org-contacts` (iCloud):
 
 - Pick one store as authoritative. Don't run both deep-cleans simultaneously — iCloud↔Google sync will fight you.
 - A single canonical "Jane Doe" contact in Google should match the canonical "Jane Doe" in iCloud. The reconciliation logic lives in the iCloud skill (it has access to both stores via the OS).
@@ -248,7 +248,7 @@ When run alongside `organizer/contacts/` (iCloud):
 - **Refuse to apply** if the active account doesn't match the plan's `account` field.
 - **Never bulk-delete without journal.** Every delete is journaled with the full pre-delete contact, so accidental losses can be recreated within 30 days even after Trash auto-purges.
 - **Never auto-merge medium-confidence clusters by default.** Only exact email or exact phone matches are safe to auto-merge.
-- **Name-match guard on within-store dedupe.** Even with exact phone matches, require all members of a cluster to share the same normalized name (or have empty name). Without this, transitive unionfind contaminates: a stale card with a relative's phone clusters two different people. See `organizer/contacts/SKILL.md` Step 3 for details.
+- **Name-match guard on within-store dedupe.** Even with exact phone matches, require all members of a cluster to share the same normalized name (or have empty name). Without this, transitive unionfind contaminates: a stale card with a relative's phone clusters two different people. See `org-contacts/SKILL.md` Step 3 for details.
 - **Phone normalization to last-10-digits** before clustering. The dominant duplicate pattern is the same number stored in international (`+CC NNN ...`), domestic-prefix (`00CCNNN...`), and local (`(NNN) NNN-NNNN`) formats; normalization collapses them.
 - **Add-only enrichment.** Cross-store enrichment (Google ↔ iCloud) only adds missing fields. Notes get appended with a `\n\n---\n\n` separator, after a whitespace-and-separator-insensitive substring check that prevents double-adding already-synced content.
 - **Stub deletes (no name, no phone, only an auto-collected email) are reversible** because they go to Trash, but always show the user the count first.

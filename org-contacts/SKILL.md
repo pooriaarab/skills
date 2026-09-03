@@ -5,13 +5,13 @@ description: "Use when the user wants to organize, dedupe, or clean up Contacts.
 
 # Contacts Organizer
 
-Clean up Contacts.app via AppleScript. Pairs with `organizer/google-contacts/`. Run them as **one coordinated pass** — running them independently is risky because iCloud↔Google sync (Apple "Internet Accounts" → Google) propagates deletions across stores.
+Clean up Contacts.app via AppleScript. Pairs with `org-google-contacts`. Run them as **one coordinated pass** — running them independently is risky because iCloud↔Google sync (Apple "Internet Accounts" → Google) propagates deletions across stores.
 
 ## Requirements
 
 - macOS Contacts.app with iCloud Contacts enabled. Contacts.app must be **running** before any AppleScript invocation, or you get error `-600 Application isn't running`. Always `open -a Contacts && sleep 1` first.
 - Automation access to Contacts (system prompt on first call).
-- For cross-store coordination: the `gog` CLI authenticated against the user's Google account — see `organizer/google-contacts/SKILL.md`.
+- For cross-store coordination: the `gog` CLI authenticated against the user's Google account — see `org-google-contacts/SKILL.md`.
 
 ## Step 1 — Ask the User First
 
@@ -104,14 +104,14 @@ In practice this yields modest deltas (~10-20 contacts gain real data; the rest 
 
 ## Cross-surface
 
-Run alongside `organizer/google-contacts/`. **Pick one as authoritative** — bidirectional sync propagates deletions ~5 minutes after they happen on the other side, which throws off mid-run merge plans. The pragmatic workflow:
+Run alongside `org-google-contacts`. **Pick one as authoritative** — bidirectional sync propagates deletions ~5 minutes after they happen on the other side, which throws off mid-run merge plans. The pragmatic workflow:
 
 1. Dedupe Google (faster, atomic API).
 2. Wait ~5 min for sync, OR re-pull iCloud after.
 3. Run iCloud-only dedupe on whatever's left.
 4. Cross-store enrichment last (after both sides are clean).
 
-Run **before** `organizer/gmail/` and `organizer/apple-notes/people/`. Clean contacts → cleaner Gmail labels → tighter Notes person-tracking.
+Run **before** `org-gmail` and `org-apple-notes` (the "people" section). Clean contacts → cleaner Gmail labels → tighter Notes person-tracking.
 
 ## Common Failures
 

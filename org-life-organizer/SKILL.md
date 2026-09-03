@@ -21,34 +21,34 @@ Multi-select. Common options (default = all of "Personal essentials"):
 
 **Personal essentials**
 - [ ] Local Mac (Downloads / Desktop / Documents / caches) → `mac`
-- [ ] Apple Notes (iCloud) → `apple-notes`
+- [ ] Apple Notes (iCloud) → `org-apple-notes`
 - [ ] Notion → `notion`
 - [ ] Google Drive → `google-drive`
-- [ ] Gmail → `gmail`
-- [ ] Contacts.app → `contacts`
-- [ ] Calendars (Google + iCloud) → `gcal`, `icloud-calendar`
-- [ ] Reminders.app → `apple-reminders`
-- [ ] Google Tasks → `gtasks`
+- [ ] Gmail → `org-gmail`
+- [ ] Contacts.app → `org-contacts`
+- [ ] Calendars (Google + iCloud) → `org-gcal`, `org-icloud-calendar`
+- [ ] Reminders.app → `org-apple-reminders`
+- [ ] Google Tasks → `org-gtasks`
 
 **Communication**
-- [ ] iMessage → `imessage`
-- [ ] Slack DMs → `slack-dm`
-- [ ] Slack Later / saved messages → `slack-later`
-- [ ] Email subscriptions / unsubscribe pass → `email-subscriptions`
+- [ ] iMessage → `org-imessage`
+- [ ] Slack DMs → `org-slack-dm`
+- [ ] Slack Later / saved messages → `org-slack-later`
+- [ ] Email subscriptions / unsubscribe pass → `org-email-subscriptions`
 
 **Media**
-- [ ] iCloud Photos → `icloud-photos`
-- [ ] Spotify playlists → `spotify-playlist`
+- [ ] iCloud Photos → `org-icloud-photos`
+- [ ] Spotify playlists → `org-spotify-playlist`
 
 **Social bookmarks**
-- [ ] X / Twitter → `x-bookmarks`
-- [ ] LinkedIn → `linkedin-bookmarks`
-- [ ] Instagram → `instagram-saved`
-- [ ] Threads → `threads-bookmarks`
+- [ ] X / Twitter → `org-x-bookmarks`
+- [ ] LinkedIn → `org-linkedin-bookmarks`
+- [ ] Instagram → `org-instagram-saved`
+- [ ] Threads → `org-threads-bookmarks`
 
 **Code**
-- [ ] GitHub repos / stars / orgs → `github`
-- [ ] Browser bookmarks (Chrome / Arc / Safari) → `browser-bookmarks`
+- [ ] GitHub repos / stars / orgs → `org-github`
+- [ ] Browser bookmarks (Chrome / Arc / Safari) → `org-browser-bookmarks`
 
 ### Q2. Work / personal split?
 
@@ -87,44 +87,44 @@ Based on the answers, output a checklist with cross-surface dependencies honored
 ### Default sequence (first-time, all surfaces selected)
 
 ```
-1. mac                 ← clean local first; everything else syncs from here
-2. contacts            ← clean people foundation; gmail/messages depend on this
-3. apple-notes         ← topical organization, no dependencies
-4. notion              ← independent of Notes
-5. google-drive        ← after local Documents is clean
-6. gmail               ← after contacts is clean (label-by-person works better)
-7. email-subscriptions ← right after gmail; same surface
-8. icloud-calendar + gcal  ← independent of others
-9. apple-reminders     ← independent
-10. github             ← code surfaces last (lower urgency for daily flow)
-11. browser-bookmarks  ← after notion (move research-link bookmarks → notion or reference)
-12. icloud-photos      ← independent, time-consuming
-13. spotify-playlist   ← low priority
-14. x/linkedin/instagram/threads bookmarks  ← review and prune; keep what's actionable, archive the rest
-15. imessage / slack-dm / slack-later  ← cleanup last; slack-later mirrors keepers to notion, then clears the queue
+1. mac                     ← clean local first; everything else syncs from here
+2. org-contacts            ← clean people foundation; gmail/messages depend on this
+3. org-apple-notes         ← topical organization, no dependencies
+4. notion                  ← independent of Notes
+5. google-drive            ← after local Documents is clean
+6. org-gmail               ← after contacts is clean (label-by-person works better)
+7. org-email-subscriptions ← right after gmail; same surface
+8. org-icloud-calendar + org-gcal  ← independent of others
+9. org-apple-reminders     ← independent
+10. org-github             ← code surfaces last (lower urgency for daily flow)
+11. org-browser-bookmarks  ← after notion (move research-link bookmarks → notion or reference)
+12. org-icloud-photos      ← independent, time-consuming
+13. org-spotify-playlist   ← low priority
+14. org-x-bookmarks / org-linkedin-bookmarks / org-instagram-saved / org-threads-bookmarks  ← review and prune; keep what's actionable, archive the rest
+15. org-imessage / org-slack-dm / org-slack-later  ← cleanup last; slack-later mirrors keepers to notion, then clears the queue
 ```
 
 ### Maintenance sequence
 
 ```
 1. mac (downloads + desktop only)
-2. gmail (last 7 days)
-3. apple-notes (notes added since last run)
+2. org-gmail (last 7 days)
+3. org-apple-notes (notes added since last run)
 4. notion (untitled pages)
-5. browser-bookmarks (last 30 days)
+5. org-browser-bookmarks (last 30 days)
 ```
 
 ### Dependencies to honor
 
 | If you run... | Run this first | Why |
 |---|---|---|
-| `gmail` | `contacts` | Better person-based labeling |
+| `org-gmail` | `org-contacts` | Better person-based labeling |
 | `google-drive` | `mac` | Local cleanup before sync upstream |
-| `email-subscriptions` | `gmail` | Same surface, do label cleanup first |
-| `browser-bookmarks` | `notion` | Bookmarks often belong in Notion as reference |
-| `apple-notes` | (none) | Independent |
+| `org-email-subscriptions` | `org-gmail` | Same surface, do label cleanup first |
+| `org-browser-bookmarks` | `notion` | Bookmarks often belong in Notion as reference |
+| `org-apple-notes` | (none) | Independent |
 | `notion` | (none) | Independent |
-| `github` | (none) | Independent |
+| `org-github` | (none) | Independent |
 
 ---
 
@@ -136,8 +136,8 @@ Output to the user:
 Recommended sequence:
 
 1. Run mac-organizer:       /run mac
-2. Run contacts:            /run contacts
-3. Run apple-notes:         /run apple-notes
+2. Run org-contacts:        /run org-contacts
+3. Run org-apple-notes:     /run org-apple-notes
    ...
 ```
 

@@ -191,7 +191,7 @@ Changes made via osxphotos / AppleScript are local-Mac-only at first; iCloud Pho
 
 - **Never delete from the source library on the first pass.** Path A reorganizes a *copy*. Path B uses Trash (30-day Photos.app trash window). Original library stays intact until the user explicitly approves cleanup.
 - **Tag every artifact with the email.** Plans, journals, dedupe reports — all per-account.
-- **Journal before mutating.** Same pattern as gmail-organizer: append the intent record before each delete/move/album-edit.
+- **Journal before mutating.** Same pattern as org-gmail: append the intent record before each delete/move/album-edit.
 - **Disk-space pre-check.** Path A needs ≥1.5× library size free. Refuse to start if not.
 - **Don't run while Photos.app is open.** Path B's SQLite reads will hit lock contention; close Photos.app first.
 

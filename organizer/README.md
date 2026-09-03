@@ -46,7 +46,7 @@ See [`_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md) for the categor
 
 ## Adding a new sub-skill
 
-1. Create `organizer/<surface>/SKILL.md` with frontmatter (`name`, `description`).
+1. Create `org-<surface>/SKILL.md` at the repo root, with frontmatter `name: org-<surface>` matching the directory (the loader only sees top-level `<name>/SKILL.md`).
 2. Follow the [sub-skill contract in DESIGN.md](DESIGN.md#sub-skill-contract).
 3. Update this README's table.
 4. Add a dispatch entry in [`life-organizer/SKILL.md`](../org-life-organizer/SKILL.md).
