@@ -444,7 +444,7 @@ Include `size` in your `fields` param: `"fields": "nextPageToken,files(id,name,m
 
 | Pattern | Action |
 |---------|--------|
-| `Feb 2025 <Program> 5x5 Advanced \| <Site>.com` | LiftVault.com` | → `Feb 2025 Workout Log` |
+| `Feb 2025 <Program> 5x5 Advanced \| <Site>.com` | → `Feb 2025 Workout Log` |
 | `results-20241123-220704` | Leave as-is inside `bigquery-exports/` sub-folder |
 | `https://blog.example.com/slug-2026-05-05` | → `Blog Performance May 2026` |
 | `Copy of Resume - <Name> (Nov 2025).docx` | → `Resume - <Name> Nov 2025 v2.docx` |
