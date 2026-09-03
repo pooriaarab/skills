@@ -1,5 +1,5 @@
 ---
-name: spotify-playlist
+name: org-spotify-playlist
 description: "Use when the user wants to organize Spotify playlists — consolidating duplicates, sorting tracks within playlists, identifying playlists with no plays in N months, deleting empty/redundant playlists, and aligning naming conventions. Triggers: 'clean up Spotify', 'too many playlists'."
 ---
 
@@ -43,5 +43,5 @@ Clean up the user's Spotify playlist library via the Spotify Web API.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../../org-life-organizer/_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../../org-life-organizer/_lib/patterns.md)
+- [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)

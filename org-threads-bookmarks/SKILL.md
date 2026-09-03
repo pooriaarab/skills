@@ -1,5 +1,5 @@
 ---
-name: threads-bookmarks
+name: org-threads-bookmarks
 description: "Use when the user wants to organize Threads saved posts — exporting to Notion or Notes reference, categorizing, and pruning the saved queue. Triggers: 'clean up Threads bookmarks'."
 ---
 
@@ -39,7 +39,7 @@ Process Threads saved posts.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../../org-life-organizer/_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../../org-life-organizer/_lib/patterns.md)
-- [`../notion/SKILL.md`](../notion/SKILL.md)
-- [`../instagram-saved/SKILL.md`](../instagram-saved/SKILL.md) — shares Meta auth
+- [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
+- [`../notion/SKILL.md`](../organizer/notion/SKILL.md)
+- [`../instagram-saved/SKILL.md`](../org-instagram-saved/SKILL.md) — shares Meta auth

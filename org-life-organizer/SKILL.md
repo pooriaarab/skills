@@ -20,8 +20,8 @@ Ask these questions, **one at a time**, before recommending anything:
 Multi-select. Common options (default = all of "Personal essentials"):
 
 Names prefixed `org-` are top-level, independently loadable skills. Bare names
-(`mac`, `notion`, `google-drive`, `apple-reminders`, `gtasks`, `icloud-calendar`,
-`icloud-photos`, `spotify-playlist`, `github`, and the social-bookmark skills)
+(`mac`, `notion`, `google-drive`, `org-apple-reminders`, `org-gtasks`, `org-icloud-calendar`,
+`org-icloud-photos`, `org-spotify-playlist`, `org-github`, and the social-bookmark skills)
 are still nested under `organizer/<surface>/SKILL.md` pending the second half
 of the flatten — invoke them by that full path.
 
@@ -32,9 +32,9 @@ of the flatten — invoke them by that full path.
 - [ ] Google Drive → `google-drive`
 - [ ] Gmail → `org-gmail`
 - [ ] Contacts.app → `org-contacts`
-- [ ] Calendars (Google + iCloud) → `org-gcal`, `icloud-calendar`
-- [ ] Reminders.app → `apple-reminders`
-- [ ] Google Tasks → `gtasks`
+- [ ] Calendars (Google + iCloud) → `org-gcal`, `org-icloud-calendar`
+- [ ] Reminders.app → `org-apple-reminders`
+- [ ] Google Tasks → `org-gtasks`
 
 **Communication**
 - [ ] iMessage → `org-imessage`
@@ -43,17 +43,17 @@ of the flatten — invoke them by that full path.
 - [ ] Email subscriptions / unsubscribe pass → `org-email-subscriptions`
 
 **Media**
-- [ ] iCloud Photos → `icloud-photos`
-- [ ] Spotify playlists → `spotify-playlist`
+- [ ] iCloud Photos → `org-icloud-photos`
+- [ ] Spotify playlists → `org-spotify-playlist`
 
 **Social bookmarks**
-- [ ] X / Twitter → `x-bookmarks`
-- [ ] LinkedIn → `linkedin-bookmarks`
-- [ ] Instagram → `instagram-saved`
-- [ ] Threads → `threads-bookmarks`
+- [ ] X / Twitter → `org-x-bookmarks`
+- [ ] LinkedIn → `org-linkedin-bookmarks`
+- [ ] Instagram → `org-instagram-saved`
+- [ ] Threads → `org-threads-bookmarks`
 
 **Code**
-- [ ] GitHub repos / stars / orgs → `github`
+- [ ] GitHub repos / stars / orgs → `org-github`
 - [ ] Browser bookmarks (Chrome / Arc / Safari) → `org-browser-bookmarks`
 
 ### Q2. Work / personal split?
@@ -130,7 +130,7 @@ Based on the answers, output a checklist with cross-surface dependencies honored
 | `org-browser-bookmarks` | `notion` | Bookmarks often belong in Notion as reference |
 | `org-apple-notes` | (none) | Independent |
 | `notion` | (none) | Independent |
-| `github` | (none) | Independent |
+| `org-github` | (none) | Independent |
 
 ---
 

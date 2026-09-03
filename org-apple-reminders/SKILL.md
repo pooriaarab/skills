@@ -1,5 +1,5 @@
 ---
-name: apple-reminders
+name: org-apple-reminders
 description: "Use when the user wants to organize Apple Reminders — pruning completed lists, archiving stale recurring tasks, consolidating duplicate lists, aligning with the organizer taxonomy. Triggers: 'clean up Reminders', 'my reminders are a mess'."
 ---
 
@@ -40,5 +40,5 @@ Clean up Reminders.app via AppleScript / EventKit.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../../org-life-organizer/_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../../org-life-organizer/_lib/patterns.md)
+- [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)

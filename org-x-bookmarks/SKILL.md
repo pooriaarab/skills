@@ -1,5 +1,5 @@
 ---
-name: x-bookmarks
+name: org-x-bookmarks
 description: "Use when the user wants to organize X / Twitter bookmarks — exporting them to a structured destination (Notion, Notes reference), categorizing by topic, identifying actionable vs reference content, and pruning the bookmark queue back to a manageable size. Triggers: 'organize Twitter bookmarks', 'process X saved'."
 ---
 
@@ -119,6 +119,6 @@ It gracefully no-ops until `setup` has been run.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../../org-life-organizer/_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../../org-life-organizer/_lib/patterns.md)
-- [`../notion/SKILL.md`](../notion/SKILL.md) — preferred destination for structured bookmark library
+- [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
+- [`../notion/SKILL.md`](../organizer/notion/SKILL.md) — preferred destination for structured bookmark library

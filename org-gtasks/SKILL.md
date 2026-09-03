@@ -1,5 +1,5 @@
 ---
-name: gtasks
+name: org-gtasks
 description: "Use when the user wants to organize Google Tasks — pruning completed items, consolidating task lists, surfacing stale recurring tasks, aligning with the organizer taxonomy. Triggers: 'organize Google Tasks', 'my Google Tasks is a mess'."
 ---
 
@@ -42,8 +42,8 @@ Clean up Google Tasks via `gog` CLI.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../../org-life-organizer/_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../../org-life-organizer/_lib/patterns.md)
-- [`../apple-reminders/SKILL.md`](../apple-reminders/SKILL.md) — Apple counterpart; coordinate
-- [`../gmail/SKILL.md`](../../org-gmail/SKILL.md) — also uses `gog`; shares auth
-- [`../gcal/SKILL.md`](../../org-gcal/SKILL.md) — also uses `gog`; shares auth
+- [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
+- [`../apple-reminders/SKILL.md`](../org-apple-reminders/SKILL.md) — Apple counterpart; coordinate
+- [`../gmail/SKILL.md`](../org-gmail/SKILL.md) — also uses `gog`; shares auth
+- [`../gcal/SKILL.md`](../org-gcal/SKILL.md) — also uses `gog`; shares auth
