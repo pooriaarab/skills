@@ -24,23 +24,33 @@ Read branch and path for each entry.
 For each linked worktree, check its branch.
 Treat a branch as merged when any test passes:
 
-- The branch appears in `git branch --merged` against origin/main.
-- Its PR state reads merged.
-- Its PR shows a merge timestamp.
+- The branch appears in `git branch --merged` against the repo's default
+  branch (usually `origin/main`; confirm it rather than assuming `main` when
+  the repo uses something else, e.g. `master` or `release`).
+- Its PR state reads merged, and the PR's merged head SHA matches the
+  branch's current tip (or the tip is an ancestor of that merge commit).
+- Its PR shows a merge timestamp, with the same tip check.
 
 A PR closed without merging is not merge evidence. Treat "closed" alone as no
-evidence, the same as no PR at all.
+evidence, the same as no PR at all. A merged PR whose head SHA predates the
+branch's current tip is also not evidence for the current tip: commits pushed
+after the merge are unmerged work, so re-check ancestry against the current
+tip before treating the worktree as safe to remove.
 
 Skip branches with no merge evidence.
 Never guess merge state.
 
 ## Check cleanliness
 
-Read worktree status.
+Read worktree status, including ignored files (`git status --porcelain
+--ignored`). A plain status without `--ignored` misses ignored-but-uncommitted
+files, such as a `.env.local` a repo's own `.gitignore` already hides, and
+treating that empty output as clean would delete them unreviewed.
 Treat empty status output as clean.
 Treat status with only scratch files as clean.
-Scratch files are WORKER_BRIEF.md, CONTINUE.md, and BRIEF.md.
-Treat any other uncommitted change as real.
+Scratch files are WORKER_BRIEF.md, CONTINUE.md, BRIEF.md, and
+WORKER_RESULT.md.
+Treat any other uncommitted or ignored file as real.
 
 ## Remove safe worktrees
 
@@ -56,11 +66,15 @@ Report each removal.
 ## Salvage real changes
 
 Never delete a worktree with real uncommitted changes.
-Before committing, scan the changed files for likely secrets: names like
-`.env*`, `*.pem`, `*_key`, `*credentials*`, `*secret*`, and any file already
-covered by the repo's own `.gitignore`. If any match, stop, leave the
-worktree untouched, and report it as needs-review with the suspect paths
-instead of committing or pushing.
+Ignored files never get committed or pushed here: they're excluded on
+purpose (often secrets or local config), so their mere presence is
+needs-review — leave the worktree untouched rather than force-adding them.
+Before committing what remains, scan both file names and file contents for
+likely secrets: names like `.env*`, `*.pem`, `*_key`, `*credentials*`,
+`*secret*`; and content patterns like API keys, private-key headers, bearer
+tokens, and connection strings with embedded passwords. If any match, stop,
+leave the worktree untouched, and report it as needs-review with the suspect
+paths instead of committing or pushing.
 Otherwise commit those changes to a salvage branch.
 Push the salvage branch.
 Then report the worktree as needs-review.
