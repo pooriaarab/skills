@@ -14,7 +14,7 @@ Run [`org-life-organizer`](../org-life-organizer/SKILL.md) — it surveys your p
 |---|---|---|
 | [`org-life-organizer`](../org-life-organizer/SKILL.md) | meta — survey + dispatch | "organize my life", "where do I start" |
 | [`org-gmail`](../org-gmail/SKILL.md) | Gmail (gws CLI / Gmail API) | "organize my gmail", "inbox zero" |
-| [`notion`](notion/SKILL.md) | Notion (MCP) | "organize my Notion", "clean up workspace" |
+| [`notion-organizer`](../notion-organizer/SKILL.md) | Notion (MCP) | "organize my Notion", "clean up workspace" |
 | [`google-drive`](google-drive/SKILL.md) | Google Drive (gws / Drive API) | "organize my Drive" |
 | [`mac`](mac/SKILL.md) | local macOS (Downloads / Desktop / Documents / caches) | "free up disk", "clean my Mac" |
 | [`org-apple-notes`](../org-apple-notes/SKILL.md) | iCloud Notes (AppleScript) | "organize my Notes", "clean up Apple Notes" |

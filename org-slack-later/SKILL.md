@@ -13,7 +13,7 @@ Related but distinct from [`org-slack-dm`](../org-slack-dm/SKILL.md) (DM threads
 
 - A **logged-in Slack session in an automatable browser** (e.g. an `agent-browser` / Playwright session where the user has completed SSO). This is the reliable path.
 - **Enterprise Grid caveat:** user/bot tokens (`xoxc`/`xoxd`, or a `bookmarks:read` app token) frequently return `invalid_auth` on Grid workspaces, and there is **no public API for the personal "Later" queue** — so browser automation is the practical path. Don't burn time on tokens first; confirm whether the workspace is Grid.
-- A **destination knowledge base** for keepers — e.g. Notion via MCP (see [`../organizer/notion/SKILL.md`](../organizer/notion/SKILL.md)), Apple Notes, or a markdown vault.
+- A **destination knowledge base** for keepers — e.g. Notion via MCP (see [`../notion-organizer/SKILL.md`](../notion-organizer/SKILL.md)), Apple Notes, or a markdown vault.
 - The user completes any **SSO / MFA** login themselves; the agent cannot.
 
 ## Step 1 — Ask the User First
@@ -79,6 +79,6 @@ This skill describes the contract; keep any executable helper (e.g. a capture-an
 
 - [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md) — shared category vocabulary
 - [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md) — dry-run → batch-approve → apply, journaling
-- [`../organizer/notion/SKILL.md`](../organizer/notion/SKILL.md) — preferred destination for a structured saved-items library
+- [`../notion-organizer/SKILL.md`](../notion-organizer/SKILL.md) — preferred destination for a structured saved-items library
 - [`../org-slack-dm/SKILL.md`](../org-slack-dm/SKILL.md) — sibling skill for DM threads + notification tuning
 - [`../slack-mcp-browser-auth/SKILL.md`](../slack-mcp-browser-auth/SKILL.md) — browser-session auth for Slack when API tokens fail (Enterprise Grid)

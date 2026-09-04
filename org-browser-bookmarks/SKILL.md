@@ -44,5 +44,5 @@ Organize bookmarks in Chrome, Arc, or Safari.
 
 - [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
 - [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
-- [`../organizer/notion/SKILL.md`](../organizer/notion/SKILL.md) — destination for research-link bookmarks
+- [`../notion-organizer/SKILL.md`](../notion-organizer/SKILL.md) — destination for research-link bookmarks
 - [`../org-apple-notes/SKILL.md`](../org-apple-notes/SKILL.md) — alternative destination for reference URLs

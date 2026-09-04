@@ -291,4 +291,4 @@ The 3 sub-folders + parent appear together in iOS/macOS Notes UI. Useful for kee
 
 - [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md) — shared default taxonomy
 - [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md) — patterns reused across sub-skills (especially "AppleScript Helpers")
-- [`../organizer/notion/SKILL.md`](../organizer/notion/SKILL.md) — for CRM-style structured data, prefer Notion over Notes
+- [`../notion-organizer/SKILL.md`](../notion-organizer/SKILL.md) — for CRM-style structured data, prefer Notion over Notes
