@@ -216,9 +216,10 @@ flow = InstalledAppFlow.from_client_secrets_file("client_secret.json",
 creds = flow.run_local_server(port=0)
 import os; os.makedirs(os.path.expanduser("~/.config/drive-personal"), exist_ok=True)
 token_file = os.path.expanduser("~/.config/drive-personal/token.json")
-tmp_file = token_file + ".tmp"
+tmp_file = f"{token_file}.{os.getpid()}.tmp"  # per-process name — avoids concurrent subagents colliding on one tmp path
 with open(tmp_file, "w") as f:
     f.write(creds.to_json())
+os.chmod(tmp_file, 0o600)  # token carries full-Drive-scope refresh creds — keep off-umask
 os.replace(tmp_file, token_file)  # atomic — avoids torn reads from concurrent subagents
 print("Saved token.json")
 ```
@@ -240,8 +241,9 @@ def get_service(token_file=TOKEN_FILE):
     creds = Credentials.from_authorized_user_info(td, td["scopes"])
     if not creds.valid:
         creds.refresh(Request())
-        tmp_file = token_file + ".tmp"
+        tmp_file = f"{token_file}.{os.getpid()}.tmp"  # per-process name — avoids concurrent subagents colliding on one tmp path
         with open(tmp_file, "w") as f: f.write(creds.to_json())
+        os.chmod(tmp_file, 0o600)  # token carries full-Drive-scope refresh creds — keep off-umask
         os.replace(tmp_file, token_file)  # atomic — avoids torn reads from concurrent subagents
     authed_http = google_auth_httplib2.AuthorizedHttp(creds, http=httplib2.Http(timeout=30))
     return build("drive", "v3", http=authed_http, cache_discovery=False)
@@ -250,7 +252,7 @@ EXPORT_MIME = {"application/vnd.google-apps.document": "text/plain",
                "application/vnd.google-apps.spreadsheet": "text/csv",
                "application/vnd.google-apps.presentation": "text/plain"}
 
-def read_file_content(svc, file_id, mime, max_chars=2000):
+def read_file_content(svc, file_id, mime, max_chars=3000):
     """Read Google Doc/Sheet/Slide content as plain text. Returns None on read failure (distinct from a genuinely empty file)."""
     export_mime = EXPORT_MIME.get(mime)
     if not export_mime: return ""
@@ -271,12 +273,14 @@ def read_file_content(svc, file_id, mime, max_chars=2000):
 def classify_with_openai(svc, file_id, name, mime, valid_folders, api_key):
     import urllib.request
     content = read_file_content(svc, file_id, mime)
+    if content is None:
+        return None, name  # read failed — unverifiable, leave file where it is (don't guess _inbox)
     if not content:
         return "_inbox", name  # empty doc → inbox
 
     prompt = f"""Classify this Google Drive document and suggest a short descriptive name.
 Current name: "{name}"
-Content: {content[:2000]}
+Content: {content[:3000]}
 Valid folders: {', '.join(valid_folders)}
 Reply JSON: {{"folder": "<folder>", "name": "<descriptive name max 60 chars>"}}"""
 
