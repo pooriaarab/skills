@@ -189,7 +189,8 @@ import pdfplumber, os, re
 # them bare threw away correct answers.
 REJECT = re.compile(r"i'?m\s|i\s+can(?:'?t|not)\b|sorry|apolog|unable\s+to|"
                     r"as\s+an\s+|please\s+(?:note|provide)|i\s+must\b|"
-                    r"here'?s\s|cannot\s+(?:provide|assist|help)", re.I)
+                    r"here'?s\s|cannot\s+(?:provide|assist|help)|"
+                    r"error\s*code\s*\d+|context\s*window\s*(?:is\s*)?exceeded", re.I)
 BANNED = {'text','what','invoice','receipt','document','filename','slug','vendor',
           'merchant','company','date','unknown','none','yyyy','mm','dd'}
 
@@ -247,12 +248,15 @@ MON = {m: f"{i:02d}" for i, m in enumerate(
     "january february march april may june july august september october november december".split(), 1)}
 
 def ym(t):  # -> 'YYYY-MM'
-    m = (re.search(r'Date of issue\s+([A-Za-z]+)\s+\d{1,2},?\s+(\d{4})', t)
-         or re.search(r'\b([A-Za-z]+)\s+\d{1,2},\s+(\d{4})', t))
+    # Labeled dates only -- an unlabeled fallback would grab the first
+    # month-day-year in the doc (a service period, a due date) instead of
+    # the invoice date. No match here means "keep original", which is safe.
+    m = re.search(r'(?:Date of issue|Invoice date|Date issued)\s*:?\s+'
+                  r'([A-Za-z]+)\s+\d{1,2},?\s+(\d{4})', t, re.I)
     return f"{m.group(2)}-{MON[m.group(1).lower()]}" if m and m.group(1).lower() in MON else None
 
 def vendor(t):
-    m = (re.search(r'^Invoice\s+(.+?)\s+Invoice number', t)
+    m = (re.search(r'^Invoice\s+(.+?)\s+Invoice number', t, re.S)
          or re.search(r'\b([A-Z][A-Za-z0-9&.\- ]{2,40}?(?:GmbH|Inc|LLC|Ltd|Corp))\b', t))
     return re.sub(r'[^a-z0-9]+', '-', m.group(1).lower()).strip('-')[:30] if m else None
 
