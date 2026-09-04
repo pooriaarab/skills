@@ -77,7 +77,10 @@ leave the worktree untouched, and report it as needs-review with the suspect
 paths instead of committing or pushing.
 Otherwise commit those changes to a salvage branch.
 Push the salvage branch.
-Then report the worktree as needs-review.
+Once the push succeeds, the changes live on the remote, so remove the
+worktree the same way as a clean one. Report it under needs-review, not
+removed, naming the salvage branch: the directory is gone, but the salvaged
+commit still needs a human to look at it and decide what to do with it.
 
 ## Safety rule
 
