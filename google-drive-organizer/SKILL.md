@@ -214,12 +214,15 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 flow = InstalledAppFlow.from_client_secrets_file("client_secret.json",
     scopes=["https://www.googleapis.com/auth/drive"])
 creds = flow.run_local_server(port=0)
-import os; os.makedirs(os.path.expanduser("~/.config/drive-personal"), exist_ok=True)
+import os; os.makedirs(os.path.expanduser("~/.config/drive-personal"), mode=0o700, exist_ok=True)
 token_file = os.path.expanduser("~/.config/drive-personal/token.json")
 tmp_file = f"{token_file}.{os.getpid()}.tmp"  # per-process name — avoids concurrent subagents colliding on one tmp path
-with open(tmp_file, "w") as f:
+# 0o600 at CREATION, not a chmod after: open(...,"w") makes the file at the
+# process umask (0644 by default), so the refresh token is world-readable for
+# the moment between create and chmod.
+fd = os.open(tmp_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+with os.fdopen(fd, "w") as f:
     f.write(creds.to_json())
-os.chmod(tmp_file, 0o600)  # token carries full-Drive-scope refresh creds — keep off-umask
 os.replace(tmp_file, token_file)  # atomic — avoids torn reads from concurrent subagents
 print("Saved token.json")
 ```
@@ -242,8 +245,9 @@ def get_service(token_file=TOKEN_FILE):
     if not creds.valid:
         creds.refresh(Request())
         tmp_file = f"{token_file}.{os.getpid()}.tmp"  # per-process name — avoids concurrent subagents colliding on one tmp path
-        with open(tmp_file, "w") as f: f.write(creds.to_json())
-        os.chmod(tmp_file, 0o600)  # token carries full-Drive-scope refresh creds — keep off-umask
+        # Same 0o600-at-creation rule as the initial write.
+        fd = os.open(tmp_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w") as f: f.write(creds.to_json())
         os.replace(tmp_file, token_file)  # atomic — avoids torn reads from concurrent subagents
     authed_http = google_auth_httplib2.AuthorizedHttp(creds, http=httplib2.Http(timeout=30))
     return build("drive", "v3", http=authed_http, cache_discovery=False)
