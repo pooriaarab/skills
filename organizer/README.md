@@ -29,6 +29,7 @@ Run [`org-life-organizer`](../org-life-organizer/SKILL.md) — it surveys your p
 | [`org-apple-reminders`](../org-apple-reminders/SKILL.md) | Reminders.app | "clean up reminders" |
 | [`org-gtasks`](../org-gtasks/SKILL.md) | Google Tasks | "organize Google Tasks" |
 | [`org-icloud-photos`](../org-icloud-photos/SKILL.md) | iCloud Photos | "organize my photos" |
+| [`org-google-photos`](../org-google-photos/SKILL.md) | Google Photos | "organize google photos", "dedupe my photos" |
 | [`org-spotify-playlist`](../org-spotify-playlist/SKILL.md) | Spotify | "clean up my playlists" |
 | [`org-github`](../org-github/SKILL.md) | GitHub (repos, stars, orgs) | "organize my GitHub" |
 | [`org-x-bookmarks`](../org-x-bookmarks/SKILL.md) | X / Twitter bookmarks | "organize my X bookmarks" |

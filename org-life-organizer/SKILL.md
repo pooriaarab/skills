@@ -42,6 +42,7 @@ pending content reconciliation — invoke them by that full path.
 
 **Media**
 - [ ] iCloud Photos → `org-icloud-photos`
+- [ ] Google Photos → `org-google-photos`
 - [ ] Spotify playlists → `org-spotify-playlist`
 
 **Social bookmarks**
@@ -102,7 +103,7 @@ Based on the answers, output a checklist with cross-surface dependencies honored
 9. apple-reminders     ← independent
 10. github             ← code surfaces last (lower urgency for daily flow)
 11. browser-bookmarks  ← after notion (move research-link bookmarks → notion or reference)
-12. icloud-photos      ← independent, time-consuming
+12. icloud-photos + google-photos  ← independent, time-consuming
 13. spotify-playlist   ← low priority
 14. x/linkedin/instagram/threads bookmarks  ← review and prune; keep what's actionable, archive the rest
 15. imessage / slack-dm / slack-later  ← cleanup last; slack-later mirrors keepers to notion, then clears the queue
