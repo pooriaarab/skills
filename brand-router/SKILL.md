@@ -10,9 +10,9 @@ skill decides *which* direction fits, then hands you to that direction's skill.
 It does not do the design itself. That keeps each direction independently
 maintainable.
 
-- Catalog: [`../README.md`](README.md)
-- The twelve surfaces every direction answers: [`../_lib/surfaces.md`](_lib/surfaces.md)
-- Shared non-negotiables: [`../_lib/craft-floor.md`](_lib/craft-floor.md)
+- Catalog: [`README.md`](README.md)
+- The twelve surfaces every direction answers: [`_lib/surfaces.md`](_lib/surfaces.md)
+- Shared non-negotiables: [`_lib/craft-floor.md`](_lib/craft-floor.md)
 
 ---
 

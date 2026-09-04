@@ -20,8 +20,8 @@ it cannot hold three paragraphs of nuance.** Send those to [buildspace](../brand
 Treat the avoid-when as a hard gate, not a preference. Most of the failures in this file come from
 someone using stadium for a post that had no number in it.
 
-Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
-[`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
+Contract: [`../brand-router/_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
+[`../brand-router/_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
 
 ---
 

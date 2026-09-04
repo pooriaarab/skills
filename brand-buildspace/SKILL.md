@@ -16,8 +16,8 @@ newsletter, anything with a door open.
 Both cases belong to [annual](../brand-annual/SKILL.md).
 
 This is the everyday core. It must survive weekly publishing for a year. Its voice does more work than
-its colour. Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
-[`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
+its colour. Contract: [`../brand-router/_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
+[`../brand-router/_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
 
 ---
 

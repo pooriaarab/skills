@@ -9,7 +9,7 @@ description: "Use when the subject is technical and verifiable and the evidence 
 
 **Signature.** A solid block cursor holds its place at the end of the last line of type. Every glyph sits on the same monospace grid, so headline, body and data share one advance width and the page reads as a single session rather than a designed layout.
 
-**Mono is not costume here.** The page *is* a transcript. The type must align in columns to prove it. That is the argument that earns monospace body copy, and it is the only one that does. Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md). Chooser: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
+**Mono is not costume here.** The page *is* a transcript. The type must align in columns to prove it. That is the argument that earns monospace body copy, and it is the only one that does. Contract: [`../brand-router/_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor: [`../brand-router/_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md). Chooser: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
 
 **Use when** the reader is technical and the claim is verifiable — a changelog, a build log, a benchmark, an engineering post where the evidence is the design.
 
