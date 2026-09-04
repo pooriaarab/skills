@@ -23,7 +23,10 @@ third-party box.
 ## Run one cloud task
 
 Start a box, let the box-side agent clone the repo from origin, do the task, and
-verify with `git diff` ON the box. Pull a patch back. Always stop the box, even on
+verify with `git status --short` and `git diff` ON the box — `git diff` alone
+misses new files, since it does not cover untracked paths. Stage untracked
+files (`git add -A`) before diffing or generating the patch, or the pulled
+patch silently drops any file the agent created. Always stop the box, even on
 failure. A wrapper tool does this in one command (see the implementation repo).
 
 Managed providers bill the box's cloud credits, not your model subscription. That
@@ -32,7 +35,8 @@ is the point: cloud credits absorb the run.
 ## Verify on the box
 
 Judge a delegated job on the diff, not the exit code. A clean exit with an empty
-diff means the agent did nothing. Read the diff every time.
+`git status --short` means the agent did nothing — an empty `git diff` alone is
+not enough, since it hides new files. Read the diff every time.
 
 ## Cost discipline
 
@@ -60,6 +64,12 @@ laptop browser over a public host URL.
   GUI client fail to fetch its environment endpoint.
 - Mint a fresh pairing code against the running server. A service restart mints a
   new code and invalidates the old one.
+- Treat the pairing code as a secret credential, not a convenience string: over a
+  public host it is the only thing standing between an outsider and a server that
+  runs arbitrary commands. Never log it, screen-share it, or paste it into a
+  shared channel. Restrict the port at the network layer (security group or
+  firewall IP allowlist) in addition to the pairing code wherever the provider
+  allows it.
 
 ## Multi-harness
 
