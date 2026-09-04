@@ -192,7 +192,7 @@ REJECT = re.compile(r"i'?m\s|i\s+can(?:'?t|not)\b|sorry|apolog|unable\s+to|"
                     r"here'?s\s|cannot\s+(?:provide|assist|help)|"
                     r"error\s*code\s*\d+|context\s*window\s*(?:is\s*)?exceeded", re.I)
 BANNED = {'text','what','invoice','receipt','document','filename','slug','vendor',
-          'merchant','company','date','unknown','none','yyyy','mm','dd'}
+          'merchant','company','date','unknown','none','yyyy','mm','dd','word'}
 
 def slugify(raw):
     raw = raw.strip().strip('.:"\' ')
@@ -256,8 +256,12 @@ def ym(t):  # -> 'YYYY-MM'
     return f"{m.group(2)}-{MON[m.group(1).lower()]}" if m and m.group(1).lower() in MON else None
 
 def vendor(t):
+    # The fallback scans for the first "<Name> Inc/LLC/..." match. Unrestricted, a
+    # "Bill To: <Customer> LLC" line above the issuer wins and misnames the file
+    # for the customer instead of the vendor, so only search text before that label.
+    head = re.split(r'\bBill\s*To\b', t, maxsplit=1, flags=re.I)[0]
     m = (re.search(r'^Invoice\s+(.+?)\s+Invoice number', t, re.S)
-         or re.search(r'\b([A-Z][A-Za-z0-9&.\- ]{2,40}?(?:GmbH|Inc|LLC|Ltd|Corp))\b', t))
+         or re.search(r'\b([A-Z][A-Za-z0-9&.\- ]{2,40}?(?:GmbH|Inc|LLC|Ltd|Corp))\b', head))
     return re.sub(r'[^a-z0-9]+', '-', m.group(1).lower()).strip('-')[:30] if m else None
 
 # name = f"{vendor}-{ym}"  else  f"invoice-{ym}-{stripe_id}"  else keep original
