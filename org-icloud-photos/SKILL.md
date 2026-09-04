@@ -45,4 +45,4 @@ Organize Photos.app library on macOS / iOS.
 
 - [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
 - [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
-- [`../organizer/mac/SKILL.md`](../organizer/mac/SKILL.md) — Mac-side cleanup (incl. Photos library size if it's bloating disk)
+- [`../mac-organizer/SKILL.md`](../mac-organizer/SKILL.md) — Mac-side cleanup (incl. Photos library size if it's bloating disk)

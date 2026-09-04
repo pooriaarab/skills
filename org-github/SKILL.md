@@ -44,4 +44,4 @@ Organize personal GitHub presence via `gh` CLI.
 
 - [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
 - [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
-- [`../organizer/mac/SKILL.md`](../organizer/mac/SKILL.md) — local repo cleanup (worktrees, node_modules) lives there
+- [`../mac-organizer/SKILL.md`](../mac-organizer/SKILL.md) — local repo cleanup (worktrees, node_modules) lives there

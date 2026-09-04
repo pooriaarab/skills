@@ -16,7 +16,7 @@ Run [`org-life-organizer`](../org-life-organizer/SKILL.md) — it surveys your p
 | [`org-gmail`](../org-gmail/SKILL.md) | Gmail (gws CLI / Gmail API) | "organize my gmail", "inbox zero" |
 | [`notion-organizer`](../notion-organizer/SKILL.md) | Notion (MCP) | "organize my Notion", "clean up workspace" |
 | [`google-drive`](google-drive/SKILL.md) | Google Drive (gws / Drive API) | "organize my Drive" |
-| [`mac`](mac/SKILL.md) | local macOS (Downloads / Desktop / Documents / caches) | "free up disk", "clean my Mac" |
+| [`mac-organizer`](../mac-organizer/SKILL.md) | local macOS (Downloads / Desktop / Documents / caches) | "free up disk", "clean my Mac" |
 | [`org-apple-notes`](../org-apple-notes/SKILL.md) | iCloud Notes (AppleScript) | "organize my Notes", "clean up Apple Notes" |
 | [`org-browser-bookmarks`](../org-browser-bookmarks/SKILL.md) | Chrome / Arc / Safari | "organize my bookmarks" |
 | [`org-email-subscriptions`](../org-email-subscriptions/SKILL.md) | Gmail unsubscribe pass | "unsubscribe from newsletters" |
