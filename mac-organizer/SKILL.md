@@ -183,28 +183,98 @@ import applefoundationmodels as fm
 from apple_vision_utils.utils import image_to_text
 import pdfplumber, os, re
 
-session = fm.Session()
+# Reject Apple refusals, prompt echoes, and UNFILLED placeholders (yyyy-mm etc.)
+# Refusal PHRASING only. `error`, `context`, `reply` and `filename` are ordinary
+# words in a real slug ("error-log-review", "context-window-notes"), so matching
+# them bare threw away correct answers.
+REJECT = re.compile(r"i'?m\s|i\s+can(?:'?t|not)\b|sorry|apolog|unable\s+to|"
+                    r"as\s+an\s+|please\s+(?:note|provide)|i\s+must\b|"
+                    r"here'?s\s|cannot\s+(?:provide|assist|help)|"
+                    r"error\s*code\s*\d+|context\s*window\s*(?:is\s*)?exceeded", re.I)
+BANNED = {'text','what','invoice','receipt','document','filename','slug','vendor',
+          'merchant','company','date','unknown','none','yyyy','mm','dd','word'}
 
-def name_image(fp, context):
-    items = image_to_text(fp)
-    text = ' '.join(x['text'] for x in items if x.get('confidence', 0) > 0.5)
-    r = session.generate(
-        f"Context: {context}\nContent: {text[:400]}\n"
-        "3-5 word filename slug, hyphens only. Reply ONLY the slug."
-    )
-    raw = r.content.strip()
-    # Reject Apple refusals / error messages
-    if re.search(r"i'?m\s|sorry|apolog|cannot|as\s+an\s+llm|error.?code|"
-                 r"context.?window|please\s+note|i\s+must|provide\s+a", raw, re.I):
+def slugify(raw):
+    raw = raw.strip().strip('.:"\' ')
+    if not raw or REJECT.search(raw): return None
+    s = re.sub(r'-+', '-', re.sub(r'[^a-z0-9-]', '-', raw.lower())).strip('-')
+    parts = s.split('-')
+    if not s or len(parts) > 6: return None
+    if 'yyyy' in parts or 'mm' in parts or 'dd' in parts: return None  # unfilled template
+    # No blanket `any(p in BANNED ...)`: it rejected the names this skill
+    # exists to produce -- 'stripe-invoice-april-2025' died on the word
+    # 'invoice'. The check below is the one that matters, and it still
+    # kills an echo of the prompt.
+    if not [p for p in parts if p not in BANNED and not p.isdigit()]: return None
+    return s[:70]
+
+def name_file(text, context):
+    # CRITICAL: a FRESH Session() per file. Reusing one session bleeds context —
+    # every file drifts toward the previous answer (all become the same vendor/date).
+    for n in (1600, 600, 250):
+        try:
+            s = fm.Session()
+            r = s.generate(f"Context: {context}\nContent: {text[:n]}\n"
+                           "3-5 word filename slug, hyphens only. Reply ONLY the slug.")
+        except fm.FoundationModelsError as e:
+            # Shortening only helps the context-window case (error code 14).
+            # Anything else -- a missing model, a permissions failure -- is a
+            # real problem, and swallowing it turns a broken setup into a silent
+            # "no name found" for every file in the folder.
+            if getattr(e, "code", None) != 14:
+                raise
+            continue
+        sl = slugify(r.content)
+        if sl:
+            return sl
+        # A refused or banned answer is NOT a length problem, so do not retry
+        # shorter: give up on this file and leave its name alone.
         return None
-    if len(raw.split()) > 8: return None
-    slug = re.sub(r'[^a-z0-9-]', '-', raw.lower())
-    return re.sub(r'-+', '-', slug).strip('-')[:70]
+    return None
+
+def img_text(fp):
+    return ' '.join(x['text'] for x in image_to_text(fp) if x.get('confidence', 0) > 0.5)
 ```
+
+### Structured docs (invoices/receipts): regex BEFORE the LLM
+
+Stripe-style invoices carry the answer in plain text (`Date of issue April 10, 2025`,
+`Invoice <Vendor> Invoice number …`). The LLM reads these **unreliably** — it hallucinates
+dates and repeats the last vendor. For structured docs, extract deterministically and skip
+the model entirely (100% accurate dates):
+
+```python
+MON = {m: f"{i:02d}" for i, m in enumerate(
+    "january february march april may june july august september october november december".split(), 1)}
+
+def ym(t):  # -> 'YYYY-MM'
+    # Labeled dates only -- an unlabeled fallback would grab the first
+    # month-day-year in the doc (a service period, a due date) instead of
+    # the invoice date. No match here means "keep original", which is safe.
+    m = re.search(r'(?:Date of issue|Invoice date|Date issued)\s*:?\s+'
+                  r'([A-Za-z]+)\s+\d{1,2},?\s+(\d{4})', t, re.I)
+    return f"{m.group(2)}-{MON[m.group(1).lower()]}" if m and m.group(1).lower() in MON else None
+
+def vendor(t):
+    # The fallback scans for the first "<Name> Inc/LLC/..." match. Unrestricted, a
+    # "Bill To: <Customer> LLC" line above the issuer wins and misnames the file
+    # for the customer instead of the vendor, so only search text before that label.
+    head = re.split(r'\bBill\s*To\b', t, maxsplit=1, flags=re.I)[0]
+    m = (re.search(r'^Invoice\s+(.+?)\s+Invoice number', t, re.S)
+         or re.search(r'\b([A-Z][A-Za-z0-9&.\- ]{2,40}?(?:GmbH|Inc|LLC|Ltd|Corp))\b', head))
+    return re.sub(r'[^a-z0-9]+', '-', m.group(1).lower()).strip('-')[:30] if m else None
+
+# name = f"{vendor}-{ym}"  else  f"invoice-{ym}-{stripe_id}"  else keep original
+```
+
+Always **DRY-run first** (print `old -> new`), then rename. Never delete originals; on
+collision append `-1`, `-2`.
 
 ### Apple Intelligence quirks
 
-- **Context window exceeded** (error code 14): retry with shorter text (400 → 200 → 100 chars)
+- **Context bleed (the big one)**: a single reused `fm.Session()` makes every file drift to the *previous* file's answer — a folder of distinct invoices all collapse to one vendor+date. Use a **fresh `Session()` per file** (see `name_file` above). For structured docs, prefer regex and skip the model.
+- **Unfilled placeholders**: the model sometimes returns the literal template (`companyname-yyyy-mm`) — reject slugs containing `yyyy`/`mm` or the generic tokens in `BANNED`.
+- **Context window exceeded** (error code 14): retry with shorter text (1600 → 600 → 250 chars)
 - **Unsupported language** (error code 20): Persian/Arabic/CJK text not supported
 - **Content policy refusal**: personal photos of people, legal docs — Apple refuses silently by responding with "I'm sorry..." — always sanitize with rejection regex
 - **Fallback**: if AI can't name a file, use directory context → `beehouse-blog-image-01.jpg`
