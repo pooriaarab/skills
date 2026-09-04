@@ -42,16 +42,28 @@ export const Route = createFileRoute("/tools/$slug")({
     const load = getToolLoader(params.slug);
     if (!load) throw notFound();
     const mod = await load();
-    return { Component: mod.default, metadata: mod.metadata };
+    return { metadata: mod.metadata };   // serializable only — never put the component in loaderData
   },
   head: ({ loaderData }) => (loaderData ? metadataHead(loaderData.metadata) : {}),
-  component: () => { const { Component } = Route.useLoaderData(); return <Component />; },
+  component: () => {
+    const { slug } = Route.useParams();
+    // Re-invoking the glob loader is a cache hit (dynamic import is module-cached), not a refetch.
+    // ToolModule's { default, metadata } shape already matches what React.lazy expects.
+    const Component = useMemo(() => lazy(getToolLoader(slug)!), [slug]);
+    return <Component />;
+  },
 });
 ```
 
 The glob pattern `tools/*/page.tsx` matches only single-level pages; nested `tools/x/[platform]/page.tsx`
 needs its own route/batch. Use a `Map` for lookups — a plain object exposes `toString`/`constructor`
 as fake slugs (prototype pollution).
+
+**Never put the loaded component in `loaderData`.** TanStack Start serializes loader data to
+dehydrate it for SSR/hydration; a React component is a function and isn't serializable, so returning
+`mod.default` from the loader crashes real navigations, not just a lint warning. Return only the
+metadata from the loader and resolve the component in `component:` (via `React.lazy` or an eager map),
+as shown above.
 
 ## 3. MDX tree at mixed depths (docs / support articles) → splat route + glob
 
