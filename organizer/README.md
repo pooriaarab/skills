@@ -1,6 +1,6 @@
 # Organizer Skills
 
-A suite of skills for organizing a person's digital life across every surface — files, notes, mail, calendars, contacts, social bookmarks, code, and more. Built around a shared lowercase taxonomy (see [`_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)) so categories stay consistent across surfaces.
+A suite of skills for organizing a person's digital life across every surface — files, notes, mail, calendars, contacts, social bookmarks, code, and more. Built around a shared lowercase taxonomy (see [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)) so categories stay consistent across surfaces.
 
 **Architecture:** see [`DESIGN.md`](DESIGN.md).
 
@@ -25,16 +25,17 @@ Run [`org-life-organizer`](../org-life-organizer/SKILL.md) — it surveys your p
 | [`org-slack-later`](../org-slack-later/SKILL.md) | Slack Later / saved-for-later queue | "organize my Slack Later", "process my Slack saved messages" |
 | [`org-contacts`](../org-contacts/SKILL.md) | Contacts.app | "dedupe my contacts", "fix my address book" |
 | [`org-gcal`](../org-gcal/SKILL.md) | Google Calendar | "clean up my calendar" |
-| [`icloud-calendar`](icloud-calendar/SKILL.md) | iCloud Calendar | "organize iCloud calendars" |
-| [`apple-reminders`](apple-reminders/SKILL.md) | Reminders.app | "clean up reminders" |
-| [`gtasks`](gtasks/SKILL.md) | Google Tasks | "organize Google Tasks" |
-| [`icloud-photos`](icloud-photos/SKILL.md) | iCloud Photos | "organize my photos" |
-| [`spotify-playlist`](spotify-playlist/SKILL.md) | Spotify | "clean up my playlists" |
-| [`github`](github/SKILL.md) | GitHub (repos, stars, orgs) | "organize my GitHub" |
-| [`x-bookmarks`](x-bookmarks/SKILL.md) | X / Twitter bookmarks | "organize my X bookmarks" |
-| [`linkedin-bookmarks`](linkedin-bookmarks/SKILL.md) | LinkedIn saved | "organize LinkedIn saved" |
-| [`instagram-saved`](instagram-saved/SKILL.md) | Instagram saved | "organize Instagram saves" |
-| [`threads-bookmarks`](threads-bookmarks/SKILL.md) | Threads saved | "organize Threads saves" |
+| [`org-icloud-calendar`](../org-icloud-calendar/SKILL.md) | iCloud Calendar | "organize iCloud calendars" |
+| [`org-apple-reminders`](../org-apple-reminders/SKILL.md) | Reminders.app | "clean up reminders" |
+| [`org-gtasks`](../org-gtasks/SKILL.md) | Google Tasks | "organize Google Tasks" |
+| [`org-icloud-photos`](../org-icloud-photos/SKILL.md) | iCloud Photos | "organize my photos" |
+| [`org-google-photos`](../org-google-photos/SKILL.md) | Google Photos | "organize google photos", "dedupe my photos" |
+| [`org-spotify-playlist`](../org-spotify-playlist/SKILL.md) | Spotify | "clean up my playlists" |
+| [`org-github`](../org-github/SKILL.md) | GitHub (repos, stars, orgs) | "organize my GitHub" |
+| [`org-x-bookmarks`](../org-x-bookmarks/SKILL.md) | X / Twitter bookmarks | "organize my X bookmarks" |
+| [`org-linkedin-bookmarks`](../org-linkedin-bookmarks/SKILL.md) | LinkedIn saved | "organize LinkedIn saved" |
+| [`org-instagram-saved`](../org-instagram-saved/SKILL.md) | Instagram saved | "organize Instagram saves" |
+| [`org-threads-bookmarks`](../org-threads-bookmarks/SKILL.md) | Threads saved | "organize Threads saves" |
 
 
 ## Conventions
@@ -42,7 +43,7 @@ Run [`org-life-organizer`](../org-life-organizer/SKILL.md) — it surveys your p
 - **Lowercase, single-word** category names where possible (`personal`, `health`, `ideas`, etc.).
 - **Dry-run first → batch approval → journal/undo**, where the surface allows.
 
-See [`_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md) for the category vocabulary, [`_lib/patterns.md`](../org-life-organizer/_lib/patterns.md) for shared implementation patterns, and [`_lib/auth-setup.md`](../org-life-organizer/_lib/auth-setup.md) for the one-time CLI auth runbook.
+See [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md) for the category vocabulary, [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md) for shared implementation patterns, and [`../org-life-organizer/_lib/auth-setup.md`](../org-life-organizer/_lib/auth-setup.md) for the one-time CLI auth runbook.
 
 ## Adding a new sub-skill
 

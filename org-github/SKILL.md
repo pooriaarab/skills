@@ -1,5 +1,5 @@
 ---
-name: github
+name: org-github
 description: "Use when the user wants to organize GitHub — auditing personal repos (active/stale/archive), pruning excessive stars, leaving inactive organizations, fixing repo descriptions/READMEs, applying consistent topics. Triggers: 'organize my GitHub', 'archive old repos', 'prune GitHub stars'."
 ---
 
@@ -42,6 +42,6 @@ Organize personal GitHub presence via `gh` CLI.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../../org-life-organizer/_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../../org-life-organizer/_lib/patterns.md)
-- [`../mac/SKILL.md`](../mac/SKILL.md) — local repo cleanup (worktrees, node_modules) lives there
+- [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
+- [`../organizer/mac/SKILL.md`](../organizer/mac/SKILL.md) — local repo cleanup (worktrees, node_modules) lives there
