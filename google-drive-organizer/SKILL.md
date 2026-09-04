@@ -10,8 +10,9 @@ Reorganize a chaotic Google Drive into a clean, kebab-case folder hierarchy usin
 ## Requirements
 
 - [`gws` CLI](https://github.com/nicholasgasior/gws) — Google Workspace CLI: `brew install gws`
-- `gcloud` CLI — for Drive export access tokens: `brew install --cask google-cloud-sdk`
-- Python 3.9+
+- `gcloud` CLI — GCP project setup: `brew install --cask google-cloud-sdk`
+- Python 3.9+ with `pip install google-api-python-client google-auth google-auth-oauthlib`
+- `client_secret.json` from GCP (OAuth Desktop app); run `drive-auth.py` once for `~/.config/drive-personal/token.json`
 - OpenAI or Anthropic API key (optional — only needed for untitled doc classification)
 - Google account authenticated: `gws auth login`
 
@@ -204,26 +205,62 @@ def classify_by_name(name):
 
 ## Step 5 — Classify Untitled Docs with AI
 
-Export Google Doc content as plain text, then classify:
+Use the Google API Python client to read file content — works reliably, auto-refreshes tokens, no `gcloud` dependency.
 
+**One-time auth setup (`drive-auth.py`) — run once, opens browser:**
 ```python
-import urllib.request
+import json
+from google_auth_oauthlib.flow import InstalledAppFlow
+flow = InstalledAppFlow.from_client_secrets_file("client_secret.json",
+    scopes=["https://www.googleapis.com/auth/drive"])
+creds = flow.run_local_server(port=0)
+import os; os.makedirs(os.path.expanduser("~/.config/drive-personal"), exist_ok=True)
+with open(os.path.expanduser("~/.config/drive-personal/token.json"), "w") as f:
+    f.write(creds.to_json())
+print("Saved token.json")
+```
 
-def get_access_token():
-    return subprocess.run(["gcloud", "auth", "print-access-token"],
-                          capture_output=True, text=True).stdout.strip()
+**Every subsequent use — auto-refreshes, no browser needed:**
+```python
+import json, io
+from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload
 
-def export_text(file_id, token):
-    url = f"https://www.googleapis.com/drive/v3/files/{file_id}/export?mimeType=text/plain"
-    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
-    try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            return resp.read().decode("utf-8", errors="ignore").strip()[:3000]
-    except Exception:
-        return ""
+TOKEN_FILE = os.path.expanduser("~/.config/drive-personal/token.json")
 
-def classify_with_openai(file_id, name, valid_folders, token, api_key):
-    content = export_text(file_id, token)
+def get_service(token_file=TOKEN_FILE):
+    with open(token_file) as f: td = json.load(f)
+    creds = Credentials(token=td.get("token"), refresh_token=td["refresh_token"],
+        token_uri=td["token_uri"], client_id=td["client_id"],
+        client_secret=td["client_secret"], scopes=td["scopes"])
+    if not creds.valid:
+        creds.refresh(Request())
+        td["token"] = creds.token
+        with open(token_file, "w") as f: json.dump(td, f)
+    return build("drive", "v3", credentials=creds, cache_discovery=False)
+
+def read_file_content(svc, file_id, mime, max_chars=2000):
+    """Read Google Doc/Sheet/Slide content as plain text."""
+    exportable = {"application/vnd.google-apps.document",
+                  "application/vnd.google-apps.spreadsheet",
+                  "application/vnd.google-apps.presentation"}
+    if mime not in exportable: return ""
+    buf = io.BytesIO()
+    dl = MediaIoBaseDownload(buf, svc.files().export_media(fileId=file_id, mimeType="text/plain"))
+    done = False
+    while not done: _, done = dl.next_chunk()
+    return buf.getvalue().decode("utf-8", errors="ignore").strip()[:max_chars]
+```
+
+**token.json lives at:** `~/.config/drive-personal/token.json` — safe for subagents to reuse, auto-refreshes without browser.
+
+**Classify with AI:**
+```python
+def classify_with_openai(svc, file_id, name, mime, valid_folders, api_key):
+    import urllib.request
+    content = read_file_content(svc, file_id, mime)
     if not content:
         return "_inbox", name  # empty doc → inbox
 
@@ -252,16 +289,16 @@ Reply JSON: {{"folder": "<folder>", "name": "<descriptive name max 60 chars>"}}"
 
 ## Step 6 — Verify Empty Files Before Deleting
 
-Never delete without checking content first:
+Never delete without checking content first. Use `read_file_content` from Step 5:
 
 ```python
-def is_empty(file_id, token, mime):
+def is_empty(svc, file_id, mime):
     exportable = {"application/vnd.google-apps.document",
                   "application/vnd.google-apps.spreadsheet",
                   "application/vnd.google-apps.presentation"}
     if mime not in exportable:
         return False  # can't verify — skip
-    return export_text(file_id, token) == ""
+    return read_file_content(svc, file_id, mime) == ""
 
 def trash_file(file_id):
     gws("files", "update",
@@ -341,25 +378,19 @@ Key naming conventions that match local:
 
 ## Content-Aware Verification (Critical)
 
-**Never trust filenames alone.** Always export file content to verify placement:
+**Never trust filenames alone.** Always read file content to verify placement. Use `read_file_content` from Step 5 — it uses the Python client directly, no token expiry issues:
 
 ```python
-import urllib.request
+svc = get_service()  # auto-refreshes token.json as needed
 
-TOKEN = subprocess.run(["gcloud", "auth", "print-access-token"],
-                       capture_output=True, text=True).stdout.strip()
+def verify_placement(svc, file_id, name, mime, expected_folder):
+    content = read_file_content(svc, file_id, mime, max_chars=1500)
+    return content  # pass to AI or manual review
 
-def export_text(fid, mime):
-    exportable = {"application/vnd.google-apps.document",
-                  "application/vnd.google-apps.spreadsheet",
-                  "application/vnd.google-apps.presentation"}
-    if mime not in exportable: return ""
-    try:
-        url = f"https://www.googleapis.com/drive/v3/files/{fid}/export?mimeType=text/plain"
-        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {TOKEN}"})
-        with urllib.request.urlopen(req, timeout=8) as r:
-            return r.read().decode("utf-8", errors="ignore").strip()[:1500]
-    except: return ""
+# Example usage
+for f in files_in_folder:
+    content = read_file_content(svc, f["id"], f["mimeType"])
+    # inspect content before moving or deleting
 ```
 
 **Common content-vs-filename mismatches found in the wild:**
@@ -433,7 +464,7 @@ size = int(f.get("size", -1))
 if size in (0, 1024) and "untitled" in name.lower() and mime != "map":
     trash(file_id)  # safe to delete
 elif size > 2000 and "untitled" in name.lower():
-    classify_with_openai(file_id, name, mime)  # analyze first
+    classify_with_openai(svc, file_id, name, mime, valid_folders, api_key)  # analyze first
 ```
 
 Include `size` in your `fields` param: `"fields": "nextPageToken,files(id,name,mimeType,size)"`
