@@ -184,8 +184,12 @@ from apple_vision_utils.utils import image_to_text
 import pdfplumber, os, re
 
 # Reject Apple refusals, prompt echoes, and UNFILLED placeholders (yyyy-mm etc.)
-REJECT = re.compile(r"i'?m\s|sorry|apolog|cannot|unable|as\s+an|error|context|"
-                    r"please|i\s+must|here'?s|reply|filename", re.I)
+# Refusal PHRASING only. `error`, `context`, `reply` and `filename` are ordinary
+# words in a real slug ("error-log-review", "context-window-notes"), so matching
+# them bare threw away correct answers.
+REJECT = re.compile(r"i'?m\s|i\s+can(?:'?t|not)\b|sorry|apolog|unable\s+to|"
+                    r"as\s+an\s+|please\s+(?:note|provide)|i\s+must\b|"
+                    r"here'?s\s|cannot\s+(?:provide|assist|help)", re.I)
 BANNED = {'text','what','invoice','receipt','document','filename','slug','vendor',
           'merchant','company','date','unknown','none','yyyy','mm','dd'}
 
@@ -195,22 +199,35 @@ def slugify(raw):
     s = re.sub(r'-+', '-', re.sub(r'[^a-z0-9-]', '-', raw.lower())).strip('-')
     parts = s.split('-')
     if not s or len(parts) > 6: return None
-    if any(p in BANNED for p in parts): return None            # kills 'yyyy-mm', echoes
+    # No blanket `any(p in BANNED ...)`: it rejected the names this skill
+    # exists to produce -- 'stripe-invoice-april-2025' died on the word
+    # 'invoice'. The check below is the one that matters, and it still
+    # kills an echo of the prompt.
     if not [p for p in parts if p not in BANNED and not p.isdigit()]: return None
     return s[:70]
 
 def name_file(text, context):
     # CRITICAL: a FRESH Session() per file. Reusing one session bleeds context —
     # every file drifts toward the previous answer (all become the same vendor/date).
-    for n in (1600, 600, 250):                                 # retry shorter on ctx-window
+    for n in (1600, 600, 250):
         try:
             s = fm.Session()
             r = s.generate(f"Context: {context}\nContent: {text[:n]}\n"
                            "3-5 word filename slug, hyphens only. Reply ONLY the slug.")
-            sl = slugify(r.content)
-            if sl: return sl
-        except Exception:
+        except FoundationModelsError as e:
+            # Shortening only helps the context-window case (error code 14).
+            # Anything else -- a missing model, a permissions failure -- is a
+            # real problem, and swallowing it turns a broken setup into a silent
+            # "no name found" for every file in the folder.
+            if getattr(e, "code", None) != 14:
+                raise
             continue
+        sl = slugify(r.content)
+        if sl:
+            return sl
+        # A refused or banned answer is NOT a length problem, so do not retry
+        # shorter: give up on this file and leave its name alone.
+        return None
     return None
 
 def img_text(fp):
