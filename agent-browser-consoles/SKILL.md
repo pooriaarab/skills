@@ -38,6 +38,10 @@ It is idempotent.
 It carries live Google, Meta Business, LinkedIn, and Reddit sessions.
 It needs no browser restart.
 
+See [agent-browser-profiles](../agent-browser-profiles/SKILL.md) for the
+`AGENT_BROWSER_AUTO_CONNECT` setting and the isolated-profile-vs-clone
+tradeoff this step builds on.
+
 ## 3. Prefer snapshot refs over synthetic DOM events
 
 Synthetic DOM events do nothing on React/Angular consoles.
