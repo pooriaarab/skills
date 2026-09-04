@@ -1,6 +1,6 @@
 # Organizer Skills
 
-A suite of skills for organizing a person's digital life across every surface — files, notes, mail, calendars, contacts, social bookmarks, code, and more. Built around a shared lowercase taxonomy (see [`_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)) so categories stay consistent across surfaces.
+A suite of skills for organizing a person's digital life across every surface — files, notes, mail, calendars, contacts, social bookmarks, code, and more. Built around a shared lowercase taxonomy (see [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)) so categories stay consistent across surfaces.
 
 **Architecture:** see [`DESIGN.md`](DESIGN.md).
 
@@ -42,7 +42,7 @@ Run [`org-life-organizer`](../org-life-organizer/SKILL.md) — it surveys your p
 - **Lowercase, single-word** category names where possible (`personal`, `health`, `ideas`, etc.).
 - **Dry-run first → batch approval → journal/undo**, where the surface allows.
 
-See [`_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md) for the category vocabulary, [`_lib/patterns.md`](../org-life-organizer/_lib/patterns.md) for shared implementation patterns, and [`_lib/auth-setup.md`](../org-life-organizer/_lib/auth-setup.md) for the one-time CLI auth runbook.
+See [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md) for the category vocabulary, [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md) for shared implementation patterns, and [`../org-life-organizer/_lib/auth-setup.md`](../org-life-organizer/_lib/auth-setup.md) for the one-time CLI auth runbook.
 
 ## Adding a new sub-skill
 

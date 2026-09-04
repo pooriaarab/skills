@@ -35,11 +35,11 @@ Tame a chaotic Google Calendar via the `gws` CLI or Calendar API.
 ## Surface-specific notes
 
 - **Don't delete shared calendars without checking who else has access.** Affects others.
-- iCloud and Google Calendar are separate surfaces — see [`../icloud-calendar/SKILL.md`](../org-icloud-calendar/SKILL.md) for iCloud.
+- iCloud and Google Calendar are separate surfaces — see [`../org-icloud-calendar/SKILL.md`](../org-icloud-calendar/SKILL.md) for iCloud.
 - Recurring event declines: decline the whole series, not individual instances, when the goal is to stop appearing on calendar.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
-- [`../icloud-calendar/SKILL.md`](../org-icloud-calendar/SKILL.md)
+- [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
+- [`../org-icloud-calendar/SKILL.md`](../org-icloud-calendar/SKILL.md)

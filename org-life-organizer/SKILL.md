@@ -7,7 +7,7 @@ description: "Use when the user wants to organize their entire digital life acro
 
 Master skill for organizing across surfaces. **Survey + dispatch model:** asks scoping questions, recommends a sequence based on dependencies, and tells you which sub-skill to run for each step. Does not invoke sub-skills directly — that keeps each one independently maintainable.
 
-For the catalog of available sub-skills, see [`../README.md`](../organizer/README.md). For the shared taxonomy, see [`../_lib/taxonomy.md`](_lib/taxonomy.md).
+For the catalog of available sub-skills, see [`../organizer/README.md`](../organizer/README.md). For the shared taxonomy, see [`../_lib/taxonomy.md`](_lib/taxonomy.md).
 
 ---
 
@@ -173,7 +173,7 @@ The sub-skill's Step 1 will re-confirm with the user; that's fine — overlap is
 
 ## See also
 
-- [`../README.md`](../organizer/README.md) — full catalog of sub-skills
-- [`../DESIGN.md`](../organizer/DESIGN.md) — architecture decisions
+- [`../organizer/README.md`](../organizer/README.md) — full catalog of sub-skills
+- [`../organizer/DESIGN.md`](../organizer/DESIGN.md) — architecture decisions
 - [`../_lib/taxonomy.md`](_lib/taxonomy.md) — shared default taxonomy
 - [`../_lib/patterns.md`](_lib/patterns.md) — implementation patterns reused across sub-skills

@@ -42,8 +42,8 @@ Clean up Google Tasks via `gog` CLI.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
+- [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
 - [`../org-apple-reminders/SKILL.md`](../org-apple-reminders/SKILL.md) — Apple counterpart; coordinate
 - [`../org-gmail/SKILL.md`](../org-gmail/SKILL.md) — also uses `gog`; shares auth
 - [`../org-gcal/SKILL.md`](../org-gcal/SKILL.md) — also uses `gog`; shares auth

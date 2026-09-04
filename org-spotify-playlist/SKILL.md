@@ -43,5 +43,5 @@ Clean up the user's Spotify playlist library via the Spotify Web API.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
+- [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
