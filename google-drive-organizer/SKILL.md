@@ -222,7 +222,7 @@ print("Saved token.json")
 
 **Every subsequent use — auto-refreshes, no browser needed:**
 ```python
-import json, io
+import json, io, os
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
@@ -232,26 +232,28 @@ TOKEN_FILE = os.path.expanduser("~/.config/drive-personal/token.json")
 
 def get_service(token_file=TOKEN_FILE):
     with open(token_file) as f: td = json.load(f)
-    creds = Credentials(token=td.get("token"), refresh_token=td["refresh_token"],
-        token_uri=td["token_uri"], client_id=td["client_id"],
-        client_secret=td["client_secret"], scopes=td["scopes"])
+    creds = Credentials.from_authorized_user_info(td, td["scopes"])
     if not creds.valid:
         creds.refresh(Request())
-        td["token"] = creds.token
-        with open(token_file, "w") as f: json.dump(td, f)
+        with open(token_file, "w") as f: f.write(creds.to_json())
     return build("drive", "v3", credentials=creds, cache_discovery=False)
+
+EXPORT_MIME = {"application/vnd.google-apps.document": "text/plain",
+               "application/vnd.google-apps.spreadsheet": "text/csv",
+               "application/vnd.google-apps.presentation": "text/plain"}
 
 def read_file_content(svc, file_id, mime, max_chars=2000):
     """Read Google Doc/Sheet/Slide content as plain text."""
-    exportable = {"application/vnd.google-apps.document",
-                  "application/vnd.google-apps.spreadsheet",
-                  "application/vnd.google-apps.presentation"}
-    if mime not in exportable: return ""
-    buf = io.BytesIO()
-    dl = MediaIoBaseDownload(buf, svc.files().export_media(fileId=file_id, mimeType="text/plain"))
-    done = False
-    while not done: _, done = dl.next_chunk()
-    return buf.getvalue().decode("utf-8", errors="ignore").strip()[:max_chars]
+    export_mime = EXPORT_MIME.get(mime)
+    if not export_mime: return ""
+    try:
+        buf = io.BytesIO()
+        dl = MediaIoBaseDownload(buf, svc.files().export_media(fileId=file_id, mimeType=export_mime))
+        done = False
+        while not done: _, done = dl.next_chunk()
+        return buf.getvalue().decode("utf-8", errors="ignore").strip()[:max_chars]
+    except Exception:
+        return ""
 ```
 
 **token.json lives at:** `~/.config/drive-personal/token.json` — safe for subagents to reuse, auto-refreshes without browser.
