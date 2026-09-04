@@ -22,7 +22,7 @@ single metric. `annual` makes optimism sound like a filing.
 
 Any single direction is therefore the wrong tool for a meaningful share of a
 year's output. So the router returns three registers — core, authority, launch —
-and a trigger rule for each. See [`brand-router/SKILL.md`](SKILL.md).
+and a trigger rule for each. See [`SKILL.md`](SKILL.md).
 
 ## Filters run cheapest-first, and taste runs last
 

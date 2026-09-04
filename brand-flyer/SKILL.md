@@ -20,8 +20,8 @@ nobody approved it.** Send those to [annual](../brand-annual/SKILL.md).
 rotation, tape, torn edges. riso is two aligned fluorescent inks, lowercase, and nothing rotates. They
 look adjacent in a moodboard and they are opposites in every rule below.
 
-Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
-[`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
+Contract: [`../brand-router/_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
+[`../brand-router/_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
 
 ---
 
