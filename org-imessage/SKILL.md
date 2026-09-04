@@ -43,4 +43,4 @@ Clean up Messages.app on macOS.
 
 - [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
 - [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
-- [`../organizer/mac/SKILL.md`](../organizer/mac/SKILL.md) — for attachment disk cleanup
+- [`../mac-organizer/SKILL.md`](../mac-organizer/SKILL.md) — for attachment disk cleanup
