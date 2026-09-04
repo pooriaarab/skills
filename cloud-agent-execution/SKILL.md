@@ -23,20 +23,24 @@ third-party box.
 ## Run one cloud task
 
 Start a box, let the box-side agent clone the repo from origin, do the task, and
-verify with `git status --short` and `git diff` ON the box — `git diff` alone
-misses new files, since it does not cover untracked paths. Stage untracked
-files (`git add -A`) before diffing or generating the patch, or the pulled
-patch silently drops any file the agent created. Always stop the box, even on
-failure. A wrapper tool does this in one command (see the implementation repo).
+verify ON the box. Record the starting commit (`git rev-parse HEAD`) before the
+agent runs. Afterward, stage untracked files (`git add -A`) and diff against that
+starting commit (`git diff <start-sha>`), not a plain `git diff` — plain `git diff`
+only shows unstaged changes against the index, so after `git add -A` it misses the
+very files you just staged, and it misses anything the agent already committed.
+Always stop the box, even on failure. A wrapper tool does this in one command (see
+the implementation repo).
 
 Managed providers bill the box's cloud credits, not your model subscription. That
 is the point: cloud credits absorb the run.
 
 ## Verify on the box
 
-Judge a delegated job on the diff, not the exit code. A clean exit with an empty
-`git status --short` means the agent did nothing — an empty `git diff` alone is
-not enough, since it hides new files. Read the diff every time.
+Judge a delegated job on the diff against the starting commit, not the exit code
+or a clean working tree. An empty `git status --short` only means nothing is
+uncommitted — the agent may have committed its work, so it does not by itself mean
+the agent did nothing. Diff against the commit recorded before the run (see above),
+not `HEAD` versus the working tree. Read the diff every time.
 
 ## Cost discipline
 
@@ -81,9 +85,12 @@ funded — preflight loudly and report which providers are ready.
 ## Guards
 
 - Personal or non-sensitive repos only on a third-party box.
-- Never `rm -rf` a worktree. First confirm it is a LINKED worktree — its gitdir
-  path contains `/worktrees/`. A main clone's does not. Deleting a main clone
-  destroys the repo.
+- Never `rm -rf` a worktree. First confirm it is a LINKED worktree: compare
+  `git rev-parse --git-dir` against `git rev-parse --git-common-dir` inside it —
+  they differ only for a linked worktree; a main clone's are identical. Don't
+  rely on the path containing `/worktrees/`, since a main clone checked out
+  under a directory of that name would match too. Deleting a main clone destroys
+  the repo.
 - A box may print its full injected environment (tokens included) on a
   non-interactive `bash -c` that sources a login profile. Never pipe such output
   to a shared log. Run a script file instead; it does not source the profile.
