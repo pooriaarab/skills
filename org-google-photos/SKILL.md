@@ -1,5 +1,5 @@
 ---
-name: google-photos
+name: org-google-photos
 description: "Use when the user wants to organize Google Photos — albums, dedupe, tagging, deleting blurry/duplicate shots, building a clean library structure. Toggles between Google Takeout (full-library export) and the Apple Photos local SQLite library (when iCloud Photos is on). Triggers: 'organize google photos', 'dedupe my photos', 'sort my photos by year/event'."
 ---
 

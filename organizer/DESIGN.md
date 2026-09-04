@@ -61,7 +61,7 @@ organizer/
 
 ## Shared Taxonomy
 
-See [`_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md). The default lowercase single-word categories (`personal`, `people`, `ideas`, `finances`, `health`, `legal`, `drafts`, `reference`, `archive`) work across most surfaces. Each sub-skill maps surface-native concepts (Notes folders, Gmail labels, GitHub topics) to this shared vocabulary.
+See [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md). The default lowercase single-word categories (`personal`, `people`, `ideas`, `finances`, `health`, `legal`, `drafts`, `reference`, `archive`) work across most surfaces. Each sub-skill maps surface-native concepts (Notes folders, Gmail labels, GitHub topics) to this shared vocabulary.
 
 ## Master Skill: `org-life-organizer`
 

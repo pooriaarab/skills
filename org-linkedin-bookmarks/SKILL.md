@@ -1,5 +1,5 @@
 ---
-name: linkedin-bookmarks
+name: org-linkedin-bookmarks
 description: "Use when the user wants to organize LinkedIn saved posts and articles — exporting to Notion or Notes reference, categorizing by topic, identifying actionable vs reference content, and pruning the saved queue. Triggers: 'organize LinkedIn bookmarks', 'process my LinkedIn saves'."
 ---
 
@@ -41,6 +41,6 @@ Process the LinkedIn "Saved Posts" / "Saved Items" queue.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../../org-life-organizer/_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../../org-life-organizer/_lib/patterns.md)
-- [`../notion/SKILL.md`](../notion/SKILL.md)
+- [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
+- [`../organizer/notion/SKILL.md`](../organizer/notion/SKILL.md)

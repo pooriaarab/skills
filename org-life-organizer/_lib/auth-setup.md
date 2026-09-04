@@ -356,8 +356,8 @@ After all the relevant auths are green, any session can:
 
 ```bash
 # Pick a surface and follow the corresponding skill
-# organizer/spotify-playlist/SKILL.md
-# organizer/x-bookmarks/SKILL.md
+# org-spotify-playlist/SKILL.md
+# org-x-bookmarks/SKILL.md
 # org-imessage/SKILL.md
 # org-gcal/SKILL.md
 # ... etc

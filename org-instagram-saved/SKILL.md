@@ -1,5 +1,5 @@
 ---
-name: instagram-saved
+name: org-instagram-saved
 description: "Use when the user wants to organize Instagram saved posts and collections — exporting to Notion or Notes reference, restructuring collections, identifying stale saves, and pruning. Triggers: 'clean up Instagram bookmarks', 'organize my IG saves'."
 ---
 
@@ -42,6 +42,6 @@ Process Instagram saved posts and collections.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../../org-life-organizer/_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../../org-life-organizer/_lib/patterns.md)
-- [`../notion/SKILL.md`](../notion/SKILL.md)
+- [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
+- [`../organizer/notion/SKILL.md`](../organizer/notion/SKILL.md)

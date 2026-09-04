@@ -7,7 +7,7 @@ description: "Use when the user wants to organize their entire digital life acro
 
 Master skill for organizing across surfaces. **Survey + dispatch model:** asks scoping questions, recommends a sequence based on dependencies, and tells you which sub-skill to run for each step. Does not invoke sub-skills directly — that keeps each one independently maintainable.
 
-For the catalog of available sub-skills, see [`../README.md`](../organizer/README.md). For the shared taxonomy, see [`../_lib/taxonomy.md`](_lib/taxonomy.md).
+For the catalog of available sub-skills, see [`../organizer/README.md`](../organizer/README.md). For the shared taxonomy, see [`../_lib/taxonomy.md`](_lib/taxonomy.md).
 
 ---
 
@@ -20,10 +20,8 @@ Ask these questions, **one at a time**, before recommending anything:
 Multi-select. Common options (default = all of "Personal essentials"):
 
 Names prefixed `org-` are top-level, independently loadable skills. Bare names
-(`mac`, `notion`, `google-drive`, `apple-reminders`, `gtasks`, `icloud-calendar`,
-`icloud-photos`, `spotify-playlist`, `github`, and the social-bookmark skills)
-are still nested under `organizer/<surface>/SKILL.md` pending the second half
-of the flatten — invoke them by that full path.
+(`mac`, `notion`, `google-drive`) are still nested under `organizer/<surface>/SKILL.md`
+pending content reconciliation — invoke them by that full path.
 
 **Personal essentials**
 - [ ] Local Mac (Downloads / Desktop / Documents / caches) → `mac`
@@ -32,9 +30,9 @@ of the flatten — invoke them by that full path.
 - [ ] Google Drive → `google-drive`
 - [ ] Gmail → `org-gmail`
 - [ ] Contacts.app → `org-contacts`
-- [ ] Calendars (Google + iCloud) → `org-gcal`, `icloud-calendar`
-- [ ] Reminders.app → `apple-reminders`
-- [ ] Google Tasks → `gtasks`
+- [ ] Calendars (Google + iCloud) → `org-gcal`, `org-icloud-calendar`
+- [ ] Reminders.app → `org-apple-reminders`
+- [ ] Google Tasks → `org-gtasks`
 
 **Communication**
 - [ ] iMessage → `org-imessage`
@@ -43,17 +41,18 @@ of the flatten — invoke them by that full path.
 - [ ] Email subscriptions / unsubscribe pass → `org-email-subscriptions`
 
 **Media**
-- [ ] iCloud Photos → `icloud-photos`
-- [ ] Spotify playlists → `spotify-playlist`
+- [ ] iCloud Photos → `org-icloud-photos`
+- [ ] Google Photos → `org-google-photos`
+- [ ] Spotify playlists → `org-spotify-playlist`
 
 **Social bookmarks**
-- [ ] X / Twitter → `x-bookmarks`
-- [ ] LinkedIn → `linkedin-bookmarks`
-- [ ] Instagram → `instagram-saved`
-- [ ] Threads → `threads-bookmarks`
+- [ ] X / Twitter → `org-x-bookmarks`
+- [ ] LinkedIn → `org-linkedin-bookmarks`
+- [ ] Instagram → `org-instagram-saved`
+- [ ] Threads → `org-threads-bookmarks`
 
 **Code**
-- [ ] GitHub repos / stars / orgs → `github`
+- [ ] GitHub repos / stars / orgs → `org-github`
 - [ ] Browser bookmarks (Chrome / Arc / Safari) → `org-browser-bookmarks`
 
 ### Q2. Work / personal split?
@@ -104,7 +103,7 @@ Based on the answers, output a checklist with cross-surface dependencies honored
 9. apple-reminders     ← independent
 10. github             ← code surfaces last (lower urgency for daily flow)
 11. browser-bookmarks  ← after notion (move research-link bookmarks → notion or reference)
-12. icloud-photos      ← independent, time-consuming
+12. icloud-photos + google-photos  ← independent, time-consuming
 13. spotify-playlist   ← low priority
 14. x/linkedin/instagram/threads bookmarks  ← review and prune; keep what's actionable, archive the rest
 15. imessage / slack-dm / slack-later  ← cleanup last; slack-later mirrors keepers to notion, then clears the queue
@@ -130,7 +129,7 @@ Based on the answers, output a checklist with cross-surface dependencies honored
 | `org-browser-bookmarks` | `notion` | Bookmarks often belong in Notion as reference |
 | `org-apple-notes` | (none) | Independent |
 | `notion` | (none) | Independent |
-| `github` | (none) | Independent |
+| `org-github` | (none) | Independent |
 
 ---
 
@@ -175,7 +174,7 @@ The sub-skill's Step 1 will re-confirm with the user; that's fine — overlap is
 
 ## See also
 
-- [`../README.md`](../organizer/README.md) — full catalog of sub-skills
-- [`../DESIGN.md`](../organizer/DESIGN.md) — architecture decisions
+- [`../organizer/README.md`](../organizer/README.md) — full catalog of sub-skills
+- [`../organizer/DESIGN.md`](../organizer/DESIGN.md) — architecture decisions
 - [`../_lib/taxonomy.md`](_lib/taxonomy.md) — shared default taxonomy
 - [`../_lib/patterns.md`](_lib/patterns.md) — implementation patterns reused across sub-skills
