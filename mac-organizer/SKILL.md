@@ -199,6 +199,7 @@ def slugify(raw):
     s = re.sub(r'-+', '-', re.sub(r'[^a-z0-9-]', '-', raw.lower())).strip('-')
     parts = s.split('-')
     if not s or len(parts) > 6: return None
+    if 'yyyy' in parts or 'mm' in parts or 'dd' in parts: return None  # unfilled template
     # No blanket `any(p in BANNED ...)`: it rejected the names this skill
     # exists to produce -- 'stripe-invoice-april-2025' died on the word
     # 'invoice'. The check below is the one that matters, and it still
@@ -214,7 +215,7 @@ def name_file(text, context):
             s = fm.Session()
             r = s.generate(f"Context: {context}\nContent: {text[:n]}\n"
                            "3-5 word filename slug, hyphens only. Reply ONLY the slug.")
-        except FoundationModelsError as e:
+        except fm.FoundationModelsError as e:
             # Shortening only helps the context-window case (error code 14).
             # Anything else -- a missing model, a permissions failure -- is a
             # real problem, and swallowing it turns a broken setup into a silent
