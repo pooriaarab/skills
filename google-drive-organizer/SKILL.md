@@ -11,7 +11,7 @@ Reorganize a chaotic Google Drive into a clean, kebab-case folder hierarchy usin
 
 - [`gws` CLI](https://github.com/nicholasgasior/gws) — Google Workspace CLI: `brew install gws`
 - `gcloud` CLI — GCP project setup: `brew install --cask google-cloud-sdk`
-- Python 3.9+ with `pip install google-api-python-client google-auth google-auth-oauthlib`
+- Python 3.9+ with `pip install google-api-python-client google-auth google-auth-oauthlib google-auth-httplib2`
 - `client_secret.json` from GCP (OAuth Desktop app); run `drive-auth.py` once for `~/.config/drive-personal/token.json`
 - OpenAI or Anthropic API key (optional — only needed for untitled doc classification)
 - Google account authenticated: `gws auth login`
@@ -215,14 +215,19 @@ flow = InstalledAppFlow.from_client_secrets_file("client_secret.json",
     scopes=["https://www.googleapis.com/auth/drive"])
 creds = flow.run_local_server(port=0)
 import os; os.makedirs(os.path.expanduser("~/.config/drive-personal"), exist_ok=True)
-with open(os.path.expanduser("~/.config/drive-personal/token.json"), "w") as f:
+token_file = os.path.expanduser("~/.config/drive-personal/token.json")
+tmp_file = token_file + ".tmp"
+with open(tmp_file, "w") as f:
     f.write(creds.to_json())
+os.replace(tmp_file, token_file)  # atomic — avoids torn reads from concurrent subagents
 print("Saved token.json")
 ```
 
 **Every subsequent use — auto-refreshes, no browser needed:**
 ```python
 import json, io, os
+import httplib2
+import google_auth_httplib2
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
@@ -235,15 +240,18 @@ def get_service(token_file=TOKEN_FILE):
     creds = Credentials.from_authorized_user_info(td, td["scopes"])
     if not creds.valid:
         creds.refresh(Request())
-        with open(token_file, "w") as f: f.write(creds.to_json())
-    return build("drive", "v3", credentials=creds, cache_discovery=False)
+        tmp_file = token_file + ".tmp"
+        with open(tmp_file, "w") as f: f.write(creds.to_json())
+        os.replace(tmp_file, token_file)  # atomic — avoids torn reads from concurrent subagents
+    authed_http = google_auth_httplib2.AuthorizedHttp(creds, http=httplib2.Http(timeout=30))
+    return build("drive", "v3", http=authed_http, cache_discovery=False)
 
 EXPORT_MIME = {"application/vnd.google-apps.document": "text/plain",
                "application/vnd.google-apps.spreadsheet": "text/csv",
                "application/vnd.google-apps.presentation": "text/plain"}
 
 def read_file_content(svc, file_id, mime, max_chars=2000):
-    """Read Google Doc/Sheet/Slide content as plain text."""
+    """Read Google Doc/Sheet/Slide content as plain text. Returns None on read failure (distinct from a genuinely empty file)."""
     export_mime = EXPORT_MIME.get(mime)
     if not export_mime: return ""
     try:
@@ -253,7 +261,7 @@ def read_file_content(svc, file_id, mime, max_chars=2000):
         while not done: _, done = dl.next_chunk()
         return buf.getvalue().decode("utf-8", errors="ignore").strip()[:max_chars]
     except Exception:
-        return ""
+        return None
 ```
 
 **token.json lives at:** `~/.config/drive-personal/token.json` — safe for subagents to reuse, auto-refreshes without browser.
@@ -300,7 +308,10 @@ def is_empty(svc, file_id, mime):
                   "application/vnd.google-apps.presentation"}
     if mime not in exportable:
         return False  # can't verify — skip
-    return read_file_content(svc, file_id, mime) == ""
+    content = read_file_content(svc, file_id, mime)
+    if content is None:
+        return False  # read failed — unverifiable, don't trash
+    return content == ""
 
 def trash_file(file_id):
     gws("files", "update",
