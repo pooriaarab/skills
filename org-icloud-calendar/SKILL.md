@@ -1,5 +1,5 @@
 ---
-name: icloud-calendar
+name: org-icloud-calendar
 description: "Use when the user wants to organize iCloud Calendar — pruning calendars, fixing color-coding, archiving past events, removing duplicate calendars synced from old devices. Triggers: 'clean up my Apple Calendar', 'too many calendars on iPhone'."
 ---
 
@@ -39,6 +39,6 @@ Clean up Calendar.app / iCloud Calendar via AppleScript or EventKit.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../../org-life-organizer/_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../../org-life-organizer/_lib/patterns.md)
-- [`../gcal/SKILL.md`](../../org-gcal/SKILL.md)
+- [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
+- [`../org-gcal/SKILL.md`](../org-gcal/SKILL.md)

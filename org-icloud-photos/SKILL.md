@@ -1,5 +1,5 @@
 ---
-name: icloud-photos
+name: org-icloud-photos
 description: "Use when the user wants to organize iCloud Photos — creating event/date-based albums, identifying duplicate or near-duplicate photos for deletion, cleaning up the Recents stream, tagging faces, and reclaiming storage. Triggers: 'clean up iCloud Photos', 'find duplicate photos'."
 ---
 
@@ -43,6 +43,6 @@ Organize Photos.app library on macOS / iOS.
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../../org-life-organizer/_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../../org-life-organizer/_lib/patterns.md)
-- [`../mac/SKILL.md`](../mac/SKILL.md) — Mac-side cleanup (incl. Photos library size if it's bloating disk)
+- [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
+- [`../organizer/mac/SKILL.md`](../organizer/mac/SKILL.md) — Mac-side cleanup (incl. Photos library size if it's bloating disk)

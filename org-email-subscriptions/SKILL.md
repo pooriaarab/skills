@@ -40,6 +40,6 @@ Mass-unsubscribe pass on Gmail (or any IMAP-accessible mailbox).
 
 ## See also
 
-- [`../_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
-- [`../_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
-- [`../gmail/SKILL.md`](../org-gmail/SKILL.md) — runs the broader Gmail pass; this is the focused unsubscribe slice
+- [`../org-life-organizer/_lib/taxonomy.md`](../org-life-organizer/_lib/taxonomy.md)
+- [`../org-life-organizer/_lib/patterns.md`](../org-life-organizer/_lib/patterns.md)
+- [`../org-gmail/SKILL.md`](../org-gmail/SKILL.md) — runs the broader Gmail pass; this is the focused unsubscribe slice
