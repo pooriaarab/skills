@@ -311,21 +311,21 @@ def move_rename(file_id, dest_id, src_id, new_name):
 
 **Ask the user:** "What does your local Documents folder look like?" Then mirror it.
 
-Example: if local is `~/Documents/pooriaarab/` with `legal/`, `finances/`, `photos/`, `notes/`, `health/` — use the same names in Drive. If local has flat project folders (`~/Documents/beeloud/`, `~/Documents/solo/`), create a `projects/` hub in Drive.
+Example: if local is `~/Documents/<your-name>/` with `legal/`, `finances/`, `photos/`, `notes/`, `health/` — use the same names in Drive. If local has flat project folders (`~/Documents/<project-a>/`, `~/Documents/<project-b>/`), create a `projects/` hub in Drive.
 
 **Work/product Drive (e.g. SaaS company):**
 `analytics/`, `decks/`, `engineering/`, `events/`, `finance/`, `marketing/`, `media/`, `outreach-leads/`, `product/`, `strategy/`, `support/`, `testing/`, `users-data/`, `personal/`, `_inbox/`, `_archive/`
 
-**Personal Drive (matching local `pooriaarab/` structure):**
+**Personal Drive (matching local `<your-name>/` structure):**
 ```
-projects/        beeloud/, startups/, ai-projects/, creative/
+projects/        <project-a>/, startups/, ai-projects/, creative/
 career/          resume/, reference-letters/, job-descriptions/, cover-letters/, certificates/
 legal/           canada-pr/, family-docs/, work-permit/   ← not "immigration/"
 education/       university/, languages/                  ← merge these
 finances/        budgets/, bank-statements/               ← not "finance/"
 media/           photos/, videos/, streaming/, screenshots/
 personal/        notes/, family/, health/, hobbies/, driving/
-fitness/         stronglifts-logs/, martial-arts/
+fitness/         <workout-logs>/, martial-arts/
 _archive/        laptop-backups/, misc-archive/, old-projects/
 _inbox/
 ```
@@ -366,8 +366,8 @@ def export_text(fid, mime):
 - Files named "Resume" that are actually cover letters → move to `cover-letters/`
 - Files named "Marketing" in grants/ that are sponsorship proposals → keep in partnerships/
 - Cold email SMTP config lists (`Instantly Bulk 1/2`) in community/ → belong in partnerships/
-- Files named "Financials" in startups/ that are Beeloud budget sheets → belong in beeloud/financials/
-- "Copy of AI @ VC Lab" in beeloud/ — template copy, not Beeloud-specific → trash
+- Files named "Financials" in startups/ that belong to one project → move under that project's `financials/`
+- A "Copy of ..." template in a project folder, not specific to it → trash
 
 **gws token expiry:** The file-based keyring token expires during long sessions. When agents hit `403 insufficientPermissions`, have the user re-run:
 ```bash
@@ -405,7 +405,7 @@ For 1,000+ file Drives, dispatch parallel agents per folder domain:
 
 ```
 Agent 1 → career/, legal/, education/     (independent domains)
-Agent 2 → projects/beeloud/, projects/startups/
+Agent 2 → projects/<project-a>/, projects/startups/
 Agent 3 → personal/, media/, finances/, fitness/
 Agent 4 → _archive/, _inbox/
 ```
@@ -444,14 +444,14 @@ Include `size` in your `fields` param: `"fields": "nextPageToken,files(id,name,m
 
 | Pattern | Action |
 |---------|--------|
-| `Feb 2025 Pooria 5x5 Advanced (aka StrongLifts) \| LiftVault.com` | → `Feb 2025 Workout Log` |
+| `Feb 2025 <Program> 5x5 Advanced \| <Site>.com` | → `Feb 2025 Workout Log` |
 | `results-20241123-220704` | Leave as-is inside `bigquery-exports/` sub-folder |
 | `https://blog.example.com/slug-2026-05-05` | → `Blog Performance May 2026` |
-| `Copy of Resume - Pooria Arab (Nov 2025).docx` | → `Resume - Pooria Arab Nov 2025 v2.docx` |
+| `Copy of Resume - <Name> (Nov 2025).docx` | → `Resume - <Name> Nov 2025 v2.docx` |
 | `# Firebase environment configuration` | → `Firebase Environment Configuration` (strip `#`) |
 | `Grandfatehred over invite edits limit` | → `Grandfathered over Invite Edits Limit` (fix typos) |
 | `ecommerce-itinerary (1) (1).pdf` | → `E-Commerce Event Itinerary.pdf` (strip duplicates) |
-| `WM0h3519 - solo-eng-tracker (2).json` | → `solo-eng-tracker.json` |
+| `WM0h3519 - <tracker-name> (2).json` | → `<tracker-name>.json` |
 
 ---
 
