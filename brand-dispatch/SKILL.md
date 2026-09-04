@@ -17,8 +17,8 @@ used, and a stamp over a small update reads as a lie.**
 
 That avoid-when has a number attached. See **Cost to run** before you use this on anything.
 
-Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
-[`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
+Contract: [`../brand-router/_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
+[`../brand-router/_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
 
 ---
 

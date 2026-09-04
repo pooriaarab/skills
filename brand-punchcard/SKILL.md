@@ -9,7 +9,7 @@ description: "Use when the work should feel filed, dated and permanent: an archi
 
 **Signature.** The page is a card: manila stock, a clipped top-left corner, and a numbered 80-column lattice printed faintly across the whole surface. Every block of content snaps to a whole number of those columns **and says so** — a panel is 24 columns wide and carries `COL 09-32` in its footer. The orange-red is ink stamped onto stock, never a glow.
 
-**Punchcard is not a monospace direction.** Prose is Archivo, a proportional sans. Courier Prime is confined to **column numbers, card IDs and dates**, because the 1-to-80 ruler across the top of every card only works if every digit is one column wide. If a paragraph on a punchcard asset is monospace, the asset is wrong. Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md). Chooser: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
+**Punchcard is not a monospace direction.** Prose is Archivo, a proportional sans. Courier Prime is confined to **column numbers, card IDs and dates**, because the 1-to-80 ruler across the top of every card only works if every digit is one column wide. If a paragraph on a punchcard asset is monospace, the asset is wrong. Contract: [`../brand-router/_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor: [`../brand-router/_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md). Chooser: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
 
 **Use when** you want the work to feel filed, dated and permanent — an archive, a body of writing, a timeline, a year-end index.
 

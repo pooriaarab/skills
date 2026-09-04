@@ -16,8 +16,8 @@ noise is the correct answer.
 type at paragraph length is a punishment.** Send long reads to [manuscript](../brand-manuscript/SKILL.md) and
 institutional work to [annual](../brand-annual/SKILL.md).
 
-Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
-[`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
+Contract: [`../brand-router/_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
+[`../brand-router/_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
 
 ---
 

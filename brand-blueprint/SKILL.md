@@ -9,7 +9,7 @@ description: "Use when you are showing how something is put together: architectu
 
 **Signature.** Nothing floats. Every element ties to something else by a dimension line with real arrowheads, or by a callout leader with a 45-degree elbow. The number in the gap is the element's actual measurement — 1440, 72px, 8pt. The page annotates itself the way a drafting sheet does.
 
-**Mono is load-bearing, not decorative.** Roboto Mono sets the dimension callouts and coordinates only. `1440` and `1441` must occupy identical width or the drawing lies. Prose is never monospace here — that is what separates blueprint from [terminal](../brand-terminal/SKILL.md). Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md). Chooser: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
+**Mono is load-bearing, not decorative.** Roboto Mono sets the dimension callouts and coordinates only. `1440` and `1441` must occupy identical width or the drawing lies. Prose is never monospace here — that is what separates blueprint from [terminal](../brand-terminal/SKILL.md). Contract: [`../brand-router/_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor: [`../brand-router/_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md). Chooser: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
 
 **Use when** you are showing how something is put together: architecture posts, product teardowns, a roadmap that has to look thought through rather than dreamt up.
 

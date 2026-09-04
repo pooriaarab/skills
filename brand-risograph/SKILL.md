@@ -21,8 +21,8 @@ error when the content has to be exact. Send those to [annual](../brand-annual/S
 rotates. Nothing is torn. The misregistration is a press tolerance, not damage. flyer is the opposite on
 all four counts.
 
-Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
-[`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
+Contract: [`../brand-router/_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor:
+[`../brand-router/_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md).
 
 ---
 

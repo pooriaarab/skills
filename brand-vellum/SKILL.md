@@ -15,7 +15,7 @@ vellum is scraped, limed calfskin: it takes ink without bleeding and stays trans
 
 **Avoid vellum when** the page has one message and one action. A stack implies there is more underneath, which is a lie on a single-purpose page.
 
-Contract: [`../_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor: [`../_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md). Picker: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
+Contract: [`../brand-router/_lib/surfaces.md`](../brand-router/_lib/surfaces.md). Floor: [`../brand-router/_lib/craft-floor.md`](../brand-router/_lib/craft-floor.md). Picker: [`../brand-router/SKILL.md`](../brand-router/SKILL.md).
 
 ## Tokens
 
@@ -186,13 +186,13 @@ The visual work is fine: nine templates cover twelve surfaces, the 24px offset g
 
 ## Pairs with / clashes with
 
-**Pairs with [`../dusk/SKILL.md`](../brand-dusk/SKILL.md).** Both are warm, unhurried and native to work with a history. vellum is the stack of drafts; dusk is the reflection written on top of it. Vermilion `#a8331f` and ember `#f2a25c` share a warm quadrant.
+**Pairs with [`../brand-dusk/SKILL.md`](../brand-dusk/SKILL.md).** Both are warm, unhurried and native to work with a history. vellum is the stack of drafts; dusk is the reflection written on top of it. Vermilion `#a8331f` and ember `#f2a25c` share a warm quadrant.
 
-**Sits beside [`../manuscript/SKILL.md`](../brand-manuscript/SKILL.md), and the two are easy to confuse.** Both are paper and both are warm; the distinction is structural. **Manuscript is a bound book: one leaf at a time, a rubric drop cap, a fixed text block, an authority already settled. vellum is loose translucent sheets: a stack, visible earlier drafts, no drop cap, nothing settled.** Content with a final version goes to manuscript; content with versions goes to vellum. Never run both in one kit — the reader sees one paper direction executed inconsistently.
+**Sits beside [`../brand-manuscript/SKILL.md`](../brand-manuscript/SKILL.md), and the two are easy to confuse.** Both are paper and both are warm; the distinction is structural. **Manuscript is a bound book: one leaf at a time, a rubric drop cap, a fixed text block, an authority already settled. vellum is loose translucent sheets: a stack, visible earlier drafts, no drop cap, nothing settled.** Content with a final version goes to manuscript; content with versions goes to vellum. Never run both in one kit — the reader sees one paper direction executed inconsistently.
 
-**Clashes with [`../swiss/SKILL.md`](../brand-swiss/SKILL.md).** Swiss is one flat plane with no material at all. Next to it vellum's alpha reads as dirt on the screen rather than as substance.
+**Clashes with [`../brand-swiss/SKILL.md`](../brand-swiss/SKILL.md).** Swiss is one flat plane with no material at all. Next to it vellum's alpha reads as dirt on the screen rather than as substance.
 
-**Clashes with [`../arcade/SKILL.md`](../brand-arcade/SKILL.md).** Arcade is instant and lit from inside; vellum is slow and lit from outside. No shared surface.
+**Clashes with [`../brand-arcade/SKILL.md`](../brand-arcade/SKILL.md).** Arcade is instant and lit from inside; vellum is slow and lit from outside. No shared surface.
 
 ## The failure mode
 
