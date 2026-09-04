@@ -1,0 +1,7 @@
+# Worker scratch files: briefs, handoff notes, and result dumps.
+# Append this block to the repo .gitignore.
+WORKER_BRIEF.md
+CONTINUE.md
+BRIEF.md
+WORKER_RESULT.md
+**/.worktrees/

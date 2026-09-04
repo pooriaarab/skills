@@ -179,6 +179,7 @@ to the skill that holds the lever. The others assume you already know which job 
 | [changelog](changelog/SKILL.md) | Auto-generate a changelog from git commits since the last tag or ref. |
 | [init-project](init-project/SKILL.md) | Auto-generate a CLAUDE.md for a new project by analyzing its structure, tooling, and conventions. |
 | [stale-branches](stale-branches/SKILL.md) | List and clean up stale git branches (merged or inactive 30+ days). |
+| [worktree-hygiene](worktree-hygiene/SKILL.md) | Prune git worktrees whose branches already merged, salvaging any with real uncommitted changes to a branch first. |
 | [branch-deploy-convention](branch-deploy-convention/SKILL.md) | Standardise branch names onto `main` (staging) and `release` (production) without breaking a deploy. The silent-dead-trigger defect class, an org-wide sweep, the safe rename order, and the four blockers to check first. |
 | [cloudflare-agent-credentials](cloudflare-agent-credentials/SKILL.md) | Get and manage Cloudflare API tokens for an agent fleet without asking a human each time. What cannot mint one (wrangler, OAuth, the MCP), the one permission that can, and minting narrow per-purpose tokens. |
 | [cloudflare-worker-previews](cloudflare-worker-previews/SKILL.md) | Configure private-beta Worker Previews for pull requests, with branch-based URLs, safe staging bindings, live verification, sticky comments, cleanup, and dedicated test users. |
