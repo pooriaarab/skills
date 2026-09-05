@@ -185,8 +185,12 @@ not assume it will self-resolve. Triage in order:
 
 1. **Do NOT press "Start New Booking".** A duplicate booking for the same applicants risks
    a double charge and two records competing for one slot.
-2. **Do NOT re-run the payment** before step 3.
-3. **Check the card statement** for the charge or an authorisation hold.
+2. **Do NOT re-run the payment** before step 4.
+3. **Check the email on the account** for a confirmation or payment-failure message. If a
+   confirmation already arrived, the payment succeeded — stop here regardless of what the
+   card statement shows next.
+4. **Check the card statement** for the charge or an authorisation hold (only if step 3
+   found no confirmation).
    - **Charge present, VFS still processing** → reconciliation lag. Wait; refresh the
      dashboard every few hours.
    - **No charge or hold, and it has been a few hours** (issuer posting can lag) → the
@@ -196,7 +200,6 @@ not assume it will self-resolve. Triage in order:
      risks the double charge step 1 warns about. If the issuer's posting is known to run
      slower than a few hours (check the issuer's app or call them), wait for that instead
      of a fixed few-hour rule before retrying.
-4. **Check the email on the account** for a confirmation or payment-failure message.
 5. Still stuck after ~24 hours → **contact VFS support** with the group reference, applicant
    names, and the slot date/time. Ask them to confirm the slot is held and whether payment
    settled.
@@ -270,18 +273,21 @@ Work backwards from the flight, not forwards from the appointment:
 
 ```
 biometrics date
-+ 15 calendar days     (standard legal decision period, Visa Code Art. 23(1))
-+ up to 30 or 60 days  (Art. 23(2)/(3) extension — used when further scrutiny is
-                        needed, which includes prior consultation under Art. 22;
-                        check whether the applicant's nationality or case type
-                        triggers it before choosing a slot)
++ up to 15 calendar days  (standard legal decision period, Visa Code Art. 23(1))
+  ...or up to 30 calendar days from lodging (Art. 23(2) extension — individual cases
+                        needing further scrutiny)
+  ...or up to 60 calendar days from lodging (Art. 23(3) extension — exceptional cases
+                        requiring prior consultation under Art. 22; check whether the
+                        applicant's nationality or case type triggers it before
+                        choosing a slot)
 + 3-5 business days    (courier return — the step people forget)
 = passport back in hand
 ```
 
-The 15-day period is the common case, not the guaranteed one. When extended scrutiny
-applies, the legal maximum is 60 calendar days from lodging, not 15 + 14 — budget for the
-worst case, not the typical one, if there is any reason to expect extra scrutiny.
+The 15-day period is the common case, not the guaranteed one. The Art. 23(2)/(3) extensions
+run from the date of lodging, not stacked on top of the 15 days — the legal maximum is 60
+calendar days total from lodging, not 15 + 60. Budget for the worst case, not the typical
+one, if there is any reason to expect extra scrutiny.
 
 If that lands after the departure date, the slot is too late. Choose an earlier one.
 
