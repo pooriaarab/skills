@@ -186,7 +186,11 @@ not assume it will self-resolve. Triage in order:
 3. **Check the card statement** for the charge or an authorisation hold.
    - **Charge present, VFS still processing** → reconciliation lag. Wait; refresh the
      dashboard every few hours.
-   - **No charge** → the payment failed. Re-open the **existing** booking and pay again.
+   - **No charge or hold, and it has been a few hours** (issuer posting can lag) → the
+     payment failed. Re-open the **existing** booking and pay again. Do not retry within
+     minutes of the first attempt on the strength of an empty statement — a hold that
+     hasn't posted yet looks identical to a failed payment, and retrying too soon risks
+     the double charge step 1 warns about.
 4. **Check the email on the account** for a confirmation or payment-failure message.
 5. Still stuck after ~24 hours → **contact VFS support** with the group reference, applicant
    names, and the slot date/time. Ask them to confirm the slot is held and whether payment
@@ -256,7 +260,10 @@ submission and must be shipped back. A local pickup may not be available (see se
 
 ### 7. Applying at a visa centre in another city
 
-When the local centre has no slots, a centre in another city is a valid route. Two
+When the local centre has no slots, a centre in another city can be a valid route — but
+confirm first that the centre actually accepts applicants from your province / consular
+district. Some centres enforce residence-based jurisdiction and will refuse or cancel an
+out-of-district booking (see "You must apply where you legally reside" above). Two
 consequences to plan for:
 
 - **Courier return is effectively mandatory.** Passports are surrendered at submission and
@@ -290,6 +297,7 @@ Common fields that silently reject valid input:
 - **First Schengen entry country:** declare the first Schengen country you physically enter,
   not the first flight stop. A layover in a non-Schengen country (e.g. London or Dubai) is
   not the entry point.
-- **Arrival date:** you may declare an arrival date earlier than the real one, for example
-  to match a hotel check-in. You just may not enter the Schengen area before the visa
-  start date.
+- **Arrival date:** declare the real, intended arrival date — do not backdate it to match
+  a placeholder hotel booking. If a refundable hotel booking used for the application has
+  the wrong date, fix the booking instead; the declared itinerary and its supporting
+  documents must agree. The declared date still cannot precede the visa's start date.
