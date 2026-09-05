@@ -89,9 +89,13 @@ its authorization check. No amount of happy-path testing finds that, because a
 happy-path test always sends a valid credential.
 
 ```sh
-npx @testerarmy/scout@latest sweep
-npx @testerarmy/scout@latest report --ci --min-coverage 90 --severity-threshold high
+npx @testerarmy/scout@<pinned-version> sweep
+npx @testerarmy/scout@<pinned-version> report --ci --min-coverage 90 --severity-threshold high
 ```
+
+Pin the version here too, even without `--header`: in CI this runs in the same
+job as steps that export credentials, and `@latest` resolving to a malicious
+publish would still see that job's environment.
 
 ## It is safe against a live deployment
 
@@ -198,7 +202,7 @@ then exit with the code you captured:
 
 ```sh
 rc=0
-npx @testerarmy/scout@latest report --ci --min-coverage 90 --severity-threshold high || rc=$?
+npx @testerarmy/scout@<pinned-version> report --ci --min-coverage 90 --severity-threshold high || rc=$?
 # human-readable report step goes here
 exit "$rc"
 ```
