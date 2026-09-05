@@ -172,7 +172,10 @@ check digit for the expiry. If the MRZ says 2027-03-05 and the typed form says 2
 the typed value is wrong.
 
 **Procedure:** read the expiry from the MRZ line 2, not from the passport bio page text.
-Verify every downstream form field against the MRZ value before submitting.
+Verify every downstream form field against the MRZ value before submitting. If the MRZ and
+the printed bio-page date genuinely disagree with each other (not just with something a
+human typed), that is a defective passport, not a typo — stop and raise it with the
+passport-issuing authority instead of picking either value.
 
 ### 2. VFS "Payment Processing" limbo — a triage runbook
 
@@ -230,11 +233,14 @@ as soon as the automated step is done; do not leave a debuggable, signed-in prof
 **Check before assuming CDP is live:**
 
 ```bash
-curl -s http://localhost:9222/json/version
+curl -fsS http://localhost:9222/json/version
 ```
 
-Returns JSON if a CDP endpoint is really there. A 404 or empty reply means the port is open
-but it is not DevTools.
+`-f` makes curl fail (non-zero exit, no body) on anything but a 2xx response, and `-S`
+still prints curl's own error to stderr despite `-s`. Exit 0 with JSON output means a CDP
+endpoint is really there. A non-zero exit means either nothing is listening on the port
+(connection refused) or something is listening but isn't DevTools — `curl -s` alone can't
+tell those two apart, since both look like an empty reply.
 
 ### 5. Visa-portal automation is blocked at the edge — a hard, tested result
 
