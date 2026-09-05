@@ -229,15 +229,20 @@ curl -s http://localhost:9222/json/version
 Returns JSON if a CDP endpoint is really there. A 404 or empty reply means the port is open
 but it is not DevTools.
 
-### 5. Visa-portal automation carries account risk — say so plainly
+### 5. Visa-portal automation is blocked at the edge — a hard, tested result
 
-Visa portals run aggressive bot detection. A flagged account can lock the application, lose
-the slot, or require a call to VFS support to unblock. Weigh that risk against the time
-the automation saves.
+Visa-portal automation is not merely risky, it is blocked at the edge. A Playwright/Chromium
+automation browser pointed at a VFS Global visa portal receives an HTTP 403 with the JSON
+body `{"code":"403201"}` instead of the login page. No login form, no captcha, no challenge
+to solve — the request is refused before anything renders. Tested September 2026 against a
+national VFS portal.
 
-**Recommended middle path:** prepare every field value in a written answer sheet beforehand.
-Then paste them in by hand in a normal browser. It is nearly as fast as automation and
-carries no account risk.
+**Correct conclusion:** do not plan on automating a visa portal at all. Prepare a written
+answer sheet with every field value in portal order and paste it in by hand.
+
+**Diagnostic:** if `agent-browser get text body` returns a short JSON object with a `code`
+field rather than page text, you are looking at a bot-protection refusal, not a broken
+selector.
 
 ### 6. Timeline arithmetic, and the step everyone forgets
 
