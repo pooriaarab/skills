@@ -187,10 +187,12 @@ not assume it will self-resolve. Triage in order:
    - **Charge present, VFS still processing** → reconciliation lag. Wait; refresh the
      dashboard every few hours.
    - **No charge or hold, and it has been a few hours** (issuer posting can lag) → the
-     payment failed. Re-open the **existing** booking and pay again. Do not retry within
-     minutes of the first attempt on the strength of an empty statement — a hold that
-     hasn't posted yet looks identical to a failed payment, and retrying too soon risks
-     the double charge step 1 warns about.
+     payment likely failed. Re-open the **existing** booking and pay again. Do not retry
+     within minutes of the first attempt on the strength of an empty statement — a hold
+     that hasn't posted yet looks identical to a failed payment, and retrying too soon
+     risks the double charge step 1 warns about. If the issuer's posting is known to run
+     slower than a few hours (check the issuer's app or call them), wait for that instead
+     of a fixed few-hour rule before retrying.
 4. **Check the email on the account** for a confirmation or payment-failure message.
 5. Still stuck after ~24 hours → **contact VFS support** with the group reference, applicant
    names, and the slot date/time. Ask them to confirm the slot is held and whether payment
@@ -220,6 +222,11 @@ DevTools Protocol (CDP).
 - **Separate automation browser:** drive a browser dedicated to automation (e.g. Playwright
   Chromium or Puppeteer) and sign in there.
 
+**CDP has no authentication.** Any local process that can reach the debug port — including
+another user's process on a shared machine — can attach and take over the signed-in session.
+Only open the debug port on a machine you trust exclusively, and close that Chrome profile
+as soon as the automated step is done; do not leave a debuggable, signed-in profile running.
+
 **Check before assuming CDP is live:**
 
 ```bash
@@ -244,19 +251,31 @@ answer sheet with every field value in portal order and paste it in by hand.
 field rather than page text, you are looking at a bot-protection refusal, not a broken
 selector.
 
+**If a different portal does not return a 403** (this was tested against one national VFS
+Global deployment; other VFS instances, TLScontact, BLS International, and consulate-run
+portals may not enforce the same edge block): the absence of a hard block does not mean
+automation is safe. Visa portals run aggressive bot detection generally, and a flagged
+account can still lock the application or lose the slot even without an upfront 403. Treat
+"not blocked yet" as "not yet caught," not as permission.
+
 ### 6. Timeline arithmetic, and the step everyone forgets
 
 Work backwards from the flight, not forwards from the appointment:
 
 ```
 biometrics date
-+ 15 calendar days     (standard legal decision period, Visa Code Art. 23)
-+ up to ~14 days       (prior consultation under Visa Code Art. 22, if applicable
-                        — check whether the applicant's nationality triggers it
-                        before choosing a slot)
++ 15 calendar days     (standard legal decision period, Visa Code Art. 23(1))
++ up to 30 or 60 days  (Art. 23(2)/(3) extension — used when further scrutiny is
+                        needed, which includes prior consultation under Art. 22;
+                        check whether the applicant's nationality or case type
+                        triggers it before choosing a slot)
 + 3-5 business days    (courier return — the step people forget)
 = passport back in hand
 ```
+
+The 15-day period is the common case, not the guaranteed one. When extended scrutiny
+applies, the legal maximum is 60 calendar days from lodging, not 15 + 14 — budget for the
+worst case, not the typical one, if there is any reason to expect extra scrutiny.
 
 If that lands after the departure date, the slot is too late. Choose an earlier one.
 
