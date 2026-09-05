@@ -34,6 +34,11 @@ under test. The same vendor's browser-QA CLI fails: the source repo it names
 does not exist publicly, its npm build ends in obfuscation, and it needs an API
 key for a paid service.
 
+The licence check is a point-in-time check, but `npx @testerarmy/scout@latest`
+re-resolves on every run, and this tool sees your credentials via `--header`.
+Once your setup is stable, pin an exact version instead of `@latest`, and
+redo the check when you bump it.
+
 ## Set it up
 
 Scout needs Node 22.12 or newer.
@@ -67,7 +72,10 @@ directories, so run every command from the repo root.
 
 ## What it actually checks
 
-A sweep runs four probe kinds against every operation.
+A sweep runs up to four probe kinds per operation, drawn from the four below —
+not every operation gets all four, only the ones the spec gives it grounds for.
+That is why a sweep's total probe count is not simply four times its operation
+count; see the worked result below, where 149 probes covered 71 operations.
 
 | Probe | What it asserts |
 | --- | --- |
@@ -176,8 +184,18 @@ Fuzz findings arrive as candidates. They do not gate until you confirm them with
 `scout finding confirm`. So a noisy fuzz run cannot break CI on its own.
 
 One more `set -e` hazard when you script this: the JSON report exits nonzero on
-a gate failure. Guard it with `|| true` if a human-readable report follows, or
-the script dies before printing the reason.
+a gate failure, so a human-readable report step written after it never runs —
+the script dies first. Don't guard the gate command itself with `|| true`;
+that discards the failure and the job reports success regardless of what the
+sweep found. Instead capture the exit code, run the report step that follows,
+then exit with the code you captured:
+
+```sh
+rc=0
+npx @testerarmy/scout@latest report --ci --min-coverage 90 --severity-threshold high || rc=$?
+# human-readable report step goes here
+exit "$rc"
+```
 
 ## Read the coverage number honestly
 
