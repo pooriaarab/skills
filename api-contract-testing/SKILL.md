@@ -110,14 +110,18 @@ Pass a literal `$VAR` string in single quotes. Scout expands it at request time
 and redacts it from output, so the secret stays out of the process table and out
 of logs. Single quotes stop the shell expanding it first.
 
+These commands carry live credentials, so use the pinned version from the
+licence check above, not `@latest` — don't let a secret flow through a tag that
+re-resolves on every run.
+
 ```sh
-npx @testerarmy/scout@latest sweep --header 'Authorization: Bearer $API_TOKEN'
+npx @testerarmy/scout@<pinned-version> sweep --header 'Authorization: Bearer $API_TOKEN'
 ```
 
 Behind Cloudflare Access, use a service token as two headers:
 
 ```sh
-npx @testerarmy/scout@latest sweep \
+npx @testerarmy/scout@<pinned-version> sweep \
   --header 'CF-Access-Client-Id: $CF_ACCESS_CLIENT_ID' \
   --header 'CF-Access-Client-Secret: $CF_ACCESS_CLIENT_SECRET'
 ```
@@ -131,10 +135,12 @@ error, which is why they are worth knowing before you hit them.
 
 ### `--ci` defaults the coverage floor to 100
 
-`scout report --ci` sets `--min-coverage` to 100 when you do not pass it. No
-sweep can satisfy that. A gate without an explicit floor can never go green, and
-it fails as `coverage-below-minimum`, which reads like a coverage problem rather
-than a defaulting problem.
+`scout report --ci` sets `--min-coverage` to 100 when you do not pass it.
+Reaching 100 needs every probeable operation exercised, including authenticated
+ones an unauthenticated sweep skips (see "Read the coverage number honestly"
+below) — so a gate without an explicit floor almost always fails, and it fails
+as `coverage-below-minimum`, which reads like a coverage problem rather than a
+defaulting problem.
 
 Always pass `--min-coverage`.
 
