@@ -1,6 +1,6 @@
 ---
 name: multi-account-cli
-description: "Use when the user needs to manage multiple accounts (work + personal) across CLI tools — cloud tools (gcloud, gws, Firebase, Netlify) AND AI coding CLIs (Claude Code, Codex, Gemini) — including setting up named profiles or per-tool config-dir isolation, switching accounts with one command, keeping skills/instructions shared while accounts/billing/MCP stay separate, and testing the switch. Triggers: 'switch accounts', 'multiple gcloud profiles', 'work vs personal CLI', 'separate work and personal Claude/Codex/Gemini', 'two ChatGPT/Claude subscriptions in terminal', 'how do I use two Google accounts in terminal'."
+description: "Use when the user needs to manage multiple accounts (work + personal) across CLI tools — cloud tools (gcloud, gws, Firebase, Netlify) AND AI coding CLIs (Claude Code, Codex, Gemini) — including setting up named profiles or per-tool config-dir isolation, switching accounts with one command, keeping skills/instructions shared while accounts/billing/MCP stay separate, and testing the switch. Triggers: 'switch accounts', 'multiple gcloud profiles', 'work vs personal CLI', 'separate work and personal Claude/Codex/Gemini', 'two ChatGPT/Claude subscriptions in terminal', 'how do I use two Google accounts in terminal', 'route requests across subscriptions through a local proxy', 'CLIProxyAPI per-request failover'."
 ---
 
 # Multi-Account CLI Profiles
@@ -9,7 +9,7 @@ description: "Use when the user needs to manage multiple accounts (work + person
 
 Two tool classes, two mechanisms:
 - **Cloud CLIs** (gcloud, gws, Firebase, Netlify) — one `work`/`personal` switcher flips them all. Steps 1–6 below.
-- **AI coding CLIs** (Claude Code, Codex, Gemini) — each keeps its own config dir; isolate per account with a config-dir env var. Section right below.
+- **AI coding CLIs** (Claude Code, Codex, Gemini) — two mechanisms: isolate per account with a config-dir env var (section right below), or route per request through a local proxy (section after it).
 
 ---
 
@@ -62,6 +62,43 @@ Never `export` the key globally, or **every** session bills to the API.
 | Gemini ignores API-key env, reuses old login | Auth is settings-driven; isolate with `GEMINI_CLI_HOME` and log in fresh there |
 | API key leaks into personal/other sessions | Don't `export` it; inject per command only |
 | A launcher/wrapper shadows the real CLI on PATH | Env vars pass through `exec` — set them before the command; the shim inherits them |
+
+---
+
+## AI Coding CLIs via Local Proxy (CLIProxyAPI)
+
+Use a local proxy when one endpoint must serve every request. Install CLIProxyAPI (github.com/router-for-me/CLIProxyAPI, MIT) from homebrew-core as `cliproxyapi`. Run it as a brew LaunchAgent on 127.0.0.1:8317.
+
+The proxy holds every account credential at once. It picks one credential per request. Point each client at one endpoint. Stop tracking which subscription has headroom.
+
+It serves Anthropic-compatible (`/v1/messages`), OpenAI-compatible (`/v1/chat/completions`, `/v1/responses`), and Gemini-compatible surfaces on the same port.
+
+Point a client at it with `ANTHROPIC_BASE_URL=http://127.0.0.1:8317` and `ANTHROPIC_AUTH_TOKEN=<a key you configure>`:
+```bash
+ANTHROPIC_BASE_URL=http://127.0.0.1:8317 ANTHROPIC_AUTH_TOKEN=<key-you-configure> claude
+```
+
+The proxy reads its key from its own config file, not the keychain. Keep that file at mode 600.
+
+Routing offers exactly three strategies: round-robin, weighted-round-robin, fill-first. Failover is reactive. The proxy moves to another credential after an error such as 429. It does not read remaining quota. It does not switch before a limit.
+
+| It holds | It cannot hold |
+|----------|----------------|
+| Claude Code, Codex, Gemini/Antigravity, Grok/xAI, Kimi, Qwen | Cursor, Devin, Meta Muse |
+| Any OpenAI-compatible API by key (e.g. OpenRouter) | — |
+
+Cursor, Devin, and Meta Muse give no OAuth surface it can drive.
+
+**Trade-off: config-dir switching vs proxy.**
+
+| | Config-dir switching | Local proxy |
+|---|---|---|
+| Reach | Works anywhere, remote machines and cloud runners included; it sets only an env var | Helps only code on that machine; it listens on 127.0.0.1 |
+| Switch point | Binds one account at process start; it never switches mid-session | Switches per request, after an error |
+
+Do not expose the proxy on a network. Remote and cloud work still needs the per-account token mechanism.
+
+**Credential trap (`claude setup-token`).** `claude setup-token` mints a long-lived token (about one year). The token runs inference. It cannot read account usage. Anthropic rejects it on `/api/oauth/profile` with `oauth_scope_insufficient` and requires `any_of(user:profile, user:office)`. A normal OAuth login carries `user:profile`. A token that runs inference correctly can still fail anything that shows quota. Two token types, two jobs.
 
 ---
 
