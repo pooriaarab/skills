@@ -38,7 +38,7 @@ Use one row per contact. Keep one row per named person or per role address; do n
 | `phone` | Optional. Only collect if the channel plan needs it and the basis allows it. |
 | `source_url` | The page, directory, or document where the contact or role address appears. |
 | `source_date` | Date you captured the source. For public pages, this is your evidence timestamp. |
-| `basis` | The reason you may contact this address: `public_role`, `public_named`, `existing_customer`, `inbound_inquiry`, `consent`, `referral`, or `do_not_contact`. |
+| `basis` | The reason you may contact this address: `public_role`, `public_named`, `existing_customer`, `inbound_inquiry`, `consent`, or `referral`. Suppression is tracked by `do_not_contact`, not by a `basis` value. |
 | `basis_expiry` | When the basis expires, if it is time-limited. For example, CASL's existing-business relationship windows. |
 | `evidence_url` | Permalink or archive of the page that supports the basis. Not the same as the company home page. |
 | `date_observed` | When the evidence was last checked. This is your freshness field. |
@@ -170,7 +170,7 @@ Do not discover invalid or toxic addresses on send day. Verify at build time.
 3. **Deliverability probe.** Use an SMTP handshake or a deliverability service to detect catch-alls, full inboxes, and disabled accounts. Do not send a real email to test.
 4. **Role detection.** Flag `support@`, `info@`, `hello@`, `sales@`, `contact@`, `admin@`, and similar patterns as `role`.
 5. **Catch-all detection.** If the domain accepts every local part, the address is not a reliable signal of a real recipient.
-6. **Re-visit the evidence URL.** If the page changed and the address or the no-solicitation statement is different, update `date_observed` and `no_solicitation_flag`.
+6. **Re-visit the evidence URL.** Confirm the `email` still appears on the page. If it no longer appears, set `verification_status` to `unverified` and do not contact until you find a new source. If the no-solicitation statement changed, update `no_solicitation_flag` accordingly. Update `date_observed` either way.
 7. **Jurisdiction check.** Confirm the company's country and the contact's country if they differ.
 
 Update `verification_status` after each step. A row with `verification_status: unverified` does not leave the build stage.
@@ -212,7 +212,7 @@ If you must use an enrichment service for an address, record the new `evidence_u
 
 Before you accept a list from a worker:
 
-1. **Evidence density.** What share of rows have a real `evidence_url`? A rate below 100% is a red flag.
+1. **Evidence density.** For rows sourced from public research (`basis: public_role` or `public_named`), what share have a real `evidence_url`? A rate below 100% on those rows is a red flag. Rows with `existing_customer`, `inbound_inquiry`, `consent`, or `referral` basis may rely on an internal record instead of a public URL.
 2. **Invented-row check.** Sample 10 rows and compare each `email` against the `evidence_url`. If any email does not appear on the evidence page, reject the batch.
 3. **Basis consistency.** Confirm the `basis` matches the `evidence_url`. A public directory is not `consent`.
 4. **No-solicitation sweep.** Open 5-10 evidence URLs and look for "no unsolicited," "do not contact," or a no-solicitation email. If any appear, the worker should have flagged them.
