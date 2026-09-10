@@ -1,6 +1,6 @@
 ---
 name: agent-browser-consoles
-description: "Drive real ad and cloud consoles with agent-browser. Use when browser-attach returns about:blank instead of attaching, synthetic clicks do nothing on React/Angular consoles, Google Ads controls hide in shadow DOM, two buttons share one label, innerText disagrees with the screen, or a setup gates on a legal attestation."
+description: "Drive real ad and cloud consoles with agent-browser. Use when browser-attach returns about:blank instead of attaching, synthetic clicks do nothing on React/Angular consoles, a chip input silently fails to save, Google Ads controls hide in shadow DOM, two buttons share one label, innerText disagrees with the screen, a setup gates on a legal attestation, or an OAuth app registers successfully and is still blocked."
 ---
 
 # agent-browser-consoles
@@ -9,7 +9,8 @@ Drive real advertising and cloud consoles with `agent-browser`.
 These traps are not obvious from the CLI help.
 Each one cost several wasted turns to rediscover.
 
-Applies to Google Ads, Meta Events Manager, Reddit Ads, LinkedIn, and GA4.
+Applies to Google Ads, Meta Events Manager, Reddit Ads, LinkedIn, GA4,
+Google Cloud Console, and the Spotify developer dashboard.
 
 ## 1. Confirm which browser you drive
 
@@ -122,3 +123,78 @@ This opened a Meta collapsible that ignored `element.click()` and had no snapsho
 rather than `'`. The failure reads as a missing element, not an encoding problem.
 Match on a substring that stops before the apostrophe, or find the node by regex in `eval`
 and click it by coordinates.
+
+## 10. Chip inputs do not commit on a synthetic Enter
+
+Google Cloud Console takes emails as chips. Test users, and the developer
+contact on the Branding page, both use one.
+
+Setting `input.value` and dispatching `input` does not create a chip. A
+dispatched `KeyboardEvent` for Enter does not either. The field looks filled.
+The Save button may even enable. Nothing persists.
+
+Type real keystrokes and end with a comma:
+
+```sh
+agent-browser click "@e67"
+agent-browser type "@e67" "someone@example.com,"
+```
+
+**Always reload and re-read after Save.** The console shows the value you typed
+whether or not it saved. On the Audience page the grid read `No rows to
+display` after three separate saves that all looked successful.
+
+This is section 3 again, in a harder form: the write appears to work.
+
+## 11. Google restricted scopes need a project of their own
+
+Some APIs use restricted scopes. Google Health is one. Restricted scopes need
+verification before an app in production may request them. An unverified app
+returns `Error 403: access_denied` with "has not completed the Google
+verification process".
+
+Publishing status `Testing` exempts approved test users from verification. So
+the personal-use route is Testing plus your own address as a test user.
+
+**Do not flip an existing project to Testing.** A shared project usually
+already runs other OAuth clients in production, and the switch breaks them.
+Create a separate project instead:
+
+```sh
+gcloud projects create <id> --name="<name>"
+gcloud services enable <service>.googleapis.com --project=<id>
+```
+
+Two costs to state up front. In Testing with an External app, refresh tokens
+expire after **7 days**. And the consent screen refuses to work at all until
+every required Branding field is set, which is where section 10 bites.
+
+## 12. Verify the service id; the obvious name is often wrong
+
+`gcloud services enable googlehealth.googleapis.com` returns PERMISSION_DENIED.
+The service is `health.googleapis.com`. The error says "not found or permission
+denied", which reads like an access problem rather than a wrong name.
+
+Confirm the id from the console URL for the API's library page before trusting
+a guess.
+
+## 13. Deleting an OAuth client does not clear the list
+
+Google soft-deletes OAuth clients. The confirm dialog links to "deleted
+credentials". After confirming, the client still appears in the Clients grid on
+reload.
+
+Do not read that as a failed delete and retry. Check the deleted-credentials
+view instead.
+
+## 14. Registering an app can succeed and still leave you blocked
+
+Spotify let the app be created, then refused every Web API call: the owner
+needs Premium. The checkbox for Web API was disabled at creation time, which
+was the only signal, and it is easy to miss.
+
+Read the app's status page after creating it. Do not treat "created" as
+"working".
+
+Spotify also stopped accepting `localhost` in a redirect URI. Use
+`http://127.0.0.1:<port>/callback`.
