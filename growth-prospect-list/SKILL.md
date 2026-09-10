@@ -43,8 +43,8 @@ Use one row per contact. Keep one row per named person or per role address; do n
 | `evidence_url` | Permalink or archive of the page that supports the basis. Not the same as the company home page. |
 | `date_observed` | When the evidence was last checked. This is your freshness field. |
 | `no_solicitation_flag` | `true` if the source says no unsolicited contact, the privacy policy opts out, or the robots/terms forbid extraction. This overrides `basis`. |
-| `verification_status` | `unverified`, `syntax_ok`, `domain_ok`, `deliverable`, `catch_all`, `role`, or `do_not_contact`. |
-| `do_not_contact` | `true` after an opt-out, a bounce, a no-solicitation finding, or a manual suppression. |
+| `verification_status` | `unverified`, `syntax_ok`, `domain_ok`, `deliverable`, `catch_all`, or `role`. |
+| `do_not_contact` | `true` after an opt-out, a bounce, a no-solicitation finding, or a manual suppression. This is the sole suppression flag; `verification_status` never encodes suppression. |
 | `notes` | One sentence of context: what problem they likely have, why they fit. Not a pitch. |
 
 Fill the compliance columns before the outreach columns. If `no_solicitation_flag` is `true`, set `do_not_contact` to `true` and stop. Do not keep the row for a later channel.
