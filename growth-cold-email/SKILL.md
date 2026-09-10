@@ -86,12 +86,19 @@ Also read the **role flag**. Of the 48 deliverable addresses above, 24 were `inf
 
 ## Named addresses, and where they live
 
-A named person's published address is worth roughly ten role addresses. The supply of them is not evenly distributed, and the pattern is strong enough to plan around:
+A named person's published address is worth roughly ten role addresses, because nobody owns a role address. So count a list in named contacts, not rows.
 
-- **Large-metro firms hide.** Contact forms, `info@`, reception. One metro sample: **38%** of rows had a named address.
-- **Smaller markets publish.** Same profession, same research method, smaller cities: **55%**.
+Where those named addresses live is worth measuring per market rather than assuming. Three samples from one profession, one research method, three regions:
 
-If your first list comes back mostly role addresses, do not conclude the research failed. Conclude that segment is a **phone** segment, and go find the same buyer where they publish. This flips the usual instinct of starting with the biggest market.
+| Sample | Rows | Named address |
+|---|---|---|
+| Large metro | 68 | 38% |
+| Regional, same province | 40 | **55%** |
+| Regional, other provinces | 51 | 35% |
+
+The obvious story — smaller markets publish more — fits the first two and **fails on the third**. Treat "where do named addresses live" as a hypothesis you test with a cheap sample per market, not a rule you plan around. Two confounds to rule out before believing any such pattern: different researchers produce different hit rates on the same brief, and professional norms vary by province or state more than by city size.
+
+What survives all three samples is the actionable part: **a segment that comes back mostly role addresses is a phone segment.** Do not read it as failed research, and do not send to `info@` in volume hoping it works. Go find that buyer on the channel where they are reachable, which `growth-cold-calling` covers.
 
 ## Suppression must outlive the contact record
 
