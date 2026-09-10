@@ -1,13 +1,13 @@
 ---
 name: growth-prospect-list
-description: "Build a defensible, verified B2B prospect list with a consent-evidence column set (basis, evidence URL, date observed, no-solicitation flag), source terms and robots checks, named versus role contact decisions, fan-out research across segments, build-time verification, and lawful enrichment boundaries. Use when the user asks to 'build a prospect list', 'find B2B leads', 'source prospects', 'verify a lead list', 'check if we can legally email this list', 'judge a researcher's output', or decide whether an enrichment step is safe. Pairs with `growth-cold-email` and `growth-cold-calling` for channel mechanics."
+description: "Build a defensible, verified B2B prospect list with a consent-evidence column set (basis, evidence URL, date observed, no-solicitation flag), source terms and robots checks, named versus role contact decisions, fan-out research across segments, build-time verification, and lawful enrichment boundaries. Use when the user asks to 'build a prospect list', 'find B2B leads', 'source prospects', 'verify a lead list', 'check if we can legally email this list', 'judge a researcher's output', or decide whether an enrichment step is safe."
 ---
 
 # growth-prospect-list
 
 A B2B prospect list is an asset only when every row has a recorded reason to be contacted and a right to be contacted. A row without that reason is a liability, and a row with an unverified address is a deliverability risk. Both are cheap to fix at build time and expensive after a send.
 
-This skill is the **build and verify** step. `growth-cold-email` and `growth-cold-calling` own the channel mechanics. Do not mix list building with send mechanics.
+This skill is the **build and verify** step. Channel mechanics — how to write and send the cold email, or how to run the cold call — are a separate concern with their own playbook. Do not mix list building with send mechanics.
 
 ## What makes a row defensible
 
@@ -251,7 +251,5 @@ A prospect list is a living file, not a one-time export.
 
 ## Related
 
-- `growth-cold-email` — the channel mechanics for cold email.
-- `growth-cold-calling` — the channel mechanics for cold calling.
 - `founder-led-sales` — the broader first-sales motion.
 - `ad-experiments` — when you move from outbound to paid experiments.
