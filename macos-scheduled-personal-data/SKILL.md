@@ -42,18 +42,24 @@ file access.
 **Put the privileged reads inside a compiled binary, and grant FDA to that.**
 
 An app bundle whose main executable is a real Mach-O copies each protected
-database into an unprotected staging directory, then `exec`s the ordinary
-script with an env var pointing at the copies. The interpreter then reads
-plain files and needs no privilege.
+database into a staging directory outside TCC's reach, then `exec`s the
+ordinary script with an env var pointing at the copies. The interpreter then
+reads plain files and needs no privilege.
 
 ```
 HPISync.app/Contents/MacOS/HPISync   <- compiled C, holds the grant, copies DBs
         |
-        v  exec, HPI_STAGING=/tmp/hpi-staging
-   sync.sh -> python -> reads /tmp/hpi-staging/chat.db   (no privilege needed)
+        v  exec, HPI_STAGING=~/Library/Application Support/HPISync/staging
+   sync.sh -> python -> reads staging/chat.db   (no privilege needed)
 ```
 
 One grant, on one signed binary, that never moves.
+
+**Do not stage under `/tmp`.** The copies are full iMessage/Safari/Reminders
+databases, and `/private/tmp` is world-writable with a default umask that
+leaves plain files world-readable — any other local account can read them.
+Stage under a path the user owns, create the directory `mkdir -m 0700`, and
+write the copies `0600`.
 
 ### Copy the `-wal` and `-shm` files too
 
