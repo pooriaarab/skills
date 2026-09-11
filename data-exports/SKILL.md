@@ -87,7 +87,7 @@ That path hits password walls, 2FA, and attestation. Stop. Hand the URL to
 the owner.
 
 Google Takeout is the one vendor that will schedule a repeat export (every
-two months for a year). That is still push-by-email, not a poll.
+month for a year, 12 exports). That is still push-by-email, not a poll.
 
 ## Route
 
