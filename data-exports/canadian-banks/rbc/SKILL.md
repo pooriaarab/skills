@@ -23,15 +23,34 @@ eDocuments: Accounts Summary → **Statements/Documents**.
 
 ## Submit
 
-1. Sign in. Stop. The owner enters the client card and password and completes 2FA.
-2. Official help: **Copy to accounting software** → accounts and period →
-   software from the list → save.
-3. UNVERIFIED current UI: **My Accounts** → the account → **Download**
-   above the table → format → date range → **Continue**. Use step 2 if
-   that control is missing.
-4. Older months: **Statements/Documents** → Account Documents → PDF.
+Verified against the live UI on 2026-09-11. Replaces the earlier guesses.
 
-Website only. Do not look for the software download in the app.
+1. `https://www.rbcroyalbank.com/` → **Sign in to R B C Online Banking**.
+   Lands on `secure.royalbank.com/statics/login-service-ui/`.
+2. **Stop.** The owner enters the client card and password and completes 2FA.
+   Do not attempt to supply these.
+3. Accounts Summary (`#/summary`) lists **Bank Accounts**, **Credit Cards**,
+   **Investments** and **Lines & Loans**, each with a balance. This page alone
+   answers "what accounts exist and what is in them".
+4. Click the account name. The URL becomes `#/details;selectedAccount`.
+5. The account page shows Current Balance, Available Balance and **Authorized
+   Overdraft**, then the transaction table with a **Download** button and a
+   **More download options** link beneath it.
+6. **Widen the range first.** The table defaults to `Display: 14 days`, and a
+   download taken without changing it silently returns a fortnight.
+7. Older months: **Statements/Documents** → Account Documents → PDF.
+
+### Automation reality
+
+The Accounts Summary scrapes cleanly, so balances and account types can be
+read by an agent. **The download itself resists automation.** On the account
+page the `Download` control sits below the fold and a synthetic click lands on
+the adjacent transfer form instead; a ref click, an `element.click()` and a
+coordinate click were each measured and none opened the dialog.
+
+Treat balance capture as automatable and the transaction download as a
+hand-off to the owner. That is one click for them, against an unbounded
+number of attempts for an agent.
 
 ## Formats
 
