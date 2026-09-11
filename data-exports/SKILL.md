@@ -100,6 +100,7 @@ month for a year, 12 exports). That is still push-by-email, not a poll.
 | Apple Account, iCloud, App Store | [apple](apple/SKILL.md) |
 | Spotify | [spotify](spotify/SKILL.md) |
 | Strava | [strava](strava/SKILL.md) |
+| RBC, Tangerine, or Wealthsimple | [canadian-banks](canadian-banks/SKILL.md) |
 
 If the vendor is not in this table, find the official "download your data"
 or "privacy" page, then write the steps here the same way. Do not invent a
