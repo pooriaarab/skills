@@ -1,6 +1,6 @@
 ---
 name: canadian-banks
-description: "Use when the user wants a personal transaction export from a Canadian bank — RBC, Tangerine, Wealthsimple, BMO, Scotiabank, or CIBC — or when an aggregator (Plaid, Flinks, MX) is proposed instead of a file download. Triggers: 'export my bank transactions', 'download RBC CSV', 'Tangerine QFX', 'Wealthsimple activities CSV', 'BMO OFX', 'Scotiabank QBO', 'CIBC download transactions', 'Plaid Canada', 'open banking Canada'."
+description: "Use when the user wants a personal transaction export from a Canadian bank — RBC, Tangerine, or Wealthsimple — or when an aggregator (Plaid, Flinks, MX) is proposed instead of a file download. Triggers: 'export my bank transactions', 'download RBC CSV', 'Tangerine QFX', 'Wealthsimple activities CSV', 'Plaid Canada', 'open banking Canada'."
 ---
 
 # Canadian bank transaction exports
@@ -39,9 +39,6 @@ is not CAD, unless the owner confirmed a US account.
 | [RBC](rbc/SKILL.md) | UNVERIFIED: CSV or OFX/QFX | Official view 90–120 days. PDF eDocs 7 years | No |
 | [Tangerine](tangerine/SKILL.md) | CSV or QFX | UNVERIFIED cap. PDF statements on the account | No |
 | [Wealthsimple](wealthsimple/SKILL.md) | CSV | Owner picks the Activities range. Monthly CSVs | No |
-| [BMO](bmo/SKILL.md) | CSV or OFX | Official: 2 months. PDF eStatements 7 years | No |
-| [Scotiabank](scotiabank/SKILL.md) | QFX or QBO | Official: one statement period. PDF 7 years | No |
-| [CIBC](cibc/SKILL.md) | UNVERIFIED: CSV / QFX / OFX | Owner picks a period. PDF eStatements 7 years | No |
 
 PDF statements are **not** machine-readable. CSV, OFX, QFX, and QBO are.
 Official download pages do not document a budget-category column.
