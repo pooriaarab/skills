@@ -25,7 +25,7 @@ eDocuments: Accounts Summary → **Statements/Documents**.
 
 Verified against the live UI on 2026-09-11. Replaces the earlier guesses.
 
-1. `https://www.rbcroyalbank.com/` → **Sign in to R B C Online Banking**.
+1. `https://www.rbcroyalbank.com/` → **Sign in to RBC Online Banking**.
    Lands on `secure.royalbank.com/statics/login-service-ui/`.
 2. **Stop.** The owner enters the client card and password and completes 2FA.
    Do not attempt to supply these.
