@@ -58,13 +58,16 @@ Four traps, in the order they bite:
    the binary by hand under Privacy & Security is the only lever and it can still
    report false.
 
-For access from outside the network, tunnel it. On ngrok's free tier the first
-request shows an interstitial the user must tap through — that blank page is not
-a broken link:
+For access from outside the network, tunnel it. The stream relays touch as well
+as video, so an unauthenticated tunnel lets anyone with the URL control the app
+under test, not just watch it — add an auth guard:
 
 ```bash
-ngrok http 8901
+ngrok http 8901 --basic-auth "user:pass"
 ```
+
+On ngrok's free tier the first request past the auth prompt shows an
+interstitial the user must tap through — that blank page is not a broken link.
 
 **Know what a stream cannot tell you.** It is video plus a touch relay. Good for
 art, layout and flow. Useless for judging input latency, because the stream adds
@@ -127,10 +130,3 @@ than only that it built.
 - <https://reactnativefeel.com/sim> — simulator tooling reference.
 - [Apple HIG](https://developer.apple.com/design/human-interface-guidelines) —
   read Games and Accessibility before designing any on-screen control.
-
-## On-device AI
-
-Apple's Foundation Models framework runs a small model on the device at zero
-inference cost. It is Swift only, so React Native needs a native module, and it
-is missing on older hardware. Every feature built on it needs a fallback, and
-nothing load-bearing should depend on it.
