@@ -146,11 +146,15 @@ A cliche is what makes a page look cheap, and every sector has its own
 saturated stock imagery. Research yours first, then convert it into a negative
 list.
 
-The method: open three to five competitor or peer sites, inspect their actual
-`<img>` filenames and alt text, and note the repeats. Filenames and alt text
+The method: open three to five competitor or peer sites and look at the images
+they actually render, then read the metadata behind them. Filenames and alt text
 leak the stock library and the subject ("diverse-team-meeting",
-"handshake-office"). Those repeats are the sector cliches. Negate them by
-name.
+"handshake-office", "iStock-504309690"), so they are strong supporting evidence.
+They are not sufficient on their own: a site can carry its entire hero set as
+CSS backgrounds and expose no `<img>` tag at all, and lazy-loaded images and
+empty alt attributes hide the rest. Scroll the page, let the images load, and
+judge what you can see; use filenames and alt text to confirm what you are
+looking at. The repeats are the sector cliches. Negate them by name.
 
 A generic starter list, extended with whatever the research finds:
 
@@ -169,8 +173,12 @@ a hard boundary, not as tone guidance.
 
 - Never attach a name, title, credential, or quotation to a generated face. No
   testimonials with generated portraits. No "meet our team". No staff roster.
-- Alt text describes the scene, never the person. Write "A reviewer annotating
-  printed pages at a shared table", never a name or a role.
+- Alt text describes the scene, never the individual. An occupational role is
+  fine when the visible action shows it: "A reviewer annotating printed pages at
+  a shared table" is accurate and useful to a screen reader. What is banned is
+  anything that identifies a particular person, real or implied: a name, a
+  title held by someone, a credential, or a claim of employment. Write "A
+  reviewer annotating printed pages", never "Dr. Alvarez, our lead reviewer".
 - Never generate an accreditation seal, certification badge, or compliance
   mark into an image. A photographed badge is a fabricated claim.
 - Never reuse one placeholder headshot across several differently named
@@ -182,8 +190,12 @@ a hard boundary, not as tone guidance.
 ## 9. QA loop and production notes
 
 - Judge the casting sheet before generating any scene. One bad sheet poisons
-  every scene that uses it. When identity drifts, regenerate the character,
-  not the scene.
+  every scene that uses it, so a flaw you accept here costs you the whole set.
+- Repair drift at the level that caused it, and do not confuse the two cases. If
+  ONE scene drifts off an otherwise good sheet, regenerate that scene: the sheet
+  is still the approved identity and replacing it would invalidate every scene
+  already signed off. Only regenerate the character when the SHEET itself is
+  wrong, and then regenerate every scene built on it.
 - Review the audience-card series together as a grid. Brightness and grade
   inconsistency only shows side by side. Single-image review passes frames
   that clash on the page.
