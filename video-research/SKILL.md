@@ -21,7 +21,7 @@ b=urllib.parse.urlencode({'client_id':d['client_id'],'client_secret':d['client_s
   'refresh_token':d['refresh_token'],'grant_type':'refresh_token'}).encode()
 print(json.load(urllib.request.urlopen('https://oauth2.googleapis.com/token',b))['access_token'])")
 
-curl -s -X POST "https://aiplatform.googleapis.com/v1/projects/pooria-personal/locations/global/publishers/google/models/gemini-3.8-flash:generateContent" \
+curl -s -X POST "https://aiplatform.googleapis.com/v1/projects/YOUR_PROJECT_ID/locations/global/publishers/google/models/gemini-3.8-flash:generateContent" \
   -H "Authorization: Bearer $TOKEN" -H 'content-type: application/json' -d '{
   "contents": [{"role": "user", "parts": [
     {"fileData": {"fileUri": "https://www.youtube.com/watch?v=VIDEO_ID", "mimeType": "video/*"}},
