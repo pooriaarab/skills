@@ -76,6 +76,46 @@ Google emails a link. Official range: a few minutes to a few days. Most people g
 
 Click the link. You land on the Takeout downloads page, not on a raw file in the mail.
 
+## Reading the delivery email by API
+
+An agent can find the mail and extract the link. Two traps make this harder
+than it looks.
+
+**A Gmail CLI that only does search and modify cannot read a body.** Check the
+subcommands before you plan around one. If the tool offers `search` and
+`modify` and nothing that returns message text, the delivery mail is findable
+and unreadable. A thin wrapper over the raw API returns it:
+
+```
+<cli> gmail users messages get --params '{"userId":"me","id":"<id>","format":"full"}'
+```
+
+Use both tools. Search with the one that has a good query syntax to get the
+message id, then read that id with the one that reaches the raw API.
+
+**The body is base64url and nested.** A single top-level read reports
+`size: 0` and looks like an empty message. The text lives in `payload.parts`,
+sometimes several levels down, so walk the tree and decode each `body.data`.
+Treating the top level as the body is the most common way this fails silently.
+
+**Extracting the link does not remove the browser step.** The URL in the mail
+is signed and still redirects to a login, so it cannot be fetched with a plain
+HTTP client using the token alone. Expect to hand it to a signed-in browser.
+
+## Calendar does not need Takeout
+
+Calendar has an ordinary API. A CLI can page it directly, which is faster than
+requesting an archive and gives a live source rather than a snapshot.
+
+Two things to get right when paging it: a `--max` style cap applies per
+request, so walk the range in chunks rather than asking for everything at
+once; and recurring events repeat across chunk boundaries, so dedupe on the
+event id afterwards. On one real account that turned an apparent few hundred
+events into **1,698 spanning eleven years**.
+
+Check the same question for any product before requesting an archive. Takeout
+is for data with no API, not for data you have not looked for an API for.
+
 ## Format
 
 `.zip` or `.tgz`, possibly split into numbered parts. One folder per product.
