@@ -19,6 +19,12 @@ it is a different person, and the user sees that at once.
 Do not use this skill for a fictional character, for stock imagery, or for a
 person the user has no photographs of.
 
+Before profiling any photographs, confirm the subject is the user themself or
+that the user holds documented consent to generate and publish that person's
+likeness. Refuse a third party's likeness — a public figure, a coworker, anyone
+else's photographs — absent that consent; a convincing identity lock makes this
+skill as good at impersonation as it is at a faithful headshot.
+
 The reference implementation is `tools/character-studio` in the `pooriaarab`
 repository. Read its README before you run it.
 
