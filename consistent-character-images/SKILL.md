@@ -1,6 +1,6 @@
 ---
 name: consistent-character-images
-description: Use when generating AI images of a real person who must stay recognisable across every render - headshots, avatars, portraits, hero images, a photo gallery, a character sheet or a reference sheet. Fixes likeness drift, where the image model pulls the face towards its own average and returns an attractive stranger. Covers the character pack and identity lock (weighted anchors with MUST and NEVER lines), the generate-verify-retry loop, and LLM verification of image output, where a vision model scores each anchor against the real photographs. Triggers - 'make images of me', 'generate a headshot', 'it does not look like him', 'the face keeps changing', 'character sheet', 'reference sheet', 'identity lock', 'consistent character', 'verify the generated image'.
+description: Use when generating AI images of a real person who must stay recognisable across every render - headshots, avatars, portraits, hero images, a photo gallery, a character sheet or a reference sheet. Fixes likeness drift, where the image model pulls the face towards its own average and returns an attractive stranger. Covers the prior-art search before you write anything, the character pack and identity lock (weighted anchors with MUST and NEVER lines, plus a drift-direction list), the generate-verify-retry loop with one correction per round, reference-image casting sheets, and LLM verification of image output, where a vision model scores each anchor against the real photographs. Triggers - 'make images of me', 'generate a headshot', 'it does not look like him', 'the face keeps changing', 'character sheet', 'reference sheet', 'identity lock', 'consistent character', 'verify the generated image'.
 ---
 
 # Consistent character images
@@ -30,40 +30,50 @@ repository. Read its README before you run it.
 
 ## The workflow
 
-Follow this order. Step 4 is the one agents skip, and skipping it wastes the
+Follow this order. Step 5 is the one agents skip, and skipping it wastes the
 whole run.
 
-1. **Collect many references, not six.** Ask for fifty or more, across angles,
-   lighting and grooming states. Six is enough to build a caricature and not
-   enough to build a likeness. See the calibration section below.
+1. **Search for prior art first.** Grep the available skills for the person's
+   name, and for the words identity, likeness, character and portrait. A skill
+   named `pooria-photo` already held an identity reference for this exact
+   person. It carried the line "Avoid a narrow V-shaped chin" and a failure list
+   entry, "The jaw becomes too narrow or too square". A fresh identity lock was
+   built from scratch without that check. The subject then reported that exact
+   fault, which cost several render cycles.
 
-2. **Profile the photographs before you write anything.** Ask a vision model for
+2. **Collect many references, not six.** Ask for fifty or more, across angles,
+   lighting and grooming states. Six is enough to build a caricature and not
+   enough to build a likeness. Collect that many to profile and to choose from.
+   Pass only three to five of them to any single render. See the calibration
+   section below.
+
+3. **Profile the photographs before you write anything.** Ask a vision model for
    a structured profile of every photograph: beard state and cheek coverage,
    hair style and volume, hairline visibility, glasses, framing, angle, and the
    measurements below. Then take the **median of each measurement** across the
    whole set. Those medians are the identity lock. Do not write it from a handful
    of pictures and do not write it from a description the user gave you.
 
-3. **Write the anchors.** Eight to twelve, ordered by how fast a wrong value
+4. **Write the anchors.** Eight to twelve, ordered by how fast a wrong value
    reads as "not them". Each carries the measured median and its sample size.
    See the anchor rules below.
 
-4. **Generate one throwaway render.** Expect it to be wrong. You now have a
+5. **Generate one throwaway render.** Expect it to be wrong. You now have a
    known-bad image, which is the test fixture for the next step.
 
-5. **Validate the verifier.** Score that known-bad image with at least two vision
+6. **Validate the verifier.** Score that known-bad image with at least two vision
    models. Keep a model only when it fails the image and names the faults you can
    see yourself. Record the model, the score and the date.
 
-6. **Generate, verify, retry.** Put the identity lock in the prompt before the
-   scene. Score the render against the real photographs. Feed the verifier's own
-   corrections back into the next prompt. Stop on a pass or after three attempts.
-   Keep the best attempt either way.
+7. **Generate, verify, retry.** Put the identity lock in the prompt before the
+   scene. Score the render against the real photographs. Feed back one
+   correction per round. Stop on a pass or after three attempts. Keep the best
+   attempt either way.
 
-7. **Show the evidence.** Put the renders, the anchor scores and the real
+8. **Show the evidence.** Put the renders, the anchor scores and the real
    photographs on one page. The user must be able to disagree with the verifier.
 
-8. **Fix anchors, not shots.** A fault that appears across several shots is an
+9. **Fix anchors, not shots.** A fault that appears across several shots is an
    anchor problem. Add the exact failure to that anchor's NEVER line.
 
 ## How to write an anchor
@@ -90,6 +100,35 @@ produced, not "an unsuitable beard".
 **`why` records the render that failed.** A later reader who does not know the
 history will read a strict MUST line as fussy and soften it. The reason is what
 stops that. Write one sentence naming the failure the anchor exists to prevent.
+
+## Keep a drift-direction list, not only a NEVER list
+
+A NEVER line states what is wrong. A drift direction states what the model turns
+the trait **into**. A verifier can look for a named result. It cannot look for an
+absence. Keep the list beside the anchors and extend it from real renders.
+
+The directions observed here:
+
+- Round wire frames become rectangular.
+- The chin becomes a pointed V.
+- The beard fills in across the cheeks.
+- Hair becomes a sculpted pompadour.
+- Skin becomes retouched and poreless.
+- The torso becomes broad.
+- Every pose defaults to a notebook, a laptop, or a direct gaze into the lens.
+
+## The enumeration density ceiling
+
+An enumerated grid of about 16 items drifts reliably. Roughly one item comes back
+duplicated or garbled. The more discrete things a prompt enumerates, the more
+likely one of them breaks.
+
+An identity lock is an enumeration. Many anchors, plus a check line for each one,
+cross that ceiling quickly. Past the ceiling, expect about one anchor to break
+per render.
+
+Prefer fewer correct elements over a busy approximation. Cut a check line before
+you add one.
 
 ## Validate the verifier before you trust it
 
@@ -121,6 +160,11 @@ Three things in the verifier prompt make the difference. Keep all three.
   did not examine the image. Most candidates score 2 or 3 on at least one
   critical anchor.
 
+**Verify at full resolution.** Thumbnails hide garbled type. Full resolution
+shows it. A downscaled candidate here hid a hard-edged composite beard that was
+obvious at full size. Send the candidate to the verifier larger than the
+references.
+
 Also keep the verifier blind. It sees the reference photographs, the candidate
 and the anchor definitions. It must never see the prompt that made the image,
 or it grades the intent instead of the result.
@@ -140,6 +184,22 @@ The mean catches a render that is wrong in many small ways. The floor catches a
 render that is right everywhere except the one trait that carries the likeness.
 You need both.
 
+## The retry loop
+
+**Feed back one correction per round.** Every fault at once makes the model trade
+one fault for another. The scores here bounced instead of climbing: 78%, then
+80%, then 73%.
+
+Rank the faults by weight times the points missing. Send back the single biggest
+win. Revise only the weakest dimension before the next generation. Change one
+variable per round when you debug.
+
+**Cap retries at about three.** A prompt that cannot pass in three attempts
+usually has a tool problem or a framing problem, not a wording problem.
+
+**Reframe past a fault the model will not drop.** Crop the offending region out
+of shot. Framing beats prompting for anything the model keeps producing.
+
 ## Never describe the face in the image prompt
 
 A long prose description of a face makes the model generate a face from the
@@ -151,6 +211,39 @@ Split the fields by job. The image prompt gets one short `check` line per anchor
 framed as a list to compare the output against. The verifier gets the full `must`
 and `never` text. Open the image prompt by naming the photographs as the source
 of the likeness, then describe only the scene.
+
+## Never write polish words
+
+Do not write "8k", "hyperrealistic", "masterpiece", "stunning", "flawless" or
+"luxury". Do not write "cinematic" either when the target is a real person.
+"Cinematic 35mm" reads as an advert. A phone-photo prompt reads as real.
+
+Name a real camera body, a real lens and a working aperture instead. Ask for
+unretouched skin, with pores, lines, uneven tone and a little shine. Unflattering
+light reads as real.
+
+## Pass three to five references, not dozens
+
+Profile a large library to **choose** well. Pass only a handful to any single
+render. Use three to five originals from different angles: one close face, one
+three-quarter, one body.
+
+Never use a generated image to establish identity. Only an original photograph
+can do that.
+
+## Let identity travel through a picture
+
+Identity does not have to travel as text. Build a four-frame casting sheet:
+front head-and-shoulders, three-quarter, strict profile, full body. Use one
+plain mid-grey background. Keep wardrobe, hair and light identical across the
+four frames. Keep the expression neutral throughout.
+
+Pass that sheet as a reference. Later renders then inherit the identity from the
+picture instead of from a fresh description.
+
+Counter-rule: never feed a busy decorated model sheet back as a reference. Nine
+or more panels, with labels, palette strips and callout lines, make the model
+reproduce the board layout instead of the person.
 
 ## Measure the person, do not describe them
 
@@ -188,6 +281,17 @@ So:
   held across all of them. The stable part became the anchor; the varying part
   became `short-beard`, `goatee` and `clean` variants that override it.
 
+**Name one canonical photograph per trait.** The medians give you the value. An
+authority map gives a disputed value a single arbiter, so you do not re-average
+the library every time two readings disagree. Write the map into the pack:
+
+| trait                               | canonical photograph |
+| ----------------------------------- | -------------------- |
+| glasses, brows, hair, beard density | `portrait-04.jpg`    |
+| face width, nose                    | `portrait-11.jpg`    |
+| shoulders, torso, build             | `half-body-02.jpg`   |
+| full-body proportions               | `full-body-01.jpg`   |
+
 ## Choose the image model by measurement
 
 Prompt work has a ceiling. Model choice moved the result more than any rewrite.
@@ -213,15 +317,33 @@ image 4 out of 5, at two resolutions.
 composite artefacts.** Keep render quality as a human check on the contact sheet.
 Do not claim an automated gate covers it.
 
+**Some models have no seed.** Checked across the WaveSpeed edit models:
+`flux-2-pro`, `flux-2-max` and `qwen-image-2.0-pro` accept a seed.
+`seedream-v5.0-pro`, `nano-banana-pro` and `gpt-image-2` do not. Those three also
+reject a negative prompt and a guidance scale. The models that hold a likeness
+best are in that second group, so there is no seed to pin. Treat score variation
+between attempts as inherent, not as a bug to fix.
+
 ## Failure modes
 
 Each of these happened. None is hypothetical.
+
+- **Writing an identity lock without searching for prior art.** A `pooria-photo`
+  skill already warned against a narrow V-shaped chin for this person. A lock
+  written from scratch missed it, the subject reported that exact fault, and
+  several render cycles paid for it. Grep the skills first.
 
 - **A verifier that agrees with the brief.** Shown the anchor text, a weak model
   restates the MUST line as its own observation and passes a wrong face. One
   scored a known-bad render 97.6%. Make the verifier write what it sees in the
   reference and what it sees in the candidate as two separate fields, force
   numeric estimates, and tell it that straight 5s mean it did not look.
+
+- **Verifying a thumbnail.** A downscaled candidate hid a hard-edged composite
+  beard that was plain at full size. Send the verifier the full-resolution file.
+
+- **Feeding every fault back at once.** The model trades one fault for another
+  and the score bounces: 78%, 80%, 73%. Send one correction per round.
 
 - **Describing the face in the image prompt.** Long prose about a face makes the
   model generate a face from the words and ignore the photographs. Four
