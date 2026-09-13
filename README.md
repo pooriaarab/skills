@@ -193,6 +193,7 @@ to the skill that holds the lever. The others assume you already know which job 
 | [deploy-app-gcp](deploy-app-gcp/SKILL.md) | Deploy a containerized app to GCP (Cloud Run + Cloud SQL + Memorystore + GCS) with Terraform, verify, then tear down. |
 | [deploy-app-aws](deploy-app-aws/SKILL.md) | Deploy a containerized app to AWS (ECS Fargate + RDS + ElastiCache + S3 + ALB) with Terraform, verify, then tear down. |
 | [deploy-app-azure](deploy-app-azure/SKILL.md) | Deploy a containerized app to Azure (Container Apps + Postgres + Cache for Redis + Blob) with Bicep, verify, then tear down. |
+| [consistent-character-images](consistent-character-images/SKILL.md) | Generate AI images of a real person that still look like them — a measured identity lock, a generate-verify-retry loop, and a vision model that scores every render against the real photographs. |
 
 ## Install
 
