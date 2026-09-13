@@ -198,3 +198,30 @@ Read the app's status page after creating it. Do not treat "created" as
 
 Spotify also stopped accepting `localhost` in a redirect URI. Use
 `http://127.0.0.1:<port>/callback`.
+
+## 15. Match headed vs headless to whether a human is in the loop
+
+agent-browser defaults to headless (`headless=new`). No window is drawn. That
+is correct for the common case: reading a page, extracting data, downloading a
+file, a background sync. A human is not needed, so a window is waste.
+
+It is wrong the moment a person must see or touch the page:
+
+- a login form they complete
+- a passkey or Touch ID prompt (a passkey cannot be replayed by the agent; the
+  person authorises it at the machine)
+- a 2FA, SafeKey, or one-time code
+- a CAPTCHA or a "prove you are human" interstitial
+- any step where the user is watching and will click
+
+Run those headed: `--headed`, or `AGENT_BROWSER_HEADED=1`. A headless run of a
+login task strands the user — they are told to "log in in the window" and there
+is no window. That failure is silent; nothing errors.
+
+Confirm the mode before handing off. `ps aux | grep 'headless=new'` must return
+nothing for a headed session. `osascript -e 'tell application "Google Chrome"
+to count windows'` should be non-zero. Do not trust the `--headed` flag alone;
+a stale headless process from an earlier run can still be driving the tab.
+
+Rule of thumb: if the next sentence to the user is "do X in the browser," it
+must be headed first.
