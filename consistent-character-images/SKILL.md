@@ -185,6 +185,91 @@ The mean catches a render that is wrong in many small ways. The floor catches a
 render that is right everywhere except the one trait that carries the likeness.
 You need both.
 
+## Verify the brief, not only the likeness
+
+A likeness score cannot see the shot. A render can be a flawless likeness of the
+right person in the wrong pose, wearing the wrong clothes, pulling the wrong
+face, and pass at 80%.
+
+Send the camera line, the expression line and the wardrobe line to the verifier
+as a **separate** pass or fail, judged apart from the likeness score. Scoring the
+two together lets either one hide the other.
+
+Put the brief failure at the head of the corrections. Only the first correction
+goes back each round, and a sharper beard on a shot pointing the wrong way is a
+wasted attempt.
+
+Four faults this caught that nothing else did:
+
+- A rear three-quarter delivered as a plain side profile. It scored 80% and sat
+  next to the real side profile, an identical frame in a turnaround.
+- A head-and-shoulders delivered as a full-length high-angle shot.
+- A mirror flip: turned to his right instead of his left, **watch on the wrong
+  wrist**, mouth closed when the brief asked for mid-sentence.
+- Sleeves rolled in one panel and long and buttoned in the next.
+
+Name these in the verifier's instructions. Telling it what the model actually
+does beats asking it to compare against an abstract brief.
+
+## Never let the identity block contradict the shot
+
+The traits that make a person recognisable and the traits a shot asks for are
+different lists, and they overlap. Habitual expression is the usual collision. An
+anchor reading "closed-mouth asymmetric half-smile" is correct for a portrait and
+flatly wrong for a panel asking for serious. With both in one prompt the model
+splits the difference, and every expression panel comes back as the same faint
+smile.
+
+**Drop the anchor the shot overrides, in the prompt and in the scoring, from one
+shared function.** Dropping it only in the prompt is worse than not dropping it:
+the model then obeys the brief and the verifier marks the correct render down
+against the anchor it was told to ignore.
+
+The same collision hides in the wardrobe. A wardrobe written once for a whole
+pack names trousers, a watch and shoes. On a head-only crop that contradicts the
+framing, and the model resolves the contradiction by pulling the camera back and
+rendering the whole body. Say which instruction wins:
+
+> The framing is the final word on what is in frame. Wardrobe items the crop
+> cannot reach are simply out of shot. Do NOT widen the shot to include them.
+
+## Do not score a shot on what it cannot show
+
+Dropping a "not visible" anchor from the mean is right, but it quietly shrinks
+the denominator. A rear view scored **100%** here: seven face anchors came back
+not visible, and the mean was taken over the remaining six. A perfect score over
+six anchors out of thirteen is not a perfect score.
+
+Give the shot a named scope and resolve the anchor list from it, so the
+denominator is decided by the shot rather than by whatever the verifier happened
+to see. Six of six is an honest number. Six of thirteen dressed up as perfect is
+not.
+
+The same scope fixes the prompt. A head-and-shoulders render told to match a
+height it cannot show is carrying an instruction it can only fail.
+
+## Pick the best attempt by pass first, then score
+
+`attempts.reduce((a, b) => b.score > a.score ? b : a)` is wrong twice.
+
+A strict `>` hands a tie to the earliest attempt. Two attempts here both scored
+1.0; the first was judged **a different person** and the second was not. The tie
+went to the first, so the pipeline published a failed render and recorded the
+panel as failed while a passing one sat beside it on disk.
+
+Ranking on score alone also prefers a higher-scoring failure over a lower-scoring
+pass. A passing attempt beats a failing one whatever the scores say, and a tie
+goes to the later attempt, because that is the one that carried a correction.
+
+## Record what the check objected to
+
+A gate that fails without saying why costs a full cycle every time. The report
+here showed a critical failure named `brief` and nothing else, so the only way to
+learn what the verifier disliked was to run the whole verification again by hand.
+
+Write the note into the report and into the log at the moment the check fails.
+Instrument a check as you add it, not after it has cost you an hour.
+
 ## The retry loop
 
 **Feed back one correction per round.** Every fault at once makes the model trade
