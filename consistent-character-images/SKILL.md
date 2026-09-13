@@ -35,11 +35,12 @@ whole run.
 
 1. **Search for prior art first.** Grep the available skills for the person's
    name, and for the words identity, likeness, character and portrait. A skill
-   named `pooria-photo` already held an identity reference for this exact
-   person. It carried the line "Avoid a narrow V-shaped chin" and a failure list
-   entry, "The jaw becomes too narrow or too square". A fresh identity lock was
-   built from scratch without that check. The subject then reported that exact
-   fault, which cost several render cycles.
+   named [`pooria-photo`](../pooria-photo/SKILL.md) already held an identity
+   reference for this exact person. It carried the line "Avoid a narrow
+   V-shaped chin" and a failure list entry, "The jaw becomes too narrow or too
+   square". A fresh identity lock was built from scratch without that check.
+   The subject then reported that exact fault, which cost several render
+   cycles.
 
 2. **Collect many references, not six.** Ask for fifty or more, across angles,
    lighting and grooming states. Six is enough to build a caricature and not
