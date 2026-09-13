@@ -43,6 +43,33 @@ Workspace accounts: an admin can disable Takeout. If the page refuses, that is w
 
 YouTube on a Brand Account: switch to that Brand Account before you export, or the videos will not be in the zip.
 
+## Which products to actually take
+
+A full Takeout can reach 180 GB, almost all of it Google Photos originals and
+Drive files. Do not take that whole for a personal record.
+
+- **Photos originals are pixels, not searchable text.** Their metadata — date,
+  geo, filename — is small and worth having, but the full-resolution files bury
+  storage and add nothing a query can use. Photos also already live in Google
+  Photos, which is their backup. Skip them.
+- **Drive** is files, not life-signal. Skip unless a specific document is the goal.
+- **Gmail, Contacts, Calendar** have live APIs. If a CLI already syncs them,
+  Takeout only duplicates them. Skip.
+
+For a queryable personal record, **Deselect all**, then take the small,
+text-based products with no good API:
+
+| Take | Why |
+|---|---|
+| Location History / Timeline | Where you were, over years. No API. |
+| My Activity (Search, YouTube) | What you searched and watched. High signal. |
+| Maps (your places, reviews) | Saved and rated places. |
+| Fit / Google Health | Only if not already pulled another way. |
+
+This turns a 180 GB request into a few GB that downloads in one pass and
+indexes cleanly. The rule matches the pipeline's principle: fetch what answers
+a question, not the rawest thing available.
+
 ## What it contains
 
 Whatever you ticked, if Google still holds it. Official examples: email, documents, Calendar, Photos, YouTube videos, registration and account activity.
