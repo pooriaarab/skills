@@ -89,7 +89,7 @@ export function makeGmail(execFile = execFileDefault) {
       "-a", account, "gmail", "send",
       "--reply-to-message-id", replyToMessageId,
       "--to", to,
-      "--subject", subject.startsWith("Re:") ? subject : `Re: ${subject}`,
+      "--subject", /^re:/i.test(subject) ? subject : `Re: ${subject}`,
       "--body", body,
       "-y",
     ]);

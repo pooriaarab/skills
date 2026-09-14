@@ -114,12 +114,26 @@ describe("mutations", () => {
     assert.ok(exec.calls[0].args.includes("UNREAD"));
   });
 
+  it("star adds STARRED", async () => {
+    const exec = fakeExec(["{}"]);
+    await makeGmail(exec).star("acct", "m1");
+    const a = exec.calls[0].args;
+    assert.ok(a.includes("--add") && a.includes("STARRED"));
+  });
+
   it("reply threads onto the original and prefixes the subject once", async () => {
     const exec = fakeExec(["{}"]);
     await makeGmail(exec).reply("acct", { replyToMessageId: "m1", to: "x@y.z", subject: "Re: Hi", body: "ok" });
     const a = exec.calls[0].args;
     assert.ok(a.includes("--reply-to-message-id") && a.includes("m1"));
     assert.equal(a[a.indexOf("--subject") + 1], "Re: Hi");
+  });
+
+  it("reply does not double-prefix a lowercase re: subject", async () => {
+    const exec = fakeExec(["{}"]);
+    await makeGmail(exec).reply("acct", { replyToMessageId: "m1", to: "x@y.z", subject: "re: Hi", body: "ok" });
+    const a = exec.calls[0].args;
+    assert.equal(a[a.indexOf("--subject") + 1], "re: Hi");
   });
 
   it("reply surfaces a failure instead of silently doing nothing", async () => {
