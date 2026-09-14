@@ -11,7 +11,7 @@ and scraped, and you will never know by whom.
 
 This skill is the scan set you run first. For the paperwork side of going public —
 LICENSE, CONTRIBUTING, CODEOWNERS, CI, branch protection — use
-[`open-source-repo-prep`](../open-source-repo-prep/SKILL.md). The two do not overlap.
+[`repo-standards`](../repo-standards/SKILL.md). The two do not overlap.
 
 ## Read this first: a clean secret scanner means less than it looks
 
