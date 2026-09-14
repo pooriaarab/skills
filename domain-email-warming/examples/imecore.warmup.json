@@ -48,41 +48,41 @@
   ],
   "seeds": [
     {
-      "address": "pooria.arab@gmail.com",
+      "address": "seed-primary@gmail.com",
       "provider": "gmail",
-      "gogAccount": "pooria.arab@gmail.com",
+      "gogAccount": "seed-primary@gmail.com",
       "engage": true
     },
     {
-      "address": "pooria.arab+imecore@gmail.com",
+      "address": "seed-primary+imecore@gmail.com",
       "provider": "gmail",
-      "gogAccount": "pooria.arab@gmail.com",
+      "gogAccount": "seed-primary@gmail.com",
       "engage": true
     },
     {
-      "address": "pooria.arab+referrals@gmail.com",
+      "address": "seed-primary+referrals@gmail.com",
       "provider": "gmail",
-      "gogAccount": "pooria.arab@gmail.com",
+      "gogAccount": "seed-primary@gmail.com",
       "engage": true
     },
     {
-      "address": "pooria.arab+support@gmail.com",
+      "address": "seed-primary+support@gmail.com",
       "provider": "gmail",
-      "gogAccount": "pooria.arab@gmail.com",
+      "gogAccount": "seed-primary@gmail.com",
       "engage": true
     },
     {
-      "address": "bhonar76@gmail.com",
+      "address": "seed-passive-1@gmail.com",
       "provider": "gmail",
       "engage": false
     },
     {
-      "address": "alikhajeh7170@gmail.com",
+      "address": "seed-passive-2@gmail.com",
       "provider": "gmail",
       "engage": false
     },
     {
-      "address": "entrepreneursity.ca@gmail.com",
+      "address": "seed-passive-3@gmail.com",
       "provider": "gmail",
       "engage": false
     }
