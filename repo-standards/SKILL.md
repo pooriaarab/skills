@@ -128,6 +128,12 @@ Capture the real terminal, running the command people actually run, with its
 real output. Not a mock, not a hand-written transcript. A recorded terminal
 beats a still image, and both beat a logo.
 
+The same PII/secret risk from the app section applies here: this step runs
+after `pre-public-repo-audit`, so nothing sweeps a committed capture. A real
+terminal's output can carry an absolute laptop path, an internal hostname, or
+an env var the command echoed back. Redact the frame before committing, or run
+`pre-public-repo-audit`'s PII sweep again over the new image.
+
 ### A library
 
 No screenshots. The code example above the fold is the image.
