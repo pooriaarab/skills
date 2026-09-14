@@ -1,6 +1,6 @@
 ---
 name: browser-extension
-description: "Use when building a cross-browser (Firefox + Chrome) Manifest V3 web extension from scratch and/or submitting it to the stores. Covers the one-manifest-two-browsers layout, the CSP rules that break WebAssembly and web workers (and the same-origin-worker fix), on-device AI via Firefox `browser.trial.ml` and Chrome's built-in Prompt API, `web-ext` build/lint, and the full store-submission flow per browser — AMO (addons.mozilla.org) including the mandatory 2FA/AAL2 gate, and the Chrome Web Store. Triggers: 'build a browser/Firefox/Chrome extension', 'MV3 extension', 'submit to AMO', 'publish to Chrome Web Store', 'web-ext', 'sign my add-on', 'extension CSP blocks my worker/wasm', 'local AI in an extension'. Also covers, once built: inserting text into a rich-text composer from a content script (Draft.js/Quill/Lexical) when the post/send button stays disabled, storing per-device auth/session state (storage.local vs sync, self-heal, sign-up races), and QA'ing a loaded unpacked extension via browser automation. Triggers: 'reply/post button disabled after inserting text', 'execCommand insertText', 'content script into X/LinkedIn composer', 'chrome.storage.sync keeps restoring old token', 'test/QA a loaded extension', 'drive extension with browser automation', 'chrome ignores --load-extension'."
+description: "Use when building a cross-browser (Firefox + Chrome) Manifest V3 web extension from scratch and/or submitting it to the stores. Covers the one-manifest-two-browsers layout, the CSP rules that break WebAssembly and web workers (and the same-origin-worker fix), on-device AI via Firefox `browser.trial.ml` and Chrome's built-in Prompt API, `web-ext` build/lint, and the full store-submission flow per browser — AMO (addons.mozilla.org) including the mandatory 2FA/AAL2 gate, and the Chrome Web Store. Triggers: 'build a browser/Firefox/Chrome extension', 'MV3 extension', 'submit to AMO', 'publish to Chrome Web Store', 'web-ext', 'sign my add-on', 'extension CSP blocks my worker/wasm', 'local AI in an extension'. Also covers, once built: inserting text into a rich-text composer from a content script (Draft.js/Quill/Lexical) when the post/send button stays disabled, storing per-device auth/session state (storage.local vs sync, self-heal, sign-up races), and QA'ing a loaded unpacked extension via browser automation. Triggers: 'reply/post button disabled after inserting text', 'execCommand insertText', 'content script into X/LinkedIn composer', 'chrome.storage.sync keeps restoring old token', 'test/QA a loaded extension', 'drive extension with browser automation', 'chrome ignores --load-extension'. ALSO covers the stores beyond Chrome and Firefox: Microsoft Edge Add-ons (free, Partner Center, same Chromium zip, has a REST submission API that belongs in CI), Opera Add-ons and Naver Whale (free, same zip, dashboard-only), and why Safari is usually a rewrite rather than a port — safari-web-extension-converter produces an Xcode app needing the $99/yr Apple Developer Program, and Safari has no `offscreen` and no `sidePanel` API. Triggers: 'submit to Edge Add-ons', 'Microsoft Partner Center extension', 'publish to Opera', 'Naver Whale store', 'safari-web-extension-converter', 'port my extension to Safari', 'which stores can I publish my extension to'."
 ---
 
 # Cross-Browser Web Extension: Build & Ship
@@ -157,6 +157,85 @@ When agent-browser `--auto-connect` reports "No running Chrome instance found" (
 
 ---
 
+## 7b. The other stores (Edge, Opera, Whale — and why not Safari)
+
+Chrome and Firefox are not the whole map. Three more stores take the package you
+already built; the fourth is a different product wearing the same name.
+
+| Store | Cost | Takes the Chromium zip as-is? | API? | Verdict |
+|---|---|---|---|---|
+| **Microsoft Edge Add-ons** | Free | Yes | **Yes** — REST | Do it. Best ratio in the table. |
+| **Opera Add-ons** | Free | Yes | No, dashboard only | Cheap. Slow review. |
+| **Naver Whale** | Free | Yes | No | Only if you want Korean reach. |
+| **Safari** | **$99/yr** | **No** — needs an Xcode app wrapper | App Store Connect | Usually no. See below. |
+
+Brave, Vivaldi, Arc and most Chromium forks install **from the Chrome Web Store**.
+There is nothing to submit to them. Chrome + Edge + Firefox covers nearly everyone.
+
+### Microsoft Edge Add-ons
+
+Register in **Partner Center** (`partner.microsoft.com/dashboard/microsoftedge`).
+No fee, unlike Chrome's $5.
+
+Edge is Chromium, so the same zip uploads unchanged — including `offscreen`, which
+Edge supports. Do not rebuild.
+
+It has a **REST submission API**, which is the reason to prioritise it: it slots
+into the same CI job as §13 rather than becoming a manual step forever. Auth is an
+Azure AD client-credentials pair (client id + secret + an access-token URL) scoped
+to a product id, not the Google OAuth dance. Broadly: POST the package to a draft,
+poll the operation until it reports complete, then POST publish. Treat the exact
+endpoint shape as **unverified here** and read the current Partner Center API docs
+before wiring it — Microsoft has revised this API at least once.
+
+Known friction, in rough order of how much time it costs:
+- Partner Center account creation is slower than Chrome's. It can require identity
+  verification before the first submission, so start it early rather than on the day
+  you want to ship.
+- The listing form is separate from the package upload; both must be complete before
+  Submit enables, with the same silent-greyed-button behaviour as Chrome (§12).
+
+### Opera Add-ons
+
+`addons.opera.com/developer/`. Free, Chromium, same zip.
+
+Dashboard-only — no publish API, so it stays a manual step. Review is human and
+historically slower than Chrome's. Opera also asks for its own listing assets rather
+than reusing the Chrome ones.
+
+### Naver Whale
+
+`store.whale.naver.com`. Chromium, same zip, needs a Naver account.
+
+Expect the listing to want Korean copy. Worth it only if Korean users are a real
+target, otherwise it is a listing you will not maintain.
+
+### Safari — read this before agreeing to it
+
+Safari "web extensions" share the WebExtension API surface but **not the delivery
+model**. `xcrun safari-web-extension-converter <ext-dir>` generates an **Xcode
+project** that wraps the extension inside a macOS or iOS app. You then ship that app
+through the App Store, which needs the **Apple Developer Program at $99/yr**.
+
+So it is not a repackage. It is a second product with its own build toolchain,
+signing identity, review queue and release cadence.
+
+Two API gaps decide it for most extensions, and they are the ones MV3 pushed people
+onto in the first place:
+
+- **No `offscreen` API.** This is Chrome-specific. Any extension using an offscreen
+  document to hold something an MV3 service worker cannot — `RTCPeerConnection` is
+  the common case, because a worker can be killed mid-session — has no equivalent on
+  Safari and needs its architecture changed, not ported.
+- **No `sidePanel` API.** Chrome's `side_panel` and Firefox's `sidebar_action` both
+  have no Safari counterpart. A side-panel-shaped product has no home there.
+
+Check both against your own manifest before quoting a timeline. If either appears,
+Safari is a rewrite wearing the costume of a port. Say so plainly and early — it is a
+much cheaper conversation before the Apple Developer purchase than after.
+
+---
+
 ## 8. Pass review the first time (pre-submission audit)
 
 Run this audit **before** uploading. It separates the warnings that are fine from the ones that get you rejected.
@@ -220,7 +299,7 @@ Auth tokens and per-device session ids belong in `chrome.storage.local`. `chrome
 
 ## 11. QA a loaded (unpacked) extension via browser automation
 
-- **Recent Chrome ignores `--load-extension`** on a normal profile (anti-abuse). Load once via `chrome://extensions` → Developer mode → Load unpacked; it persists across restarts. To pick up a rebuild without GUI, **quit + relaunch** the browser — the unpacked registration persists.
+- **Chrome ignores `--load-extension`** on a normal profile (anti-abuse); the flag was removed around Chrome 137 and confirmed still inert on 152. `--enable-unsafe-extension-debugging` does **not** bring it back — verified: only Chrome's built-in extension targets appear over CDP, none for yours. Do not spend time on flags. Load once via `chrome://extensions` → Developer mode → Load unpacked; it persists across restarts. To pick up a rebuild without GUI, **quit + relaunch** the browser — the unpacked registration persists.
 - A DOM-automation tool that connects **through an installed helper extension** can drive content injected into normal web pages, but usually **cannot open `chrome://` or `chrome-extension://`** pages (the extension's own popup/side panel). Drive those with screen automation, or design the test to avoid them.
 - Screen-automation focus is unreliable when several terminal/agent windows compete for foreground (clicks/keystrokes land in the wrong window). **Activate the target app deterministically via the OS scripting layer first** (macOS: `osascript -e 'tell application "Google Chrome" to activate'`, then open the URL), and confirm the intended window is frontmost before acting.
 - **Fastest way to seed a known-good session into a content script for a test:** create a valid session against the API, then set the token/id into the **page origin's `localStorage`** (content scripts read page `localStorage`, and a well-written client uses it as a fallback) — sidesteps the extension's `chrome://`-only storage UI entirely.
@@ -254,6 +333,7 @@ Review takes days–weeks. Set a **durable cloud schedule** (claude.ai routine +
 - [ ] Pre-submission audit (§8): own code free of `eval`/dynamic-`innerHTML`/remote code; vendored libs shipped **unminified** + licensed; `web-ext lint` 0 errors; minimal justified permissions; privacy policy URL live.
 - [ ] Content-script insertion (§9): activate the field, insert via `execCommand('insertText')` (not `textContent`), and confirm the target's Post/Send button actually **enables**.
 - [ ] Session state (§10): tokens in `storage.local` not `sync`; concurrent auto-sign-ups de-duped via one in-flight promise; self-heal (clear + re-auth) on 401/403.
+- [ ] Other stores (§7b): Edge submitted (free, same zip, has an API — wire it into §13); Opera/Whale decided; Safari explicitly ruled in or out against the `offscreen`/`sidePanel` gaps.
 - [ ] QA (§11): loaded via `chrome://extensions` (not `--load-extension`); target app activated deterministically before automation; screenshot→click coordinates scaled; test HTTP calls send a browser UA + `Origin`.
 
 ---
