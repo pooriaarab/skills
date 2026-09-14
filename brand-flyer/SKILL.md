@@ -320,11 +320,11 @@ trusted.
 **Clashes with** [arcade](../brand-arcade/SKILL.md): both are noise-forward, and together they read as a
 person with no editing instinct.
 
-Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand-router/SKILL.md):
+Full set of twenty-one, routed by [`../brand-router/SKILL.md`](../brand-router/SKILL.md):
 [broadsheet](../brand-broadsheet/SKILL.md), [swiss](../brand-swiss/SKILL.md), [manuscript](../brand-manuscript/SKILL.md),
 [plaque](../brand-plaque/SKILL.md), [annual](../brand-annual/SKILL.md), [terminal](../brand-terminal/SKILL.md),
 [blueprint](../brand-blueprint/SKILL.md), [spec](../brand-spec/SKILL.md), [oscilloscope](../brand-oscilloscope/SKILL.md),
-[punchcard](../brand-punchcard/SKILL.md), [buildspace](../brand-buildspace/SKILL.md),
+[punchcard](../brand-punchcard/SKILL.md), [signage](../brand-signage/SKILL.md), [buildspace](../brand-buildspace/SKILL.md),
 [risograph](../brand-risograph/SKILL.md), [stadium](../brand-stadium/SKILL.md), [arcade](../brand-arcade/SKILL.md), flyer,
 [dispatch](../brand-dispatch/SKILL.md), [dusk](../brand-dusk/SKILL.md), [vellum](../brand-vellum/SKILL.md),
 [aurora](../brand-aurora/SKILL.md), [porcelain](../brand-porcelain/SKILL.md).
