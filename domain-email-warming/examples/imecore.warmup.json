@@ -48,21 +48,21 @@
   ],
   "seeds": [
     {
-      "address": "seed-primary@gmail.com",
+      "address": "seed-primary@example.com",
       "provider": "gmail",
-      "gogAccount": "seed-primary@gmail.com",
+      "gogAccount": "seed-primary@example.com",
       "engage": true
     },
     {
-      "address": "seed-primary+a@gmail.com",
+      "address": "seed-primary+a@example.com",
       "provider": "gmail",
-      "gogAccount": "seed-primary@gmail.com",
+      "gogAccount": "seed-primary@example.com",
       "engage": true
     },
     {
-      "address": "seed-primary+b@gmail.com",
+      "address": "seed-primary+b@example.com",
       "provider": "gmail",
-      "gogAccount": "seed-primary@gmail.com",
+      "gogAccount": "seed-primary@example.com",
       "engage": true
     },
     {
