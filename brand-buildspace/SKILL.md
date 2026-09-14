@@ -265,11 +265,11 @@ On one page the two read as two different people.
 two products, not two moods. **Clashes with** [porcelain](../brand-porcelain/SKILL.md), whose precision makes
 buildspace look sloppy instead of honest.
 
-Full set of twenty, routed by [`../brand-router/SKILL.md`](../brand-router/SKILL.md):
+Full set of twenty-one, routed by [`../brand-router/SKILL.md`](../brand-router/SKILL.md):
 [broadsheet](../brand-broadsheet/SKILL.md), [swiss](../brand-swiss/SKILL.md), [manuscript](../brand-manuscript/SKILL.md),
 [plaque](../brand-plaque/SKILL.md), [annual](../brand-annual/SKILL.md), [terminal](../brand-terminal/SKILL.md),
 [blueprint](../brand-blueprint/SKILL.md), [spec](../brand-spec/SKILL.md), [oscilloscope](../brand-oscilloscope/SKILL.md),
-[punchcard](../brand-punchcard/SKILL.md), buildspace, [risograph](../brand-risograph/SKILL.md),
+[punchcard](../brand-punchcard/SKILL.md), [signage](../brand-signage/SKILL.md), buildspace, [risograph](../brand-risograph/SKILL.md),
 [stadium](../brand-stadium/SKILL.md), [arcade](../brand-arcade/SKILL.md), [flyer](../brand-flyer/SKILL.md),
 [dispatch](../brand-dispatch/SKILL.md), [dusk](../brand-dusk/SKILL.md), [vellum](../brand-vellum/SKILL.md),
 [aurora](../brand-aurora/SKILL.md), [porcelain](../brand-porcelain/SKILL.md).

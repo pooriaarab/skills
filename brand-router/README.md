@@ -1,7 +1,7 @@
 # Brand Skills
 
 A suite for running a whole brand — voice, website, and every social surface —
-from one chosen visual direction. Twenty directions, each a complete world, each
+from one chosen visual direction. Twenty-one directions, each a complete world, each
 answering the same twelve surfaces so they stay comparable and swappable.
 
 **Where to start:** run [`brand-router`](SKILL.md). It surveys what
@@ -37,6 +37,7 @@ what breaks when you ignore it.
 | [`spec`](../brand-spec/SKILL.md) | technical | Pricing, comparisons, reference writing. | cheap |
 | [`oscilloscope`](../brand-oscilloscope/SKILL.md) | technical | One metric is the story. | moderate |
 | [`punchcard`](../brand-punchcard/SKILL.md) | technical | Work that should feel filed and permanent. Archives. | moderate |
+| [`signage`](../brand-signage/SKILL.md) | technical | The reader is moving and deciding. Navigation, onboarding paths, docs maps. | cheap |
 | [`buildspace`](../brand-buildspace/SKILL.md) | expressive | Founders talked to, not sold to. Community, newsletter. | cheap |
 | [`risograph`](../brand-risograph/SKILL.md) | expressive | A zine, a drop, small-batch work. | expensive |
 | [`stadium`](../brand-stadium/SKILL.md) | expressive | A launch, a result, a date. | moderate |
@@ -102,9 +103,16 @@ npx skills add pooriaarab/brand/annual
 
 ## Provenance
 
-All twenty directions exist as running code — verified palettes, real texture
+Twenty of the directions exist as running code — verified palettes, real texture
 CSS, working motion — in the `pooriaarab.com` repo under
 `apps/website/src/brand/`, rendered at `/brand` with a live preview per
 direction, and paired there with twenty structural site archetypes at `/lab`.
-The hex values, font stacks, and contrast ratios quoted in these skills are
+The hex values, font stacks, and contrast ratios quoted in those skills are
 copied from that source, not invented.
+
+`signage` is the exception and is marked as such deliberately. It has no
+implementation in that repo yet, so its palette was authored here and every
+contrast ratio in it was **computed** from the committed hex values rather than
+read off a running page. That is a weaker provenance than the other twenty have,
+and it is worth knowing which kind you are reading: the numbers are correct, but
+nothing has yet proved the direction survives contact with a real page.
