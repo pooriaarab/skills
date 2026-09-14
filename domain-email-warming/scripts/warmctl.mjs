@@ -12,7 +12,7 @@ import { argv, exit } from "node:process";
 import { cfEnv, getLimits, sendEmail } from "./lib/cloudflare.mjs";
 import { compose, composeReply, loadLogo, VARIANTS, variantFor } from "./lib/content.mjs";
 import { classify, findByMessageId, markRead, reply, rescueFromSpam } from "./lib/gmail.mjs";
-import { checkDomain } from "./lib/preflight.mjs";
+import { checkDomain, organizationalDomain } from "./lib/preflight.mjs";
 import { planForDay } from "./lib/ramp.mjs";
 import { dayIndex, loadState, recordSend, saveState, sendsOnDay } from "./lib/state.mjs";
 
@@ -68,7 +68,10 @@ async function loadConfig(path) {
 function sendingDomains(cfg) {
   const apex = cfg.sendingDomain ?? null;
   return [...new Set(cfg.identities.map((i) => i.address.split("@")[1]))].map((domain) => {
-    const isSub = apex ? domain !== apex : domain.split(".").length > 2;
+    // A bare label count misreads an apex under a multi-part public suffix
+    // (example.co.uk) as a subdomain, so fall back to the same registrable-
+    // domain logic preflight uses for DMARC inheritance.
+    const isSub = apex ? domain !== apex : domain !== organizationalDomain(domain);
     return {
       domain,
       role: isSub ? "send-only" : "send+receive",
