@@ -15,10 +15,12 @@ export const VARIANTS = ["plain", "html_simple", "html_logo", "html_rich", "news
 /**
  * "newsletter" is deliberately the shape real cold outreach takes: a broadcast
  * with a promotional block, an availability list and a numbered form. It is the
- * hardest shape to land and the one most likely to be filtered to Promotions,
- * so it is worth measuring on its own rather than assuming the 1:1 result
- * carries over. It is also the only shape here that is a commercial electronic
- * message, so it carries a List-Unsubscribe header and a physical identifier.
+ * one most likely to be filtered to Promotions among the 1:1 shapes, so it is
+ * worth measuring on its own rather than assuming the 1:1 result carries over.
+ * It is also a commercial electronic message, so it carries a List-Unsubscribe
+ * header and an opt-out line. (A physical mailing address is also required for
+ * real commercial mail under CASL/CAN-SPAM; this builder does not add one, so
+ * callers sending this variant to real recipients must supply it themselves.)
  */
 const NEWSLETTER_INTROS = [
   "Good morning,",
@@ -219,7 +221,9 @@ function composeNewsletter(rng, { fromName, fromAddress, replyAddress, org }) {
  *
  * Note before aiming this at anyone real: a promotional contest is regulated
  * separately from email law, with its own disclosure rules, and it is
- * unambiguously a commercial electronic message.
+ * unambiguously a commercial electronic message. Like "newsletter", it carries
+ * a List-Unsubscribe header but no physical mailing address; callers sending
+ * this variant to real recipients must supply one themselves.
  */
 function composePromo(rng, { fromName, fromAddress, replyAddress, org }) {
   const domain = String(fromAddress).split("@")[1] ?? "";
