@@ -10,8 +10,10 @@ branch can be deleted; a repo that was public for an hour has been cloned, index
 and scraped, and you will never know by whom.
 
 This skill is the scan set you run first. For the paperwork side of going public —
-LICENSE, CONTRIBUTING, CODEOWNERS, CI, branch protection — use
-[`open-source-repo-prep`](../open-source-repo-prep/SKILL.md). The two do not overlap.
+LICENSE, CONTRIBUTING, CODEOWNERS, branch protection — use
+[`repo-standards`](../repo-standards/SKILL.md). The two do not overlap. Neither
+skill sets up CI; re-point the workflows a template clone already carries
+(`build-from-template` §3), or add one by hand for a project with no template.
 
 ## Read this first: a clean secret scanner means less than it looks
 
