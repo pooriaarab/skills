@@ -211,6 +211,14 @@ Four faults this caught that nothing else did:
 Name these in the verifier's instructions. Telling it what the model actually
 does beats asking it to compare against an abstract brief.
 
+## Describe the frame, do not name an angle
+
+A brief that asked for a body "turned 135 degrees away" came back at 180
+degrees twice, then with the head twisted back to expose a face. Rewritten as
+what the camera sees — mainly his back, the outer edge of one shoulder, a
+sliver of cheek, and explicitly no eyes, nose or glasses front — it passed on
+the first attempt. Degrees are a number the model does not measure.
+
 ## Never let the identity block contradict the shot
 
 The traits that make a person recognisable and the traits a shot asks for are
@@ -286,6 +294,23 @@ usually has a tool problem or a framing problem, not a wording problem.
 **Reframe past a fault the model will not drop.** Crop the offending region out
 of shot. Framing beats prompting for anything the model keeps producing.
 
+## Change the model before the twelfth retry
+
+One panel failed twelve attempts across two models on a single fault. The
+model that held the likeness best would not hold a crop or a facial
+asymmetry. The fix was not better wording, it was a model measured to follow
+an instruction more literally. A bake-off's real value is not picking one
+model for everything; it is having a measured second choice for the shot the
+default cannot do.
+
+## Relabel rather than ship a permanently failing panel
+
+No model tried would render a controlled facial asymmetry. A panel asking for
+a lopsided half-smile would have failed forever. Ask for what the models can
+hold, rename the panel to match what it shows, and record the limitation on
+the panel. Leaving it failing teaches nobody anything, and calling a
+symmetrical smile a half-smile makes the sheet lie.
+
 ## Never describe the face in the image prompt
 
 A long prose description of a face makes the model generate a face from the
@@ -324,12 +349,29 @@ front head-and-shoulders, three-quarter, strict profile, full body. Use one
 plain mid-grey background. Keep wardrobe, hair and light identical across the
 four frames. Keep the expression neutral throughout.
 
-Pass that sheet as a reference. Later renders then inherit the identity from the
-picture instead of from a fresh description.
+Pass that sheet as a reference. Later renders then inherit the face from the
+picture instead of from a fresh description. The sheet does not set later
+crops or camera heights.
 
 Counter-rule: never feed a busy decorated model sheet back as a reference. Nine
 or more panels, with labels, palette strips and callout lines, make the model
 reproduce the board layout instead of the person.
+
+## A reference image carries identity, not framing
+
+Feeding the approved casting card in as the leading reference fixed the face
+and did nothing at all for the crop. The same panel kept returning a waist-up
+high-angle shot against a head-and-shoulders brief. Use a reference for who
+the person is, not for how the shot is composed.
+
+## The artefact others cite clears a higher bar than the ones citing it
+
+The casting card is the reference every later render uses. It passed at
+exactly the pack's floor while carrying a gaunt face, a patchy beard and
+clothing that changed between its own four frames, and it pushed all of that
+downstream, where it read as model drift rather than a bad reference. Let a
+shot demand a higher pass score than the pack floor, and make the reference
+demand it.
 
 ## Measure the person, do not describe them
 
