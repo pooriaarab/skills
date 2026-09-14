@@ -130,18 +130,34 @@ function decodeQuotedPrintable(body) {
     .replace(/=([0-9A-Fa-f]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
 }
 
+/** Classify by path and query only, so a host like `list-manage.com` (Mailchimp's
+ * ESP domain, which contains "manage") never trips the deny list on its own. */
+function linkIntent(u) {
+  try {
+    const parsed = new URL(u);
+    return parsed.pathname + parsed.search;
+  } catch {
+    return u;
+  }
+}
+
 function extractLinks(raw) {
   const text = decodeQuotedPrintable(raw);
   const urls = new Set();
   for (const m of text.matchAll(/https?:\/\/[^\s"'<>)\]]+/g)) {
     urls.add(m[0].replace(/[.,;:]+$/, ""));
   }
-  return [...urls].filter((u) => !DENY.test(u) && ALLOW.test(u));
+  return [...urls].filter((u) => {
+    const intent = linkIntent(u);
+    return !DENY.test(intent) && ALLOW.test(intent);
+  });
 }
 
-/** gog exposes no raw-message command, so the body comes from the preview. */
+/** gog exposes no raw-message command, so the body comes from the preview.
+ * Errors propagate to the caller's try/catch, which already reports them per
+ * row instead of being masked into a false "no confirmation link found". */
 async function bodyForGmail(row) {
-  const out = await gog(["-a", ACCOUNT, "gmail", "messages", "search", `rfc822msgid:${row.id}`, "--max", "1", "-j"]).catch(() => "");
+  const out = await gog(["-a", ACCOUNT, "gmail", "messages", "search", `rfc822msgid:${row.id}`, "--max", "1", "-j"]);
   return `${row.subject}\n${out}`;
 }
 

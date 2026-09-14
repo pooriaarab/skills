@@ -34,7 +34,7 @@ const EMAIL_INPUT =
   /<input[^>]*(type=["']?email|name=["']?[^"'>]*(email|EMAIL)[^"'>]*["']?|id=["']?[^"'>]*email)/i;
 
 function detectPlatform(html, url) {
-  if (/substack\.com/i.test(url) || /substack/i.test(html)) return "substack";
+  if (/substack\.com/i.test(url)) return "substack";
   if (/beehiiv/i.test(html)) return "beehiiv";
   if (/list-manage\.com|mailchimp/i.test(html)) return "mailchimp";
   if (/hs-form|hubspot/i.test(html)) return "hubspot";

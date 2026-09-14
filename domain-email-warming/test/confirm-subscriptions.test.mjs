@@ -10,11 +10,23 @@ function decodeQuotedPrintable(body) {
   return body.replace(/=\r?\n/g, "").replace(/=([0-9A-Fa-f]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
 }
 
+function linkIntent(u) {
+  try {
+    const parsed = new URL(u);
+    return parsed.pathname + parsed.search;
+  } catch {
+    return u;
+  }
+}
+
 function extractLinks(raw) {
   const text = decodeQuotedPrintable(raw);
   const urls = new Set();
   for (const m of text.matchAll(/https?:\/\/[^\s"'<>)\]]+/g)) urls.add(m[0].replace(/[.,;:]+$/, ""));
-  return [...urls].filter((u) => !DENY.test(u) && ALLOW.test(u));
+  return [...urls].filter((u) => {
+    const intent = linkIntent(u);
+    return !DENY.test(intent) && ALLOW.test(intent);
+  });
 }
 
 describe("confirmation link extraction", () => {
@@ -50,5 +62,14 @@ describe("confirmation link extraction", () => {
     assert.ok(CONFIRM_SUBJECT.test("Please confirm your subscription"));
     assert.ok(CONFIRM_SUBJECT.test("Verify your email"));
     assert.ok(!CONFIRM_SUBJECT.test("Your weekly digest"));
+  });
+
+  it("keeps a Mailchimp confirm link even though the ESP host contains \"manage\"", () => {
+    // list-manage.com is Mailchimp's own ESP domain. A deny check against the
+    // full URL would veto every Mailchimp confirmation link on that account.
+    assert.deepEqual(
+      extractLinks("https://example.list-manage.com/subscribe/confirm?u=1&id=2"),
+      ["https://example.list-manage.com/subscribe/confirm?u=1&id=2"],
+    );
   });
 });

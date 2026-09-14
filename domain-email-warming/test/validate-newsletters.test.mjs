@@ -53,4 +53,12 @@ describe("newsletter validation", () => {
   it("rejects a non-http url before fetching it", () => {
     assert.equal(classify({ status: 200, url: "file:///etc/passwd" }).reason, "not-http");
   });
+
+  it("does not accept a page merely mentioning Substack in its text", () => {
+    // A page that references Substack (a footer link, a share icon) is not
+    // itself a Substack publication, and still needs a real signup form.
+    const r = classify({ status: 200, url: "https://a.com", html: "<p>as seen on Substack</p>" });
+    assert.equal(r.valid, false);
+    assert.equal(r.reason, "no-form");
+  });
 });
