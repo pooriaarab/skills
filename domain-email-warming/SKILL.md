@@ -143,6 +143,5 @@ the tool.
 
 ## Related
 
-- `cloudflare-email-service` — provider setup, routing, and the sending REST API.
 - `growth-cold-email` — the campaign this warm-up is preparing for.
 - `lifecycle-email` — classifying transactional against marketing mail.
