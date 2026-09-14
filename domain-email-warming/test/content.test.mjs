@@ -120,3 +120,26 @@ describe("escapeHtml", () => {
     assert.equal(escapeHtml(`<&>"'`), "&lt;&amp;&gt;&quot;&#39;");
   });
 });
+
+describe("promo variant", () => {
+  const promo = () => compose(seeded(21), { ...base, variant: "promo", replyTo: "hello@imecore.com", orgName: "IMECore" });
+
+  it("carries a List-Unsubscribe header and an opt-out line", () => {
+    const m = promo();
+    assert.match(m.headers["List-Unsubscribe"], /mailto:hello@imecore\.com/);
+    assert.match(m.text, /unsubscribe/i);
+  });
+
+  it("leads with the offer, which is what makes it the hardest shape to land", () => {
+    assert.match(promo().text, /^.*\n\nWIN /s);
+  });
+
+  it("escapes the org name in the html", () => {
+    const m = compose(seeded(22), { ...base, variant: "promo", orgName: "<b>x</b>", replyTo: "a@b.c" });
+    assert.ok(!m.html.includes("<b>x</b>"));
+  });
+
+  it("is deterministic for a fixed rng", () => {
+    assert.deepEqual(promo(), promo());
+  });
+});

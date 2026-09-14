@@ -48,7 +48,7 @@ same second is a machine signature regardless of content.
 ## Vary the format, not just the wording
 
 Identical bodies at volume are themselves a bulk signal, so wording is drawn from pools.
-More importantly, formats are filtered differently, and the tool rotates through five
+More importantly, formats are filtered differently, and the tool rotates through six
 shapes so each is measured separately:
 
 | Variant | Shape |
@@ -58,12 +58,14 @@ shapes so each is measured separately:
 | `html_logo` | HTML with one inline CID logo. |
 | `html_rich` | Styled signature block plus logo. |
 | `newsletter` | A broadcast: promotional block, availability list, numbered form, `List-Unsubscribe`. |
+| `promo` | The most aggressive shape: a giveaway or offer above the fold. |
 
-`newsletter` is deliberately the shape real cold outreach takes, and it is the hardest
-to land. It is also the only variant here that is a commercial electronic message, so it
-carries a `List-Unsubscribe` header and a way to opt out — both because bulk mail without
-them is filtered harder, and because once it is aimed at real recipients it is a CASL
-obligation.
+`newsletter` and `promo` are deliberately the shapes real cold outreach takes, and
+`promo` is the hardest to land, worse than `newsletter`. Both are commercial electronic
+messages, so each carries a `List-Unsubscribe` header and a way to opt out — both because
+bulk mail without them is filtered harder, and because once aimed at real recipients it is
+a CASL obligation. `promo` is also a promotional contest, which carries disclosure
+obligations of its own; see [consent-and-law.md](consent-and-law.md).
 
 Test the shape you intend to send. A warm-up that only proves plain text lands tells you
 nothing about the HTML template your campaign will actually use.
