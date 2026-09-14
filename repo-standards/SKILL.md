@@ -114,6 +114,14 @@ that was never drawn, and nothing errors.
 Capture the state that proves the product works, not the empty state. An empty
 dashboard is a screenshot of nothing.
 
+Log into a seeded or demo account, not one holding real customer data. This
+step runs after `pre-public-repo-audit` in the pipeline, so nothing it commits
+gets swept by that skill's PII/secret sweeps. A screenshot of a real logged-in
+account bakes emails, names, internal hostnames or keys into a committed,
+public image before anyone scans for them. If the only account available holds
+real data, redact the frame before committing, or run `pre-public-repo-audit`'s
+PII sweep again over the new image.
+
 ### A CLI
 
 Capture the real terminal, running the command people actually run, with its
