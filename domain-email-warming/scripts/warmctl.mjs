@@ -187,6 +187,11 @@ async function cmdSend(cfg, opts, state) {
       headers,
       replyTo,
     });
+    // A retried slot replaces its prior failed attempt rather than piling up
+    // next to it: report and engage both read state.sends directly, and a
+    // stale failed row left beside the eventual success would double-count
+    // the slot in every placement total.
+    state.sends = state.sends.filter((s) => !(s.day === day && s.slot === p.slot));
     recordSend(state, {
       id: crypto.randomUUID(),
       day,
