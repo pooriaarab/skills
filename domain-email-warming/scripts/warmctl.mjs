@@ -113,9 +113,11 @@ async function cmdSend(cfg, opts, state) {
   const day = opts.day ?? dayIndex(state);
   const plan = planForDay(cfg, day, Math.random);
 
-  // Re-running `send` on the same day must top up, never duplicate. The state
-  // file is the record of what already went out.
-  const already = sendsOnDay(state, day).length;
+  // Re-running `send` on the same day must top up, never duplicate. Only a
+  // send that was actually accepted counts as done — a failed attempt must
+  // stay in the queue, or one provider hiccup silently drops that pair for
+  // the rest of the day and never retries it.
+  const already = sendsOnDay(state, day).filter((s) => s.accepted).length;
 
   // Only what is actually due. The ramp spreads the day across a working window
   // precisely so the mail does not leave in one burst, and sending the whole
