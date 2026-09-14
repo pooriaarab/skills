@@ -83,7 +83,7 @@ gh repo edit pooriaarab/<repo> \
 ```
 
 Four to twelve topics. On a repo with no stars, topics are the only discovery
-surface GitHub gives you, and 29 of the 33 public repos in this fleet had none.
+surface GitHub gives you, and most public repos in this fleet had none.
 
 Topic names on a private repo are public. Do not name an unshipped product.
 
