@@ -1,11 +1,11 @@
 ---
 name: brand-router
-description: "Use when choosing or applying a visual brand direction across a whole personal or product brand, not just a website. Surveys what you actually publish, then routes to one of twenty direction skills covering voice, landing page, avatar, OG card, LinkedIn, Instagram carousels, YouTube thumbnails and edits, podcast cover, and decks. Triggers: 'pick a brand direction', 'what style should my brand be', 'design my landing page', 'make my social media consistent', 'brand guidelines', 'how should my instagram carousels look', 'redesign my personal brand'."
+description: "Use when choosing or applying a visual brand direction across a whole personal or product brand, not just a website. Surveys what you actually publish, then routes to one of twenty-one direction skills covering voice, landing page, avatar, OG card, LinkedIn, Instagram carousels, YouTube thumbnails and edits, podcast cover, and decks. Triggers: 'pick a brand direction', 'what style should my brand be', 'design my landing page', 'make my social media consistent', 'brand guidelines', 'how should my instagram carousels look', 'redesign my personal brand'."
 ---
 
 # Brand router
 
-Entry point for a twenty-direction brand system. **Survey and dispatch:** this
+Entry point for a twenty-one-direction brand system. **Survey and dispatch:** this
 skill decides *which* direction fits, then hands you to that direction's skill.
 It does not do the design itself. That keeps each direction independently
 maintainable.
@@ -41,7 +41,7 @@ registers.**
 triggered by content type, never by mood.** A launch register used because you
 felt like it is just inconsistency wearing a nicer coat.
 
-Most people need exactly three. Nobody needs twenty. The other seventeen are
+Most people need exactly three. Nobody needs twenty-one. The other eighteen are
 there so the three you pick are chosen rather than defaulted into.
 
 ---
