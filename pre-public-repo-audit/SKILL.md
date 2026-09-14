@@ -94,7 +94,7 @@ is the whole failure.
 ### 3. Absolute paths from a development machine
 
 ```sh
-git grep -nIE '/Users/[a-z0-9._-]+|/home/[a-z0-9._-]+|C:\\\\Users\\\\' -- .
+git grep -nIE '/Users/[a-z0-9._-]+|/home/[a-z0-9._-]+|C:\\+Users\\+' -- .
 git log -p --all | grep -oE '/Users/[a-zA-Z0-9._-]+/[^ ]*' | sort -u
 ```
 
