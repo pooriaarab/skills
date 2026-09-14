@@ -18,7 +18,10 @@ export const VARIANTS = ["plain", "html_simple", "html_logo", "html_rich", "news
  * hardest shape to land and the one most likely to be filtered to Promotions,
  * so it is worth measuring on its own rather than assuming the 1:1 result
  * carries over. It is also the only shape here that is a commercial electronic
- * message, so it carries a List-Unsubscribe header and a physical identifier.
+ * message, so it carries a List-Unsubscribe header and an opt-out line. (A
+ * physical mailing address is also required for real commercial mail under
+ * CASL/CAN-SPAM; this builder does not add one, so callers sending this
+ * variant to real recipients must supply it themselves.)
  */
 const NEWSLETTER_INTROS = [
   "Good morning,",
