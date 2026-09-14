@@ -113,33 +113,38 @@ async function cmdSend(cfg, opts, state) {
   const day = opts.day ?? dayIndex(state);
   const plan = planForDay(cfg, day, Math.random);
 
-  // Re-running `send` on the same day must top up, never duplicate. Only a
-  // send that was actually accepted counts as done — a failed attempt must
-  // stay in the queue, or one provider hiccup silently drops that pair for
-  // the rest of the day and never retries it.
-  const already = sendsOnDay(state, day).filter((s) => s.accepted).length;
+  // Each planned message owns a numbered slot for the day, and a send records
+  // the slot it filled. Counting rows instead would go wrong the moment one
+  // send fails: the count no longer lines up with position, so the next run
+  // re-sends a message that already went out and silently abandons the one
+  // that failed. Only an accepted send retires its slot, so a failure is
+  // retried on the next tick.
+  const claimed = new Set(sendsOnDay(state, day).filter((s) => s.accepted).map((s) => s.slot));
+  const numbered = plan.map((p, slot) => ({ ...p, slot }));
+  const done = numbered.filter((p) => claimed.has(p.slot)).length;
 
   // Only what is actually due. The ramp spreads the day across a working window
   // precisely so the mail does not leave in one burst, and sending the whole
   // day's plan the moment the command runs would throw that away — sixteen
   // messages in one second is a machine signature whatever they say. Run this
   // hourly and each pass sends the few that have come due.
-  const due = opts.all ? plan.length : plan.filter((p) => Date.parse(p.sendAt) <= Date.now()).length;
-  const todo = plan.slice(already, Math.max(already, due));
+  const todo = numbered.filter(
+    (p) => !claimed.has(p.slot) && (opts.all || Date.parse(p.sendAt) <= Date.now()),
+  );
   if (!todo.length) {
-    const next = plan[already]?.sendAt;
+    const next = numbered.find((p) => !claimed.has(p.slot))?.sendAt;
     console.log(
-      `day ${day}: ${already}/${plan.length} sent` +
+      `day ${day}: ${done}/${plan.length} sent` +
         (next ? `, next due ${new Date(next).toISOString().slice(11, 16)}Z` : ", day complete"),
     );
     return;
   }
-  console.log(`day ${day}: ${already}/${plan.length} sent, sending ${todo.length} now${opts.apply ? "" : " (DRY RUN)"}`);
+  console.log(`day ${day}: ${done}/${plan.length} sent, sending ${todo.length} now${opts.apply ? "" : " (DRY RUN)"}`);
 
   if (!opts.apply) {
     const variants = cfg.variants ?? VARIANTS;
-    for (const [i, p] of todo.entries()) {
-      console.log(`  would send ${variantFor(already + i, variants).padEnd(11)} ${p.from} -> ${p.to}`);
+    for (const p of todo) {
+      console.log(`  would send ${variantFor(p.slot, variants).padEnd(11)} ${p.from} -> ${p.to}`);
     }
     return;
   }
@@ -153,11 +158,11 @@ async function cmdSend(cfg, opts, state) {
   const logo = await loadLogo(logoPath).catch((err) => {
     throw new Error(`could not read logoPath: ${err.message}`);
   });
-  for (const [i, p] of todo.entries()) {
+  for (const p of todo) {
     const identity = cfg.identities.find((i) => i.address === p.from);
-    // Rotate by absolute position in the day so a resumed run keeps cycling
-    // shapes instead of restarting at "plain" every time.
-    const variant = variantFor(already + i, variants);
+    // Keyed to the slot, not the loop position, so a retried slot goes out in
+    // the same format it was planned and recorded under.
+    const variant = variantFor(p.slot, variants);
     // Replies must reach a mailbox that exists; sending subdomains are
     // send-only, so their identities carry an apex replyTo.
     const replyTo = identity.replyTo ?? null;
@@ -185,6 +190,7 @@ async function cmdSend(cfg, opts, state) {
     recordSend(state, {
       id: crypto.randomUUID(),
       day,
+      slot: p.slot,
       at: new Date().toISOString(),
       from: p.from,
       to: p.to,
