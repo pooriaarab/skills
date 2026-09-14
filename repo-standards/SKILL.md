@@ -235,6 +235,11 @@ gh api repos/<owner>/<repo>/collaborators --jq '.[].login'
 So protection is not preventing unauthorised merges. It is making the intent
 explicit and future-proofing for a second collaborator.
 
+**Create `.github/CODEOWNERS` before you rely on it.** Unlike CODE_OF_CONDUCT,
+CONTRIBUTING and the other community health files, GitHub's org-wide `.github`
+defaults do not cover CODEOWNERS — it has to live in the repo itself. Add
+`* @<owner>` if the file is not already there.
+
 **`CODEOWNERS` alone does not gate merges.** It requests a review. It only
 becomes a gate once a protection rule adds "require review from code owners"
 and restricts who can push. Say that in `CONTRIBUTING.md` rather than implying
