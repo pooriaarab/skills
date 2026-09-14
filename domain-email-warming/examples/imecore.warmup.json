@@ -95,7 +95,7 @@
   },
   "replyRate": 0.5,
   "sendingDomain": "imecore.com",
-  "logoPath": "examples/imecore-logo.png",
+  "logoPath": "imecore-logo.png",
   "variants": [
     "plain",
     "html_simple",

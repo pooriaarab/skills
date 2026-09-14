@@ -6,6 +6,7 @@
 // every send is followed up on the receiving side and the verdict is recorded.
 
 import { readFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import { argv, exit } from "node:process";
 
 import { cfEnv, getLimits, sendEmail } from "./lib/cloudflare.mjs";
@@ -143,7 +144,11 @@ async function cmdSend(cfg, opts, state) {
 
   const env = cfEnv(cfg);
   const variants = cfg.variants ?? VARIANTS;
-  const logo = await loadLogo(cfg.logoPath).catch((err) => {
+  // Resolved against the config file's own directory, not the process cwd:
+  // warm-tick.sh is meant to run hourly from cron, which does not promise any
+  // particular working directory.
+  const logoPath = cfg.logoPath ? resolve(dirname(opts.config), cfg.logoPath) : null;
+  const logo = await loadLogo(logoPath).catch((err) => {
     throw new Error(`could not read logoPath: ${err.message}`);
   });
   for (const [i, p] of todo.entries()) {
