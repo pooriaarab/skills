@@ -2,16 +2,16 @@
 
 Why this suite is shaped the way it is.
 
-## One direction per skill, never one skill for all twenty
+## One direction per skill, never one skill for all twenty-one
 
-A single "brand" skill holding twenty directions would load twenty worlds of
-context to apply one. Splitting them means the router costs a table read, and
-the chosen direction costs one file. It also means a direction can be revised,
-or a new one added, without touching the other nineteen.
+A single "brand" skill holding twenty-one directions would load twenty-one
+worlds of context to apply one. Splitting them means the router costs a table
+read, and the chosen direction costs one file. It also means a direction can be
+revised, or a new one added, without touching the other twenty.
 
-The cost is duplication: all twenty repeat the same twelve headings. That is
-deliberate. **The repetition is the feature** — two skills are diffable surface
-by surface only because they share a skeleton.
+The cost is duplication: all twenty-one repeat the same twelve headings. That
+is deliberate. **The repetition is the feature** — two skills are diffable
+surface by surface only because they share a skeleton.
 
 ## The router recommends a kit, not a winner
 

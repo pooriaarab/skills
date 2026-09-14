@@ -1,6 +1,6 @@
 # The craft floor
 
-Non-negotiables shared by all twenty directions. A direction may be loud, ugly
+Non-negotiables shared by all twenty-one directions. A direction may be loud, ugly
 on purpose, or deliberately hostile to convention — it may not break these.
 
 ## Colour
