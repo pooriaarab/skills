@@ -73,7 +73,7 @@ function organizationalDomain(domain) {
   return parts.length <= 2 ? domain : parts.slice(-2).join(".");
 }
 
-function parseDmarc(record) {
+function parseTags(record) {
   const tags = {};
   for (const part of record.split(";")) {
     const [k, v] = part.split("=").map((s) => s?.trim());
@@ -81,6 +81,8 @@ function parseDmarc(record) {
   }
   return tags;
 }
+
+const VALID_DMARC_POLICIES = new Set(["none", "quarantine", "reject"]);
 
 /**
  * `role` decides what "correct" means. A send-only sending subdomain needs no
@@ -114,31 +116,46 @@ export async function checkDomain(domain, options = {}) {
   }
 
   // --- DKIM ----------------------------------------------------------------
+  // `v=` is optional per RFC 6376 and defaults to DKIM1 when absent — only an
+  // explicit, different version disqualifies a record. The required tag is
+  // `p`; an empty `p=` is a deliberately revoked key and must still fail.
   const dkim = {};
   for (const selector of dkimSelectors) {
     const name = `${selector}._domainkey.${domain}`;
-    const found = (await txt(r, name)).filter((t) => t.toLowerCase().includes("v=dkim1"));
+    const found = (await txt(r, name)).filter((t) => {
+      const tags = parseTags(t);
+      if (tags.v && tags.v.toLowerCase() !== "dkim1") return false;
+      return Boolean(tags.p);
+    });
     dkim[selector] = found.length > 0;
     if (found.length) add("ok", `DKIM selector ${selector} resolves at ${name}.`);
     else add("fail", `No DKIM record at ${name}. Without it nothing this domain sends can be signed, so DMARC cannot pass on DKIM.`);
   }
 
   // --- DMARC ---------------------------------------------------------------
+  // A record missing the required `p` tag, or a name publishing more than
+  // one record, is invalid and receivers discard it outright — that must
+  // report `fail`, not `ok`/`warn` with `p=unset`.
   const own = (await txt(r, `_dmarc.${domain}`)).filter((t) => t.toLowerCase().startsWith("v=dmarc1"));
+  const ownTags = own.length === 1 ? parseTags(own[0]) : null;
   let dmarc = null;
-  if (own.length) {
-    dmarc = parseDmarc(own[0]);
-    add("ok", `DMARC is published at _dmarc.${domain} with p=${dmarc.p ?? "unset"}.`);
+  if (own.length > 1) {
+    add("fail", `${domain} publishes ${own.length} DMARC records at _dmarc.${domain}. Receivers treat that as invalid and apply no DMARC policy — merge them into one.`);
+  } else if (ownTags && VALID_DMARC_POLICIES.has(ownTags.p)) {
+    dmarc = ownTags;
+    add("ok", `DMARC is published at _dmarc.${domain} with p=${dmarc.p}.`);
+  } else if (ownTags) {
+    add("fail", `_dmarc.${domain} has no valid p= tag. Receivers discard a DMARC record without one, so this domain is unauthenticated in practice.`);
   } else {
     const org = organizationalDomain(domain);
     const parent = org === domain ? [] : (await txt(r, `_dmarc.${org}`)).filter((t) => t.toLowerCase().startsWith("v=dmarc1"));
-    if (parent.length) {
-      const tags = parseDmarc(parent[0]);
-      const effective = tags.sp ?? tags.p;
-      dmarc = { ...tags, inherited: true, p: effective };
+    const parentTags = parent.length === 1 ? parseTags(parent[0]) : null;
+    if (parentTags && VALID_DMARC_POLICIES.has(parentTags.p)) {
+      const effective = VALID_DMARC_POLICIES.has(parentTags.sp) ? parentTags.sp : parentTags.p;
+      dmarc = { ...parentTags, inherited: true, p: effective };
       add("warn", `${domain} has no DMARC record of its own, so it inherits p=${effective} from ${org}. That is workable, but its mail is judged by a policy you did not set for it.`);
     } else {
-      add("fail", `No DMARC record at _dmarc.${domain} and none to inherit. Publish one so receivers know how to treat unauthenticated mail.`);
+      add("fail", `No usable DMARC record at _dmarc.${domain} and none to inherit from ${org}. Publish one so receivers know how to treat unauthenticated mail.`);
     }
   }
 

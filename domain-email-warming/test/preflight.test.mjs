@@ -68,6 +68,44 @@ describe("checkDomain", () => {
     assert.equal(r.dkim.s1, false);
   });
 
+  it("accepts a DKIM record with no v= tag, since it defaults to DKIM1", async () => {
+    const r = await checkDomain("ex.com", {
+      dkimSelectors: ["s1"],
+      resolver: fakeResolver({
+        txt: { "ex.com": ["v=spf1 ~all"], "_dmarc.ex.com": ["v=DMARC1; p=none;"], "s1._domainkey.ex.com": ["k=rsa; p=abc"] },
+      }),
+    });
+    assert.equal(r.dkim.s1, true);
+  });
+
+  it("fails a DKIM record whose v= tag names a version other than DKIM1", async () => {
+    const r = await checkDomain("ex.com", {
+      dkimSelectors: ["s1"],
+      resolver: fakeResolver({
+        txt: { "ex.com": ["v=spf1 ~all"], "_dmarc.ex.com": ["v=DMARC1; p=none;"], "s1._domainkey.ex.com": ["v=DKIM2; p=abc"] },
+      }),
+    });
+    assert.equal(r.dkim.s1, false);
+  });
+
+  it("fails a DMARC record with no p= tag instead of reporting it ok", async () => {
+    const r = await checkDomain("ex.com", {
+      resolver: fakeResolver({ txt: { "ex.com": ["v=spf1 ~all"], "_dmarc.ex.com": ["v=DMARC1;"] } }),
+    });
+    assert.ok(r.findings.some((f) => f.level === "fail" && f.message.includes("no valid p=")));
+    assert.equal(r.dmarc, null);
+  });
+
+  it("fails when two DMARC records are published", async () => {
+    const r = await checkDomain("ex.com", {
+      resolver: fakeResolver({
+        txt: { "ex.com": ["v=spf1 ~all"], "_dmarc.ex.com": ["v=DMARC1; p=reject;", "v=DMARC1; p=none;"] },
+      }),
+    });
+    assert.ok(r.findings.some((f) => f.level === "fail" && f.message.includes("2 DMARC records")));
+    assert.equal(r.dmarc, null);
+  });
+
   it("a send-only subdomain needs no MX and checks SPF on its return path", async () => {
     const r = await checkDomain("mail.ex.com", {
       role: "send-only",
