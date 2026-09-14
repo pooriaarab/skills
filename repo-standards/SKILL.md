@@ -184,8 +184,9 @@ So:
    the next step being skipped.
 3. Upload it in the browser, under Settings, Social preview.
 
-Skip this entirely on private repos. GitHub does not share a private repo's
-card, so the upload changes nothing.
+Skip this entirely on private repos. GitHub does not serve a private repo's
+card to the places a preview is read, so the upload cannot reach the audience
+it exists for.
 
 ## Translations
 
