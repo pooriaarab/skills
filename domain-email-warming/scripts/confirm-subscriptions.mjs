@@ -92,11 +92,15 @@ async function recentInboundGmail() {
     "--max", "50", "-j",
   ]);
   const i = out.search(/[[{]/);
-  if (i === -1) return [];
+  if (i === -1) {
+    console.error(`gog produced no JSON payload: ${out.slice(0, 200)}`);
+    return [];
+  }
   let parsed;
   try {
     parsed = JSON.parse(out.slice(i));
-  } catch {
+  } catch (err) {
+    console.error(`gog output not parseable as JSON: ${err.message}`);
     return [];
   }
   const list = Array.isArray(parsed) ? parsed : (parsed.messages ?? []);
@@ -116,7 +120,11 @@ async function recentInboundD1() {
     `WHERE direction='inbound' AND received_at >= ${since} ORDER BY received_at DESC LIMIT 200`;
   const out = await wrangler(["d1", "execute", DB, "--remote", "--json", "--command", sql]);
   const parsed = parseJsonLoose(out);
-  return parsed?.[0]?.results ?? [];
+  if (parsed === null) {
+    console.error(`wrangler d1 output not parseable as JSON: ${out.slice(0, 200)}`);
+    return [];
+  }
+  return parsed[0]?.results ?? [];
 }
 
 /**

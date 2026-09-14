@@ -68,7 +68,12 @@ async function check(entry) {
   if (!res.ok) {
     return { ...entry, valid: false, status: res.status, finding: `HTTP ${res.status} - page not found` };
   }
-  const html = await res.text().catch(() => "");
+  let html;
+  try {
+    html = await res.text();
+  } catch (err) {
+    return { ...entry, valid: false, status: res.status, finding: `body unreadable: ${err.message}` };
+  }
   const hasForm = EMAIL_INPUT.test(html);
   const platform = detectPlatform(html, res.url);
   return {
