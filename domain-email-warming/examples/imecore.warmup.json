@@ -1,0 +1,91 @@
+{
+  "program": "imecore",
+  "startDate": "2026-09-14",
+  "cloudflare": {
+    "accountIdEnv": "CLOUDFLARE_ACCOUNT_ID",
+    "zoneIdEnv": "CLOUDFLARE_ZONE_ID",
+    "tokenEnv": "CLOUDFLARE_API_TOKEN"
+  },
+  "dkimSelectors": [
+    "cf-bounce"
+  ],
+  "identities": [
+    {
+      "address": "hello@imecore.com",
+      "name": "IMECore"
+    },
+    {
+      "address": "pooria@imecore.com",
+      "name": "Pooria Arab"
+    },
+    {
+      "address": "ali@imecore.com",
+      "name": "Ali"
+    },
+    {
+      "address": "referrals@imecore.com",
+      "name": "IMECore Referrals"
+    },
+    {
+      "address": "support@imecore.com",
+      "name": "IMECore Support"
+    },
+    {
+      "address": "hello@mail.imecore.com",
+      "name": "IMECore",
+      "replyTo": "hello@imecore.com"
+    },
+    {
+      "address": "pooria@mail.imecore.com",
+      "name": "Pooria Arab",
+      "replyTo": "pooria@imecore.com"
+    },
+    {
+      "address": "referrals@referrals.imecore.com",
+      "name": "IMECore Referrals",
+      "replyTo": "referrals@imecore.com"
+    }
+  ],
+  "seeds": [
+    {
+      "address": "seed-primary@gmail.com",
+      "provider": "gmail",
+      "gogAccount": "seed-primary@gmail.com",
+      "engage": true
+    },
+    {
+      "address": "seed-primary+a@gmail.com",
+      "provider": "gmail",
+      "gogAccount": "seed-primary@gmail.com",
+      "engage": true
+    },
+    {
+      "address": "seed-primary+b@gmail.com",
+      "provider": "gmail",
+      "gogAccount": "seed-primary@gmail.com",
+      "engage": true
+    },
+    {
+      "address": "seed-passive-1@example.com",
+      "provider": "gmail",
+      "engage": false
+    }
+  ],
+  "ramp": {
+    "startPerIdentity": 2,
+    "growth": 1.25,
+    "maxPerIdentity": 12,
+    "days": 28
+  },
+  "replyRate": 0.5,
+  "sendingDomain": "imecore.com",
+  "logoPath": "imecore-logo.png",
+  "variants": [
+    "plain",
+    "html_simple",
+    "html_logo",
+    "html_rich",
+    "newsletter"
+  ],
+  "orgName": "IMECore"
+}
