@@ -11,7 +11,7 @@ A site can be fully built and deployed and still be invisible to search and bare
 
 - A docs/marketing/product site just deployed to a real domain for the first time.
 - Someone asks to "submit to Google Search Console", "check our SEO", "add a sitemap", or notices link shares (Slack/Twitter/LinkedIn) render with no title/description/image.
-- Stage between `open-source-repo-prep` (repo is public-ready) and `launch-video-generation`/`social-launch-post` (announcing it) in the `ship-a-product` pipeline — the site should be discoverable and shareable *before* you point an announcement at it.
+- Stage between `repo-standards` (repo is public-ready) and `launch-video-generation`/`social-launch-post` (announcing it) in the `ship-a-product` pipeline — the site should be discoverable and shareable *before* you point an announcement at it.
 
 ## Don't assume your host gives you a real robots.txt
 
@@ -133,7 +133,7 @@ This skill makes a site findable by search crawlers and shareable as a link. It 
 
 ## See also
 
-- [`../open-source-repo-prep/SKILL.md`](../open-source-repo-prep/SKILL.md) — repo-level public-readiness; this skill is the deployed-site-level counterpart.
+- [`../repo-standards/SKILL.md`](../repo-standards/SKILL.md) — repo-level public-readiness; this skill is the deployed-site-level counterpart.
 - [`../social-launch-post/SKILL.md`](../social-launch-post/SKILL.md) — the OG/Twitter meta here is what makes that skill's cross-posted links render with a real preview instead of a bare URL.
 - [`../launch-analytics/SKILL.md`](../launch-analytics/SKILL.md) — the measurement counterpart: GA4 + Microsoft Clarity. Together with the search-engine submissions above (§6), these are the things every domain project needs.
 - [`../ship-a-product/SKILL.md`](../ship-a-product/SKILL.md) — orchestrator; this is the discoverability stage, done once the site is live and before announcing it.

@@ -87,4 +87,4 @@ Bare names are usually taken. Check `npm view <name>` and `npm view @scope/<name
 
 ## 7. Then
 
-`open-source-repo-prep` → `launch-video-generation` (the HyperFrames $0 path renders a distinct native-UI-style video per tool) → `social-launch-post`. See `ship-a-product` for the full chain.
+`repo-standards` → `launch-video-generation` (the HyperFrames $0 path renders a distinct native-UI-style video per tool) → `social-launch-post`. See `ship-a-product` for the full chain.
