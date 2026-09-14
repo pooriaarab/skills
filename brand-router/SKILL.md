@@ -162,6 +162,7 @@ Lowercase names are house style. Full detail in each skill.
 | [spec](../brand-spec/SKILL.md) | Reader came for an answer. Pricing, comparisons, reference writing. | You want them to feel something. A manifesto in spec reads as terms of service. |
 | [oscilloscope](../brand-oscilloscope/SKILL.md) | One metric is the story. A chart, a benchmark, a counter. | Several equal subjects. This instrument has one channel. |
 | [punchcard](../brand-punchcard/SKILL.md) | The work should feel filed, dated, permanent. Archives, timelines. | The subject is speculative. Card stock implies the record exists. |
+| [signage](../brand-signage/SKILL.md) | The reader is moving and deciding, not sitting and reading. Navigation, onboarding paths, docs maps. | The content asks the reader to slow down and read, or needs warmth and a face. Long-form reflection, an emotional pitch. |
 
 ### Expressive — the volume is the design
 
