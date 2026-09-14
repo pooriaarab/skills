@@ -22,7 +22,7 @@ walks straight past.
 Worked example, 2026-09-14. A public repo carried this in a documentation comment:
 
 ```
-# Also available via: cat ~/.secrets/civitai.env  # CIVITAI_API_KEY=fe825695fc3ac7f292aa50f57c95c139
+# Also available via: cat ~/.secrets/civitai.env  # CIVITAI_API_KEY=fe8256…
 ```
 
 A live key, verified still authenticating. `gitleaks` passed the repo clean, twice:
