@@ -6,6 +6,25 @@
 import { Resolver } from "node:dns/promises";
 
 /**
+ * True for a routable public IPv4. A zone's NS delegation is data the zone
+ * owner controls, and a nameserver hostname that resolves to loopback,
+ * link-local (which includes the 169.254.169.254 cloud metadata address) or
+ * an RFC1918 range would point our queries at the local network instead of
+ * the real nameserver.
+ */
+export function isPublicIPv4(ip) {
+  const parts = ip.split(".").map(Number);
+  if (parts.length !== 4 || parts.some((n) => !Number.isInteger(n) || n < 0 || n > 255)) return false;
+  const [a, b] = parts;
+  if (a === 0 || a === 10 || a === 127) return false;
+  if (a === 169 && b === 254) return false;
+  if (a === 172 && b >= 16 && b <= 31) return false;
+  if (a === 192 && b === 168) return false;
+  if (a >= 224) return false;
+  return true;
+}
+
+/**
  * Query the zone's own nameservers rather than the system resolver.
  *
  * A record published seconds ago is still NXDOMAIN in a local cache for the
@@ -19,7 +38,7 @@ async function authoritativeResolver(domain) {
     const zone = labels.slice(i).join(".");
     try {
       const ns = await system.resolveNs(zone);
-      const ips = (await Promise.all(ns.map((h) => system.resolve4(h).catch(() => [])))).flat();
+      const ips = (await Promise.all(ns.map((h) => system.resolve4(h).catch(() => [])))).flat().filter(isPublicIPv4);
       if (ips.length) {
         const r = new Resolver();
         r.setServers(ips);

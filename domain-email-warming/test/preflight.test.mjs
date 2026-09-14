@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { checkDomain } from "../scripts/lib/preflight.mjs";
+import { checkDomain, isPublicIPv4 } from "../scripts/lib/preflight.mjs";
 
 /** Minimal stand-in for node:dns Resolver so no test performs real DNS. */
 function fakeResolver({ txt = {}, mx = {} } = {}) {
@@ -95,5 +95,17 @@ describe("checkDomain", () => {
     });
     assert.equal(r.dmarc.inherited, true);
     assert.equal(r.dmarc.p, "quarantine");
+  });
+});
+
+describe("isPublicIPv4", () => {
+  it("rejects loopback, link-local, and RFC1918 ranges", () => {
+    for (const ip of ["127.0.0.1", "169.254.169.254", "10.0.0.1", "172.16.0.5", "192.168.1.1", "0.0.0.0"]) {
+      assert.equal(isPublicIPv4(ip), false, ip);
+    }
+  });
+
+  it("accepts a routable public address", () => {
+    assert.equal(isPublicIPv4("93.184.216.34"), true);
   });
 });
