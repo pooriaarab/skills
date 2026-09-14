@@ -57,6 +57,12 @@ export function makeGmail(execFile = execFileDefault) {
    */
   async function findByMessageId(account, messageId) {
     const bare = String(messageId).replace(/^<|>$/g, "");
+    // A real RFC5322 id has no whitespace or search-operator syntax. Refusing
+    // anything else keeps a stray ID from being read as a Gmail search query
+    // (e.g. "x@d.com OR from:attacker") instead of an exact message lookup.
+    if (!/^[^\s"()<>]+@[^\s"()<>]+$/.test(bare)) {
+      return { found: false, id: null, threadId: null, labels: [] };
+    }
     for (const query of [`rfc822msgid:${bare}`, `rfc822msgid:${bare} in:anywhere`]) {
       const m = await search(account, query);
       if (m) {

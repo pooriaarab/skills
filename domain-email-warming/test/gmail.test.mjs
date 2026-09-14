@@ -68,6 +68,13 @@ describe("findByMessageId", () => {
     assert.ok(exec.calls[1].args.some((a) => a.includes("in:anywhere")));
   });
 
+  it("refuses to search on an id carrying Gmail operator syntax", async () => {
+    const exec = fakeExec([msg(["INBOX"])]);
+    const r = await makeGmail(exec).findByMessageId("acct", "x@d.com OR from:attacker.evil");
+    assert.equal(r.found, false);
+    assert.equal(exec.calls.length, 0);
+  });
+
   it("reports not found only when both queries miss", async () => {
     const r = await makeGmail(fakeExec([none, none])).findByMessageId("acct", "abc@d.com");
     assert.equal(r.found, false);
