@@ -10,7 +10,7 @@ import { readFile } from "node:fs/promises";
 import { basename, extname } from "node:path";
 
 /** Format shapes, cheapest to richest. `report --by-variant` compares them. */
-export const VARIANTS = ["plain", "html_simple", "html_logo", "html_rich", "newsletter"];
+export const VARIANTS = ["plain", "html_simple", "html_logo", "html_rich", "newsletter", "promo"];
 
 /**
  * "newsletter" is deliberately the shape real cold outreach takes: a broadcast
@@ -18,10 +18,7 @@ export const VARIANTS = ["plain", "html_simple", "html_logo", "html_rich", "news
  * hardest shape to land and the one most likely to be filtered to Promotions,
  * so it is worth measuring on its own rather than assuming the 1:1 result
  * carries over. It is also the only shape here that is a commercial electronic
- * message, so it carries a List-Unsubscribe header and an opt-out line. (A
- * physical mailing address is also required for real commercial mail under
- * CASL/CAN-SPAM; this builder does not add one, so callers sending this
- * variant to real recipients must supply it themselves.)
+ * message, so it carries a List-Unsubscribe header and a physical identifier.
  */
 const NEWSLETTER_INTROS = [
   "Good morning,",
@@ -115,6 +112,9 @@ export function compose(rng, { fromName, fromAddress, toAddress, day, variant = 
     throw new Error(`variant "${variant}" needs a logo; set "logoPath" in the config`);
   }
 
+  if (variant === "promo") {
+    return composePromo(rng, { fromName, fromAddress, replyAddress: replyTo, org: orgName ?? fromName });
+  }
   if (variant === "newsletter") {
     return composeNewsletter(rng, { fromName, fromAddress, replyAddress: replyTo, org: orgName ?? fromName });
   }
@@ -209,6 +209,65 @@ function composeNewsletter(rng, { fromName, fromAddress, replyAddress, org }) {
   // aimed at real recipients, is a CASL problem as well as a deliverability one.
   const headers = { "List-Unsubscribe": `<mailto:${reply}?subject=unsubscribe>` };
   return { subject, text, html, attachments: [], headers, variant: "newsletter" };
+}
+
+/**
+ * The most aggressive shape we send: a giveaway or offer above the fold. It
+ * exists to be measured, not recommended. Modelled on a real competitor
+ * broadcast, and expected to place worse than every other variant — which is
+ * the finding, if it holds.
+ *
+ * Note before aiming this at anyone real: a promotional contest is regulated
+ * separately from email law, with its own disclosure rules, and it is
+ * unambiguously a commercial electronic message.
+ */
+function composePromo(rng, { fromName, fromAddress, replyAddress, org }) {
+  const domain = String(fromAddress).split("@")[1] ?? "";
+  const reply = replyAddress ?? fromAddress;
+  const prize = pick(rng, ["two tickets to the Saturday match", "a pair of tickets to this weekend's game", "two seats at Saturday's home game"]);
+  const subject = pick(rng, [
+    "Contest: two tickets to Saturday's match",
+    "Win two tickets to the weekend game",
+    "Quick question, and two tickets on offer",
+  ]);
+  const rows = availabilityRows(rng);
+  const textRows = rows.map((r) => `  ${r.date} — ${r.city} — ${r.kind}`).join("\n");
+
+  const text =
+    `${pick(rng, NEWSLETTER_INTROS)}\n\n` +
+    `WIN ${prize.toUpperCase()}\n\n` +
+    `We are giving away ${prize}. To enter, answer one question: name two of the ` +
+    `assessment types listed below. Email your answer to ${reply} by 4 PM today. ` +
+    `One winner is drawn at random from the correct entries and told by email.\n\n` +
+    `Good luck, and thank you for choosing ${org}.\n\n` +
+    `UPCOMING AVAILABILITY\n${textRows}\n\n` +
+    `${org}\n${domain}\n\nTo stop receiving these updates, reply with "unsubscribe".`;
+
+  const htmlRows = rows
+    .map((r) => `<tr><td style="padding:4px 12px 4px 0">${escapeHtml(r.date)}</td><td style="padding:4px 12px 4px 0">${escapeHtml(r.city)}</td><td style="padding:4px 0">${escapeHtml(r.kind)}</td></tr>`)
+    .join("");
+  const html =
+    `<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;font-size:14px;color:#1f2933;line-height:1.5">` +
+    `<p>${escapeHtml(pick(rng, NEWSLETTER_INTROS))}</p>` +
+    `<p style="font-size:18px;font-weight:700;color:#b02a37">WIN ${escapeHtml(prize.toUpperCase())}</p>` +
+    `<p>We are giving away ${escapeHtml(prize)}. To enter, answer one question: name two of the ` +
+    `assessment types listed below. Email your answer to ${escapeHtml(reply)} by 4 PM today. ` +
+    `One winner is drawn at random from the correct entries and told by email.</p>` +
+    `<p>Good luck, and thank you for choosing ${escapeHtml(org)}.</p>` +
+    `<h3 style="font-size:14px;margin:16px 0 6px">Upcoming availability</h3>` +
+    `<table role="presentation" cellpadding="0" cellspacing="0">${htmlRows}</table>` +
+    `<p style="color:#52606d;font-size:12px;border-top:1px solid #dfe3e8;padding-top:10px;margin-top:16px">` +
+    `${escapeHtml(org)} &middot; ${escapeHtml(domain)}<br>` +
+    `To stop receiving these updates, reply with &quot;unsubscribe&quot;.</p></div>`;
+
+  return {
+    subject,
+    text,
+    html,
+    attachments: [],
+    headers: { "List-Unsubscribe": `<mailto:${reply}?subject=unsubscribe>` },
+    variant: "promo",
+  };
 }
 
 export function composeReply(rng) {
