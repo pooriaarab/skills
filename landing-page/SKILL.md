@@ -136,10 +136,37 @@ auto). Faster than authoring from zero when the aesthetic fits.
 ## D. STYLE / AESTHETIC
 
 - **Tone axis:** Professional / Playful / Authoritative / Minimal. Commit to one.
-- **No brand yet?** Use impeccable's aesthetic-direction — commit to a distinct world, don't
-  default. For a whole visual identity (multiple directions to pick from, tokens, logo,
-  favicon/OG, guidelines), run **`saas-brand-system`** first, then build this page inside the
-  chosen brand. **Brand exists?** Extract its tokens and build inside them.
+- **Brand exists?** Extract its tokens and build inside them. Stop reading this bullet.
+- **No brand yet? Adopt a finished direction before you invent one.** The
+  [`brand-router`](../brand-router/SKILL.md) suite carries **twenty** directions, and each one
+  already specifies its landing-page surface with committed hex values, audited contrast, a
+  named motion, and the failure mode that kills it. Run the router to pick; it surveys what
+  you actually publish and recommends a kit rather than a single style. Adopting one is
+  hours; generating a fresh world is days and starts unaudited.
+
+  Three routes, and they are not interchangeable:
+
+  | Route | Use when | Output |
+  |---|---|---|
+  | [`brand-router`](../brand-router/SKILL.md) → a direction | A direction in the catalog fits | Finished tokens and twelve surfaces, already audited |
+  | `saas-brand-system` | The brand does not exist and nothing in the catalog fits | N prototypes, judged, then expanded |
+  | `impeccable` aesthetic-direction | You only need this one page to have a point of view | A direction for the page, not the brand |
+
+  **Prototype before you commit.** Render two or three candidate directions as standalone
+  pages with real product copy, then pick from the rendered result. A direction reads
+  completely differently as a page than as a description, and this step is cheap.
+
+- **Cost to run is the filter that actually binds.** Every direction declares it, and a brand
+  dies of upkeep far more often than of ugliness. `swiss`, `terminal`, `spec`, `porcelain`,
+  `broadsheet`, `manuscript`, `plaque` and `buildspace` are the cheap ones — reachable by one
+  person publishing weekly. `risograph`, `arcade`, `flyer` and `aurora` need real craft per
+  asset; pick one of those only if a designer is in the loop.
+
+- **Whatever you pick, apply it as a direction and not as a palette.** Swapping hex values
+  while leaving centred heroes, soft shadows and rounded cards in place produces a recoloured
+  template, not a brand. The section *form* is most of the direction: `swiss` is flush left on
+  a visible twelve-column grid with radius 0 and exactly one red element, and none of that is
+  a colour.
 - **AI house-style tells to avoid** (they read as slop): cream + serif + terracotta/amber;
   navy + teal + Inter; purple→indigo gradients on everything; emoji as icons; three fonts.
   Run impeccable's slop-check.
