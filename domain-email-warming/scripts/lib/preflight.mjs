@@ -67,10 +67,31 @@ const mx = async (r, name) => {
   }
 };
 
+/**
+ * Second-level public suffixes in common use, so a domain under one of these
+ * (e.g. `mail.example.co.uk`) resolves its organizational domain to
+ * `example.co.uk` rather than `co.uk`. Not a full public suffix list — an
+ * unlisted multi-part suffix still falls back to the last two labels.
+ */
+const MULTI_PART_SUFFIXES = new Set([
+  "co.uk", "org.uk", "gov.uk", "ac.uk", "me.uk", "net.uk", "sch.uk",
+  "co.jp", "or.jp", "ne.jp", "ac.jp", "go.jp",
+  "co.nz", "org.nz", "govt.nz", "ac.nz",
+  "co.za", "org.za", "gov.za",
+  "com.au", "net.au", "org.au", "gov.au", "edu.au",
+  "com.br", "net.br", "org.br", "gov.br",
+  "co.in", "org.in", "gov.in", "net.in",
+  "com.cn", "org.cn", "net.cn", "gov.cn",
+  "co.kr", "or.kr", "go.kr",
+]);
+
 /** The registrable domain, used to find the DMARC record a subdomain inherits. */
 function organizationalDomain(domain) {
   const parts = domain.split(".");
-  return parts.length <= 2 ? domain : parts.slice(-2).join(".");
+  if (parts.length <= 2) return domain;
+  const lastTwo = parts.slice(-2).join(".");
+  if (parts.length > 2 && MULTI_PART_SUFFIXES.has(lastTwo)) return parts.slice(-3).join(".");
+  return lastTwo;
 }
 
 function parseTags(record) {

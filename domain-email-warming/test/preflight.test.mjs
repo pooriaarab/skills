@@ -134,6 +134,19 @@ describe("checkDomain", () => {
     assert.equal(r.dmarc.inherited, true);
     assert.equal(r.dmarc.p, "quarantine");
   });
+
+  it("inherits from the registrable domain, not the last two labels, under a multi-part suffix", async () => {
+    const r = await checkDomain("mail.example.co.uk", {
+      resolver: fakeResolver({
+        txt: {
+          "mail.example.co.uk": ["v=spf1 ~all"],
+          "_dmarc.example.co.uk": ["v=DMARC1; p=reject; sp=quarantine;"],
+        },
+      }),
+    });
+    assert.equal(r.dmarc.inherited, true);
+    assert.equal(r.dmarc.p, "quarantine");
+  });
 });
 
 describe("isPublicIPv4", () => {
