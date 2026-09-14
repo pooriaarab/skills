@@ -159,6 +159,37 @@ test("sendEmail does not crash on a non-JSON proxy error page", async () => {
   assert.match(res.error, /502/);
 });
 
+test("sendEmail does not report success on a non-JSON 200 body", async () => {
+  stubFetch(
+    () =>
+      new Response("<html><body>ok</body></html>", {
+        status: 200,
+        headers: { "content-type": "text/html" },
+      }),
+  );
+  const res = await sendEmail(ENV, SEND_ARGS);
+  assert.equal(res.ok, false);
+  assert.equal(res.messageId, null);
+  assert.match(res.error, /malformed response/);
+});
+
+test("sendEmail reports both bounced and suppressed recipients", async () => {
+  stubFetch(() =>
+    jsonResponse(200, {
+      success: true,
+      errors: [],
+      result: {
+        permanent_bounces: ["bounced@example.com"],
+        suppressed_recipients: ["suppressed@example.com"],
+      },
+    }),
+  );
+  const res = await sendEmail(ENV, SEND_ARGS);
+  assert.equal(res.ok, false);
+  assert.match(res.error, /permanently bounced: bounced@example\.com/);
+  assert.match(res.error, /suppressed: suppressed@example\.com/);
+});
+
 test("sendEmail converts a request timeout into ok:false", async () => {
   stubFetch(() => {
     throw new DOMException("The operation timed out.", "TimeoutError");

@@ -51,6 +51,14 @@ export async function sendEmail(
 
   if (!res.ok) return { ok: false, messageId: null, error: res.error };
 
+  if (!res.body || typeof res.body !== "object") {
+    return {
+      ok: false,
+      messageId: null,
+      error: `malformed response (HTTP ${res.status})`,
+    };
+  }
+
   const errors = res.body?.errors ?? [];
   if (res.body?.success === false || errors.length) {
     const detail = errors.map((e) => e?.message).filter(Boolean).join("; ");
@@ -66,10 +74,14 @@ export async function sendEmail(
   // bounce or suppression has to be read out of the result. Counting those as
   // sent would fill the placement report with mail nobody ever received.
   if (bounced.length || suppressed.length) {
+    const parts = [
+      ...(bounced.length ? [`permanently bounced: ${bounced.join(", ")}`] : []),
+      ...(suppressed.length ? [`suppressed: ${suppressed.join(", ")}`] : []),
+    ];
     return {
       ok: false,
       messageId: result.message_id ?? null,
-      error: bounced.length ? `permanently bounced: ${bounced.join(", ")}` : `suppressed: ${suppressed.join(", ")}`,
+      error: parts.join("; "),
     };
   }
 
