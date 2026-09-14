@@ -13,7 +13,7 @@ import { cfEnv, getLimits, sendEmail } from "./lib/cloudflare.mjs";
 import { compose, composeReply, loadLogo, VARIANTS, variantFor } from "./lib/content.mjs";
 import { classify, findByMessageId, markRead, reply, rescueFromSpam } from "./lib/gmail.mjs";
 import { checkDomain, organizationalDomain } from "./lib/preflight.mjs";
-import { planForDay } from "./lib/ramp.mjs";
+import { planForDay, selectDueSlots } from "./lib/ramp.mjs";
 import { dayIndex, loadState, recordSend, saveState, sendsOnDay } from "./lib/state.mjs";
 
 const USAGE = `warmctl - measured domain email warm-up
@@ -116,29 +116,14 @@ async function cmdSend(cfg, opts, state) {
   const day = opts.day ?? dayIndex(state);
   const plan = planForDay(cfg, day, Math.random);
 
-  // Each planned message owns a numbered slot for the day, and a send records
-  // the slot it filled. Counting rows instead would go wrong the moment one
-  // send fails: the count no longer lines up with position, so the next run
-  // re-sends a message that already went out and silently abandons the one
-  // that failed. Only an accepted send retires its slot, so a failure is
-  // retried on the next tick.
-  const claimed = new Set(sendsOnDay(state, day).filter((s) => s.accepted).map((s) => s.slot));
-  const numbered = plan.map((p, slot) => ({ ...p, slot }));
-  const done = numbered.filter((p) => claimed.has(p.slot)).length;
-
-  // Only what is actually due. The ramp spreads the day across a working window
-  // precisely so the mail does not leave in one burst, and sending the whole
-  // day's plan the moment the command runs would throw that away — sixteen
-  // messages in one second is a machine signature whatever they say. Run this
-  // hourly and each pass sends the few that have come due.
-  const todo = numbered.filter(
-    (p) => !claimed.has(p.slot) && (opts.all || Date.parse(p.sendAt) <= Date.now()),
-  );
+  // Slot accounting lives in ramp.mjs so it can be tested against the code
+  // that actually runs here. Only an accepted send retires its slot, so a
+  // failed one is picked up again on the next tick instead of being skipped.
+  const { done, todo, nextDue } = selectDueSlots(plan, state.sends, day, { all: opts.all });
   if (!todo.length) {
-    const next = numbered.find((p) => !claimed.has(p.slot))?.sendAt;
     console.log(
       `day ${day}: ${done}/${plan.length} sent` +
-        (next ? `, next due ${new Date(next).toISOString().slice(11, 16)}Z` : ", day complete"),
+        (nextDue ? `, next due ${new Date(nextDue).toISOString().slice(11, 16)}Z` : ", day complete"),
     );
     return;
   }

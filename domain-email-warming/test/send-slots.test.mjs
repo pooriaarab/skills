@@ -1,21 +1,16 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { planForDay } from "../scripts/lib/ramp.mjs";
+import { planForDay, selectDueSlots } from "../scripts/lib/ramp.mjs";
 
 /**
- * Reproduces the slot-accounting rule cmdSend relies on, without the provider
- * or the filesystem. The bug this guards against is subtle and silent: with a
- * count-based scheme, one failed send in the middle of a batch shifts every
- * later index by one, so the next run re-sends a message that already went out
- * and never retries the one that failed.
+ * Exercises the slot accounting `cmdSend` actually calls, not a copy of it.
+ * The bug guarded against here is subtle and silent: with a count-based
+ * scheme, one failed send in the middle of a batch shifts every later index by
+ * one, so the next run re-sends a message that already went out and never
+ * retries the one that failed.
  */
-function selectTodo(plan, sends, day, now) {
-  const claimed = new Set(sends.filter((s) => s.day === day && s.accepted).map((s) => s.slot));
-  return plan
-    .map((p, slot) => ({ ...p, slot }))
-    .filter((p) => !claimed.has(p.slot) && Date.parse(p.sendAt) <= now);
-}
+const selectTodo = (plan, sends, day, now) => selectDueSlots(plan, sends, day, { now }).todo;
 
 const cfg = {
   startDate: "2026-09-14",
@@ -65,5 +60,27 @@ describe("send slot accounting", () => {
 
   it("releases nothing before the first scheduled time", () => {
     assert.equal(selectTodo(plan, [], 1, Date.parse("2026-09-14T00:00:00Z")).length, 0);
+  });
+});
+
+describe("selectDueSlots reporting", () => {
+  const plan = planForDay(cfg, 1, rng);
+
+  it("counts completed slots and names the next one due", () => {
+    const sends = plan.map((p, slot) => ({ day: 1, slot, accepted: slot < 3 }));
+    const r = selectDueSlots(plan, sends, 1, { now: LATER });
+    assert.equal(r.done, 3);
+    assert.equal(r.nextDue, plan[3].sendAt);
+  });
+
+  it("reports no next slot once the day is complete", () => {
+    const sends = plan.map((p, slot) => ({ day: 1, slot, accepted: true }));
+    assert.equal(selectDueSlots(plan, sends, 1, { now: LATER }).nextDue, null);
+  });
+
+  it("--all ignores the schedule and releases the whole remaining day", () => {
+    const early = Date.parse("2026-09-14T00:00:00Z");
+    assert.equal(selectDueSlots(plan, [], 1, { now: early, all: true }).todo.length, plan.length);
+    assert.equal(selectDueSlots(plan, [], 1, { now: early }).todo.length, 0);
   });
 });
