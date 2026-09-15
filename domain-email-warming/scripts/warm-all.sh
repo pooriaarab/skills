@@ -20,6 +20,10 @@ for cfg in "$DIR"/*.warmup.json; do
   [ -e "$cfg" ] || continue
   name=$(basename "$cfg" .warmup.json)
   echo "--- $name"
-  node "$HERE/warmctl.mjs" send   --config "$cfg" --apply 2>&1 | sed 's/^/    /'
+  # send is gated on preflight, same as warm-tick.sh: a domain whose
+  # authentication has broken since the last pass must not keep sending.
+  if node "$HERE/warmctl.mjs" preflight --config "$cfg" 2>&1 | sed 's/^/    /'; then
+    node "$HERE/warmctl.mjs" send --config "$cfg" --apply 2>&1 | sed 's/^/    /'
+  fi
   node "$HERE/warmctl.mjs" engage --config "$cfg" --apply 2>&1 | sed 's/^/    /'
 done
