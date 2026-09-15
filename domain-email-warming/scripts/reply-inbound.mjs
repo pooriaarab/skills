@@ -106,11 +106,15 @@ const rows = parseRows(await wrangler([
   `WHERE direction='inbound' AND received_at >= ${since} ORDER BY received_at DESC LIMIT ${LIMIT}`,
 ]));
 
-// Only answer a human. Our own addresses would loop, and a bounce sender is not
-// a correspondent.
+// Only answer a human. Our own addresses would loop — including a seed's
+// engage-side reply, which lands here as ordinary inbound mail — and a bounce
+// sender is not a correspondent.
 const targets = rows.filter((r) => {
   const from = String(r.from_address ?? "").toLowerCase();
-  return from && !ours.has(from) && !/mailer-daemon|postmaster|no-?reply|bounce/.test(from);
+  if (!from || /mailer-daemon|postmaster|no-?reply|bounce/.test(from)) return false;
+  if (ours.has(from)) return false;
+  if (seeds.has(from.replace(/\+[^@]*@/, "@"))) return false;
+  return true;
 });
 
 console.log(`${targets.length} reply-able message(s)${APPLY ? "" : " (DRY RUN)"}\n`);

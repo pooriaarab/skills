@@ -23,9 +23,14 @@ function threadHeaders(row) {
 }
 
 const ours = new Set(["hello@a.com"]);
-const answerable = (from) =>
-  Boolean(from) && !ours.has(from.toLowerCase()) &&
-  !/mailer-daemon|postmaster|no-?reply|bounce/.test(from.toLowerCase());
+const seeds = new Set(["seed-primary@example.com"]);
+const answerable = (from) => {
+  const f = String(from ?? "").toLowerCase();
+  if (!f || /mailer-daemon|postmaster|no-?reply|bounce/.test(f)) return false;
+  if (ours.has(f)) return false;
+  if (seeds.has(f.replace(/\+[^@]*@/, "@"))) return false;
+  return true;
+};
 
 describe("who gets answered", () => {
   it("answers a real correspondent", () => assert.equal(answerable("someone@gmail.com"), true));
@@ -43,6 +48,17 @@ describe("who gets answered", () => {
   });
 
   it("ignores case when matching", () => assert.equal(answerable("MAILER-DAEMON@x.com"), false));
+
+  it("never answers a seed address", () => {
+    // The engage loop replies from the seed side we control; without this
+    // check its reply lands here as ordinary inbound mail and gets a reply
+    // of its own, looping between our own identity and seed mailboxes.
+    assert.equal(answerable("seed-primary@example.com"), false);
+  });
+
+  it("never answers a tagged variant of a seed address", () => {
+    assert.equal(answerable("seed-primary+a@example.com"), false);
+  });
 });
 
 describe("threading", () => {
