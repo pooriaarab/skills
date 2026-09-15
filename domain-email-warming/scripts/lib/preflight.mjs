@@ -198,3 +198,63 @@ export async function checkDomain(domain, options = {}) {
 
   return { domain, role, spf: spf[0] ?? null, dkim, dmarc, mx: mxRecords, findings };
 }
+
+/**
+ * Role is a config fact, not a DNS fact. A subdomain is send-only because the
+ * program said so, not because it happens to lack MX. Inferring the role from
+ * a missing MX is how the old message became advice dressed as a check.
+ */
+export function roleForIdentity(identity, sendingDomain = null) {
+  if (identity.role === "send-only" || identity.role === "send+receive") return identity.role;
+  const domain = String(identity.address ?? "").split("@")[1] ?? "";
+  const isSub = sendingDomain ? domain !== sendingDomain : domain !== organizationalDomain(domain);
+  return isSub ? "send-only" : "send+receive";
+}
+
+/**
+ * Second pass: for each identity, the address a reply actually goes to.
+ *
+ * checkDomain never sees identities. A send-only host can (and should) have
+ * no MX; what it cannot do is leave replies aimed at itself. `replyTo` when
+ * set, otherwise the identity's own address — and that domain must have MX.
+ */
+export async function checkReplyPaths(identities, options = {}) {
+  const { resolver = null, sendingDomain = null } = options;
+  const findings = [];
+  const add = (level, message) => findings.push({ level, message });
+  const resolvers = new Map();
+
+  for (const identity of identities) {
+    const address = identity.address;
+    const role = roleForIdentity(identity, sendingDomain);
+    const replyTo = identity.replyTo || null;
+
+    // Send-only plus no replyTo is a fail on the config, before any DNS.
+    // Giving the sending host MX would not make it receive: the role said
+    // it does not, and a reply still goes to an address with no inbound route.
+    if (role === "send-only" && !replyTo) {
+      add("fail", `${address} is send-only and has no replyTo, so a reply to it bounces.`);
+      continue;
+    }
+
+    const replyAddress = replyTo || address;
+    const replyDomain = String(replyAddress).split("@")[1] ?? "";
+    let r = resolver;
+    if (!r) {
+      if (!resolvers.has(replyDomain)) resolvers.set(replyDomain, await authoritativeResolver(replyDomain));
+      r = resolvers.get(replyDomain);
+    }
+    const mxRecords = await mx(r, replyDomain);
+    if (mxRecords.length === 0) {
+      if (replyTo) {
+        add("fail", `${replyTo} is the replyTo for ${address}, but ${replyDomain} has no MX record, so a reply to it bounces.`);
+      } else {
+        add("fail", `No MX record on ${replyDomain}, so a reply to ${address} cannot be received.`);
+      }
+    } else {
+      add("ok", `${replyDomain} has ${mxRecords.length} MX record(s) and can receive a reply to ${replyAddress}.`);
+    }
+  }
+
+  return { findings };
+}

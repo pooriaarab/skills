@@ -12,7 +12,7 @@ import { argv, exit } from "node:process";
 import { cfEnv, getLimits, sendEmail } from "./lib/cloudflare.mjs";
 import { compose, composeReply, loadLogo, VARIANTS, variantFor } from "./lib/content.mjs";
 import { classify, findByMessageId, markRead, reply, rescueFromSpam } from "./lib/gmail.mjs";
-import { checkDomain, organizationalDomain } from "./lib/preflight.mjs";
+import { checkDomain, checkReplyPaths, organizationalDomain } from "./lib/preflight.mjs";
 import { planForDay, selectDueSlots } from "./lib/ramp.mjs";
 import { dayIndex, loadState, recordSend, saveState, sendsOnDay } from "./lib/state.mjs";
 
@@ -21,7 +21,7 @@ const USAGE = `warmctl - measured domain email warm-up
   warmctl <command> --config <path> [--apply] [--json] [--day N]
 
 Commands
-  preflight   Check SPF, DKIM, DMARC and MX for every sending domain.
+  preflight   Check SPF, DKIM, DMARC, MX and the reply path for every identity.
   plan        Print the schedule for a day. Never sends.
   send        Send whatever is due now. Dry run unless --apply.
               Run hourly: the ramp spreads the day, so each pass sends a few.
@@ -82,13 +82,26 @@ function sendingDomains(cfg) {
 
 async function cmdPreflight(cfg, opts) {
   const results = [];
-  for (const { domain, role, returnPath } of sendingDomains(cfg)) {
+  const domains = sendingDomains(cfg);
+  const roleByDomain = new Map(domains.map((d) => [d.domain, d.role]));
+  for (const { domain, role, returnPath } of domains) {
     results.push(await checkDomain(domain, {
       dkimSelectors: cfg.dkimSelectors ?? ["cf-bounce"],
       role,
       returnPath,
     }));
   }
+  // Identities, not domains: a send-only host needing no MX is not the same
+  // as a reply being able to land. Role comes from the config via the map
+  // above, never from a missing MX record.
+  const reply = await checkReplyPaths(
+    cfg.identities.map((i) => ({
+      address: i.address,
+      replyTo: i.replyTo ?? null,
+      role: roleByDomain.get(i.address.split("@")[1]),
+    })),
+  );
+  results.push({ domain: "reply path", role: "identities", findings: reply.findings });
   if (opts.json) return console.log(JSON.stringify(results, null, 2));
   let failed = false;
   for (const r of results) {
