@@ -289,6 +289,36 @@ And the structural lever, which beats every tuning knob above: **fewer, larger P
 fleet's output into one PR per logical change cuts the multiplier at the source instead of making
 each multiplied run cheaper.
 
+## Per-author CI credentials on GitHub Actions
+
+A repo owner wants contributor B's CI runs off his personal AI subscription tokens. GitHub
+offers no per-user secret for this. Secrets are repository-scoped: a workflow triggered by
+contributor B still reads the repo's secrets. Adding secrets needs ADMIN — a collaborator
+with write/push access cannot add their own.
+
+Route by author with a ternary. It works reliably:
+
+```yaml
+env:
+  AI_API_KEY: ${{ github.actor == 'someone' && secrets.KEY_SOMEONE || secrets.KEY_DEFAULT }}
+```
+
+Prefer this over dynamic `secrets[format(...)]` indexing. Its behaviour in step-level
+`with:`/`env:` could not be confirmed from GitHub's documentation.
+
+Know what routing buys. It buys spend attribution: each author's runs bill their own token.
+It does not buy isolation. The owner still stores every contributor's token. For a same-repo
+(non-fork) `pull_request`, GitHub runs the workflow file as committed on the PR branch with
+full secrets access — a push-access collaborator can edit the workflow to reference any
+secret. An `if: actor == owner` guard is cosmetic, not a boundary.
+
+The only platform-enforced boundary is fork-based contribution: forked `pull_request` runs
+get zero base-repo secrets. Environments with required reviewers would impose a real gate,
+but they need GitHub Enterprise on a private repo — not available on Free or Pro.
+
+Use author routing for attribution on a trusted team. Require forks for untrusted
+contributors. Never present routing as isolation.
+
 ## Gotchas
 
 | Symptom | Cause |
