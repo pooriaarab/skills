@@ -120,6 +120,11 @@ Proof: n/a — pure type-level refactor, no runtime path and no visible surface
 The checker accepts the line. The review council judges whether the reason holds, so a bare
 "not applicable" fails on the next pass. An agent cannot clear its own proof requirement.
 
+The `Proof: n/a - <reason>` hatch does not survive contact with a UI diff. When the diff
+touches UI files (`**/*.tsx`, `**/app/**/page.*`), attach real before/after media no matter
+how good the written reason is — the checker's source comment says exactly that. Never clear
+this by applying the `proof-not-applicable` label to your own PR.
+
 ## Size
 
 | Cap | Limit |
