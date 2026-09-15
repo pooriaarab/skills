@@ -227,6 +227,10 @@ export async function checkReplyPaths(identities, options = {}) {
   const findings = [];
   const add = (level, message) => findings.push({ level, message });
   const resolvers = new Map();
+  // Many identities share a reply domain (every subdomain's replyTo often
+  // names the same org mailbox) — cache the MX lookup itself, not just the
+  // resolver, so that fan-in queries DNS once per distinct domain.
+  const mxByDomain = new Map();
 
   for (const identity of identities) {
     const address = identity.address;
@@ -243,12 +247,15 @@ export async function checkReplyPaths(identities, options = {}) {
 
     const replyAddress = replyTo || address;
     const replyDomain = String(replyAddress).split("@")[1] ?? "";
-    let r = resolver;
-    if (!r) {
-      if (!resolvers.has(replyDomain)) resolvers.set(replyDomain, await authoritativeResolver(replyDomain));
-      r = resolvers.get(replyDomain);
+    if (!mxByDomain.has(replyDomain)) {
+      let r = resolver;
+      if (!r) {
+        if (!resolvers.has(replyDomain)) resolvers.set(replyDomain, await authoritativeResolver(replyDomain));
+        r = resolvers.get(replyDomain);
+      }
+      mxByDomain.set(replyDomain, await mx(r, replyDomain));
     }
-    const mxRecords = await mx(r, replyDomain);
+    const mxRecords = mxByDomain.get(replyDomain);
     if (mxRecords.length === 0) {
       if (replyTo) {
         add("fail", `${replyTo} is the replyTo for ${address}, but ${replyDomain} has no MX record, so a reply to it bounces.`);
