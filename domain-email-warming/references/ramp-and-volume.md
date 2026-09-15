@@ -48,7 +48,7 @@ same second is a machine signature regardless of content.
 ## Vary the format, not just the wording
 
 Identical bodies at volume are themselves a bulk signal, so wording is drawn from pools.
-More importantly, formats are filtered differently, and the tool rotates through six
+More importantly, formats are filtered differently, and the tool rotates through seven
 shapes so each is measured separately:
 
 | Variant | Shape |
@@ -57,6 +57,7 @@ shapes so each is measured separately:
 | `html_simple` | Minimal HTML, no images. |
 | `html_logo` | HTML with one inline CID logo. |
 | `html_rich` | Styled signature block plus logo. |
+| `attachment` | HTML with the logo as a real attachment, not embedded. |
 | `newsletter` | A broadcast: promotional block, availability list, numbered form, `List-Unsubscribe`. |
 | `promo` | The most aggressive shape: a giveaway or offer above the fold. |
 

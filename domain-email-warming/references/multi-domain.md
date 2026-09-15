@@ -169,3 +169,37 @@ schedule runs hourly through the whole send window with a pass near the end.
 The pre-existing DMARC record on every live-mail domain is backed up. Role
 addresses have routing rules and appear on no sender list. Seed inboxes have
 filters. Start dates are staggered. Only then start the loop.
+
+## Mail the other domains in the fleet, not only the seed inbox
+
+A domain whose entire outbound history goes to one Gmail address looks like
+what it is. Real senders write to many recipient domains, and that spread is
+itself part of what a receiver sees.
+
+When a fleet shares an account, each domain can mail the others. Point a share
+of every domain's daily volume at mailboxes on its peers — `hello@adscapi.com`
+writing to `team@popcornteam.com` — and each domain's outbound history gains
+genuine recipient variety without inventing a single new recipient.
+
+It also exercises the half of the setup that otherwise goes untested. Sending is
+checked constantly; the receive path is only checked when something arrives. A
+peer send proves MX, routing rules and forwarding on the receiving domain every
+time it runs.
+
+**Placement stays measurable, which is the part that makes this worth doing.**
+Because each domain forwards to the seed inbox, a message sent to
+`team@popcornteam.com` still lands somewhere readable, and the same
+`rfc822msgid:` lookup finds it. Configure peer seeds with the seed mailbox as
+their `gogAccount`, not the peer address, or the lookup searches a mailbox no
+one can open.
+
+**Be clear about what this does not buy.** Mail between domains you own is not
+judged by an independent receiver in the way mail to a stranger is. It builds
+sending history and recipient spread; it does not prove anyone wanted the mail.
+Keep third-party recipients in the mix and treat peer traffic as the base layer
+rather than the whole programme.
+
+One practical caution: forwarding breaks SPF alignment, since the forwarding
+host is not in the original domain's SPF record. DKIM survives forwarding and
+carries DMARC on its own, which is why the DKIM record on every sending domain
+and subdomain is not optional here.

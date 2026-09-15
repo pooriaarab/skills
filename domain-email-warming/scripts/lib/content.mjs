@@ -10,7 +10,7 @@ import { readFile } from "node:fs/promises";
 import { basename, extname } from "node:path";
 
 /** Format shapes, cheapest to richest. `report --by-variant` compares them. */
-export const VARIANTS = ["plain", "html_simple", "html_logo", "html_rich", "newsletter", "promo"];
+export const VARIANTS = ["plain", "html_simple", "html_logo", "html_rich", "attachment", "newsletter", "promo"];
 
 /**
  * "newsletter" is deliberately the shape real cold outreach takes: a broadcast
@@ -121,6 +121,22 @@ export function compose(rng, { fromName, fromAddress, toAddress, day, variant = 
     return composeNewsletter(rng, { fromName, fromAddress, replyAddress: replyTo, org: orgName ?? fromName });
   }
   if (variant === "plain") return { subject, text, html: null, attachments: [], headers: null, variant };
+
+  // A file attached rather than embedded. Inline images ride in the body and
+  // are filtered as part of it; a real attachment is scanned separately, so the
+  // two shapes are not interchangeable and each needs its own measurement.
+  if (variant === "attachment") {
+    if (!logo) throw new Error('variant "attachment" needs a logo; set "logoPath" in the config');
+    const paras = body.split("\n\n").map((x) => `<p>${escapeHtml(x)}</p>`).join("");
+    return {
+      subject,
+      text: `${text}\n\n(attached: ${logo.filename})`,
+      html: `<div>${paras}<p>${escapeHtml(closer)}<br>${escapeHtml(fromName)}</p></div>`,
+      attachments: [{ disposition: "attachment", filename: logo.filename, type: logo.type, content: logo.content }],
+      headers: null,
+      variant,
+    };
+  }
 
   const paras = body.split("\n\n").map((p) => `<p>${escapeHtml(p)}</p>`).join("");
   const img = useLogo ? `<img src="cid:logo" alt="${escapeHtml(fromName)}" width="40" height="40" style="display:block;border:0">` : "";
