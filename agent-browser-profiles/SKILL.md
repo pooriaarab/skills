@@ -68,3 +68,12 @@ browser-personal   # fresh isolated profile, personal context
 browser-work-real  # real Chrome on a work clone (existing logins)
 browser-attach     # opt into driving your daily Chrome
 ```
+
+## Driving a form once you are in
+
+Picking the browser is half of it. Filling a form and knowing whether it worked
+is the other half, and every failure there is silent: `fill` on an unbound ref,
+a click on a disabled button, and a loop that narrates its own success all
+report `✓ Done` while doing nothing.
+
+See [references/driving-forms.md](references/driving-forms.md).
