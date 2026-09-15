@@ -143,3 +143,26 @@ describe("promo variant", () => {
     assert.deepEqual(promo(), promo());
   });
 });
+
+describe("attachment variant", () => {
+  const att = () => compose(seeded(31), { ...base, variant: "attachment", logo: LOGO });
+
+  it("attaches the file rather than embedding it", () => {
+    const m = att();
+    assert.equal(m.attachments.length, 1);
+    assert.equal(m.attachments[0].disposition, "attachment");
+    // An inline image rides in the body and is filtered with it; an attached
+    // file is scanned separately, so the two are not interchangeable.
+    assert.ok(!m.html.includes("cid:"));
+  });
+
+  it("names the attachment in the text part", () => {
+    assert.match(att().text, /attached: logo\.png/);
+  });
+
+  it("refuses without a file rather than sending an empty attachment variant", () => {
+    assert.throws(() => compose(seeded(32), { ...base, variant: "attachment" }), /needs a logo/);
+  });
+
+  it("is deterministic for a fixed rng", () => assert.deepEqual(att(), att()));
+});
