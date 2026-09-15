@@ -48,7 +48,7 @@ describe("compose", () => {
 
   it("never emits campaign markers in the 1:1 shapes", () => {
     const banned = /(unsubscribe|click here|limited time|https?:\/\/|<a\s)/i;
-    for (const variant of ["plain", "html_simple", "html_logo", "html_rich"]) {
+    for (const variant of ["plain", "html_simple", "html_logo", "html_rich", "attachment"]) {
       for (let i = 0; i < 60; i++) {
         const m = compose(seeded(i + 1), { ...base, variant, logo: LOGO });
         assert.ok(!banned.test(m.text), `${variant} text leaked a campaign marker`);
