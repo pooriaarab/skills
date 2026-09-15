@@ -314,7 +314,8 @@ secret. An `if: actor == owner` guard is cosmetic, not a boundary.
 
 The only platform-enforced boundary is fork-based contribution: forked `pull_request` runs
 get zero base-repo secrets. Environments with required reviewers would impose a real gate,
-but they need GitHub Enterprise on a private repo — not available on Free or Pro.
+but on a private repo they need a paid plan — GitHub Pro, Team, or Enterprise Cloud — not
+available on Free.
 
 Use author routing for attribution on a trusted team. Require forks for untrusted
 contributors. Never present routing as isolation.
