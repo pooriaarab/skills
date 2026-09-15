@@ -86,7 +86,7 @@ const MULTI_PART_SUFFIXES = new Set([
 ]);
 
 /** The registrable domain, used to find the DMARC record a subdomain inherits. */
-function organizationalDomain(domain) {
+export function organizationalDomain(domain) {
   const parts = domain.split(".");
   if (parts.length <= 2) return domain;
   const lastTwo = parts.slice(-2).join(".");
