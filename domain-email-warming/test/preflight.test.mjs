@@ -159,6 +159,19 @@ describe("checkDomain", () => {
 });
 
 describe("checkReplyPaths", () => {
+  it("honours a configured send+receive role on a subdomain, rather than inferring send-only from its shape", async () => {
+    // The config is the authority on role. Without this, roleForIdentity falls
+    // back to "a subdomain must be send-only", and an operator who deliberately
+    // set up a receiving subdomain gets a fail they cannot clear. It is also
+    // the only case that distinguishes reading the role from guessing it: for
+    // every identity whose shape agrees with its config, both paths agree.
+    const r = await checkReplyPaths(
+      [{ address: "hello@mail.ex.com", replyTo: null, role: "send+receive" }],
+      { resolver: fakeResolver({ mx: { "mail.ex.com": [{ exchange: "mx.mail.ex.com", priority: 10 }] } }) },
+    );
+    assert.equal(r.findings.filter((f) => f.level === "fail").length, 0);
+  });
+
   it("fails a send-only identity with replyTo: null, even when the sending domain has MX", async () => {
     // Role is taken from the identity, not from DNS. MX on the sending host
     // must not turn this into a pass — that circularity is the original bug.

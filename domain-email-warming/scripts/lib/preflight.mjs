@@ -189,7 +189,11 @@ export async function checkDomain(domain, options = {}) {
   // --- MX ------------------------------------------------------------------
   const mxRecords = await mx(r, domain);
   if (role === "send-only") {
-    add("ok", `${domain} is send-only, so it needs no MX record. Set Reply-To to a mailbox that does receive.`);
+    // Deliberately not advice any more. Telling the operator to "set Reply-To"
+    // and then not checking it is how 49 sending hosts sat unable to receive a
+    // reply for weeks while every preflight reported green. The reply path
+    // section below is the check; this line only states the role.
+    add("ok", `${domain} is send-only, so it needs no MX record of its own. Its reply path is checked separately.`);
   } else if (mxRecords.length === 0) {
     add("fail", `No MX record on ${domain}, so it cannot receive mail or any reply.`);
   } else {
