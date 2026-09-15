@@ -94,14 +94,14 @@ async function cmdPreflight(cfg, opts) {
   // Identities, not domains: a send-only host needing no MX is not the same
   // as a reply being able to land. Role comes from the config via the map
   // above, never from a missing MX record.
-  const reply = await checkReplyPaths(
+  const replyPaths = await checkReplyPaths(
     cfg.identities.map((i) => ({
       address: i.address,
       replyTo: i.replyTo ?? null,
       role: roleByDomain.get(i.address.split("@")[1]),
     })),
   );
-  results.push({ domain: "reply path", role: "identities", findings: reply.findings });
+  results.push({ domain: "reply path", role: "identities", findings: replyPaths.findings });
   if (opts.json) return console.log(JSON.stringify(results, null, 2));
   let failed = false;
   for (const r of results) {
