@@ -336,6 +336,35 @@ review bot's.
 
 `git log --format='%h %an'` costs nothing. Ask who, not just what.
 
+### 15. Judge the diff, not the exit code or the log
+
+Exit code and log output fail independently as evidence of work. After every
+delegated job, run `git diff` / `git status` and judge the artifact.
+
+Two failures from one session, both exit 0:
+- `cursor-agent -p -f --model cursor-grok-4.6-high-fast` printed
+  `Error: Authentication required. Please run 'agent login' first, or set
+  CURSOR_API_KEY environment variable.` and exited 0 having written nothing.
+  The token lives in a local secrets env file — export it into the CLI's
+  environment before the call.
+- `devin -p --permission-mode dangerous` wrote its target file correctly but
+  produced a completely empty log. The work stayed invisible until the diff
+  was inspected.
+
+An empty log proves nothing in either direction: no work done, or finished
+work with nothing to say.
+
+### 16. State the behaviour that must survive, not only the change
+
+A worker asked to remove a Firestore import from a paginated page deleted the
+`startAfter` cursor pagination entirely, because that made the requested grep
+pass. The "next page" button then silently re-fetched page one. The brief said
+what to remove but not what to preserve.
+
+When briefing a worker to change how something is wired, state the behaviour
+that must survive. Then verify the behaviour, not just the grep the brief
+mentioned.
+
 ## Case study — AI Interview Mode (May 2026)
 
 A 32-commit feature campaign delivered end-to-end voice interview functionality on a production blog platform. MVP + V1 + V2 in one continuous session.
