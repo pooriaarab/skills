@@ -138,6 +138,28 @@ Offset the start dates by days, and let the ramps differ per domain so the
 curves do not march in step. The cost is a longer calendar. The saving is that
 no receiver sees a synchronized fleet where it should see unrelated senders.
 
+## Changing the identity list mid-day reshuffles the slots
+
+A day's plan numbers its messages by position. Positions are derived from the
+identity list, so adding or removing a mailbox renumbers every slot after it,
+while the state file still holds slots recorded under the old numbering.
+
+The effect is not a crash and not a loss. It is a one-day smear: some
+identities send twice that day and others do not send at all, and the next day
+plans cleanly against the new list. Observed on a real domain that had already
+sent twenty messages when its list grew from twenty mailboxes to thirty — five
+identities repeated and five waited until the following day.
+
+That is usually acceptable, and it is better than the alternatives. Clearing the
+day's state to force a clean replan re-sends everything already delivered, which
+is real duplicate mail to a real mailbox. Blocking config changes until midnight
+is worse still.
+
+So: expect the smear, do not try to repair it, and prefer to grow the identity
+list before a day's sending starts rather than in the middle of it. If the list
+must change mid-day, the thing to check afterwards is that no identity is
+missing from the following day's plan, not that today's was perfect.
+
 ## Before starting a fleet run
 
 Walk this list once, with the files open, before the first send. Program names
