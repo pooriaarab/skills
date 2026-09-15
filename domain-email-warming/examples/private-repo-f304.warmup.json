@@ -1,0 +1,91 @@
+{
+  "program": "private-repo-f304",
+  "startDate": "2026-09-14",
+  "cloudflare": {
+    "accountIdEnv": "CLOUDFLARE_ACCOUNT_ID",
+    "zoneIdEnv": "CLOUDFLARE_ZONE_ID",
+    "tokenEnv": "CLOUDFLARE_API_TOKEN"
+  },
+  "dkimSelectors": [
+    "cf-bounce"
+  ],
+  "identities": [
+    {
+      "address": "hello@private-repo-f304.com",
+      "name": "private-repo-f304"
+    },
+    {
+      "address": "pooria@private-repo-f304.com",
+      "name": "Pooria Arab"
+    },
+    {
+      "address": "ali@private-repo-f304.com",
+      "name": "Ali"
+    },
+    {
+      "address": "referrals@private-repo-f304.com",
+      "name": "private-repo-f304 Referrals"
+    },
+    {
+      "address": "support@private-repo-f304.com",
+      "name": "private-repo-f304 Support"
+    },
+    {
+      "address": "hello@mail.private-repo-f304.com",
+      "name": "private-repo-f304",
+      "replyTo": "hello@private-repo-f304.com"
+    },
+    {
+      "address": "pooria@mail.private-repo-f304.com",
+      "name": "Pooria Arab",
+      "replyTo": "pooria@private-repo-f304.com"
+    },
+    {
+      "address": "referrals@referrals.private-repo-f304.com",
+      "name": "private-repo-f304 Referrals",
+      "replyTo": "referrals@private-repo-f304.com"
+    }
+  ],
+  "seeds": [
+    {
+      "address": "seed-primary@example.com",
+      "provider": "gmail",
+      "gogAccount": "seed-primary@example.com",
+      "engage": true
+    },
+    {
+      "address": "seed-primary+a@example.com",
+      "provider": "gmail",
+      "gogAccount": "seed-primary@example.com",
+      "engage": true
+    },
+    {
+      "address": "seed-primary+b@example.com",
+      "provider": "gmail",
+      "gogAccount": "seed-primary@example.com",
+      "engage": true
+    },
+    {
+      "address": "seed-passive-1@example.com",
+      "provider": "gmail",
+      "engage": false
+    }
+  ],
+  "ramp": {
+    "startPerIdentity": 2,
+    "growth": 1.25,
+    "maxPerIdentity": 12,
+    "days": 28
+  },
+  "replyRate": 0.5,
+  "sendingDomain": "private-repo-f304.com",
+  "logoPath": "private-repo-f304-logo.png",
+  "variants": [
+    "plain",
+    "html_simple",
+    "html_logo",
+    "html_rich",
+    "newsletter"
+  ],
+  "orgName": "private-repo-f304"
+}
