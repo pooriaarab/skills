@@ -51,3 +51,28 @@ export function planForDay(config, day, rng = Math.random) {
   const times = spread(rng, pairs.length, day, config.startDate);
   return pairs.map((p, i) => ({ ...p, sendAt: times[i] }));
 }
+
+/**
+ * Which of the day's planned messages still need sending.
+ *
+ * Each planned message owns a numbered slot and a send records the slot it
+ * filled. Counting recorded rows instead would go wrong the moment one send
+ * fails: the count stops lining up with position, so the next run re-sends a
+ * message that already went out and silently abandons the one that failed.
+ * Only an accepted send retires its slot, so a failure comes back round.
+ *
+ * Exported and pure so the accounting can be tested against the code that
+ * actually runs, rather than against a copy of it.
+ */
+export function selectDueSlots(plan, sends, day, { now = Date.now(), all = false } = {}) {
+  const claimed = new Set(
+    sends.filter((s) => s.day === day && s.accepted).map((s) => s.slot),
+  );
+  const numbered = plan.map((p, slot) => ({ ...p, slot }));
+  return {
+    numbered,
+    done: numbered.filter((p) => claimed.has(p.slot)).length,
+    todo: numbered.filter((p) => !claimed.has(p.slot) && (all || Date.parse(p.sendAt) <= now)),
+    nextDue: numbered.find((p) => !claimed.has(p.slot))?.sendAt ?? null,
+  };
+}
