@@ -54,9 +54,19 @@ is the correct end state and the thing that stops others spoofing you.
 ## MX
 
 Required for any domain that must receive mail or a reply. **Not** required for a
-send-only sending subdomain — demanding it there is a false alarm. What a send-only
-subdomain does need is a `replyTo` pointing at a mailbox that exists, or every reply
-bounces.
+send-only sending subdomain — demanding it there is a false alarm. That finding is
+only about the sending host. It is not a check that a reply can land.
+
+## Reply path
+
+Preflight walks every identity and looks up MX on the address a reply actually
+goes to: `replyTo` when set, otherwise the identity's own address.
+
+- A send-only identity with no `replyTo` is a FAIL. A reply to it bounces.
+- A `replyTo` whose domain has no MX is a FAIL. The identity and the replyTo
+  are both named — the config looks correct, and that is the quieter miss.
+- Role comes from the config. A missing MX does not make a domain send-only; it
+  makes a reply undeliverable.
 
 ## What preflight cannot tell you
 
