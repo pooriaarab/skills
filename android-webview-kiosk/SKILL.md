@@ -36,9 +36,14 @@ Manifest essentials on the Activity: `configChanges="orientation|screenSize|keyb
 running instance — required for the reload trick below), and `HOME` +
 `DEFAULT` categories if the app should be selectable as the launcher.
 
-Also set `android:debuggable="true"` on `<application>` — it is what makes
-`run-as` work, and `run-as` is the whole update path. Strip it only for a
-real production build.
+`android:debuggable="true"` on `<application>` is what makes `run-as` work,
+which the update path below depends on — but it also leaves the app sandbox
+fully readable/writable (including an `adb backup` of `filesDir`) to any host
+already paired over the wireless-debugging transport this skill keeps armed.
+Scope it to the updatable demo shell only. The device-owner build is
+permanently un-updatable except by reflashing (see the frozen-build trap
+below), so ship it non-debuggable — a debug flag baked into an undeletable
+build is a backdoor that no later change can patch out.
 
 ## Lockdown ladder, weakest to strongest
 
@@ -65,7 +70,11 @@ different one — can never be updated, disabled, or uninstalled without a
 factory reset. `pm disable` answers `Cannot disable a protected package`.
 
 - Generate the keystore once, store it **outside** `build/` (a `rm -rf build`
-   between builds is all it takes to lose it), and commit it or vault it.
+   between builds is all it takes to lose it), and vault it in a secrets
+   manager — never commit it. It is the only key that can ever sign a
+   replacement for an undeletable device-owner app; anyone with repo read
+   access (now or from a future leak of the history) could sign and install
+   an arbitrary APK with it.
 - Keep the first signed APK. If the on-device build predates a feature, that
    build is what the panel runs forever.
 - Treat a device-owner build as a one-shot artifact: get the content right,
