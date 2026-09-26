@@ -22,13 +22,9 @@ awareness.
    purchase history for new orders. Otherwise fall back to Costco email receipts
    (Same-Day/Instacart). Costco.ca online orders go in the non-grocery section
    unless they are food.
-3. **Costco** — if the signed-in session is alive, check warehouse and online
-   purchase history for new orders. Otherwise fall back to Costco email receipts
-   (Same-Day/Instacart). Costco.ca online orders go in the non-grocery section
-   unless they are food.
-4. **Fridge inventory** — if the user sent a fridge/freezer photo since the last
+3. **Fridge inventory** — if the user sent a fridge/freezer photo since the last
    refresh, reconcile staples against it and note what is running low.
-5. **Publish** — edit `groceries/order-history.md` on a branch
+4. **Publish** — edit `groceries/order-history.md` on a branch
    (e.g. `hbi/grocery-history`), commit with a clear message, open or update the
    PR in `pooriaarab/brain`. Never merge without explicit approval.
 
