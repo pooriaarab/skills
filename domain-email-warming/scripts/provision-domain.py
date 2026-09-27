@@ -97,6 +97,18 @@ def add_dns(zid, recs, rtype, name, content, priority=None):
 def provision(apex, zid, worker):
     print(f"\n===== {apex}")
 
+    recs = existing_dns(zid)
+
+    # A domain whose real mail already lands elsewhere must not be touched:
+    # adding Cloudflare MX beside the incumbent set diverts that mail, and
+    # sending registration rewrites _dmarc to p=reject, which can start
+    # rejecting the incumbent provider's unaligned mail.
+    foreign_mx = [r["content"] for r in recs if r["type"] == "MX" and r["name"] == apex
+                  and "mx.cloudflare.net" not in r["content"]]
+    # Snapshot _dmarc for every name registration will touch, before it does.
+    dmarc_before = {r["name"]: r["content"] for r in recs
+                    if r["type"] == "TXT" and r["name"].startswith("_dmarc.")}
+
     # 1. Register sending names (apex + subdomains).
     subs = cf(f"/zones/{zid}/email/sending/subdomains?per_page=100").get("result") or []
     by_name = {s["name"]: s for s in subs}
@@ -108,6 +120,16 @@ def provision(apex, zid, worker):
                 by_name[name] = res["result"]
                 print(f"    + registered sending domain {name}")
                 time.sleep(0.5)
+
+    # Restore any _dmarc registration overwrote. Only a name that HAD one gets
+    # its record back; a fresh p=reject on a previously unprotected name is the
+    # intended end state and stays.
+    for name, content in dmarc_before.items():
+        cur = cf(f"/zones/{zid}/dns_records?type=TXT&name={name}").get("result") or []
+        if not any(r["content"] == content for r in cur):
+            for r in cur:
+                cf(f"/zones/{zid}/dns_records/{r['id']}", "PUT", {"type": "TXT", "name": name, "content": content, "ttl": 1})
+            print(f"    ~ restored {name} (registration had overwritten it)")
 
     # 2. DNS per sending name. Records are fetched AFTER registration because
     #    Cloudflare writes the cf-bounce MX set itself during step 1; a
@@ -124,6 +146,9 @@ def provision(apex, zid, worker):
 
     # 3. Inbound: apex MX + SPF. These make Email Routing accept mail for the
     #    whole zone - without them the domain sends but cannot receive.
+    if foreign_mx:
+        print(f"    SKIP inbound: apex already has non-Cloudflare MX {foreign_mx} - leaving existing mail flow alone")
+        return
     for prio, mx in [(6, "route2.mx.cloudflare.net"), (18, "route1.mx.cloudflare.net"), (91, "route3.mx.cloudflare.net")]:
         add_dns(zid, recs, "MX", apex, mx, prio)
     if not any(r["type"] == "TXT" and r["name"] == apex and "v=spf1" in r["content"] for r in recs):

@@ -263,13 +263,11 @@ async function cmdEngage(cfg, opts, state) {
     s.placementCheckedAt = new Date().toISOString();
     const reclassify = unresolved(s);
     if (!found.found) {
-      if (found.error) {
-        s.placement = "lookup_failed";
-        console.log(`  lookup_failed  ${s.from} -> ${s.to}  (${found.error})`);
-      } else {
-        s.placement = "not_found";
-        console.log(`  not_found  ${s.from} -> ${s.to}`);
-      }
+      // Only an unresolved send gets its placement stamped. One that was
+      // already measured and is pending only for a reply keeps its verdict -
+      // a lookup error must not erase a real measurement.
+      if (reclassify) s.placement = found.error ? "lookup_failed" : "not_found";
+      console.log(`  ${found.error ? "lookup_failed" : "not_found"}  ${s.from} -> ${s.to}${found.error ? `  (${found.error})` : ""}`);
       await saveState(state);
       continue;
     }

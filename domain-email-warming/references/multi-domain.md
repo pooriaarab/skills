@@ -110,10 +110,14 @@ can start rejecting that domain's legitimate mail the moment the record is
 published.
 
 Read and store the existing DMARC record before registering, and restore it
-afterwards. The rest of the setup is safe: apex MX and apex SPF records are not
+afterwards. `provision-domain.py` snapshots every `_dmarc.*` before registering
+and puts back any registration overwrote — but only for names that already had
+one, so a fresh `p=reject` on a previously unprotected name stays. It also
+refuses to add inbound MX or routing rules on a domain whose apex already
+points at a non-Cloudflare MX, because that would divert someone else's live
+mail. The rest of the setup is safe: apex MX and apex SPF records are not
 touched by registration, so the domain's existing inbound routing and sender
-authorization survive. The DMARC record is the single collision, which is why it
-is the one to back up rather than snapshotting the whole zone and hoping.
+authorization survive.
 
 ## Role addresses need routing rules, but must not be senders
 
