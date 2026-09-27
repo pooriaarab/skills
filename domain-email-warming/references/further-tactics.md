@@ -220,14 +220,31 @@ include Cloudinary (`cld agent signup`), CoreGit, Berth, Bird
 (`bird auth signup`), Whisper Security (curl-based), Molar
 (`molar agent signup`), Pantheon (`pantheon signup`), Linq (`linq signup`),
 Arcoa, Beryl, Smoketest (`smoketest auth signup`), PincerPay
-(`npx @pincerpay/cli signup`), Kite Passport (`kpass signup init`), and
-Cosmic (agent-signup API). Most email a 6-digit OTP or a verification link.
+(`npx @pincerpay/cli signup`), Kite Passport (`kpass signup init`),
+here.now (REST `request-code`/`verify-code`), and Cosmic
+(`agent-signup`/`agent-verify` CLI). Most email a 6-digit OTP or a
+verification link. Verified working end to end so far: here.now and Cosmic.
 
 Treat that list as leads, not gospel — CLIs and flags drift. Verify each
 signup command on the service's own docs before running it against a warm-up
 mailbox, and confirm the OTP mail actually arrived before trusting the
 account exists. The same rfc822msgid discipline applies: a signup flow whose
 verification email never landed produced no inbound value.
+
+The fleet runs this sweep as `signup-sweep` in `pooriaarab/scripts`: it walks
+every warmup domain config, assigns each identity a service round-robin,
+requests the code, polls Gmail for the OTP, verifies, and stores the
+credential under `~/.local/state` (never in a repo). Two operational lessons
+from the first live run are baked into it and worth knowing by hand:
+
+- **OTP mail is routinely spam-foldered.** Verification senders score poorly
+  on a fresh domain, so a default Gmail search sees nothing even when the
+  mail arrived. Search with `in:anywhere` or the sweep finds no codes.
+- **Inbox scanners burn one-time codes.** Claim links and some codes are
+  consumed by mail-security pre-fetchers sitting on the message, sometimes
+  within a minute of delivery. Verify as soon as the mail lands — a code
+  polled minutes later can already be dead, and the fix is speed, not
+  retries.
 
 Keep the same discipline as the rest of the program: real accounts, modest
 counts, and the ability to unsubscribe or delete. Subscribing a warmed mailbox
