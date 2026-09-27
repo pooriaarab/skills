@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Sign every warm-up mailbox up for a third-party CLI/API service so its inbox
+# Sign every warm-up mailbox up for third-party CLI/API services so its inbox
 # receives real external mail: verification codes, welcome notes, and the
 # ongoing notifications those services send after signup.
 #
@@ -15,10 +15,10 @@
 #   signup-sweep --daemon    loop passes until every mailbox is terminal
 #
 # Mailboxes come from the warm-up configs (identities[].address). Each mailbox
-# gets exactly one service, assigned round-robin so inbound is spread across
-# providers instead of piling onto one. State lives in SWEEP_STATE as JSON and
-# survives restarts; credentials land in SWEEP_CRED_DIR (0700/0600), never in
-# a repo. Verification codes are never written to state or logs.
+# gets two services, assigned round-robin so inbound senders vary per mailbox.
+# State keys are "<email>|<service>" and live in SWEEP_STATE as JSON, surviving
+# restarts; credentials land in SWEEP_CRED_DIR (0700/0600), never in a repo.
+# Verification codes are never written to state or logs.
 #
 # Services throttle. Each adapter declares the seconds between code requests
 # and a cap on codes in flight; a 429 or equivalent answer backs that
@@ -55,6 +55,7 @@ TICK = int(os.environ.get("SWEEP_TICK", "45"))
 
 OTP_TTL = 14 * 60        # codes older than this are retried, not verified
 MAX_ATTEMPTS = 5
+SERVICES_PER_MAILBOX = 2
 
 def now():
     return time.time()
@@ -76,6 +77,8 @@ def log(service, mailbox, ok, detail):
                             "ok": ok, "detail": detail[:200]}) + "\n")
 
 def store_cred(service, mailbox, secret):
+    if not secret:
+        return
     d = CRED_DIR / service
     d.mkdir(parents=True, exist_ok=True)
     os.chmod(CRED_DIR, 0o700)
@@ -85,9 +88,16 @@ def store_cred(service, mailbox, secret):
     os.chmod(p, 0o600)
 
 def load_state():
+    state = {"pairs": {}, "services": {}}
     if STATE_PATH.exists():
-        return json.loads(STATE_PATH.read_text())
-    return {"pairs": {}, "services": {}}
+        state = json.loads(STATE_PATH.read_text())
+    # Migrate pre-multi-service keys ("email") to "<email>|<service>".
+    pairs = {}
+    for k, v in state.get("pairs", {}).items():
+        key = k if "|" in k else f"{k}|{v.get('service', '?')}"
+        pairs[key] = v
+    state["pairs"] = pairs
+    return state
 
 def save_state(state):
     STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -120,9 +130,11 @@ def gmail_body(mid):
     rc, out = run([GOG, "-a", ACCOUNT, "gmail", "get", mid, "--format", "full"])
     return out
 
-def curl_json(method, url, payload):
-    rc, out = run([CURL, "-sS", "-X", method, url,
-                   "-H", "content-type: application/json", "-d", json.dumps(payload)])
+def curl_json(method, url, payload, headers=()):
+    argv = [CURL, "-sS", "-X", method, url, "-H", "content-type: application/json"]
+    for h in headers:
+        argv += ["-H", h]
+    rc, out = run(argv + ["-d", json.dumps(payload)] if payload is not None else argv)
     try:
         return rc, json.loads(out)
     except json.JSONDecodeError:
@@ -135,19 +147,10 @@ def retry_after_seconds(body):
     except (TypeError, ValueError):
         return None
 
-# --- adapters ---------------------------------------------------------------
-# An adapter needs four verbs:
-#   request(email)      -> (ok, detail, backoff_seconds_or_None)
-#   mail_query()        -> gmail search that finds this service's OTP mail
-#   extract(body)       -> (to_address, code) or None
-#   verify(email, code) -> (ok, detail, credential_or_None)
-# Sender cadence comes from `interval`; at most `in_flight` unverified codes.
-
-def herenow_request(email):
-    rc, b = curl_json("POST", "https://here.now/api/auth/agent/request-code", {"email": email})
-    if b.get("success"):
-        return True, "code sent", None, False
-    return False, b.get("message", b.get("error", f"http {rc}")), retry_after_seconds(b), False
+def permanent_refusal(detail):
+    d = detail.lower()
+    return any(w in d for w in ("disposable", "not allowed", "blocked", "blocklist",
+                                "already been taken"))
 
 def to_addr(body):
     # gog get dumps headers as "to<TAB>addr"; raw mail uses "To: <addr>";
@@ -159,51 +162,177 @@ def to_addr(body):
             return m.group(1)
     return None
 
+def six_digit(body):
+    m = (re.search(r"(?:code|verification|otp|claim)[^0-9]{0,30}(\d{6})", body, re.I)
+         or re.search(r"\b(\d{6})\b", body))
+    t = to_addr(body)
+    return (t, m.group(1)) if m and t else None
+
+# --- adapters ---------------------------------------------------------------
+# An adapter needs:
+#   request(email, pair)       -> (ok, detail, backoff_or_None, permanent)
+#                               may stash pair["cred"] / pair["meta"] for later
+#   query()                    -> gmail search that finds this service's mail
+#   extract(body)              -> (to_address, code) or None
+#   verify(email, code, pair)  -> (ok, detail, credential_or_None)
+# `request_only` adapters complete on request success (account made, mail sent).
+# Sender cadence comes from `interval`; at most `in_flight` unverified codes.
+
+def herenow_request(email, pair):
+    rc, b = curl_json("POST", "https://here.now/api/auth/agent/request-code", {"email": email})
+    if b.get("success"):
+        return True, "code sent", None, False
+    d = b.get("message", b.get("error", f"http {rc}"))
+    return False, d, retry_after_seconds(b), permanent_refusal(d)
+
 def herenow_extract(body):
     m = re.search(r"here\.now code:\s*([A-Z0-9]{4}-[A-Z0-9]{4})", body)
     t = to_addr(body)
     return (t, m.group(1)) if m and t else None
 
-def herenow_verify(email, code):
+def herenow_verify(email, code, pair):
     rc, b = curl_json("POST", "https://here.now/api/auth/agent/verify-code",
                       {"email": email, "code": code})
     if b.get("success") and b.get("apiKey"):
         return True, "verified", b["apiKey"]
     return False, b.get("message", b.get("error", "verify failed")), None
 
-def cosmic_request(email):
+def cosmic_request(email, pair):
     proj = re.sub(r"[^a-z0-9]+", "-", email.split("@")[0])[:24]
     rc, out = run([COSMIC, "agent-signup", "-e", email, "-p", proj,
                    "--prompt-hint", "project inbox"])
     detail = "created" if rc == 0 else out.strip()[:120]
     # A domain-policy refusal will not clear on retry — fail it terminal.
-    permanent = "disposable" in out.lower() or "not allowed" in out.lower()
-    return rc == 0, detail, None, permanent
+    return rc == 0, detail, None, permanent_refusal(out)
 
 def cosmic_extract(body):
     m = re.search(r"claim code is\s*([0-9]{6})", body)
     t = to_addr(body)
     return (t, m.group(1)) if m and t else None
 
-def cosmic_verify(email, code):
+def cosmic_verify(email, code, pair):
     rc, out = run([COSMIC, "agent-verify", code])
     return rc == 0, out.strip()[:120], None
 
+def agentmail_request(email, pair):
+    # Username = sanitized mailbox so the issued inbox reads predictably.
+    user = re.sub(r"[^a-z0-9-]", "-", email.replace("@", "-").lower())[:40]
+    rc, b = curl_json("POST", "https://api.agentmail.to/v0/agent/sign-up",
+                      {"human_email": email, "username": user, "source": "signup-sweep"})
+    if b.get("api_key"):
+        pair["cred"] = b["api_key"]
+        pair["meta"] = {"inbox": b.get("inbox_id") or b.get("email"),
+                        "organization_id": b.get("organization_id")}
+        return True, "otp sent", None, False
+    d = b.get("message", b.get("error", f"http {rc}"))
+    return False, d, retry_after_seconds(b), permanent_refusal(d)
+
+def agentmail_verify(email, code, pair):
+    rc, b = curl_json("POST", "https://api.agentmail.to/v0/agent/verify",
+                      {"otp_code": code},
+                      headers=[f"Authorization: Bearer {pair.get('cred', '')}"])
+    if b.get("verified"):
+        meta = pair.get("meta") or {}
+        cred = pair.get("cred", "") + "\n" + json.dumps(meta)
+        return True, "verified", cred
+    return False, b.get("message", b.get("error", "verify failed")), None
+
+def inkbox_request(email, pair):
+    rc, b = curl_json("POST", "https://inkbox.ai/api/v1/agent-signup/",
+                      {"human_email": email, "display_name": "Warmup Agent",
+                       "note_to_human": "Please verify this agent inbox.",
+                       "harness": "devin"})
+    if b.get("api_key"):
+        pair["cred"] = b["api_key"]
+        pair["meta"] = {"inbox": b.get("email_address"),
+                        "agent_handle": b.get("agent_handle"),
+                        "organization_id": b.get("organization_id")}
+        return True, "otp sent", None, False
+    d = b.get("message", b.get("error", json.dumps(b.get("detail", f"http {rc}"))))
+    return False, str(d), retry_after_seconds(b), permanent_refusal(str(d))
+
+def inkbox_verify(email, code, pair):
+    rc, b = curl_json("POST", "https://inkbox.ai/api/v1/agent-signup/verify",
+                      {"verification_code": code},
+                      headers=[f"X-API-Key: {pair.get('cred', '')}"])
+    ok = bool(b.get("verified") or b.get("claim_status") == "claimed" or b.get("success")
+              or "verified successfully" in str(b.get("message", "")).lower())
+    if ok:
+        meta = pair.get("meta") or {}
+        cred = pair.get("cred", "") + "\n" + json.dumps(meta)
+        return True, "verified", cred
+    return False, str(b.get("message", b.get("error", b.get("detail", "verify failed"))))[:200], None
+
+def recoupable_request(email, pair):
+    rc, b = curl_json("POST", "https://api.recoupable.dev/api/agents/signup",
+                      {"email": email})
+    if b.get("api_key"):
+        pair["cred"] = b["api_key"]
+        pair["meta"] = {"account_id": b.get("account_id")}
+        return True, "key issued", None, False
+    if b.get("account_id"):
+        pair["meta"] = {"account_id": b.get("account_id")}
+        return True, "otp sent", None, False
+    d = b.get("message", b.get("error", f"http {rc}"))
+    return False, d, retry_after_seconds(b), permanent_refusal(d)
+
+def recoupable_verify(email, code, pair):
+    rc, b = curl_json("POST", "https://api.recoupable.dev/api/agents/verify",
+                      {"email": email, "code": code})
+    if b.get("api_key") or b.get("verified") or b.get("success"):
+        cred = b.get("api_key") or pair.get("cred", "")
+        meta = pair.get("meta") or {}
+        return True, "verified", cred + "\n" + json.dumps(meta)
+    return False, str(b.get("message", b.get("error", "verify failed")))[:200], None
+
+def cloudinary_request(email, pair):
+    # Returns account creds immediately and mails a verification link; the
+    # inbound email is the goal, so request success completes this pair.
+    rc, b = curl_json("POST", "https://api.cloudinary.com/v1_1/provisioning/agents/accounts",
+                      {"email": email, "agent_framework": "python",
+                       "agent_llm_model": "swe-2-max", "agent_goal": "domain-warmup"})
+    envs = b.get("product_environments") or []
+    if envs and envs[0].get("api_environment_variable"):
+        pair["cred"] = envs[0]["api_environment_variable"]
+        pair["meta"] = {"external_id": b.get("external_id"), "plan": b.get("plan_name")}
+        return True, "account provisioned", None, False
+    d = b.get("error", {}).get("message", f"http {rc}") if isinstance(b.get("error"), dict) else b.get("error", f"http {rc}")
+    return False, d, retry_after_seconds(b), permanent_refusal(str(d))
+
 ADAPTERS = [
-    # OTP mail is routine spam-foldered; a default search never sees it.
+    # OTP mail is routine spam-foldered; every query must use in:anywhere.
     {"name": "herenow", "interval": 20, "in_flight": 8,
      "request": herenow_request, "query": lambda: "in:anywhere from:here.now newer_than:20m",
      "extract": herenow_extract, "verify": herenow_verify},
     {"name": "cosmic", "interval": 65, "in_flight": 4,
      "request": cosmic_request, "query": lambda: "in:anywhere from:cosmicjs.com newer_than:20m",
      "extract": cosmic_extract, "verify": cosmic_verify},
+    {"name": "agentmail", "interval": 20, "in_flight": 8,
+     "request": agentmail_request, "query": lambda: "in:anywhere agentmail newer_than:20m",
+     "extract": six_digit, "verify": agentmail_verify},
+    {"name": "inkbox", "interval": 20, "in_flight": 8,
+     "request": inkbox_request, "query": lambda: "in:anywhere inkbox newer_than:20m",
+     "extract": six_digit, "verify": inkbox_verify},
+    {"name": "recoupable", "interval": 20, "in_flight": 8,
+     "request": recoupable_request, "query": lambda: "in:anywhere recoupable newer_than:20m",
+     "extract": six_digit, "verify": recoupable_verify},
+    {"name": "cloudinary", "interval": 30, "in_flight": 4, "request_only": True,
+     "request": cloudinary_request, "query": lambda: "", "extract": None, "verify": None},
 ]
 
-def service_for(email):
-    h = 0
+def service_names(email):
+    h1 = 0
     for ch in email:
-        h = (h * 31 + ord(ch)) & 0xFFFFFFFF
-    return ADAPTERS[h % len(ADAPTERS)]
+        h1 = (h1 * 31 + ord(ch)) & 0xFFFFFFFF
+    h2 = 0
+    for ch in email + "\x00secondary":
+        h2 = (h2 * 31 + ord(ch)) & 0xFFFFFFFF
+    names = [a["name"] for a in ADAPTERS]
+    first = names[h1 % len(names)]
+    second = names[h2 % len(names)]
+    if second == first:
+        second = names[(h2 + 1) % len(names)]
+    return [first, second]
 
 # --- sweep ------------------------------------------------------------------
 
@@ -213,51 +342,57 @@ def tick(state):
 
     # 1. Verify pending codes against fresh OTP mail, one search per service.
     for ad in ADAPTERS:
+        if ad.get("request_only"):
+            continue
         # Poll almost immediately: inbox scanners click one-time claim links,
         # so a code left sitting loses the race before we ever try it.
-        pend = [e for e, s in pairs.items()
+        pend = [k for k, s in pairs.items()
                 if s["service"] == ad["name"] and s["status"] == "requested"
                 and s["sent_at"] + 8 < t]
         if not pend:
             continue
-        # Fetching every OTP mail's body is slow (one gog call each), so only
-        # fetch messages whose subject could carry a pending mailbox's code:
-        # Cosmic subjects embed the project slug (the sanitized localpart).
-        locals_ = {re.sub(r"[^a-z0-9]+", "-", e.split("@")[0].lower())[:24]
-                   for e in pend}
+        # Fetching every OTP mail's body is slow (one gog call each), so skip
+        # messages whose subject clearly belongs to no pending mailbox: Cosmic
+        # subjects embed the project slug (the sanitized localpart).
+        locals_ = {re.sub(r"[^a-z0-9]+", "-", k.split("|")[0].split("@")[0].lower())[:24]
+                   for k in pend}
         hits = {}
         for msg in gmail_search(ad["query"]()):
             subj = (msg.get("subject") or "").lower()
-            slugs = re.findall(r'"([^"]+)"', subj)
-            if slugs and not any(s in locals_ for s in slugs):
-                continue
+            if ad["name"] == "cosmic":
+                slugs = re.findall(r'"([^"]+)"', subj)
+                if slugs and not any(s in locals_ for s in slugs):
+                    continue
             mid = msg.get("id") or msg.get("messageId")
             if not mid:
                 continue
             got = ad["extract"](gmail_body(mid))
-            if got:
+            # Search returns newest first; a mailbox can hold several codes,
+            # so keep the first (freshest) hit, never overwrite with older.
+            if got and got[0].lower() not in hits:
                 hits[got[0].lower()] = got[1]
-        for e in pend:
+        for k in pend:
+            e = k.split("|")[0]
             code = hits.get(e.lower())
             if not code:
                 continue
-            ok, detail, cred = ad["verify"](e, code)
-            pairs[e]["status"] = "verified" if ok else "retry"
-            pairs[e]["next_at"] = 0 if ok else t + 300
-            pairs[e]["attempts"] += 1
-            if ok and cred:
-                store_cred(ad["name"], e, cred)
+            ok, detail, cred = ad["verify"](e, code, pairs[k])
+            pairs[k]["status"] = "verified" if ok else "retry"
+            pairs[k]["next_at"] = 0 if ok else t + 300
+            pairs[k]["attempts"] += 1
+            if ok:
+                store_cred(ad["name"], e, cred or pairs[k].get("cred", ""))
             log(ad["name"], e, ok, detail)
 
     # 2. Expire stale codes back to retry.
-    for e, s in pairs.items():
+    for k, s in pairs.items():
         if s["status"] == "requested" and s["sent_at"] + OTP_TTL < t:
             s["status"] = "retry" if s["attempts"] < MAX_ATTEMPTS else "failed"
             s["next_at"] = t + 60
-            log(s["service"], e, False, "otp expired")
+            log(s["service"], k.split("|")[0], False, "otp expired")
 
     # 3. Request fresh codes within each service's pace and in-flight cap.
-    for e, s in pairs.items():
+    for k, s in pairs.items():
         if s["status"] not in ("new", "retry") or s.get("next_at", 0) > t:
             continue
         if s["attempts"] >= MAX_ATTEMPTS:
@@ -271,9 +406,13 @@ def tick(state):
                      if x["service"] == ad["name"] and x["status"] == "requested")
         if flying >= ad["in_flight"]:
             continue
-        ok, detail, backoff, permanent = ad["request"](e)
+        e = k.split("|")[0]
+        ok, detail, backoff, permanent = ad["request"](e, s)
         svc["last_at"] = t
-        if ok:
+        if ok and ad.get("request_only"):
+            s["status"] = "verified"
+            store_cred(ad["name"], e, s.get("cred", ""))
+        elif ok:
             s.update(status="requested", sent_at=t, attempts=s["attempts"] + 1)
         elif permanent:
             s["status"] = "failed"
@@ -292,10 +431,11 @@ def main():
     state = load_state()
     boxes = mailboxes()
     for e in boxes:
-        key = e
-        if key not in state["pairs"]:
-            state["pairs"][key] = {"service": service_for(e)["name"], "status": "new",
-                                   "attempts": 0, "sent_at": 0, "next_at": 0}
+        for name in service_names(e):
+            key = f"{e}|{name}"
+            if key not in state["pairs"]:
+                state["pairs"][key] = {"service": name, "status": "new",
+                                       "attempts": 0, "sent_at": 0, "next_at": 0}
     save_state(state)
 
     daemon = sys.argv[1] == "--daemon"
