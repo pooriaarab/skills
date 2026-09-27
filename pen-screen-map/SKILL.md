@@ -21,7 +21,7 @@ each shot → minified `.pen` committed, previews attached to the PR.
 
 ```bash
 export ANTHROPIC_BASE_URL=http://127.0.0.1:8317      # CLIProxyAPI, brew service, live Claude seats
-export CLAUDE_CODE_OAUTH_TOKEN=cpa-30f043ef20f140bec2de4ebc020c2c13bea6fcd6b02a5056
+export CLAUDE_CODE_OAUTH_TOKEN=${CLIPROXY_API_KEY:?your cli-proxy-api key}
 # or OffRouter: ANTHROPIC_BASE_URL=http://127.0.0.1:8789 CLAUDE_CODE_OAUTH_TOKEN=offrouter-dev
 ```
 
