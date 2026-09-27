@@ -225,7 +225,8 @@ here.now (REST `request-code`/`verify-code`), and Cosmic
 (`agent-signup`/`agent-verify` CLI). Most email a 6-digit OTP or a
 verification link.
 
-Verified working end to end (REST, OTP or creds confirmed live):
+Verified working end to end (REST, OTP or creds confirmed live). The
+sweep signs every mailbox up for all fourteen:
 
 | Service | Signup | Verify | Notes |
 |---|---|---|---|
@@ -235,6 +236,14 @@ Verified working end to end (REST, OTP or creds confirmed live):
 | Inkbox | `POST inkbox.ai/api/v1/agent-signup/` | `POST .../verify` (`X-API-Key`) | Needs `note_to_human`; key + mailbox issued at signup; 48 h code TTL |
 | Recoupable | `POST api.recoupable.dev/api/agents/signup` | `POST /api/agents/verify` | `.com` hosts redirect to `.dev`; `agent+` addresses can return the key immediately |
 | Cloudinary | `POST api.cloudinary.com/v1_1/provisioning/agents/accounts` | link in email | Needs `agent_framework`, `agent_llm_model`, `agent_goal`; returns `CLOUDINARY_URL` at once |
+| Tinysend | `POST id.tinysend.com/agent/auth` (`anonymous`) | `POST /agent/auth/claim/complete` | auth.md flow: anonymous register, then `claim` emails a 6-digit OTP |
+| ClawdMail | `POST app.clawdmail.ai/api/v1/agents/register` | none needed | Anonymous register gives inbox + key; the agent then emails its own human |
+| Chronary | `POST api.chronary.ai/v1/agent/sign-up` | `POST /v1/agent/verify` (bearer) | Needs `tos_version` from `GET /v1/auth/terms/current`; resend drops the key, verify dies with it |
+| Agentboxd | `GET`+`POST api.agentboxd.com/v1/signup{,/challenge}` | `POST /v1/signup/claim` | SHA-256 proof-of-work (~1 s at difficulty 21), then claim emails the owner |
+| MailboxKit | `POST mailboxkit.com/api/v1/register` | owner email | Key + `@agent.mailboxkit.com` inbox at once, verification mail to owner |
+| Agentpub | `POST agentpub.io/api/auth/agent/request-code` | `POST .../verify-code` | `LLLL-DDDD` code shape; same flow as here.now |
+| General Compute | `POST api.generalcompute.com/v1/public/agent-signups` | `POST .../{signupId}/verify` | 15-min 6-digit code; a second signup returns no `signupId` (terminal) |
+| Didit | `POST apx.didit.me/auth/v2/programmatic/register/` | `POST .../verify-email/` | Needs a generated password (stored with the key); 10-min 6-char alphanumeric code |
 
 Rejected or dead leads from live probes: CoreGit (`AUTH_EMAIL_NOT_ALLOWED`
 on our domains), Molar (endpoint gone), PincerPay (TTY-only interactive
@@ -247,7 +256,7 @@ account exists. The same rfc822msgid discipline applies: a signup flow whose
 verification email never landed produced no inbound value.
 
 The fleet runs this sweep as `signup-sweep` in `pooriaarab/scripts`: it walks
-every warmup domain config, assigns each identity two services round-robin,
+every warmup domain config, signs each identity up for every service,
 requests the code, polls Gmail for the OTP, verifies, and stores the
 credential under `~/.local/state` (never in a repo). Three operational
 lessons from live runs are baked into it and worth knowing by hand:

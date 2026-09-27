@@ -43,6 +43,12 @@ case "$url" in
   *provisioning/agents/accounts*)
     echo '{"external_id":"e1","product_environments":[{"api_environment_variable":"CLOUDINARY_URL=cloudinary://k:s@c"}]}'
     ;;
+  *programmatic/register*)
+    echo '{"message":"Registration successful. Check your email for the verification code."}'
+    ;;
+  *programmatic/verify-email*)
+    echo '{"api_key":"didit-key-123"}'
+    ;;
   *) echo "stub curl: refused url: $url" >&2; exit 9 ;;
 esac
 STUB
@@ -97,9 +103,9 @@ SWEEP_FAKE_CURL_MODE=ok python3 "$SCRIPT" --once >/dev/null
 st=$(pair 'd@t.example|herenow' status)
 [ "$st" = "requested" ] && ok "code requested for d@t.example (herenow)" || bad "first pass status=$st"
 
-# 2. Every mailbox gets two service assignments.
+# 2. Every mailbox gets a pair for every adapter.
 n=$(python3 -c "import json;print(sum(1 for k in json.load(open('$SWEEP_STATE'))['pairs'] if k.startswith('d@t.example|')))")
-[ "$n" -eq 2 ] && ok "two services assigned per mailbox" || bad "assigned $n services"
+[ "$n" -ge 10 ] && ok "all services assigned per mailbox ($n)" || bad "assigned $n services"
 
 # 3. Second pass with the OTP in the mailbox: verified, credential stored.
 python3 -c "import json;s=json.load(open('$SWEEP_STATE'));s['pairs']['d@t.example|herenow']['sent_at']-=60;json.dump(s,open('$SWEEP_STATE','w'))"
@@ -134,7 +140,30 @@ st=$(pair 'a@t.example|agentmail' status)
 [ "$st" = "verified" ] && ok "agentmail otp verified" || bad "agentmail verify status=$st"
 [ -f "$ROOT/state/creds/agentmail/a_t.example" ] && ok "agentmail credential stored" || bad "no agentmail credential"
 
-# 7. cloudinary is request-only: account + creds on first pass, no OTP wait.
+# 7. agentpub: LLLL-DDDD code shape extracts and verifies.
+seed 'p@t.example|agentpub' '{"service":"agentpub","status":"new","attempts":0,"sent_at":0,"next_at":0}'
+pace
+SWEEP_FAKE_CURL_MODE=ok python3 "$SCRIPT" --once >/dev/null
+st=$(pair 'p@t.example|agentpub' status)
+[ "$st" = "requested" ] && ok "agentpub code requested" || bad "agentpub status=$st"
+python3 -c "import json;s=json.load(open('$SWEEP_STATE'));s['pairs']['p@t.example|agentpub']['sent_at']-=60;json.dump(s,open('$SWEEP_STATE','w'))"
+SWEEP_FAKE_TO="p@t.example" SWEEP_FAKE_BODY="Your sign-in code is WXYZ-1234." python3 "$SCRIPT" --once >/dev/null
+st=$(pair 'p@t.example|agentpub' status)
+[ "$st" = "verified" ] && ok "agentpub code verified" || bad "agentpub verify status=$st"
+
+# 8. didit: 6-char alphanumeric code, key returned at verify.
+seed 'w@t.example|didit' '{"service":"didit","status":"new","attempts":0,"sent_at":0,"next_at":0}'
+pace
+python3 "$SCRIPT" --once >/dev/null
+st=$(pair 'w@t.example|didit' status)
+[ "$st" = "requested" ] && ok "didit code requested" || bad "didit status=$st"
+python3 -c "import json;s=json.load(open('$SWEEP_STATE'));s['pairs']['w@t.example|didit']['sent_at']-=60;json.dump(s,open('$SWEEP_STATE','w'))"
+SWEEP_FAKE_TO="w@t.example" SWEEP_FAKE_BODY="Your verification code is A3K9F2." python3 "$SCRIPT" --once >/dev/null
+st=$(pair 'w@t.example|didit' status)
+[ "$st" = "verified" ] && ok "didit code verified" || bad "didit verify status=$st"
+[ -f "$ROOT/state/creds/didit/w_t.example" ] && ok "didit credential stored" || bad "no didit credential"
+
+# 9. cloudinary is request-only: account + creds on first pass, no OTP wait.
 seed 'z@t.example|cloudinary' '{"service":"cloudinary","status":"new","attempts":0,"sent_at":0,"next_at":0}'
 pace
 SWEEP_FAKE_BODY="" python3 "$SCRIPT" --once >/dev/null
@@ -142,7 +171,7 @@ st=$(pair 'z@t.example|cloudinary' status)
 [ "$st" = "verified" ] && ok "cloudinary request-only verified" || bad "cloudinary status=$st"
 [ -f "$ROOT/state/creds/cloudinary/z_t.example" ] && ok "cloudinary credential stored" || bad "no cloudinary credential"
 
-# 8. Missing config dir exits 1.
+# 10. Missing config dir exits 1.
 SWEEP_CONFIG_DIR="$ROOT/nope" python3 "$SCRIPT" --once >/dev/null 2>&1
 [ $? -eq 1 ] && ok "missing config dir exits 1" || bad "missing config dir exit=$?"
 

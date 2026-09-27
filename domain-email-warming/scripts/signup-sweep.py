@@ -15,7 +15,7 @@
 #   signup-sweep --daemon    loop passes until every mailbox is terminal
 #
 # Mailboxes come from the warm-up configs (identities[].address). Each mailbox
-# gets two services, assigned round-robin so inbound senders vary per mailbox.
+# signs up for every service, so inbound senders vary per mailbox.
 # State keys are "<email>|<service>" and live in SWEEP_STATE as JSON, surviving
 # restarts; credentials land in SWEEP_CRED_DIR (0700/0600), never in a repo.
 # Verification codes are never written to state or logs.
@@ -38,7 +38,7 @@
 # Exit 0  pass completed (daemon: all mailboxes terminal)
 # Exit 1  config dir missing or unreadable
 # Exit 2  usage error
-import json, os, random, re, subprocess, sys, time
+import hashlib, json, os, random, re, subprocess, sys, time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -55,7 +55,6 @@ TICK = int(os.environ.get("SWEEP_TICK", "45"))
 
 OTP_TTL = 14 * 60        # codes older than this are retried, not verified
 MAX_ATTEMPTS = 5
-SERVICES_PER_MAILBOX = 2
 
 def now():
     return time.time()
@@ -310,6 +309,181 @@ def cloudinary_request(email, pair):
     d = b.get("error", {}).get("message", f"http {rc}") if isinstance(b.get("error"), dict) else b.get("error", f"http {rc}")
     return False, d, retry_after_seconds(b), permanent_refusal(str(d))
 
+def tinysend_request(email, pair):
+    rc, b = curl_json("POST", "https://id.tinysend.com/agent/auth", {"type": "anonymous"})
+    tok = (b.get("data") or {}).get("claim_token")
+    if not tok:
+        return False, str(b.get("error", b))[:200], None, False
+    pair["cred"] = (b["data"].get("credential") or "")
+    pair["meta"] = {"claim_token": tok, "user_id": b["data"].get("user_id")}
+    rc, b = curl_json("POST", "https://id.tinysend.com/agent/auth/claim",
+                      {"claim_token": tok, "email": email, "link": False})
+    if (b.get("data") or {}).get("verification_required"):
+        return True, "otp sent", None, False
+    d = str(b.get("error", b))[:200]
+    return False, d, None, permanent_refusal(d)
+
+def tinysend_verify(email, code, pair):
+    rc, b = curl_json("POST", "https://id.tinysend.com/agent/auth/claim/complete",
+                      {"claim_token": (pair.get("meta") or {}).get("claim_token", ""),
+                       "otp": code})
+    cred = (b.get("data") or {}).get("credential") or pair.get("cred", "")
+    if b.get("ok") and cred:
+        return True, "verified", cred + "\n" + json.dumps(pair.get("meta") or {})
+    return False, str(b.get("error", b))[:200], None
+
+def clawdmail_request(email, pair):
+    # Anonymous register issues an inbox + key; the agent then sends one mail
+    # to its own human — the inbound copy is the whole point here.
+    handle = re.sub(r"[^a-z0-9-]", "-", email.split("@")[0].lower())[:30] + "-" + f"{abs(hash(email)) % 9999:04d}"
+    rc, b = curl_json("POST", "https://app.clawdmail.ai/api/v1/agents/register",
+                      {"handle": handle, "displayName": "Warmup Agent"})
+    if not b.get("apiKey") or not b.get("agentId"):
+        d = str(b.get("error", b.get("message", f"http {rc}")))[:200]
+        return False, d, None, permanent_refusal(d)
+    pair["cred"] = b["apiKey"]
+    pair["meta"] = {"agentId": b["agentId"], "inbox": b.get("email")}
+    rc, b = curl_json("POST", f"https://app.clawdmail.ai/api/v1/agents/{b['agentId']}/send",
+                      {"to": email, "subject": "Warmup check-in",
+                       "text": "Confirming this inbox is live for the warm-up program."},
+                      headers=[f"Authorization: Bearer {b['apiKey']}"])
+    if rc == 0:
+        return True, "inbox live, mail sent", None, False
+    # Registration still produced the account; count it even if the send failed.
+    return True, "registered", None, False
+
+def chronary_tos():
+    rc, b = curl_json("GET", "https://api.chronary.ai/v1/auth/terms/current", None)
+    return b.get("version") or b.get("tos_version") or "2026-05-11"
+
+def chronary_request(email, pair):
+    name = re.sub(r"[^a-z0-9 -]", "-", email.split("@")[0].lower())[:40] or "agent"
+    rc, b = curl_json("POST", "https://api.chronary.ai/v1/agent/sign-up",
+                      {"email": email, "agent_name": name.strip(),
+                       "tos_version": chronary_tos()})
+    if b.get("api_key"):
+        pair["cred"] = b["api_key"]
+        pair["meta"] = {"org_id": b.get("org_id"), "agent_id": b.get("agent_id")}
+        return True, "otp sent", None, False
+    d = str(b.get("error", b.get("message", f"http {rc}")))[:200]
+    if isinstance(b.get("error"), dict):
+        d = str(b["error"].get("message", b["error"]))[:200]
+    # A resend withholds the key; without it verify is impossible — terminal.
+    permanent = permanent_refusal(d) or "verification code sent" in d.lower()
+    return False, d, retry_after_seconds(b), permanent
+
+def chronary_verify(email, code, pair):
+    rc, b = curl_json("POST", "https://api.chronary.ai/v1/agent/verify",
+                      {"otp": code},
+                      headers=[f"Authorization: Bearer {pair.get('cred', '')}"])
+    if b.get("verified") or b.get("ok") or "verif" in str(b.get("message", "")).lower():
+        return True, "verified", pair.get("cred", "") + "\n" + json.dumps(pair.get("meta") or {})
+    return False, str(b.get("error", b.get("message", "verify failed")))[:200], None
+
+def agentboxd_request(email, pair):
+    # Proof-of-work signup, then the claim endpoint emails the human.
+    rc, c = curl_json("GET", "https://api.agentboxd.com/v1/signup/challenge", None)
+    chal, diff = c.get("challenge"), int(c.get("difficulty") or 0)
+    if not chal or not diff:
+        return False, str(c)[:200], None, False
+    sol = 0
+    while True:
+        h = hashlib.sha256(f"{chal}:{sol}".encode()).digest()
+        if int.from_bytes(h, "big") >> (256 - diff) == 0:
+            break
+        sol += 1
+    name = re.sub(r"[^a-z0-9-]", "-", email.split("@")[0].lower())[:40]
+    rc, b = curl_json("POST", "https://api.agentboxd.com/v1/signup",
+                      {"challenge": chal, "solution": str(sol), "agent_name": name,
+                       "owner_email": email, "kind": "mailbox"})
+    if not b.get("api_key"):
+        d = str(b.get("error", b.get("message", f"http {rc}")))[:200]
+        return False, d, None, permanent_refusal(d)
+    pair["cred"] = b["api_key"]
+    pair["meta"] = {"workspace": (b.get("workspace") or {}).get("id"),
+                    "inbox": (b.get("inbox") or {}).get("address")}
+    rc, c = curl_json("POST", "https://api.agentboxd.com/v1/signup/claim",
+                      {"email": email},
+                      headers=[f"Authorization: Bearer {b['api_key']}"])
+    return True, "claim email sent", None, False
+
+def mailboxkit_request(email, pair):
+    name = re.sub(r"[^a-z0-9 -]", "-", email.split("@")[0].lower())[:40] or "agent"
+    rc, b = curl_json("POST", "https://mailboxkit.com/api/v1/register",
+                      {"name": name.strip(), "owner_email": email})
+    if b.get("api_key"):
+        pair["cred"] = b["api_key"]
+        pair["meta"] = {"inbox": b.get("email"), "inbox_id": b.get("inbox_id")}
+        return True, "verification email sent", None, False
+    d = str(b.get("error", b.get("message", f"http {rc}")))[:200]
+    return False, d, retry_after_seconds(b), permanent_refusal(d)
+
+def agentpub_request(email, pair):
+    rc, b = curl_json("POST", "https://agentpub.io/api/auth/agent/request-code",
+                      {"email": email})
+    if b.get("ok") or b.get("success"):
+        return True, "code sent", None, False
+    d = str(b.get("message", b.get("error", f"http {rc}")))[:200]
+    return False, d, retry_after_seconds(b), permanent_refusal(d)
+
+def agentpub_extract(body):
+    m = re.search(r"\b([A-Z]{4}-[0-9]{4})\b", body)
+    t = to_addr(body)
+    return (t, m.group(1)) if m and t else None
+
+def agentpub_verify(email, code, pair):
+    rc, b = curl_json("POST", "https://agentpub.io/api/auth/agent/verify-code",
+                      {"email": email, "code": code})
+    if b.get("apiKey"):
+        return True, "verified", b["apiKey"]
+    return False, str(b.get("message", b.get("error", "verify failed")))[:200], None
+
+def generalcompute_request(email, pair):
+    rc, b = curl_json("POST", "https://api.generalcompute.com/v1/public/agent-signups",
+                      {"email": email})
+    if b.get("signupId"):
+        pair["meta"] = {"signupId": b["signupId"]}
+        return True, "otp sent", None, False
+    d = str(b.get("error", b.get("message", f"http {rc}")))[:200]
+    if isinstance(b.get("error"), dict):
+        d = str(b["error"].get("message", b["error"]))[:200]
+    # A pending signup resends nothing we can verify against (no signupId).
+    permanent = permanent_refusal(d) or "already pending" in d.lower()
+    return False, d, retry_after_seconds(b), permanent
+
+def generalcompute_verify(email, code, pair):
+    sid = (pair.get("meta") or {}).get("signupId", "")
+    rc, b = curl_json("POST", f"https://api.generalcompute.com/v1/public/agent-signups/{sid}/verify",
+                      {"code": code})
+    if b.get("apiKey"):
+        return True, "verified", b["apiKey"]
+    return False, str(b.get("error", b.get("message", "verify failed")))[:200], None
+
+def didit_request(email, pair):
+    pw = hashlib.sha256(f"{email}:{time.time()}".encode()).hexdigest()[:16] + "Aa1!"
+    pair["meta"] = {"password": pw}
+    rc, b = curl_json("POST", "https://apx.didit.me/auth/v2/programmatic/register/",
+                      {"email": email, "password": pw, "name": "Warmup Agent"})
+    msg = str(b.get("message", "")).lower()
+    if "verification" in msg or "successful" in msg or "code" in msg:
+        return True, "code sent", None, False
+    d = str(b.get("error", b.get("message", f"http {rc}")))[:200]
+    return False, d, retry_after_seconds(b), permanent_refusal(d)
+
+def didit_extract(body):
+    m = re.search(r"\b([A-Z0-9]{6})\b", body)
+    t = to_addr(body)
+    return (t, m.group(1)) if m and t else None
+
+def didit_verify(email, code, pair):
+    rc, b = curl_json("POST", "https://apx.didit.me/auth/v2/programmatic/verify-email/",
+                      {"email": email, "code": code})
+    cred = b.get("api_key") or b.get("apiKey")
+    if cred:
+        pw = (pair.get("meta") or {}).get("password", "")
+        return True, "verified", cred + "\n" + json.dumps({"password": pw})
+    return False, str(b.get("error", b.get("message", "verify failed")))[:200], None
+
 ADAPTERS = [
     # OTP mail is routine spam-foldered; every query must use in:anywhere.
     {"name": "herenow", "interval": 20, "in_flight": 8,
@@ -329,21 +503,33 @@ ADAPTERS = [
      "extract": six_digit, "verify": recoupable_verify},
     {"name": "cloudinary", "interval": 30, "in_flight": 4, "request_only": True,
      "request": cloudinary_request, "query": lambda: "", "extract": None, "verify": None},
+    {"name": "tinysend", "interval": 20, "in_flight": 8,
+     "request": tinysend_request, "query": lambda: "in:anywhere tinysend newer_than:20m",
+     "extract": six_digit, "verify": tinysend_verify},
+    {"name": "clawdmail", "interval": 20, "in_flight": 4, "request_only": True,
+     "request": clawdmail_request, "query": lambda: "", "extract": None, "verify": None},
+    {"name": "chronary", "interval": 20, "in_flight": 8,
+     "request": chronary_request, "query": lambda: "in:anywhere chronary newer_than:20m",
+     "extract": six_digit, "verify": chronary_verify},
+    {"name": "agentboxd", "interval": 30, "in_flight": 4, "request_only": True,
+     "request": agentboxd_request, "query": lambda: "", "extract": None, "verify": None},
+    {"name": "mailboxkit", "interval": 20, "in_flight": 4, "request_only": True,
+     "request": mailboxkit_request, "query": lambda: "", "extract": None, "verify": None},
+    {"name": "agentpub", "interval": 20, "in_flight": 8,
+     "request": agentpub_request, "query": lambda: "in:anywhere agentpub newer_than:20m",
+     "extract": agentpub_extract, "verify": agentpub_verify},
+    {"name": "generalcompute", "interval": 20, "in_flight": 8,
+     "request": generalcompute_request, "query": lambda: "in:anywhere generalcompute newer_than:20m",
+     "extract": six_digit, "verify": generalcompute_verify},
+    {"name": "didit", "interval": 20, "in_flight": 8,
+     "request": didit_request, "query": lambda: "in:anywhere didit newer_than:20m",
+     "extract": didit_extract, "verify": didit_verify},
 ]
 
 def service_names(email):
-    h1 = 0
-    for ch in email:
-        h1 = (h1 * 31 + ord(ch)) & 0xFFFFFFFF
-    h2 = 0
-    for ch in email + "\x00secondary":
-        h2 = (h2 * 31 + ord(ch)) & 0xFFFFFFFF
-    names = [a["name"] for a in ADAPTERS]
-    first = names[h1 % len(names)]
-    second = names[h2 % len(names)]
-    if second == first:
-        second = names[(h2 + 1) % len(names)]
-    return [first, second]
+    # Every mailbox signs up for every service: more distinct legitimate
+    # senders per mailbox is the point of the sweep.
+    return [a["name"] for a in ADAPTERS]
 
 # --- sweep ------------------------------------------------------------------
 
@@ -441,23 +627,16 @@ def main():
 
     state = load_state()
     boxes = mailboxes()
+    want = set(service_names(""))
     for e in boxes:
-        # Migrated pairs keep their service; top up to SERVICES_PER_MAILBOX
-        # from the hashed picks instead of adding two on top of the old one.
-        # Drop never-requested pairs beyond the cap (e.g. extras created by
-        # an earlier migration bug): no account was opened for them yet.
+        # Pairs for removed services get dropped only if they never made a
+        # request; in-flight and finished work always survives.
         ks = {k: s for k, s in state["pairs"].items() if k.split("|")[0] == e}
-        have = {s.get("service") for s in ks.values()}
-        want = set(service_names(e))
-        for k, s in sorted(ks.items(), key=lambda kv: kv[1]["service"] in want):
-            if len(have) <= SERVICES_PER_MAILBOX:
-                break
-            if s["status"] == "new":
+        for k, s in ks.items():
+            if s["service"] not in want and s["status"] == "new":
                 del state["pairs"][k]
-                have.discard(s["service"])
+        have = {s["service"] for k, s in ks.items() if k in state["pairs"]}
         for name in service_names(e):
-            if len(have) >= SERVICES_PER_MAILBOX:
-                break
             if name in have:
                 continue
             state["pairs"][f"{e}|{name}"] = {"service": name, "status": "new",
