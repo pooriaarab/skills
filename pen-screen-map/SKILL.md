@@ -60,6 +60,14 @@ look for the repo's own test fixtures before giving up:
   `userIdForEmail`). Reuse the same helpers the e2e suite uses.
 - Capture waits: `domcontentloaded` + `waitForLoadState("networkidle", 8000)`
   inside try/catch — SSE/polling pages never reach networkidle.
+- **Anonymous vs signed-in is a different page.** `/` and `/login` render
+  signed-in variants once the session exists — capture every public route in a
+  fresh context with no cookies, then mint the session for the authed set.
+- Host-gated surfaces (admin consoles) render only on their own hostname —
+  check the app's middleware for a dev admin host (yaya: `admin.localhost`).
+- **Wire 200 can still be a 404.** `notFound()` inside a streamed shell leaves
+  the response at 200 — detect the app's not-found text in page content and
+  record a `note` in the manifest, not just the status.
 - Record `route → file → HTTP status` per screen into
   `designs/captures/manifest.json`. A real 404 or a login-redirect IS the honest
   capture — keep it and note it.
@@ -92,6 +100,35 @@ visible layout, text, colors, and spacing. Use design variables for the palette.
   `previews/` PNGs — attach them to the PR (`gh pr comment --attach`).
 - Follow fleet PR rules: issue first, `yay-<issue>-<slug>`-style branch, one
   Closes, `Assisted-by:` trailer.
+
+## Step 5b — review boards (optional but requested often)
+
+- **One-file map**: merge all `.pen` files into a single grid board. `.pen` is
+  JSON (`{version, children:[top frames], variables}`) — offset each file's
+  top-level `x`/`y` into grid cells, merge `variables` first-wins, add a text
+  label per cell. **Match the `version` field of the source files** (2.19) —
+  writing an older version makes Pen.app render every frame as a black box.
+  Get frame heights for grid packing from the capture PNGs.
+- **Design-system sheet**: one extra pen run with the project's token file and
+  the shadcn library loaded:
+
+```bash
+pen --out designs/design-system.pen --model claude-opus-4-8 \
+  --library pencil:shadcn.lib.pen \
+  --prompt-file designs/captures/<densest-screen>.png \
+  --prompt "Design-system board: color tokens from <tokens file>, type scale, \
+and component sheet (buttons, inputs, nav items, cards, table rows) matching \
+the attached app UI."
+```
+
+## Known limitations
+
+- `Export(..., "html-tailwind"|"html-css", path)` exists in the execute API but
+  writes nothing in headless or desktop-connected interactive mode. For
+  design→code, drive the agent path instead: `pen --in x.pen --prompt
+  "implement as React+Tailwind in this repo"` — pen's bundled `code.md` and
+  `tailwind.md` guides govern conventions (reuse existing components, Tailwind
+  v4, tokens → CSS vars in `:root`).
 
 ## Iterating later
 
