@@ -103,6 +103,8 @@ def save_state(state):
     STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
     tmp = STATE_PATH.with_suffix(".tmp")
     tmp.write_text(json.dumps(state, indent=1))
+    # Pending API keys ride inside pairs until verification completes.
+    os.chmod(tmp, 0o600)
     os.replace(tmp, STATE_PATH)
 
 def mailboxes():
@@ -131,10 +133,19 @@ def gmail_body(mid):
     return out
 
 def curl_json(method, url, payload, headers=()):
-    argv = [CURL, "-sS", "-X", method, url, "-H", "content-type: application/json"]
-    for h in headers:
-        argv += ["-H", h]
-    rc, out = run(argv + ["-d", json.dumps(payload)] if payload is not None else argv)
+    # Auth headers go through --config stdin so bearer keys never appear in
+    # argv (and therefore never in `ps`).
+    stdin = None
+    argv = [CURL, "-sS", "-X", method, url]
+    if headers:
+        stdin = "".join(f'header = "{h}"\n' for h in headers)
+        stdin += 'header = "content-type: application/json"\n'
+        argv += ["--config", "-"]
+    else:
+        argv += ["-H", "content-type: application/json"]
+    if payload is not None:
+        argv += ["-d", json.dumps(payload)]
+    rc, out = run(argv, stdin=stdin)
     try:
         return rc, json.loads(out)
     except json.JSONDecodeError:
@@ -431,11 +442,27 @@ def main():
     state = load_state()
     boxes = mailboxes()
     for e in boxes:
+        # Migrated pairs keep their service; top up to SERVICES_PER_MAILBOX
+        # from the hashed picks instead of adding two on top of the old one.
+        # Drop never-requested pairs beyond the cap (e.g. extras created by
+        # an earlier migration bug): no account was opened for them yet.
+        ks = {k: s for k, s in state["pairs"].items() if k.split("|")[0] == e}
+        have = {s.get("service") for s in ks.values()}
+        want = set(service_names(e))
+        for k, s in sorted(ks.items(), key=lambda kv: kv[1]["service"] in want):
+            if len(have) <= SERVICES_PER_MAILBOX:
+                break
+            if s["status"] == "new":
+                del state["pairs"][k]
+                have.discard(s["service"])
         for name in service_names(e):
-            key = f"{e}|{name}"
-            if key not in state["pairs"]:
-                state["pairs"][key] = {"service": name, "status": "new",
-                                       "attempts": 0, "sent_at": 0, "next_at": 0}
+            if len(have) >= SERVICES_PER_MAILBOX:
+                break
+            if name in have:
+                continue
+            state["pairs"][f"{e}|{name}"] = {"service": name, "status": "new",
+                                             "attempts": 0, "sent_at": 0, "next_at": 0}
+            have.add(name)
     save_state(state)
 
     daemon = sys.argv[1] == "--daemon"
