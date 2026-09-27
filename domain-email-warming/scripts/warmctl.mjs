@@ -11,7 +11,7 @@ import { argv, exit } from "node:process";
 
 import { cfEnv, getLimits, sendEmail } from "./lib/cloudflare.mjs";
 import { compose, composeReply, loadLogo, VARIANTS, variantFor } from "./lib/content.mjs";
-import { classify, findByMessageId, markRead, reply, rescueFromSpam } from "./lib/gmail.mjs";
+import { classify, findByMessageId, markRead, probe, reply, rescueFromSpam } from "./lib/gmail.mjs";
 import { checkDomain, checkReplyPaths, organizationalDomain } from "./lib/preflight.mjs";
 import { planForDay, selectDueSlots } from "./lib/ramp.mjs";
 import { dayIndex, loadState, recordSend, saveState, sendsOnDay } from "./lib/state.mjs";
@@ -227,7 +227,9 @@ async function cmdEngage(cfg, opts, state) {
   // A send is pending while EITHER its placement is unresolved or it has not
   // been replied to yet: a message that was classified but whose reply failed
   // still has work outstanding, and keying only on placement would strand it.
-  const unresolved = (s) => s.placement === null || s.placement === "not_found" || s.placement === "unknown";
+  // "lookup_failed" stays unresolved so a fixed credential retries it next tick.
+  const unresolved = (s) =>
+    s.placement === null || s.placement === "not_found" || s.placement === "unknown" || s.placement === "lookup_failed";
   const pending = state.sends.filter((s) => {
     const seed = seeds.get(s.to);
     return s.accepted && s.messageId && seed?.engage && Date.parse(s.at) > cutoff &&
@@ -240,14 +242,32 @@ async function cmdEngage(cfg, opts, state) {
     return;
   }
 
+  // Probe each receiving account once before trusting its answers. A dead
+  // OAuth token (cron cannot unlock the macOS keychain) must fail loudly here:
+  // per-message it would be recorded as not_found and read as a delivery
+  // failure that never happened.
+  const accounts = [...new Set(pending.map((s) => seeds.get(s.to).gogAccount))];
+  const deadAccounts = new Map();
+  for (const account of accounts) {
+    const p = await probe(account);
+    if (!p.ok) deadAccounts.set(account, p.error);
+  }
+  for (const [account, error] of deadAccounts) {
+    console.log(`  unreachable account ${account}: ${error} - skipping its seeds`);
+  }
+
   for (const s of pending) {
     const seed = seeds.get(s.to);
+    if (deadAccounts.has(seed.gogAccount)) continue;
     const found = await findByMessageId(seed.gogAccount, s.messageId);
     s.placementCheckedAt = new Date().toISOString();
     const reclassify = unresolved(s);
     if (!found.found) {
-      s.placement = "not_found";
-      console.log(`  not_found  ${s.from} -> ${s.to}`);
+      // Only an unresolved send gets its placement stamped. One that was
+      // already measured and is pending only for a reply keeps its verdict -
+      // a lookup error must not erase a real measurement.
+      if (reclassify) s.placement = found.error ? "lookup_failed" : "not_found";
+      console.log(`  ${found.error ? "lookup_failed" : "not_found"}  ${s.from} -> ${s.to}${found.error ? `  (${found.error})` : ""}`);
       await saveState(state);
       continue;
     }
@@ -262,15 +282,29 @@ async function cmdEngage(cfg, opts, state) {
     }
     await markRead(seed.gogAccount, found.id);
     if (!s.replied && Math.random() < (cfg.replyRate ?? 0.5)) {
-      await reply(seed.gogAccount, {
-        replyToMessageId: found.id,
-        to: s.replyTo ?? s.from,
-        subject: s.subject,
-        body: composeReply(Math.random, s),
-      });
-      s.replied = true;
+      // A failed reply must not abort the run: classification is the product,
+      // and a 429 or provider error would otherwise strand every pending send
+      // behind it. Leave s.replied false so the next pass retries.
+      try {
+        await reply(seed.gogAccount, {
+          replyToMessageId: found.id,
+          to: s.replyTo ?? s.from,
+          subject: s.subject,
+          body: composeReply(Math.random, s),
+        });
+        s.replied = true;
+      } catch (err) {
+        console.log(`  reply_failed   ${s.from} -> ${s.to}  (${err.message})`);
+      }
     }
     await saveState(state);
+  }
+
+  // A skipped account leaves its sends pending, so the run "succeeds" while
+  // measuring nothing. Fail the command so the scheduler's log shows it.
+  if (deadAccounts.size) {
+    console.log(`\n${deadAccounts.size} account(s) unreachable - their sends stay pending. Fix the login and rerun.`);
+    exit(1);
   }
 }
 

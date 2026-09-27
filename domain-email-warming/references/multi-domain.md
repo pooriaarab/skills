@@ -74,6 +74,32 @@ seconds. Document a workaround only when a probe like that has confirmed it;
 an untested assumption about mail flow is how a fleet of domains silently
 receives nothing.
 
+## Sending registration is not receiving — provision both halves
+
+Registering a domain for Cloudflare Email Sending writes the `cf-bounce.*`
+return-path records: MX, SPF, DKIM and a `_dmarc` for each sending name. It
+creates **no** apex MX and **no** routing rule. A domain set up that way sends
+fine and receives nothing — warm-up mail leaves, replies and peer sends never
+arrive, and the receive path fails silently.
+
+The inbound half is separate state on the zone: apex MX pointing at
+`route{1,2,3}.mx.cloudflare.net`, apex SPF, literal routing rules for each
+warm-up mailbox, and a catch-all to the inbound worker. `scripts/provision-domain.py`
+does all of it idempotently — register the sending names, write the DNS each
+asks for, add the MX and rules:
+
+```bash
+CLOUDFLARE_API_TOKEN=... python3 scripts/provision-domain.py example.com
+```
+
+Two behaviours worth knowing before it surprises you. Once Email Routing is
+active on a zone, Cloudflare owns the MX record set — including the
+`cf-bounce.*` records it created during registration — and refuses manual MX
+writes with error 890190. That is the desired state already, not a failure.
+And the registration→DNS sequence matters: read the record list after
+registering, because registration itself writes records a stale snapshot
+cannot see.
+
 ## Registering a sending domain rewrites _dmarc to p=reject — back it up first
 
 Registering a domain as a Cloudflare sending domain publishes a `_dmarc`
@@ -84,10 +110,14 @@ can start rejecting that domain's legitimate mail the moment the record is
 published.
 
 Read and store the existing DMARC record before registering, and restore it
-afterwards. The rest of the setup is safe: apex MX and apex SPF records are not
+afterwards. `provision-domain.py` snapshots every `_dmarc.*` before registering
+and puts back any registration overwrote — but only for names that already had
+one, so a fresh `p=reject` on a previously unprotected name stays. It also
+refuses to add inbound MX or routing rules on a domain whose apex already
+points at a non-Cloudflare MX, because that would divert someone else's live
+mail. The rest of the setup is safe: apex MX and apex SPF records are not
 touched by registration, so the domain's existing inbound routing and sender
-authorization survive. The DMARC record is the single collision, which is why it
-is the one to back up rather than snapshotting the whole zone and hoping.
+authorization survive.
 
 ## Role addresses need routing rules, but must not be senders
 

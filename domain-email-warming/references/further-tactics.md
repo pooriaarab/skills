@@ -187,6 +187,53 @@ this a consent problem before it is a deliverability problem — bought lists ca
 spam traps, and a spam trap hit does immediate blocklist damage that no warm-up
 undoes.
 
+## Inbound variety from real services
+
+**industry.** Mailboxes that only ever receive warm-up mail from sibling domains
+have a thin inbound history. Real accounts at real services add a third-party
+senders' view of the domain — different IPs, different ESPs, different content
+shapes — without mailing a single additional person.
+
+Legitimate sources, all of which email on their own schedule once an account
+exists:
+
+- **Account and notification mail from tools you actually use.** Developer and
+  agentic platforms registerable from a CLI send welcome, verification, alert
+  and digest mail from their own infrastructure. A `hello@` mailbox that
+  holds real accounts receives real third-party traffic.
+- **Newsletters and changelogs you would read anyway.** Permission-based,
+  relevant, reversible. The companion scripts (`confirm-subscriptions.mjs`,
+  `validate-newsletters.mjs`) exist to prove the subscription mail actually
+  arrives and to audit the list, not to bulk-subscribe.
+- **Service notifications with volume control.** Repository watches, issue
+  digests, forum summaries — sources whose cadence you can tune from the
+  account side.
+- **Calendar invites.** An `.ics` attachment or a real invite is a different
+  message shape and opens a second thread type. Vary the formats warm-up
+  mail takes so the traffic is not one template forever.
+
+CLI-signup services are the useful sub-category: the whole flow runs in a
+terminal, the verification email lands in the warm-up mailbox (where the
+inbound worker and gog can both read it), and the finished account then
+produces ongoing notification mail. As of late 2026, reported options
+include Cloudinary (`cld agent signup`), CoreGit, Berth, Bird
+(`bird auth signup`), Whisper Security (curl-based), Molar
+(`molar agent signup`), Pantheon (`pantheon signup`), Linq (`linq signup`),
+Arcoa, Beryl, Smoketest (`smoketest auth signup`), PincerPay
+(`npx @pincerpay/cli signup`), Kite Passport (`kpass signup init`), and
+Cosmic (agent-signup API). Most email a 6-digit OTP or a verification link.
+
+Treat that list as leads, not gospel — CLIs and flags drift. Verify each
+signup command on the service's own docs before running it against a warm-up
+mailbox, and confirm the OTP mail actually arrived before trusting the
+account exists. The same rfc822msgid discipline applies: a signup flow whose
+verification email never landed produced no inbound value.
+
+Keep the same discipline as the rest of the program: real accounts, modest
+counts, and the ability to unsubscribe or delete. Subscribing a warmed mailbox
+to bulk mail nobody wants re-creates the engagement-pod pattern under a
+friendlier name, and the receiving ESPs read it the same way.
+
 ## Seed-list and inbox-placement services
 
 **industry, useful, not a substitute.** Services like these maintain seed
