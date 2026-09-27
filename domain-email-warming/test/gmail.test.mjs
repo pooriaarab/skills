@@ -97,6 +97,45 @@ describe("findByMessageId", () => {
     const r = await makeGmail(fakeExec([err, err])).findByMessageId("acct", "abc@d.com");
     assert.equal(r.found, false);
   });
+
+  it("surfaces the lookup error instead of reporting a clean miss", async () => {
+    const err = Object.assign(new Error("boom"), { stdout: "", stderr: "No auth for gmail acct" });
+    const r = await makeGmail(fakeExec([err, err])).findByMessageId("acct", "abc@d.com");
+    assert.equal(r.found, false);
+    assert.match(r.error, /No auth/);
+  });
+
+  it("still reports a clean miss only when every query ran", async () => {
+    const r = await makeGmail(fakeExec([none, none])).findByMessageId("acct", "abc@d.com");
+    assert.equal(r.found, false);
+    assert.equal(r.error, null);
+  });
+
+  it("recovers a hit on the spam retry after the first query fails", async () => {
+    const err = Object.assign(new Error("boom"), { stdout: "", stderr: "flake" });
+    const r = await makeGmail(fakeExec([err, msg(["SPAM"])])).findByMessageId("acct", "abc@d.com");
+    assert.equal(r.found, true);
+  });
+});
+
+describe("probe", () => {
+  it("passes on any parseable answer, including an empty mailbox", async () => {
+    const r = await makeGmail(fakeExec([none])).probe("acct");
+    assert.equal(r.ok, true);
+  });
+
+  it("fails when gog cannot reach the account, so absence is never trusted", async () => {
+    const err = Object.assign(new Error("boom"), { stdout: "", stderr: "No auth for gmail acct" });
+    const r = await makeGmail(fakeExec([err])).probe("acct");
+    assert.equal(r.ok, false);
+    assert.match(r.error, /No auth/);
+  });
+
+  it("asks for one message anywhere, not a query that can miss a live mailbox", async () => {
+    const exec = fakeExec([none]);
+    await makeGmail(exec).probe("acct");
+    assert.ok(exec.calls[0].args.some((a) => a.includes("in:anywhere")));
+  });
 });
 
 describe("mutations", () => {
