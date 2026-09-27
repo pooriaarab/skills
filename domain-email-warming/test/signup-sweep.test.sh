@@ -14,7 +14,7 @@ ROOT=$(mktemp -d)
 trap 'rm -rf "$ROOT"' EXIT
 mkdir -p "$ROOT/bin" "$ROOT/cfg" "$ROOT/state"
 
-# curl answers here.now endpoints from SWEEP_FAKE_CURL_MODE and refuses
+# curl answers known service endpoints from SWEEP_FAKE_CURL_MODE and refuses
 # anything that looks like a real network call it was not told to fake.
 cat > "$ROOT/bin/curl" <<'STUB'
 #!/usr/bin/env bash
@@ -34,27 +34,36 @@ case "$url" in
       bad) echo '{"success":false,"message":"invalid code"}' ;;
     esac
     ;;
+  *agent/sign-up*)
+    echo '{"api_key":"am-test-key","inbox_id":"x@agentmail.to","organization_id":"o1"}'
+    ;;
+  *agent/verify*)
+    echo '{"verified":true}'
+    ;;
+  *provisioning/agents/accounts*)
+    echo '{"external_id":"e1","product_environments":[{"api_environment_variable":"CLOUDINARY_URL=cloudinary://k:s@c"}]}'
+    ;;
   *) echo "stub curl: refused url: $url" >&2; exit 9 ;;
 esac
 STUB
 
-# gog serves a search result list, then a body containing To + OTP per
-# SWEEP_FAKE_TO / SWEEP_FAKE_CODE. Empty SWEEP_FAKE_CODE means no mail yet.
+# gog serves a search result list, then a body per SWEEP_FAKE_TO /
+# SWEEP_FAKE_BODY. Empty SWEEP_FAKE_BODY means no mail yet.
 cat > "$ROOT/bin/gog" <<'STUB'
 #!/usr/bin/env bash
 set -uo pipefail
 args="$*"
 case "$args" in
   *"messages search"*)
-    if [ -n "${SWEEP_FAKE_CODE:-}" ]; then
+    if [ -n "${SWEEP_FAKE_BODY:-}" ]; then
       echo '{"messages":[{"id":"m1"}]}'
     else
       echo '{"messages":[]}'
     fi
     ;;
   *"get "*)
-    printf 'from\t"here.now" <noreply@here.now>\nto\t%s\n\nYour here.now code: %s\n' \
-      "${SWEEP_FAKE_TO:-nobody@example.com}" "${SWEEP_FAKE_CODE:-XXXX-XXXX}"
+    printf 'from\tnoreply@example.com\nto\t%s\n\n%s\n' \
+      "${SWEEP_FAKE_TO:-nobody@example.com}" "${SWEEP_FAKE_BODY:-none}"
     ;;
 esac
 STUB
@@ -78,40 +87,62 @@ export SWEEP_CONFIG_DIR="$ROOT/cfg" SWEEP_STATE="$ROOT/state/signups.json" \
        SWEEP_GOG="$ROOT/bin/gog" SWEEP_COSMIC="$ROOT/bin/cosmic" SWEEP_TICK=1
 export PATH="$ROOT/bin:$PATH"
 
-svc_of() { python3 -c "import json;print(json.load(open('$SWEEP_STATE'))['pairs']['$1']['service'])"; }
+pair() { python3 -c "import json;print(json.load(open('$SWEEP_STATE'))['pairs']['$1']['$2'])"; }
+seed() { python3 -c "import json,os,time;p='$SWEEP_STATE';s=json.load(open(p)) if os.path.exists(p) else {'pairs':{},'services':{}};s['pairs']['$1']=$2;json.dump(s,open(p,'w'))"; }
+pace() { python3 -c "import json;s=json.load(open('$SWEEP_STATE'));s['services']={};json.dump(s,open('$SWEEP_STATE','w'))"; }
 
-# 1. First pass: the mailbox is registered and a code is requested.
+# 1. First pass: a seeded herenow pair gets a code requested.
+seed 'd@t.example|herenow' '{"service":"herenow","status":"new","attempts":0,"sent_at":0,"next_at":0}'
 SWEEP_FAKE_CURL_MODE=ok python3 "$SCRIPT" --once >/dev/null
-svc=$(svc_of d@t.example)
-st=$(python3 -c "import json;print(json.load(open('$SWEEP_STATE'))['pairs']['d@t.example']['status'])")
-[ "$svc" = "herenow" ] || { ok "skips cosmic-only assertions for $svc assignment"; }
-[ "$st" = "requested" ] && ok "code requested for d@t.example ($svc)" || bad "first pass status=$st"
+st=$(pair 'd@t.example|herenow' status)
+[ "$st" = "requested" ] && ok "code requested for d@t.example (herenow)" || bad "first pass status=$st"
 
-# 2. Second pass with the OTP in the mailbox: verified, credential stored.
-if [ "$svc" = "herenow" ]; then
-  # age the request past the 25s poll floor
-  python3 -c "import json;s=json.load(open('$SWEEP_STATE'));s['pairs']['d@t.example']['sent_at']-=60;json.dump(s,open('$SWEEP_STATE','w'))"
-  SWEEP_FAKE_TO="d@t.example" SWEEP_FAKE_CODE="B8XG-EBXF" python3 "$SCRIPT" --once >/dev/null
-  st=$(python3 -c "import json;print(json.load(open('$SWEEP_STATE'))['pairs']['d@t.example']['status'])")
-  [ "$st" = "verified" ] && ok "otp verified" || bad "verify status=$st"
-  [ -f "$ROOT/state/creds/herenow/d_t.example" ] && ok "credential stored" || bad "no credential file"
-else
-  ok "herenow path untested this run (assigned $svc)"
-fi
+# 2. Every mailbox gets two service assignments.
+n=$(python3 -c "import json;print(sum(1 for k in json.load(open('$SWEEP_STATE'))['pairs'] if k.startswith('d@t.example|')))")
+[ "$n" -eq 2 ] && ok "two services assigned per mailbox" || bad "assigned $n services"
 
-# 3. Rate-limit response pushes next_at out instead of burning attempts.
-python3 -c "import json;s=json.load(open('$SWEEP_STATE'));s['pairs']['b@t.example']={'service':'herenow','status':'new','attempts':0,'sent_at':0,'next_at':0};s['services']={};json.dump(s,open('$SWEEP_STATE','w'))"
-SWEEP_FAKE_CURL_MODE=limit python3 "$SCRIPT" --once >/dev/null
-nxt=$(python3 -c "import json,time;s=json.load(open('$SWEEP_STATE'));print(int(s['pairs']['b@t.example']['next_at']-time.time()))")
+# 3. Second pass with the OTP in the mailbox: verified, credential stored.
+python3 -c "import json;s=json.load(open('$SWEEP_STATE'));s['pairs']['d@t.example|herenow']['sent_at']-=60;json.dump(s,open('$SWEEP_STATE','w'))"
+SWEEP_FAKE_TO="d@t.example" SWEEP_FAKE_BODY="Your here.now code: B8XG-EBXF" python3 "$SCRIPT" --once >/dev/null
+st=$(pair 'd@t.example|herenow' status)
+[ "$st" = "verified" ] && ok "otp verified" || bad "verify status=$st"
+[ -f "$ROOT/state/creds/herenow/d_t.example" ] && ok "credential stored" || bad "no credential file"
+
+# 4. Rate-limit response pushes next_at out instead of burning attempts.
+seed 'b@t.example|herenow' '{"service":"herenow","status":"new","attempts":0,"sent_at":0,"next_at":0}'
+pace
+SWEEP_FAKE_BODY="" SWEEP_FAKE_CURL_MODE=limit python3 "$SCRIPT" --once >/dev/null
+nxt=$(python3 -c "import json,time;s=json.load(open('$SWEEP_STATE'));print(int(s['pairs']['b@t.example|herenow']['next_at']-time.time()))")
 [ "$nxt" -gt 600 ] && ok "rate-limit backoff honored (${nxt}s)" || bad "next_at only +${nxt}s"
 
-# 4. A code older than the OTP window goes back to retry, not verified.
-python3 -c "import json,time;s=json.load(open('$SWEEP_STATE'));s['pairs']['c@t.example']={'service':'herenow','status':'requested','attempts':1,'sent_at':time.time()-900,'next_at':0};json.dump(s,open('$SWEEP_STATE','w'))"
-python3 "$SCRIPT" --once >/dev/null
-st=$(python3 -c "import json;print(json.load(open('$SWEEP_STATE'))['pairs']['c@t.example']['status'])")
+# 5. A code older than the OTP window goes back to retry, not verified.
+seed 'c@t.example|herenow' '{"service":"herenow","status":"requested","attempts":1,"sent_at":'$(( $(date +%s) - 900 ))',"next_at":0}'
+SWEEP_FAKE_CURL_MODE=ok python3 "$SCRIPT" --once >/dev/null
+st=$(pair 'c@t.example|herenow' status)
 [ "$st" = "retry" ] && ok "expired code retried" || bad "expiry status=$st"
 
-# 5. Missing config dir exits 1.
+# 6. agentmail: signup returns a key, OTP verify marks verified.
+seed 'a@t.example|agentmail' '{"service":"agentmail","status":"new","attempts":0,"sent_at":0,"next_at":0}'
+pace
+python3 "$SCRIPT" --once >/dev/null
+st=$(pair 'a@t.example|agentmail' status)
+cr=$(python3 -c "import json;print(json.load(open('$SWEEP_STATE'))['pairs']['a@t.example|agentmail'].get('cred',''))")
+{ [ "$st" = "requested" ] && [ "$cr" = "am-test-key" ]; } && ok "agentmail signup stores pending key" || bad "agentmail status=$st cred=$cr"
+python3 -c "import json;s=json.load(open('$SWEEP_STATE'));s['pairs']['a@t.example|agentmail']['sent_at']-=60;json.dump(s,open('$SWEEP_STATE','w'))"
+SWEEP_FAKE_TO="a@t.example" SWEEP_FAKE_BODY="Your AgentMail verification code is 483920." python3 "$SCRIPT" --once >/dev/null
+st=$(pair 'a@t.example|agentmail' status)
+[ "$st" = "verified" ] && ok "agentmail otp verified" || bad "agentmail verify status=$st"
+[ -f "$ROOT/state/creds/agentmail/a_t.example" ] && ok "agentmail credential stored" || bad "no agentmail credential"
+
+# 7. cloudinary is request-only: account + creds on first pass, no OTP wait.
+seed 'z@t.example|cloudinary' '{"service":"cloudinary","status":"new","attempts":0,"sent_at":0,"next_at":0}'
+pace
+SWEEP_FAKE_BODY="" python3 "$SCRIPT" --once >/dev/null
+st=$(pair 'z@t.example|cloudinary' status)
+[ "$st" = "verified" ] && ok "cloudinary request-only verified" || bad "cloudinary status=$st"
+[ -f "$ROOT/state/creds/cloudinary/z_t.example" ] && ok "cloudinary credential stored" || bad "no cloudinary credential"
+
+# 8. Missing config dir exits 1.
 SWEEP_CONFIG_DIR="$ROOT/nope" python3 "$SCRIPT" --once >/dev/null 2>&1
 [ $? -eq 1 ] && ok "missing config dir exits 1" || bad "missing config dir exit=$?"
 

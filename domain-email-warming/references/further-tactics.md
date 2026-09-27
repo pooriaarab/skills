@@ -223,7 +223,22 @@ Arcoa, Beryl, Smoketest (`smoketest auth signup`), PincerPay
 (`npx @pincerpay/cli signup`), Kite Passport (`kpass signup init`),
 here.now (REST `request-code`/`verify-code`), and Cosmic
 (`agent-signup`/`agent-verify` CLI). Most email a 6-digit OTP or a
-verification link. Verified working end to end so far: here.now and Cosmic.
+verification link.
+
+Verified working end to end (REST, OTP or creds confirmed live):
+
+| Service | Signup | Verify | Notes |
+|---|---|---|---|
+| here.now | `POST /api/auth/agent/request-code` | `POST /api/auth/agent/verify-code` | `XXXX-XXXX` code; aggressive per-IP rate limit, honor `retry_after` |
+| Cosmic | `cosmic agent-signup` CLI | `cosmic agent-verify` CLI | 6-digit code; spam-foldered; scanners burn links fast; rejects some domains as disposable |
+| AgentMail | `POST api.agentmail.to/v0/agent/sign-up` | `POST /v0/agent/verify` (bearer) | Returns API key at signup; 6-digit OTP, 24 h TTL; unverified inboxes can only mail the human |
+| Inkbox | `POST inkbox.ai/api/v1/agent-signup/` | `POST .../verify` (`X-API-Key`) | Needs `note_to_human`; key + mailbox issued at signup; 48 h code TTL |
+| Recoupable | `POST api.recoupable.dev/api/agents/signup` | `POST /api/agents/verify` | `.com` hosts redirect to `.dev`; `agent+` addresses can return the key immediately |
+| Cloudinary | `POST api.cloudinary.com/v1_1/provisioning/agents/accounts` | link in email | Needs `agent_framework`, `agent_llm_model`, `agent_goal`; returns `CLOUDINARY_URL` at once |
+
+Rejected or dead leads from live probes: CoreGit (`AUTH_EMAIL_NOT_ALLOWED`
+on our domains), Molar (endpoint gone), PincerPay (TTY-only interactive
+flow). Several names in the raw list never resolved to a real signup surface.
 
 Treat that list as leads, not gospel — CLIs and flags drift. Verify each
 signup command on the service's own docs before running it against a warm-up
@@ -232,10 +247,10 @@ account exists. The same rfc822msgid discipline applies: a signup flow whose
 verification email never landed produced no inbound value.
 
 The fleet runs this sweep as `signup-sweep` in `pooriaarab/scripts`: it walks
-every warmup domain config, assigns each identity a service round-robin,
+every warmup domain config, assigns each identity two services round-robin,
 requests the code, polls Gmail for the OTP, verifies, and stores the
-credential under `~/.local/state` (never in a repo). Two operational lessons
-from the first live run are baked into it and worth knowing by hand:
+credential under `~/.local/state` (never in a repo). Three operational
+lessons from live runs are baked into it and worth knowing by hand:
 
 - **OTP mail is routinely spam-foldered.** Verification senders score poorly
   on a fresh domain, so a default Gmail search sees nothing even when the
@@ -245,6 +260,9 @@ from the first live run are baked into it and worth knowing by hand:
   within a minute of delivery. Verify as soon as the mail lands — a code
   polled minutes later can already be dead, and the fix is speed, not
   retries.
+- **A mailbox can hold several live codes.** Re-requests stack OTP mails;
+  extracting from whichever message sorts last grabs an older, dead code.
+  Take the newest matching message only.
 
 Keep the same discipline as the rest of the program: real accounts, modest
 counts, and the ability to unsubscribe or delete. Subscribing a warmed mailbox
