@@ -146,8 +146,8 @@ def retry_after_seconds(body):
 def herenow_request(email):
     rc, b = curl_json("POST", "https://here.now/api/auth/agent/request-code", {"email": email})
     if b.get("success"):
-        return True, "code sent", None
-    return False, b.get("message", b.get("error", f"http {rc}")), retry_after_seconds(b)
+        return True, "code sent", None, False
+    return False, b.get("message", b.get("error", f"http {rc}")), retry_after_seconds(b), False
 
 def to_addr(body):
     # gog get dumps headers as "to<TAB>addr"; raw mail uses "To: <addr>";
@@ -175,7 +175,10 @@ def cosmic_request(email):
     proj = re.sub(r"[^a-z0-9]+", "-", email.split("@")[0])[:24]
     rc, out = run([COSMIC, "agent-signup", "-e", email, "-p", proj,
                    "--prompt-hint", "project inbox"])
-    return rc == 0, ("created" if rc == 0 else out.strip()[:120]), None
+    detail = "created" if rc == 0 else out.strip()[:120]
+    # A domain-policy refusal will not clear on retry — fail it terminal.
+    permanent = "disposable" in out.lower() or "not allowed" in out.lower()
+    return rc == 0, detail, None, permanent
 
 def cosmic_extract(body):
     m = re.search(r"claim code is\s*([0-9]{6})", body)
@@ -268,10 +271,12 @@ def tick(state):
                      if x["service"] == ad["name"] and x["status"] == "requested")
         if flying >= ad["in_flight"]:
             continue
-        ok, detail, backoff = ad["request"](e)
+        ok, detail, backoff, permanent = ad["request"](e)
         svc["last_at"] = t
         if ok:
             s.update(status="requested", sent_at=t, attempts=s["attempts"] + 1)
+        elif permanent:
+            s["status"] = "failed"
         else:
             s["next_at"] = t + (backoff or ad["interval"] * 3)
         log(ad["name"], e, ok, f"request: {detail}")
