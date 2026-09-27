@@ -45,9 +45,32 @@ export function makeGmail(execFile = execFileDefault) {
     return Array.isArray(list) && list.length ? list[0] : null;
   }
 
+  /**
+   * Returns { ok, error, message }. `ok:false` means the lookup itself failed
+   * (auth, binary missing, gog error) - NOT that the message is absent. The
+   * distinction is load-bearing: an unreadable mailbox must never be recorded
+   * as "the mail did not arrive", or a dead credential silently rewrites the
+   * placement report as not_found.
+   */
   async function search(account, query) {
     const res = await gog(["-a", account, "gmail", "messages", "search", query, "--max", "1", "-j"]);
-    return firstMessage(parseJson(res.stdout));
+    const parsed = parseJson(res.stdout);
+    // A parsed payload is the truth even when the exit code disagrees - gog
+    // can exit non-zero while still printing results on stdout.
+    if (parsed) return { ok: true, error: null, message: firstMessage(parsed) };
+    if (!res.ok) return { ok: false, error: res.error ?? "gog failed", message: null };
+    return { ok: false, error: "unparseable gog output", message: null };
+  }
+
+  /**
+   * Positive-case instrument check: can this account be read at all? An empty
+   * result still passes - the point is proving auth and connectivity before a
+   * run of "not found" answers is trusted. Under cron a dead OAuth token fails
+   * here instead of being stamped onto every pending message as not_found.
+   */
+  async function probe(account) {
+    const r = await search(account, "in:anywhere");
+    return r.ok ? { ok: true } : { ok: false, error: r.error };
   }
 
   /**
@@ -61,15 +84,22 @@ export function makeGmail(execFile = execFileDefault) {
     // anything else keeps a stray ID from being read as a Gmail search query
     // (e.g. "x@d.com OR from:attacker") instead of an exact message lookup.
     if (!/^[^\s"()<>]+@[^\s"()<>]+$/.test(bare)) {
-      return { found: false, id: null, threadId: null, labels: [] };
+      return { found: false, error: "invalid message id", id: null, threadId: null, labels: [] };
     }
+    let lastError = null;
     for (const query of [`rfc822msgid:${bare}`, `rfc822msgid:${bare} in:anywhere`]) {
-      const m = await search(account, query);
-      if (m) {
-        return { found: true, id: m.id, threadId: m.threadId, labels: m.labels ?? [] };
+      const r = await search(account, query);
+      if (!r.ok) {
+        lastError = r.error;
+        continue;
+      }
+      if (r.message) {
+        return { found: true, error: null, id: r.message.id, threadId: r.message.threadId, labels: r.message.labels ?? [] };
       }
     }
-    return { found: false, id: null, threadId: null, labels: [] };
+    // A miss beside a failed query is ambiguous, so the error wins: the caller
+    // must not record not_found for a lookup that never really ran.
+    return { found: false, error: lastError, id: null, threadId: null, labels: [] };
   }
 
   async function rescueFromSpam(account, id) {
@@ -97,7 +127,7 @@ export function makeGmail(execFile = execFileDefault) {
     return res;
   }
 
-  return { findByMessageId, rescueFromSpam, markRead, star, reply };
+  return { probe, findByMessageId, rescueFromSpam, markRead, star, reply };
 }
 
 /**
@@ -123,6 +153,7 @@ export function classify(labels) {
 export const GOOD_PLACEMENTS = new Set(["primary"]);
 
 const shared = makeGmail();
+export const probe = shared.probe;
 export const findByMessageId = shared.findByMessageId;
 export const rescueFromSpam = shared.rescueFromSpam;
 export const markRead = shared.markRead;

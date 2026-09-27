@@ -137,6 +137,11 @@ Everything that sends, replies or changes DNS is a dry run unless you pass `--ap
 | `engage` | Classify placement, rescue from spam, mark read, reply |
 | `report` | Placement overall, by day, and by format variant, plus provider quota |
 
+`scripts/provision-domain.py` — idempotent Cloudflare setup for a new domain:
+sending-domain registration, the DNS each asks for, apex MX and routing rules
+to the inbound worker. Sending registration alone leaves a domain able to send
+but unable to receive (see [references/multi-domain.md](references/multi-domain.md)).
+
 Configure with `examples/imecore.warmup.json` as the template. The Cloudflare adapter is
 one file (`scripts/lib/cloudflare.mjs`); another provider means replacing that file, not
 the tool.
