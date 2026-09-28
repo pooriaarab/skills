@@ -66,6 +66,10 @@ fixed-height feeds that eat their last row.
 
 ## Findings format
 
+Outside reference catalogs for style, component and motion sources live in
+`ui-variant-lab` and `ui-micro-interactions` — cite one in findings when a fix
+has a known-good pattern there.
+
 Report as a table: `| Check | Finding | File/line | Severity |`. Severity:
 **blocker** (contract broken, a11y floor failed, content lost),
 **major** (state missing, rhythm broken), **minor** (polish). Blockers and

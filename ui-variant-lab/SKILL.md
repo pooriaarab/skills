@@ -73,6 +73,41 @@ keeping the contract's copy and the floor's checks. Delete the losing files and
 the gallery unless the user asks to keep them — harness files that linger get
 mistaken for product.
 
+## Outside references
+
+The project's own design system decides first. These fill the gaps it has not
+decided, most often when picking direction worlds. Fetch the real content
+before citing a reference — if a page cannot be read, say so and design from
+the system's own tokens. Never imitate from memory. Report which reference was
+used and what it changed.
+
+Style directions:
+
+| Reference | What it gives |
+| --- | --- |
+| styles.refero.design | 2,000+ named `DESIGN.md` style directions from real product sites — colors, type, spacing per world. The fastest way to name a direction. |
+| VoltAgent/awesome-design-md | Open-source `DESIGN.md` collection for ~74 brands, MIT. |
+| minimal.gallery | Curated minimal-site gallery; tag pages (`/tag/saas/`, `/tag/startup/`, `/tag/one-page/`) for restraint baselines. |
+
+Components and interaction (full list in `ui-micro-interactions`):
+
+| Reference | What it gives |
+| --- | --- |
+| 21st.dev | React + Tailwind component registry with an MCP; free usage limit — say what you are looking for before calling. |
+| component.gallery | 60 components across ~95 design systems. Check how mature systems handle a component before inventing one. |
+| microkit.co | MIT micro-interactions on the shadcn registry. |
+| aicss.dev | Agent-UI component taxonomy (thinking, tool calls, streaming, approvals). Pro source — use the taxonomy, not the code. |
+
+Motion and video:
+
+| Reference | What it gives |
+| --- | --- |
+| kinetics.colorion.co | Spring-physics motion recipes; copy CSS, React or an AI prompt. |
+| whatships.com | Launch-video library; tile a reference's frames to study pacing. |
+| hyperframes.dev | Renders an authored HTML sequence to MP4 for demo videos. |
+| impeccable.style | `polish`/`distill`/`bolder` review commands for "still feels off" work. |
+| jakubkrehel/skills | `better-*` interface skill collection — `npx skills add jakubkrehel/skills`. |
+
 ## Before you finish
 
 | Mistake | Fix |

@@ -24,6 +24,13 @@ bug with a nice surface.
 - **component.gallery** — cross-design-system component reference: how ~95
   mature systems handle a given component. Read for pattern consensus before
   inventing an interaction.
+- **kinetics.colorion.co** — spring-physics animation recipes; copy the CSS,
+  the React, or a ready-made prompt.
+- **21st.dev** — React + Tailwind component registry with an MCP; free usage
+  limit — say what you are looking for before calling.
+
+The full outside-reference catalog (style directions, video, review tools)
+lives in `ui-variant-lab`.
 
 If a reference's actual content cannot be fetched, say so and design from the
 system's own tokens — do not imitate from memory.
