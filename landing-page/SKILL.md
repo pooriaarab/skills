@@ -208,7 +208,27 @@ invoke them rather than re-deriving. Score each section on its own.
 
 ---
 
-## G. HANDOFF NOTE
+## G. OUTSIDE REFERENCES
+
+The project's own design system decides first. Reach for these only where the
+system has not decided, and fetch the real content before citing one — never
+imitate a page you could not read. Report which reference you used and what
+changed. The full catalog lives in `ui-variant-lab`.
+
+- **styles.refero.design** — named `DESIGN.md` directions from real sites; the
+  fastest way to pick an aesthetic direction.
+- **VoltAgent/awesome-design-md** — open-source `DESIGN.md` set for ~74 brands.
+- **minimal.gallery** — curated minimal sites for restraint baselines.
+- **component.gallery** — how ~95 design systems handle a given component.
+- **microkit.co** — MIT micro-interactions on the shadcn registry.
+- **aicss.dev** — agent-UI component taxonomy (Pro source; use the taxonomy).
+- **kinetics.colorion.co** — spring-physics motion recipes.
+- **jakubkrehel/skills** — `better-*` interface skills: typography, colors,
+  layout, accessibility, writing, review.
+
+---
+
+## H. HANDOFF NOTE
 
 When you finish, state: which sections you built/upgraded, the one or two signature interactions
 you chose and why, which review gates passed, and anything you were unsure about (a claim you
