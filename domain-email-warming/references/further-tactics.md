@@ -226,7 +226,7 @@ here.now (REST `request-code`/`verify-code`), and Cosmic
 verification link.
 
 Verified working end to end (REST, OTP or creds confirmed live). The
-sweep signs every mailbox up for all fourteen:
+sweep signs every mailbox up for all fifteen:
 
 | Service | Signup | Verify | Notes |
 |---|---|---|---|
@@ -243,7 +243,8 @@ sweep signs every mailbox up for all fourteen:
 | MailboxKit | `POST mailboxkit.com/api/v1/register` | owner email | Key + `@agent.mailboxkit.com` inbox at once, verification mail to owner |
 | Agentpub | `POST agentpub.io/api/auth/agent/request-code` | `POST .../verify-code` | `LLLL-DDDD` code shape; same flow as here.now |
 | General Compute | `POST api.generalcompute.com/v1/public/agent-signups` | `POST .../{signupId}/verify` | 15-min 6-digit code; a second signup returns no `signupId` (terminal) |
-| Didit | `POST apx.didit.me/auth/v2/programmatic/register/` | `POST .../verify-email/` | Needs a generated password (stored with the key); 10-min 6-char alphanumeric code |
+| Didit | `POST apx.didit.me/auth/v2/programmatic/register/` | `POST .../verify-email/` | Needs a generated password (stored with the key); 10-min 6-char alphanumeric code; verify returns a JSON array |
+| Whisper | `POST console.whisper.security/api/signup` | `POST /api/signup/verify` | `signup_id` + 15-min 6-digit code; `attribution` block required |
 
 Rejected or dead leads from live probes: CoreGit (`AUTH_EMAIL_NOT_ALLOWED`
 on our domains), Molar (endpoint gone), PincerPay (TTY-only interactive
