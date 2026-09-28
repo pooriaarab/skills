@@ -47,7 +47,13 @@ case "$url" in
     echo '{"message":"Registration successful. Check your email for the verification code."}'
     ;;
   *programmatic/verify-email*)
-    echo '{"api_key":"didit-key-123"}'
+    echo '[{"api_key":"didit-key-123"}]'
+    ;;
+  *api/signup*)
+    echo '{"signup_id":"w1"}'
+    ;;
+  *api/signup/verify*)
+    echo '{"api_key":"whisper-key"}'
     ;;
   *) echo "stub curl: refused url: $url" >&2; exit 9 ;;
 esac

@@ -478,10 +478,37 @@ def didit_extract(body):
 def didit_verify(email, code, pair):
     rc, b = curl_json("POST", "https://apx.didit.me/auth/v2/programmatic/verify-email/",
                       {"email": email, "code": code})
+    if isinstance(b, list):
+        b = b[0] if b and isinstance(b[0], dict) else {}
     cred = b.get("api_key") or b.get("apiKey")
     if cred:
         pw = (pair.get("meta") or {}).get("password", "")
         return True, "verified", cred + "\n" + json.dumps({"password": pw})
+    return False, str(b.get("error", b.get("message", "verify failed")))[:200], None
+
+def whisper_request(email, pair):
+    rc, b = curl_json("POST", "https://console.whisper.security/api/signup",
+                      {"email": email,
+                       "attribution": {"agent_name": "warmup-agent",
+                                       "agent_runtime": "custom",
+                                       "source": "self"}})
+    if b.get("signup_id"):
+        pair["meta"] = {"signupId": b["signup_id"]}
+        return True, "code sent", None, False
+    d = str(b.get("error", b.get("message", f"http {rc}")))[:200]
+    if isinstance(b.get("error"), dict):
+        d = str(b["error"].get("message", b["error"]))[:200]
+    permanent = permanent_refusal(d) or "already" in d.lower()
+    return False, d, retry_after_seconds(b), permanent
+
+def whisper_verify(email, code, pair):
+    sid = (pair.get("meta") or {}).get("signupId", "")
+    rc, b = curl_json("POST", "https://console.whisper.security/api/signup/verify",
+                      {"signup_id": sid, "code": code})
+    if isinstance(b, list):
+        b = b[0] if b and isinstance(b[0], dict) else {}
+    if b.get("api_key"):
+        return True, "verified", b["api_key"]
     return False, str(b.get("error", b.get("message", "verify failed")))[:200], None
 
 ADAPTERS = [
@@ -524,6 +551,9 @@ ADAPTERS = [
     {"name": "didit", "interval": 20, "in_flight": 8,
      "request": didit_request, "query": lambda: "in:anywhere didit newer_than:20m",
      "extract": didit_extract, "verify": didit_verify},
+    {"name": "whisper", "interval": 20, "in_flight": 8,
+     "request": whisper_request, "query": lambda: "in:anywhere whisper newer_than:20m",
+     "extract": six_digit, "verify": whisper_verify},
 ]
 
 def service_names(email):
@@ -573,7 +603,11 @@ def tick(state):
             code = hits.get(e.lower())
             if not code:
                 continue
-            ok, detail, cred = ad["verify"](e, code, pairs[k])
+            try:
+                ok, detail, cred = ad["verify"](e, code, pairs[k])
+            except Exception as ex:
+                log(ad["name"], e, False, f"verify raised {ex!r}"[:160])
+                continue
             pairs[k]["status"] = "verified" if ok else "retry"
             pairs[k]["next_at"] = 0 if ok else t + 300
             pairs[k]["attempts"] += 1
@@ -604,7 +638,12 @@ def tick(state):
         if flying >= ad["in_flight"]:
             continue
         e = k.split("|")[0]
-        ok, detail, backoff, permanent = ad["request"](e, s)
+        try:
+            ok, detail, backoff, permanent = ad["request"](e, s)
+        except Exception as ex:
+            log(ad["name"], e, False, f"request raised {ex!r}"[:160])
+            s["next_at"] = t + 300
+            continue
         svc["last_at"] = t
         if ok and ad.get("request_only"):
             s["status"] = "verified"
