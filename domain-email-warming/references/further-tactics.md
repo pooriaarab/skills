@@ -205,6 +205,18 @@ exists:
   relevant, reversible. The companion scripts (`confirm-subscriptions.mjs`,
   `validate-newsletters.mjs`) exist to prove the subscription mail actually
   arrives and to audit the list, not to bulk-subscribe.
+- **Announce lists joined by email.** Every serious list system still accepts
+  a subscribe message, and web signup forms are mostly CAPTCHA-gated anyway —
+  the mailbox emails the join address itself, which is also an outbound send
+  the domain gets credit for. `subscribe-sweep.mjs` does this: each mailbox
+  joins two of eight low-volume announce lists by hash (sourcehut, GNU,
+  Debian, Apache, Python, GCC, Golang, PostgreSQL), the seed Gmail is polled
+  for the confirmation, and it is completed in-band — mailman/ezmlm/smartlist
+  lists get a Subject-preserving reply, pgLister-style lists get their link
+  visited. Confirm exchanges are real two-way threads and the announce
+  traffic then arrives a few times a month indefinitely. Web-endpoint notes
+  from live probes: Substack, beehiiv and Buttondown are all bot-gated; the
+  send-based route has no gate at all.
 - **Service notifications with volume control.** Repository watches, issue
   digests, forum summaries — sources whose cadence you can tune from the
   account side.
