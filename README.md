@@ -198,6 +198,9 @@ to the skill that holds the lever. The others assume you already know which job 
 | [deploy-app-aws](deploy-app-aws/SKILL.md) | Deploy a containerized app to AWS (ECS Fargate + RDS + ElastiCache + S3 + ALB) with Terraform, verify, then tear down. |
 | [deploy-app-azure](deploy-app-azure/SKILL.md) | Deploy a containerized app to Azure (Container Apps + Postgres + Cache for Redis + Blob) with Bicep, verify, then tear down. |
 | [consistent-character-images](consistent-character-images/SKILL.md) | Generate AI images of a real person that still look like them — a measured identity lock, a generate-verify-retry loop, and a vision model that scores every render against the real photographs. |
+| [ui-variant-lab](ui-variant-lab/SKILL.md) | Explore a landing-page redesign by building several whole visual worlds against one frozen copy contract, comparing them in a local gallery, then promoting the winner. |
+| [ui-craft-review](ui-craft-review/SKILL.md) | Review a landing page or UI artifact against a craft floor — verbatim copy, banned words, tokenized styles, the a11y floor, motion rules, interaction states, and the 390px clip check. |
+| [ui-micro-interactions](ui-micro-interactions/SKILL.md) | Source and apply micro-interactions from real libraries (microkit.co, aicss.dev taxonomy, component.gallery) without over-animating. |
 
 ## Install
 
