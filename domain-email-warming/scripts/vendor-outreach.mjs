@@ -38,6 +38,21 @@ const VENDORS = [
   { key: "email:resend", to: "support@resend.com", category: "email" },
   { key: "email:postmark", to: "support@postmarkapp.com", category: "email" },
   { key: "email:loops", to: "support@loops.so", category: "email" },
+  { key: "auth:clerk", to: "support@clerk.com", category: "auth" },
+  { key: "auth:workos", to: "support@workos.com", category: "auth" },
+  { key: "auth:stytch", to: "support@stytch.com", category: "auth" },
+  { key: "billing:paddle", to: "sellers@paddle.com", category: "billing" },
+  { key: "billing:lemonsqueezy", to: "support@lemonsqueezy.com", category: "billing" },
+  { key: "billing:polar", to: "support@polar.sh", category: "billing" },
+  { key: "data:neon", to: "support@neon.tech", category: "data" },
+  { key: "data:turso", to: "support@turso.tech", category: "data" },
+  { key: "data:upstash", to: "support@upstash.com", category: "data" },
+  { key: "observability:axiom", to: "support@axiom.co", category: "observability" },
+  { key: "observability:betterstack", to: "hello@betterstack.com", category: "observability" },
+  { key: "observability:checkly", to: "support@checklyhq.com", category: "observability" },
+  { key: "ai:groq", to: "support@groq.com", category: "ai" },
+  { key: "ai:fireworks", to: "support@fireworks.ai", category: "ai" },
+  { key: "ai:replicate", to: "support@replicate.com", category: "ai" },
 ];
 
 const INQUIRIES = {
@@ -65,6 +80,53 @@ const INQUIRIES = {
       "Hi — we are evaluating transactional email providers for a new product.\n\n" +
       "Can you share the pricing tiers, what the free/developer tier covers, " +
       "and whether dedicated IPs or deliverability tooling are available?\n\n" +
+      "Thanks,\n{name}\n{domain}",
+  },
+  auth: {
+    subject: "Evaluating auth providers — a few questions",
+    text:
+      "Hi — we are comparing auth providers for a multi-tenant product.\n\n" +
+      "Could you share how pricing scales past the free tier, whether " +
+      "organization/team features are metered separately, and what the " +
+      "migration path looks like if we start on hosted and move to embedded?\n\n" +
+      "Thanks,\n{name}\n{domain}",
+  },
+  billing: {
+    subject: "Merchant-of-record pricing question",
+    text:
+      "Hi — we sell software internationally and are comparing " +
+      "merchant-of-record options.\n\n" +
+      "What are the effective rates at low volume, how does payout timing " +
+      "work, and is there a sandbox we can run test checkouts against?\n\n" +
+      "Thanks,\n{name}\n{domain}",
+  },
+  data: {
+    subject: "Database pricing and limits question",
+    text:
+      "Hi — we are evaluating hosted databases for a few small services.\n\n" +
+      "Can you share how the free tier is bounded (storage, compute, " +
+      "branches), what read/write limits apply, and what the jump to the " +
+      "first paid tier looks like?\n\n" +
+      "Thanks,\n{name}\n{domain}",
+  },
+  observability: {
+    subject: "Log/monitoring pricing question",
+    text:
+      "Hi — we are picking an observability stack for a handful of " +
+      "services.\n\n" +
+      "How is ingestion priced at low volume, what retention is included, " +
+      "and is there an extended trial or free tier we can evaluate with " +
+      "real data?\n\n" +
+      "Thanks,\n{name}\n{domain}",
+  },
+  ai: {
+    subject: "Inference pricing question",
+    text:
+      "Hi — we are comparing inference providers for a batch-heavy " +
+      "workload.\n\n" +
+      "Could you share per-token pricing for the models we would use, " +
+      "rate limits on the free/developer tier, and whether dedicated " +
+      "throughput is available?\n\n" +
       "Thanks,\n{name}\n{domain}",
   },
 };
