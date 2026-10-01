@@ -62,6 +62,11 @@ A niche must pass all four tests. One failure means a different niche.
 Write the result as one line per test, with the source URL and the licence
 name. Read the licence text itself. A summary on a blog is not proof.
 
+A share-alike licence binds the whole database. If you build listings from
+OpenStreetMap, your listings database must also be under the ODbL, and each
+page must credit OpenStreetMap. Your paid tiers then sell placement and
+leads, not the data.
+
 **Stop condition:** all four tests pass, and each data source has a licence
 that permits your use. Then run [validate-an-idea](../validate-an-idea/SKILL.md)
 if the payer test rests on a guess.
@@ -236,8 +241,10 @@ search-console launch <domain> --sitemap https://<domain>/sitemap.xml \
 
 **IndexNow takes two runs.** The first `launch` writes `<key>.txt` to
 `--key-dir`, and the `indexnow` step fails with `the key file is not
-reachable`. Deploy that file so that `https://<domain>/<key>.txt` returns 200.
-Then run `launch` again. The finished steps pass again, and the `indexnow`
+reachable`. Commit that file to the site's static files and ship it through `release`,
+so that `https://<domain>/<key>.txt` returns 200. A staging deploy is not
+enough, because IndexNow reads the key from the production host. Then run
+`launch` again. The finished steps pass again, and the `indexnow`
 step sends the URLs. Google does not take IndexNow. It reads the sitemap.
 
 Exit code 4 means DNS was not ready before `--wait` ended. Run the command
@@ -254,8 +261,10 @@ each page type (home, country, region, city, category, listing, tool):
   page's question with a number, for example "There are 14 pottery studios
   in Austin, Texas." Build it from a copy template with real counts.
 - **FAQ schema.** Put `FAQPage` JSON-LD on city pages, with questions that
-  the page answers. Since 2023, Google shows FAQ rich results only for
-  authoritative government and health sites. Answer engines still read the
+  the page answers. Since
+  [August 2023](https://developers.google.com/search/blog/2023/08/howto-faq-changes),
+  Google shows FAQ rich results only for authoritative government and health
+  sites. Answer engines still read the
   markup, so keep it accurate.
 - **Entity schema.** Put `LocalBusiness` JSON-LD, or the type from the config,
   on each listing page, plus `BreadcrumbList` on each page.
