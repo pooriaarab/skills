@@ -91,8 +91,11 @@ Show the owner a table of domain, available, first-year price, and renewal
 price. Cloudflare Registrar sells at cost, so the renewal price matters as much
 as the first year.
 
-**Stop condition:** the owner picks a domain and says to buy it. Until then,
-build with a placeholder domain. The template runs locally without a real one.
+**Stop condition:** the owner makes one of two decisions. Either the owner
+picks a domain and says to buy it, or the owner defers the purchase. If the
+owner defers, continue with a placeholder domain. The template runs locally
+without a real one. Stage 7 needs the real domain, so the purchase gate moves
+there.
 
 ## 3. Clone the template and swap the three parts
 
@@ -181,14 +184,18 @@ owns checkout, webhooks and dunning.
 
 ## 7. Deploy staging and production
 
+**Gate:** this stage needs the real domain on Cloudflare. If the owner has not
+said to buy it, stop here and ask.
+
 | Environment | Branch | Host | Indexable |
 |---|---|---|---|
 | Preview | pull request | Worker Preview URL | No |
 | Staging | `main` | `staging.<domain>` | No |
 | Production | `release` | `<domain>`, with `www` redirected to it | Yes |
 
-Ship to production by a fast-forward of `release` to `main`. Never push to
-`release` by hand. [branch-deploy-convention](../branch-deploy-convention/SKILL.md)
+Ship to production with a fast-forward merge of `main` into `release`, so
+that `release` points at the same commit as `main`. Never push other commits
+to `release` by hand. [branch-deploy-convention](../branch-deploy-convention/SKILL.md)
 explains why a branch filter that names a missing branch fails without an error.
 
 Name each Cloudflare resource `<id>-<resource>-<env>`. Keep real IDs in GitHub
@@ -221,6 +228,7 @@ Build it once:
 ```bash
 git clone https://github.com/pooriaarab/clis.git
 cd clis/search-console && make build      # binary: bin/search-console
+export PATH="$PWD/bin:$PATH"              # so the commands below find it
 ```
 
 Do the one-time setup from its README: a Google OAuth client of type Desktop
