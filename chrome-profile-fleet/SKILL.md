@@ -1,6 +1,6 @@
 ---
 name: chrome-profile-fleet
-description: "Run a fleet of Chrome profiles — one profile per online identity (work, personal, per-subscription, per-domain) — and wire each identity's mailbox into one primary Gmail. Covers safe Local State editing (browser fully quit, backup first), the process-name collision between real Chrome and bundled automation browsers, a naming convention that keeps the avatar picker unambiguous, the three mailbox shapes (hosted mailbox, routed alias, plus-alias), Gmail send-as through Google's own SMTP servers (app password + include:_spf.google.com + why DMARC p=reject rejects send-as without it), and Cloudflare Email Routing constraints (one rule per address, one action per rule, catch-all fallback, verified destinations). Use when separating browser identities, adding Chrome profiles from the CLI, consolidating several addresses into one Gmail, or deciding where a per-domain mailbox should land."
+description: "Run a fleet of Chrome profiles — one profile per online identity (work, personal, per-subscription, per-domain) — and wire each identity's mailbox into one primary Gmail. Covers safe Local State editing (browser fully quit, backup first), the process-name collision between real Chrome and bundled automation browsers, a naming convention that keeps the avatar picker unambiguous, the three mailbox shapes (hosted mailbox, routed alias, plus-alias), Gmail send-as through Google's own SMTP servers or a provider's own SMTP (app password vs api_token transports, SPF/DKIM alignment, why DMARC p=reject rejects unaligned send-as, and why sendAs.create is Workspace-only so consumer adds go through the UI), and Cloudflare Email Routing constraints (one rule per address, one action per rule, catch-all fallback, verified destinations). Use when separating browser identities, adding Chrome profiles from the CLI, consolidating several addresses into one Gmail, or deciding where a per-domain mailbox should land."
 ---
 
 # Chrome profile fleet
@@ -85,8 +85,9 @@ decides what "receive in one inbox" means:
 
 ## Gmail send-as recipe
 
-Gmail can send as any verified external address through Google's own
-servers — no per-domain SMTP account required. Per address:
+Two transports work; pick per domain.
+
+**Option A — Google's own servers.** No per-domain SMTP account required:
 
 1. Create a Gmail **app password** on the primary account
    (`myaccount.google.com/apppasswords`, requires 2FA).
@@ -98,12 +99,33 @@ servers — no per-domain SMTP account required. Per address:
    publishes `p=reject` DMARC, a send-as message whose SPF and DKIM are both
    unaligned gets rejected outright. The SPF include is the only alignment
    available — consumer Gmail cannot DKIM-sign with the alias domain.
-4. Gmail → Settings → Accounts and Import → Send mail as → Add another
-   email address. SMTP server `smtp.gmail.com`, port 587, username = the
-   primary Gmail address, password = the app password.
-5. Google emails a verification code to the alias. It must land somewhere
+4. SMTP server `smtp.gmail.com`, port 587, username = the primary Gmail
+   address, password = the app password.
+
+**Option B — the domain's own provider SMTP.** Better deliverability when
+the provider signs domain DKIM. Example for Cloudflare Email Service:
+`smtp.mx.cloudflare.net`, port 465 SSL, username is the literal string
+`api_token`, password is an API token with the Email Sending permission.
+The domain must be onboarded for sending — the tell is a
+`cf2024-1._domainkey` TXT on the zone (the account-wide sending DKIM key;
+copy it from any onboarded zone if missing). Aligned DKIM + aligned SPF
+satisfies `p=reject` DMARC with no Google SPF include needed.
+
+Either way:
+
+5. Gmail → Settings → Accounts and Import → Send mail as → Add another
+   email address, fill the SMTP fields, submit.
+6. Google emails a verification link to the alias. It must land somewhere
    you read — a forward rule, a hosted mailbox you can open, or a worker
    inbox you can query. Have that path ready before clicking verify.
+
+**API caveat:** `users.settings.sendAs.create` is restricted to Workspace
+accounts with domain-wide delegation — on consumer Gmail the call fails
+with `Access restricted to service accounts`. List/get work on any
+account, so CLI tools can verify state but cannot create aliases; the add
+flow must go through the Gmail UI (automatable with a browser agent: the
+popup fields are `cfn`=name, `cfa`=email, `cfss`=server, `cfsp`=port,
+`cfsl`=username, `cfsw`=password).
 
 ## Cloudflare Email Routing constraints
 
