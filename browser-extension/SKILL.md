@@ -420,8 +420,9 @@ Each fact below cost a build or a review round on Firefox 153 to 157. Set
   the threaded code on an `https:` page that sends COOP and COEP, and talk to it
   with `postMessage`.
 - **The MV3 background is an event page with a DOM.** There is no service
-  worker and no `offscreen`. The page unloads after about 30 seconds idle. An
-  open `runtime.Port` from a sidebar does not keep it loaded. Save state in
+  worker and no `offscreen`. The page unloads after about 30 seconds idle. In
+  testing on Firefox 157, an open `runtime.Port` from a sidebar did not keep it
+  loaded. Save state in
   `storage.session` or `storage.local`, and wake the page with `alarms`. A model
   loaded in the event page goes away with it.
 - **No `debugger` permission and no CDP.** Synthetic events from
@@ -430,9 +431,10 @@ Each fact below cost a build or a review round on Firefox 153 to 157. Set
 - **`scripting.executeScript({ func })` sends the function as source text.**
   The function must be self-contained. Pass data in `args`.
 
-### The `sandbox` manifest key (Firefox 154)
+### The `sandbox` manifest key
 
-`sandbox.pages` plus `content_security_policy.sandbox` gives a page an opaque
+Firefox 157 honoured this key in testing. Check MDN compatibility data for the
+first version that supports it. `sandbox.pages` plus `content_security_policy.sandbox` gives a page an opaque
 origin, no extension APIs, `eval`, and its own CSP. `connect-src 'none'` makes it
 a no-network room.
 
@@ -456,7 +458,8 @@ the key. Allow that one warning by code in your lint script, not all warnings.
   `privacy.network.peerConnectionEnabled` while the isolated task runs, and give
   the old value back after. The setting is browser-wide.
 - A speculative `<link rel="preconnect">` skips `webRequest`. Route blocked
-  hosts in `proxy.onRequest` to a proxy that does not exist, with `proxyDNS`.
+  hosts in `proxy.onRequest` to a `socks` proxy that does not exist, with
+  `proxyDNS: true`. `proxyDNS` applies only to `socks` and `socks4` proxies.
   Turn off `privacy.network.networkPredictionEnabled` to stop DNS prefetch.
 - If `privacy.*.set()` answers `false` (a policy or another extension controls
   it), refuse the task. Do not run with the channel open.
@@ -469,7 +472,8 @@ the key. Allow that one warning by code in your lint script, not all warnings.
 
 ### Tabs
 
-`tabs.group` (138) and `tabGroups` (139) put each agent task in a named group.
+`tabs.group` and `tabGroups` put each agent task in a named group. Both worked
+in testing on Firefox 157. Feature-detect them before use.
 `tabs.hide` (permission `tabHide`) keeps agent tabs out of the strip.
 
 ### Test with WebDriver BiDi
