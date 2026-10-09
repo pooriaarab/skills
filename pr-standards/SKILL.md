@@ -125,6 +125,36 @@ touches UI files (`**/*.tsx`, `**/app/**/page.*`), attach real before/after medi
 how good the written reason is — the checker's source comment says exactly that. Never clear
 this by applying the `proof-not-applicable` label to your own PR.
 
+## When the checker fails a correct PR
+
+These rules each failed a real PR whose work was fine. Write the body so they
+pass the first time.
+
+- **A new repo's first PR uses the fallback prefix.** The checker reads
+  `.github/pr-standards.json` from the base branch. Until that file is on
+  `main`, the prefix comes from `repo-prefixes.json`, else it is derived from
+  the repo name: the first three letters of a one-word name (`foxkit` gives
+  `fox`), the initials of a hyphenated one. Name the first branch and title
+  with that prefix. Use the configured prefix from the second PR on.
+- **`## What` is one to three sentences.** The checker counts sentence ends.
+  Put the rest in a `## Details` section just before `## How I verified`.
+- **Write each proof line as `` `command` -> result ``.** Put the proof lines
+  first in `## How I verified`, one per line, with no bullets. The `->` is the
+  form the result check always accepts.
+- **A nonzero count vetoes the whole section.** `3 failed`, `2 warnings` or
+  `1 error` anywhere in `## How I verified` marks the result as not clean. This
+  includes prose about a tests-first red run. Describe that run without a count
+  ("the new tests ran red before the fix"), or put it under `## Details`.
+- **No bare `N/A`, `TODO` or "tested locally"** in that section. Write
+  `Operator: not applicable - <reason>` or `Proof: n/a - <reason>`.
+- **A visible file needs an attachment URL.** A diff that touches `.html`,
+  `.css` or other UI files fails without a `user-attachments` image. Recent
+  `gh` (2.99) uploads one for you: `gh pr create --body-file body.md --attach
+  ./shot.png`. A `![alt](./shot.png)` reference in the body is rewritten to the
+  uploaded URL.
+  An agent that cannot upload saves the PNG outside the repo, references it in
+  the body, and leaves the upload to the person who opens the PR.
+
 ## Size
 
 | Cap | Limit |
