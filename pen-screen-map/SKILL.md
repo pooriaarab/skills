@@ -53,7 +53,7 @@ proxy, not the app, when the app's port is baked into auth config.
 Public routes screenshot fine anonymous. Auth-gated routes need a real session —
 look for the repo's own test fixtures before giving up:
 
-- yaya pattern: `POST /api/auth/test-only/magic-link` mints a session for
+- Reference pattern: `POST /api/auth/test-only/magic-link` mints a session for
   `*@example.com` when `AUTH_MAGIC_LINK_TEST_CAPTURE=true` is in the worker's
   `.dev.vars`, then seed a tenant row directly in local D1
   (`tests/e2e/helpers/d1-tenant-seed.ts`: `seedTenantWithOwnerInD1`,
@@ -64,7 +64,7 @@ look for the repo's own test fixtures before giving up:
   signed-in variants once the session exists — capture every public route in a
   fresh context with no cookies, then mint the session for the authed set.
 - Host-gated surfaces (admin consoles) render only on their own hostname —
-  check the app's middleware for a dev admin host (yaya: `admin.localhost`).
+  check the app's middleware for a dev admin host (e.g. `admin.localhost`).
 - **Wire 200 can still be a 404.** `notFound()` inside a streamed shell leaves
   the response at 200 — detect the app's not-found text in page content and
   record a `note` in the manifest, not just the status.
@@ -72,7 +72,7 @@ look for the repo's own test fixtures before giving up:
   `designs/captures/manifest.json`. A real 404 or a login-redirect IS the honest
   capture — keep it and note it.
 
-Reference script: `designs/capture-screenshots.ts` in the yaya repo.
+Reference script: `designs/capture-screenshots.ts` in the app repo it was built for.
 
 ## Step 4 — recreate each screen as .pen
 
