@@ -140,12 +140,14 @@ conflicts with their squashed copy.
 ### Stay under the secondary limit
 
 GitHub limits content creation to about 80 requests a minute and 500 an hour.
-This limit is separate from the 5,000 GraphQL points, and it answers `403`
-while `gh api rate_limit` still shows a full quota. Six repos landing at once
+This secondary limit is separate from the primary limits (5,000 REST requests
+and 5,000 GraphQL points an hour). It answers `403` or `429` while
+`gh api rate_limit` still shows a full quota. It counts REST and GraphQL
+writes alike, so a change of API does not avoid it. Six repos landing at once
 hit it.
 
-- Create issues and PRs with REST (`gh api repos/<o>/<r>/pulls -f ...`), not
-  `gh pr create`, except when you need `--attach`.
+- When a response is `403` or `429`, wait for the `retry-after` header if it
+  is present, else at least one minute, before the next write.
 - Poll check runs with REST on the head SHA every 30 seconds:
   `gh api repos/<o>/<r>/commits/<sha>/check-runs`.
 - Merge at most about three repos in one round, then wait.
@@ -165,8 +167,8 @@ one commit at a time:
 
 Commit by commit keeps a tests-first history visible. Stop on a conflict in
 any file other than `package.json` or the lockfile: that is a real conflict.
-Keep worktrees inside the project tree, because pnpm writes `file:` paths to
-the lockfile as relative paths.
+pnpm writes `file:` paths to the lockfile as relative paths, so keep the same
+relative layout as the main checkout for every worktree.
 
 ### Ship a second release into a squash-merged branch
 
@@ -181,8 +183,22 @@ git merge -s ours --no-edit origin/release
 git diff --quiet origin/main && echo "tree equals main"
 ```
 
-Open it against `release` with a full standard body and its own issue. Do not
-put the word `release` in the branch name: the fleet pre-push hook blocks it.
+**Caution:** `-s ours` drops every change that exists only on `release`, for
+example a hotfix made there. First run `git log origin/main..origin/release`.
+Each squash commit shows there, so also compare `release` with the `main`
+commit it last shipped:
+
+```bash
+git diff --stat <main SHA of the last ship> origin/release
+```
+
+An empty diff means `release` holds nothing that `main` lacks. If the diff
+shows changes, stop. Port those changes to `main` first.
+
+Open it against `release` with a full standard body and its own issue. Some
+pre-push guards block any branch whose name contains `release`, because they
+protect release branches. The sync branch is not a release push, so name it
+`ship-sync`.
 
 ## Budget the seats
 
