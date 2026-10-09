@@ -20,7 +20,7 @@ Use HeyGen's current API, `GET /v3/avatars/looks?limit=50` (50 at most), to list
 - About 50 words for about 19 s at speed 1.08.
 - Write it as the maker talking: why it exists, what it does for the viewer, an invitation. The first one was:
 
-  > Hi, I'm Pooria. I built foxpilot because I wanted an agent that lives in my browser, not in someone else's
+  > Hi, I'm <name>. I built foxpilot because I wanted an agent that lives in my browser, not in someone else's
   > cloud. You tell Firefox what you want, and it does the clicking. The model runs right on your laptop, so your
   > goals never go to a cloud model. It's free and open source. Give it a goal, and tell me what it should learn next.
 
@@ -39,7 +39,7 @@ matting, and alpha WebM adds risk in the render.
 ## Place it
 
 - A 330 × 330 card, bottom-right (70 px from the right, 96 px from the bottom), 30 px radius, a 6 px white border
-  and a soft shadow. A mono name tag sits under it: "Pooria · made foxpilot".
+  and a soft shadow. A mono name tag sits under it: "<Name> · made <product>".
 - Enter 1 s in: `scale 0.6 → 1` from the bottom-right corner, `expo.out`, 0.6 s. Leave as the voice ends:
   `scale 0.85`, fade, `expo.in`, 0.35 s, before the finale, so the wordmark owns the frame.
 - Keep the side-column copy and the footage card clear of the card's area.
