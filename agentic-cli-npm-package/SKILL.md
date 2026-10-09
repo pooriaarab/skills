@@ -67,9 +67,17 @@ jobs:
 
 Set the `NPM_TOKEN` secret once per repo (`gh secret set NPM_TOKEN --repo owner/name`). The version guard makes re-runs idempotent (no "cannot publish over existing version" failures).
 
+Keep the guard when the job grows more steps. If the job signs an extension, uploads to a store, or tags after `npm publish`, a failure there leaves the version on npm. The guard is what lets `gh run rerun <id> --failed` skip the publish and reach the failed step. Without it, every re-run stops at npm's "cannot publish over" error.
+
 ## 5. Naming: check npm before you commit to a name
 
 Bare names are usually taken. Check `npm view <name>` and `npm view @scope/<name>` up front. If taken by someone else, publish under **your own user scope** (`@you/name`) — always available, collision-free, and the `bin` keeps the command bare. Check package-name availability the same session you check the domain.
+
+**A free name can still be refused.** `npm view <name>` answering 404 does not mean npm accepts it. The first `npm publish` can fail with E403 "too similar to an existing package". Three of 19 names in one run failed this way: `foxden` (like `boxen`), `foxlink` (like `oxlint`), and `foxpay` (like `fox-pay`). The refusal comes at release time, after the README, the imports, and the docs already use the name.
+
+- Treat a name one or two letters away from a popular package as at risk. There is no dry-run check for this. Pick a name with a real suffix from the start, or ship the first version early to find out.
+- Keep the repo name. Publish under a plain name that contains it: `foxden-sandbox`, `foxlink-oauth`, `foxpay-agent`. A hyphen-only variant (`fox-den`) does not help (see section 6).
+- A rename after a scoped publish leaves the old `@you/name` copy on npm. `npm deprecate` it to point at the new name.
 
 ## 6. Gotchas (each cost a cycle)
 
@@ -84,6 +92,20 @@ Bare names are usually taken. Check `npm view <name>` and `npm view @scope/<name
 - **Baking the version via a tsup `define` needs a non-`await` fallback for vitest.** `define: { __X_VERSION__: JSON.stringify(pkg.version) }` replaces the token at build, but under vitest (no build) the token is undefined. Resolve it as `typeof __X_VERSION__ !== 'undefined' ? __X_VERSION__ : createRequire(import.meta.url)('../package.json').version` — `typeof` on an undeclared identifier is safe (no ReferenceError), and staying synchronous avoids a top-level `await` in a library entry (which some downstream bundlers choke on).
 - **Give the MCP bin its OWN entry file** (`src/mcp-bin.ts` → `import { startMcp } from './mcp'; startMcp()`), separate from `src/mcp.ts`. tsup code-splitting rewrites module URLs, so the symlink main-guard above is fragile for the MCP bin; a dedicated entry that just calls `startMcp()` sidesteps the guard entirely. Point the `adscapi-mcp` bin at `dist/mcp-bin.js`.
 - **For an SDK that fans out to many destinations, adapters must THROW, not swallow.** If you extract adapters from a fire-and-forget backend (which logs + swallows so a failed pixel never breaks the request), flip them: throw on non-2xx so the SDK's client layer can retry + report a per-destination result. A swallowing adapter makes retries and `{ platform, ok, error }[]` results impossible. (adscapi extraction, from replytosocial.)
+
+## 6b. Sibling packages and pnpm 11
+
+When several of your packages depend on each other and ship in one run:
+
+- **Develop against `file:` paths, and make them absolute.** pnpm writes a `file:` dependency to the lockfile as a path relative to the project. A worktree in `/tmp` then points the lockfile at a path that does not exist on any other machine or in CI. Keep worktrees inside the same parent directory as the checkout.
+- **Swap `file:` for the published range before you land.** Run `npm view <pkg> version`. When it prints a version, change the spec to `^<version>` and regenerate the lockfile on every branch that changed. CI has no `file:` path.
+- **pnpm 11 refuses a dependency newer than its `minimumReleaseAge` setting.** Your own package published an hour ago is too new. List the exact versions in `pnpm-workspace.yaml`:
+  ```yaml
+  minimumReleaseAgeExclude:
+    - your-core@0.1.0
+  ```
+  Remove each entry when the version is old enough.
+- **pnpm 11 fails the install when a dependency build script is not approved.** Approve the ones you need, for example `allowBuilds: { esbuild: true }` in `pnpm-workspace.yaml`.
 
 ## 7. Then
 
