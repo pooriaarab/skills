@@ -19,6 +19,12 @@ and videos in different styles never look alike.
 | [Retro desktop OS](retro-desktop-os.md) | A 90s desktop: every line is a dialog box | Account links, tokens and permission prompts | 124 BPM | 22.5 s |
 | [Pixel arcade](pixel-arcade.md) | An 8-bit game: stages and a boss fight | Stories with an attacker to beat | 140 BPM | 22.3 s |
 | [Whiteboard marker](whiteboard-marker.md) | A hand-drawn explainer: circled words, ticks | A loop or a flow that needs a diagram | 107 BPM | 20.7 s |
+| [Blueprint](blueprint.md) | An engineering drawing: grid, dimension lines, a spec sheet | Benchmarks and tools that prove a claim | 124 BPM | 24 s |
+| [Editorial magazine](editorial-magazine.md) | A print feature: cover line, drop cap, white stock | Calm, personal tools such as memory or notes | 112 BPM | 23.5 s |
+| [Financial ticker](financial-ticker.md) | A trading terminal: tickers, live numbers | Payments, budgets and spend limits | 118 BPM | 25.6 s |
+| [Glass on shader](glass-on-shader.md) | Frosted glass panels over moving light | Abstract AI products; sits well under a voice | 100 BPM | 22.8 s |
+| [Newsprint zine](newsprint-zine.md) | A photocopied punk zine: cut-out words, stamps | Tamper detection and "caught it" stories | 128 BPM | 21.8 s |
+| [Swiss grid](swiss-grid.md) | International Typographic: a visible 12-column grid | Rule engines and policy gates | 120 BPM | 24.5 s |
 
 [Presenter](presenter.md) is a module, not a style: a talking-head avatar card that any style can carry.
 
