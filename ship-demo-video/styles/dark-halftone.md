@@ -12,3 +12,8 @@ First used for: foxshield (22 s). Lookbook source: hyperframes-launches `inspect
 - **Music prompt:** "Dark tense electronic thriller cue, 100 BPM, pulsing sub bass, ticking hi-hats, low brass hits, suspense, heavy drop at 8 seconds. Instrumental only, no vocals. Strong first hit at the very start, no intro. Clean ending on the final bar." (elevenlabs/music: dips at 2 s and 7 s, drop at 9 s, fade from 20 s, so the cut is 22 s.)
 - **SFX cue map:** whoosh on every dot dissolve; pop as each footage card irises open; hit on each stat slam; stamp on the stat label; click on each technique flip; chime on the end card.
 - **Copy pattern:** a threat hook in second person ("YOUR AGENT READS WHAT YOU CAN'T SEE."), a stakes line with the red word, wordmark plus one-line promise, footage with kicker + verdict ("FOXSHIELD SCANS IT / A HIDDEN BOX. NO CONTRAST."), measured stats on the drop ("4/4", "0 false alarms on 18 normal pages", "19/19"), end card.
+
+## v2 polish (foxshield, second round)
+- One worst-case example per shot, drawn as SVG: a shop card with a scanner that reveals the white-on-white note; a review card whose hidden tail fades up; a support chat whose last bubble is the hidden note. Then the meme, the shield, the outcome.
+- Halftone fills come from an SVG `<pattern>` of dots (teal, and red for threats). Shields, avatars and image areas use it.
+- Entrances per shot: scanner sweep with a clip reveal, slide plus star draw-on, iris plus bubble pops, frame-stepped typing, arrows plus a shield slam, a per-letter rise plus an underline draw-on, a tile wave with rotationY, then blur-to-sharp.

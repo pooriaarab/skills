@@ -99,3 +99,12 @@ bring it back to 1.0 over 0.6 s as the voice ends.
 ## Reference build
 
 `pooriaarab/scripts` → `demo-video/styles/keynote_whip.py` with `demo-video/examples/keynote-whip.json`.
+
+## v2 polish (foxmate, second round)
+
+- **Drawn props over footage:** a cursor that moves and clicks, a prompt that slides up, a lock that slams,
+  chain lines that draw on, and a ring with a ticking counter, all as white cards on the grey stage.
+- **Seams:** the expo-in whips alternate direction: left, up, right, down.
+- **Labels:** a small-caps mono kicker at the top left. A shot shows a label or a sentence, never both.
+- **Presenter mix:** SFX stay at 0.3 or less, and at 0.22 or less under the voice. The first cut had them
+  too loud.

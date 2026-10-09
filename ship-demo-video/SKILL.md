@@ -110,8 +110,8 @@ every line fading up, 13 s scenes) came back as "too generic". What fixed it:
 - One style per video, each with its own ground, type pair, ease family and tempo band. For example: a
   light gray stage with white cards and exponential whips; cream paper with a dot grid and giant serif beats;
   flat color grounds that cut on the beat, with condensed display type.
-- Shorter: 20 to 26 seconds, with shots of 1 to 1.5 s and about 6 to 9 cuts per 10 s. Hold longer only on
-  the scene that carries the message.
+- Shorter: 20 to 26 seconds, cut on beats. Fast cuts suit pure graphic frames; any frame with text holds
+  long enough to read (see the polish rules below).
 - A clear arc: hook, stakes, value, demo on the musical drop, payoff, end card.
 - Varied text entrances: masked per-word rise, velocity-matched waterfall (the first word travels furthest),
   blur-to-sharp scale slam, frame-stepped typing, hard-cut word swaps on beats, wide-to-tight tracking.
@@ -126,6 +126,33 @@ seams, pacing, sound cues and story arcs.
 (launch-video galleries such as whatships.com). Without a reference, an agent falls back to the same default
 look: centered text, gradient background, everything fading in. For a big launch, ask for three storyboard
 variants and pick one.
+
+### Polish rules
+
+A second round on a 19-video set fixed what the owner still disliked: too much text, too many screenshots,
+and cuts too fast to read. Apply these from the first storyboard.
+
+- **Reading pace.** Hold any frame with text for at least 2.5 s, plus about 0.3 s for each word over six.
+  A text frame has at most about 8 words. That gives about 8 to 10 shots in 20 to 26 s. Cut on beats, but
+  skip beats.
+- **One idea per frame.** Text or a graphic is the hero, not both. One visual action per shot: never stack
+  a screenshot, a scan, a callout and a label in one frame.
+- **Graphics are the story.** Draw the UI as animated SVG in the video's style: a cursor clicks, a toggle
+  flips, a form fills itself, a stamp lands, a shield blocks an arrow. Use at most one real screenshot per
+  video, as a quick "this is real" beat, cropped tight. No terminal, code, JSON or log shots unless the
+  viewer needs that exact command.
+- **Less text.** At most about 40% of shots carry a text line. The rest carry a 1 to 3 word label at most.
+  No two shots in a row use the same entrance.
+- **A copy frame per video.** Pick PAS (problem, agitate, solve), BAB (before, after, bridge) or AIDA, and
+  vary it across the set. Open on an everyday situation or the worst case, in plain words for a viewer who
+  knows nothing about the field. "Do you remember what you ordered yesterday? Neither does your AI."
+- **Proof that lands.** Do not put "N/N checks pass" in every video. Prefer one concrete outcome ("0
+  requests left your laptop"), and keep numbers only where they carry the story.
+- **Frame 0 is the poster.** The first frame is a finished graphic with the hook line, never blank, black
+  or a fade-in. Export it as `<name>-poster.png` next to the MP4; it is the social thumbnail.
+- **Truth.** Never present a scripted or test agent as a real one; label it "scripted" or "test agent".
+  Show no invented URL or domain, only the real repository and package names. Do not invent incidents,
+  and name a company as breached only when it is public record.
 
 ## 4. Music bed
 
@@ -149,7 +176,10 @@ variants and pick one.
   slams, typing under typed text, a chime on success. `elevenlabs/sound-effects-v2` on WaveSpeed costs
   about $0.002 per effect. Give each SFX `<audio>` its own track and a slot equal to the file length.
 - Put every scene boundary on a bar. Hard cuts inside a scene go on beats.
-- Under a voice, duck the bed to about 0.26 while the voice plays and bring it up as the voice ends.
+- Under a voice, duck the bed to about 0.26 while the voice plays and bring it up as the voice ends. Keep
+  SFX at 0.3 or less under the voice and 0.6 or less elsewhere. The voice must sit clearly on top.
+- Run a final `loudnorm` pass on the rendered file (about −16 to −14 LUFS integrated, peak below −1 dB).
+  The renderer can ignore the mix volumes, so measure the output, not the composition.
 - Fade the bed in over the first 0.4 s and out over the last 1.5 s, using a volume automation lane, not a
   timeline tween. Target about −16 dB mean and a peak below −1 dB.
 
@@ -188,7 +218,16 @@ footage; a short founder intro over it works.
   `aspect_ratio: "1:1"`, `resolution`, optional `voice_settings.speed`), then poll `GET /v3/videos/{id}`.
   List looks with `GET /v3/avatars/looks` (`limit` at most 50). The v2 endpoints return a sunset warning.
 - Prefer the user's own digital twin and cloned voice. Check every claim in the script against the
-  product, the same as on-screen copy.
+  product, the same as on-screen copy. Keep the script to about 40 to 50 words.
+- The default Avatar IV engine gave the twin fake, veneer-like teeth. Render with
+  `engine: {type: "avatar_v", reference_look_id: <the filmed twin's look>}` instead.
+- For a new outfit or angle, edit real photos of the person, not a text-to-image portrait: an image-edit
+  model (WaveSpeed `google/nano-banana-2/edit`) with four original photos as references, then a HeyGen
+  photo look in the twin's group (about $1.32 each). Use a different outfit in every avatar video of a set.
+- Talking-photo models on WaveSpeed were weaker. InfiniteTalk came closest and cheapest (about $0.07 per
+  second) but still lost to Avatar V; Kling, LongCat and Pruna were rejected.
+- For voice only, HeyGen `POST /v3/voices/speech` with engine `orca` costs about $0.004 per second and
+  matched the speaker at 0.954 similarity.
 - Keep the avatar's own background and put it in a rounded card. A solid card needs no alpha channel;
   transparent WebM needs a matting-enabled avatar.
 - Keep the avatar's sound on its `<video>` (`data-has-audio="true"`), and duck the music under it.
