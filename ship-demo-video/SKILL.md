@@ -98,6 +98,9 @@ Write the plan before any HTML. A frame change here costs a minute; after a rend
 - Present it as a proposal: one line saying "this video tells [audience] that [message]", then a table of
   frame, beat, on screen and why. Cut any frame whose "why" does not trace back to the message.
 
+**Start from the [style library](styles/README.md).** It holds the proven looks (Keynote whip, Dossier, Pop flats)
+and the [presenter](styles/presenter.md) module, each specified down to the copy, eases, music prompt and SFX cues.
+
 **Give each video its own style.** A first pass where three videos shared one look (dark radial gradient,
 every line fading up, 13 s scenes) came back as "too generic". What fixed it:
 
