@@ -76,7 +76,8 @@ Bare names are usually taken. Check `npm view <name>` and `npm view @scope/<name
 **A free name can still be refused.** `npm view <name>` answering 404 does not mean npm accepts it. The first `npm publish` can fail with E403 "too similar to an existing package". Three of 19 names in one run failed this way: `foxden` (like `boxen`), `foxlink` (like `oxlint`), and `foxpay` (like `fox-pay`). The refusal comes at release time, after the README, the imports, and the docs already use the name.
 
 - Treat a name one or two letters away from a popular package as at risk. There is no dry-run check for this. Pick a name with a real suffix from the start, or ship the first version early to find out.
-- Keep the repo name. Publish under a plain name that contains it: `foxden-sandbox`, `foxlink-oauth`, `foxpay-agent`. A hyphen-only variant (`fox-den`) does not help (see section 6).
+- A scoped name (`@you/foxden`) is not checked for similarity, so you can keep the bare name under your scope.
+- Or keep the repo name and publish under a plain name that contains it: `foxden-sandbox`, `foxlink-oauth`, `foxpay-agent`. A hyphen-only variant (`fox-den`) does not help (see section 6).
 - A rename after a scoped publish leaves the old `@you/name` copy on npm. `npm deprecate` it to point at the new name.
 
 ## 6. Gotchas (each cost a cycle)
@@ -97,15 +98,15 @@ Bare names are usually taken. Check `npm view <name>` and `npm view @scope/<name
 
 When several of your packages depend on each other and ship in one run:
 
-- **Develop against `file:` paths, and make them absolute.** pnpm writes a `file:` dependency to the lockfile as a path relative to the project. A worktree in `/tmp` then points the lockfile at a path that does not exist on any other machine or in CI. Keep worktrees inside the same parent directory as the checkout.
+- **Develop against `file:` paths.** pnpm writes a `file:` dependency to the lockfile as a path relative to the project. A worktree in `/tmp` then points the lockfile at a path that does not exist on any other machine or in CI. Keep the same relative layout as the main checkout for every worktree.
 - **Swap `file:` for the published range before you land.** Run `npm view <pkg> version`. When it prints a version, change the spec to `^<version>` and regenerate the lockfile on every branch that changed. CI has no `file:` path.
-- **pnpm 11 refuses a dependency newer than its `minimumReleaseAge` setting.** Your own package published an hour ago is too new. List the exact versions in `pnpm-workspace.yaml`:
+- **pnpm 11.10 refused a dependency newer than its `minimumReleaseAge` setting in this run.** Check the default in your pnpm version. Your own package published an hour ago was too new. List the exact versions in `pnpm-workspace.yaml`:
   ```yaml
   minimumReleaseAgeExclude:
     - your-core@0.1.0
   ```
   Remove each entry when the version is old enough.
-- **pnpm 11 fails the install when a dependency build script is not approved.** Approve the ones you need, for example `allowBuilds: { esbuild: true }` in `pnpm-workspace.yaml`.
+- **pnpm 11.10 failed the install in this run when a dependency build script was not approved.** Approve the ones you need, for example `allowBuilds: { esbuild: true }` in `pnpm-workspace.yaml`. Check the setting name in the docs for your pnpm version.
 
 ## 7. Then
 
