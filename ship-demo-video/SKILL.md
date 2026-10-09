@@ -6,7 +6,7 @@ description: "Turn real footage of your own product into a short, social-ready d
 # Demo videos from real product footage
 
 A demo cut from real footage proves the product works. Generated imagery cannot. This skill takes a product
-from "it runs in a test harness" to a 30 to 60 second video that is ready to post, and back again
+from "it runs in a test harness" to a 20 to 30 second video that is ready to post, and back again
 when the product changes.
 
 **Boundary.** Use this skill when the footage is your own product running for real. For a launch film built
@@ -57,6 +57,9 @@ A full-screen capture leaks the menu bar, OS notifications and other apps' windo
   prints can be later than the moment the window closed, and the frames between show the desktop. Sample
   frames around the end of each run and cut before the last product frame.
 - Review the tail of every segment frame by frame before you share anything.
+- Record the last product frame of each source file (for example 38.45 s), and make the build refuse any
+  clip whose `data-media-start + data-duration × rate` reads past it. A cut made 0.3 s too late put a private
+  notes window into a finished social video. The guard turns that mistake into a build error.
 
 ### Third-party sites
 
@@ -95,6 +98,24 @@ Write the plan before any HTML. A frame change here costs a minute; after a rend
 - Present it as a proposal: one line saying "this video tells [audience] that [message]", then a table of
   frame, beat, on screen and why. Cut any frame whose "why" does not trace back to the message.
 
+**Give each video its own style.** A first pass where three videos shared one look (dark radial gradient,
+every line fading up, 13 s scenes) came back as "too generic". What fixed it:
+
+- One style per video, each with its own ground, type pair, ease family and tempo band. For example: a
+  light gray stage with white cards and exponential whips; cream paper with a dot grid and giant serif beats;
+  flat color grounds that cut on the beat, with condensed display type.
+- Shorter: 20 to 26 seconds, with shots of 1 to 1.5 s and about 6 to 9 cuts per 10 s. Hold longer only on
+  the scene that carries the message.
+- A clear arc: hook, stakes, value, demo on the musical drop, payoff, end card.
+- Varied text entrances: masked per-word rise, velocity-matched waterfall (the first word travels furthest),
+  blur-to-sharp scale slam, frame-stepped typing, hard-cut word swaps on beats, wide-to-tight tracking.
+- Designed seams: whip off with blur, zoom-through, mask open, color cut. Not crossfades.
+
+Mine a real library for these patterns before writing any. HeyGen's `hyperframes-launches` repository has
+the source of its launch films. Clone it without large media (`--filter=blob:limit=300k`; the media is in
+Git LFS) and have a subagent extract a lookbook with file and line citations: grounds, text techniques,
+seams, pacing, sound cues and story arcs.
+
 **Reference beats description.** Name one or two reference videos whose pacing and type you want to match
 (launch-video galleries such as whatships.com). Without a reference, an agent falls back to the same default
 look: centered text, gradient background, everything fading in. For a big launch, ask for three storyboard
@@ -110,7 +131,16 @@ variants and pick one.
 - Detect beats (HyperFrames: `npx hyperframes beats` in the project). A detector can report double the
   tempo you asked for, because it counts eighth notes. Take the median gap and derive the bar: the bar at
   112 BPM is 2.143 s.
+- Match the genre to the story, and make the genres differ across a set of videos: a thriller cue with a
+  drop for a "caught in time" story, funk-pop for a "clearing clutter" story, a sparse keynote bed under a voice.
+- Generate two variants per video from two models, then choose by energy curve, not by name. Print the
+  loudness per second (`ebur128`) and look for the shape the story needs: a strong first second, a drop
+  where the demo starts, a clean end. Trim a long track to its best section instead of regenerating.
+- Add SFX on the story's actions: a whoosh on each whip, a click and pop on taps, a stamp or hit on the
+  slams, typing under typed text, a chime on success. `elevenlabs/sound-effects-v2` on WaveSpeed costs
+  about $0.002 per effect. Give each SFX `<audio>` its own track and a slot equal to the file length.
 - Put every scene boundary on a bar. Hard cuts inside a scene go on beats.
+- Under a voice, duck the bed to about 0.26 while the voice plays and bring it up as the voice ends.
 - Fade the bed in over the first 0.4 s and out over the last 1.5 s, using a volume automation lane, not a
   timeline tween. Target about −16 dB mean and a peak below −1 dB.
 
@@ -139,6 +169,28 @@ composition drives the animation, and the CLI checks, snapshots and renders.
 | Decorative ghost text fails the contrast audit | Use non-text decoration (glow, grid), or none. |
 | Negative `z-index` highlight disappears | Order it in the DOM: the highlight first, the word in a positioned span after it. |
 | Unbundled fonts warn and can fail in cloud renders | Use a bundled pair, for example Montserrat for display and JetBrains Mono for labels. |
+
+### A presenter in the corner
+
+A talking presenter in a corner card makes a demo personal. The script does not need to narrate the
+footage; a short founder intro over it works.
+
+- HeyGen's current API is `POST /v3/videos` (`type: avatar`, `avatar_id`, `voice_id`, `script`,
+  `aspect_ratio: "1:1"`, `resolution`, optional `voice_settings.speed`), then poll `GET /v3/videos/{id}`.
+  List looks with `GET /v3/avatars/looks` (`limit` at most 50). The v2 endpoints return a sunset warning.
+- Prefer the user's own digital twin and cloned voice. Check every claim in the script against the
+  product, the same as on-screen copy.
+- Keep the avatar's own background and put it in a rounded card. A solid card needs no alpha channel;
+  transparent WebM needs a matting-enabled avatar.
+- Keep the avatar's sound on its `<video>` (`data-has-audio="true"`), and duck the music under it.
+
+### Asset paths in sub-compositions
+
+- A sub-composition may not reference `../`. Lint rejects it. Put fonts and images next to the
+  sub-composition files (`compositions/fonts/`, `compositions/banners/`) and reference them relatively.
+- Lint checks each sub-composition alone, so each one that uses a custom font needs its own `@font-face`.
+- Verify font files before use: a clone without LFS gives 130-byte pointer files, not fonts. Download open
+  fonts (for example from Google Fonts) as woff2 instead.
 
 ### Footage handling
 
@@ -190,7 +242,7 @@ repeated, a gate that was missing. The next agent reads the skill, not this chat
 
 - 16:9 at 1920×1080 suits X, LinkedIn and YouTube. Make this cut first.
 - 9:16 needs a new layout (footage card on top, topline below), not a crop of the 16:9 cut.
-- Keep each cut at 30 to 45 seconds for a feed. Put the hook in the first 3 seconds.
+- Keep each cut at 20 to 30 seconds for a feed. Put the hook in the first 2 seconds.
 
 ## Related skills
 
