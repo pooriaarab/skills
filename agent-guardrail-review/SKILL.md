@@ -57,7 +57,9 @@ nearly every one. The bugs fell into the groups below.
 - Bug found: a custom auth header followed a cross-origin redirect to another
   host. Fix: strip each secret header from any request its rule does not
   allow, also while the vault is locked and nothing is being added.
-- Use `redirect: "manual"` for requests that carry a payment or a token.
+- Use `redirect: "manual"` for requests that carry a payment or a token. The
+  Fetch spec strips only `Authorization` on a cross-origin redirect, not custom
+  headers.
 - No token in errors, logs, stored state, or tool results.
 
 ### Isolation has no side door
@@ -82,11 +84,12 @@ nearly every one. The bugs fell into the groups below.
 
 - Bug found: an audit log line with a repeated JSON key read differently in
   two parsers, so forged data could hide in it. Reject repeated keys at any
-  depth, also when spelled with escapes (`"a"` and `"a"`).
+  depth, also when spelled with escapes (`"a"` and `"\u0061"`).
 
 ## Related
 
-- [browser-extension](../browser-extension/SKILL.md) — Firefox container and
-  network facts behind the isolation items.
+- [browser-extension](../browser-extension/SKILL.md) — section 14, "Firefox-only
+  facts for agent extensions", holds the container and network facts behind
+  the isolation items.
 - [agentic-commerce](../agentic-commerce/SKILL.md) — the buy side behind an
   approval gate.
