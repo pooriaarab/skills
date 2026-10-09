@@ -57,6 +57,8 @@ A full-screen capture leaks the menu bar, OS notifications and other apps' windo
   prints can be later than the moment the window closed, and the frames between show the desktop. Sample
   frames around the end of each run and cut before the last product frame.
 - Review the tail of every segment frame by frame before you share anything.
+- Cut harness segments that show a user name or account, not only the frames after the last product frame. A
+  harness log line such as `"user":"<name>"` on screen is a leak too.
 - Record the last product frame of each source file (for example 38.45 s), and make the build refuse any
   clip whose `data-media-start + data-duration × rate` reads past it. A cut made 0.3 s too late put a private
   notes window into a finished social video. The guard turns that mistake into a build error.
@@ -94,12 +96,13 @@ Write the plan before any HTML. A frame change here costs a minute; after a rend
 - **Proof from measured runs only.** Use the numbers your harness measured (a timing, a pass count, "0
   network requests"). Do not invent a statistic for impact.
 - **End card.** Name, one-line description, where to get it. Do not claim a store listing that is still
-  under review.
+  under review. Copy the install line exactly from the README (`npm create <name>@latest`,
+  `npm i -g <name>`, `npm i <name>-agent`). A generic `npm i <name>` is wrong for most packages.
 - Present it as a proposal: one line saying "this video tells [audience] that [message]", then a table of
   frame, beat, on screen and why. Cut any frame whose "why" does not trace back to the message.
 
-**Start from the [style library](styles/README.md).** It holds the proven looks (Keynote whip, Dossier, Pop flats)
-and the [presenter](styles/presenter.md) module, each specified down to the copy, eases, music prompt and SFX cues.
+**Start from the [style library](styles/README.md).** It holds every proven look, with a
+table to choose from, and the [presenter](styles/presenter.md) module, each specified down to the copy, eases, music prompt and SFX cues.
 
 **Give each video its own style.** A first pass where three videos shared one look (dark radial gradient,
 every line fading up, 13 s scenes) came back as "too generic". What fixed it:
@@ -127,7 +130,7 @@ variants and pick one.
 ## 4. Music bed
 
 - Generate an instrumental per video at the exact length you need. On WaveSpeed, `elevenlabs/music` takes
-  `music_length_ms` and `force_instrumental` (about $0.10 per track). State a tempo, "starts on a strong
+  `music_length_ms` and `force_instrumental`. It bills $0.01 per second, so a 25 s track costs $0.25. State a tempo, "starts on a strong
   downbeat, no long intro" and "clean ending on the final bar" in the prompt.
 - Check every file. Equal byte sizes are normal for constant-bitrate output; compare checksums to confirm the
   tracks differ.
@@ -136,7 +139,10 @@ variants and pick one.
   112 BPM is 2.143 s.
 - Match the genre to the story, and make the genres differ across a set of videos: a thriller cue with a
   drop for a "caught in time" story, funk-pop for a "clearing clutter" story, a sparse keynote bed under a voice.
-- Generate two variants per video from two models, then choose by energy curve, not by name. Print the
+- Generate two variants per video from two models, then choose by energy curve, not by name. Under a
+  $0.30 cap per video, make the second variant with `minimax/music-02` (about $0.03), not
+  `minimax/music-2.6`. `music-02` has no instrumental flag: put "instrumental only, no vocals" in the
+  prompt and run speech-to-text on the result to check for lyrics. Print the
   loudness per second (`ebur128`) and look for the shape the story needs: a strong first second, a drop
   where the demo starts, a clean end. Trim a long track to its best section instead of regenerating.
 - Add SFX on the story's actions: a whoosh on each whip, a click and pop on taps, a stamp or hit on the
@@ -186,6 +192,10 @@ footage; a short founder intro over it works.
 - Keep the avatar's own background and put it in a rounded card. A solid card needs no alpha channel;
   transparent WebM needs a matting-enabled avatar.
 - Keep the avatar's sound on its `<video>` (`data-has-audio="true"`), and duck the music under it.
+- Measure the avatar clip with `ffprobe` before you time the scenes. A clip can come back shorter than the
+  plan, and a fixed timeline then holds a silent end card for 5 s. Fit the end card to the clip.
+- Vary the look across a set: other outfits and camera angles of the same twin (`GET /v3/avatars/looks`)
+  keep several avatar videos from reading as one recording.
 
 ### Asset paths in sub-compositions
 

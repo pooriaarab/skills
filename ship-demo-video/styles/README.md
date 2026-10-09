@@ -9,6 +9,16 @@ and videos in different styles never look alike.
 | [Keynote whip](keynote-whip.md) | An Apple keynote: calm, confident, fast | A capability that "just works" (an agent, an automation) | about 120 BPM | 26 s |
 | [Dossier](dossier.md) | A case file: tension, then relief | Safety, privacy, "caught in time" stories | about 119 BPM, with a drop | 22.5 s |
 | [Pop flats](pop-flats.md) | A satisfying clean-up: loud, playful, quick | Annoyance killers, "never again" products | 120 BPM | 23 s |
+| [Brutalist mono](brutalist-mono.md) | A stark spec sheet: hard grid, one acid accent | Scaffolders and one-command CLIs | 126 BPM | 23 s |
+| [CRT terminal](crt-terminal.md) | A glowing 80s terminal: commands and logs | Developer tools that survive a crash or a kill | 112 BPM | 24 s |
+| [Dark halftone](dark-halftone.md) | A threat briefing: black, teal dots, one red word | Security tools that catch an attack | 100 BPM | 22 s |
+| [Paper cutout](paper-cutout.md) | Handmade stop-motion: warm, bouncy | Friendly local-first tools | 108 BPM | 24 s |
+| [Neon synthwave](neon-synthwave.md) | An 80s outrun night: neon sign, sunset grid | Gates and switches with a hard yes or no | 118 BPM | 23.5 s |
+| [Museum archive labels](museum-archive-labels.md) | A quiet gallery: framed exhibits, wall labels | Inspectors and tools that read what is on screen | 100 BPM | 21.5 s |
+| [Risograph duotone](risograph-duotone.md) | A two-ink print: warm, a little off-register | Pairing and approval flows | about 110 BPM | 24 s |
+| [Retro desktop OS](retro-desktop-os.md) | A 90s desktop: every line is a dialog box | Account links, tokens and permission prompts | 124 BPM | 22.5 s |
+| [Pixel arcade](pixel-arcade.md) | An 8-bit game: stages and a boss fight | Stories with an attacker to beat | 140 BPM | 22.3 s |
+| [Whiteboard marker](whiteboard-marker.md) | A hand-drawn explainer: circled words, ticks | A loop or a flow that needs a diagram | 107 BPM | 20.7 s |
 
 [Presenter](presenter.md) is a module, not a style: a talking-head avatar card that any style can carry.
 
@@ -43,4 +53,5 @@ Do not add a style that has not shipped at least one video.
 7. **Footage treatment** — card, frame, tilt, zoom values.
 8. **Music** — the generation prompt, the model, the tempo and how the variant was chosen.
 9. **SFX cue map** — which sound lands on which event.
-10. **Reference build** — the example spec and builder in `pooriaarab/scripts` `demo-video/`.
+10. **Reference build** — the example spec and builder in `pooriaarab/scripts` `demo-video/`. Until a
+    style has a builder there, name the video it first shipped on.
