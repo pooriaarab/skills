@@ -1,6 +1,6 @@
 ---
 name: drain-a-pr-queue
-description: "Use when a repo accumulates a large open-PR backlog and an LLM review council gates merges — the chair posts a state comment but never a formal review, so nothing can land. Covers diagnosing council starvation (metered lens keys at a monthly cap or credits depleted, OAuth seats expired), re-pointing council lenses at live subscription seats via the council_models override, the rerun trap (a re-run uses the workflow file pinned at trigger time, so only a fresh synchronize picks up the fix), the empty-commit kick recipe that needs no checkout, keeping repo secrets synced to rotating OAuth credentials, a merge loop contract (clean state, latest-run-per-check green, one APPROVED review, delete head branch so stacked children re-target), and disposing of stacked, oversize, and superseded PRs without losing work. Triggers: 'merge all open PRs', 'zero open PRs', 'review council not approving', 'vibecodereview failing', 'chair posted no review', 'PR queue backlog', 'unstack PRs', 'approve PRs'."
+description: "Use when a repo accumulates a large open-PR backlog and an LLM review council gates merges — the chair posts a state comment but never a formal review, so nothing can land. Covers diagnosing council starvation (metered lens keys at a monthly cap or credits depleted, OAuth seats expired), re-pointing council lenses at live subscription seats via the council_models override, the rerun trap (a re-run uses the workflow file pinned at trigger time, so only a fresh synchronize picks up the fix), the empty-commit kick recipe that needs no checkout, keeping repo secrets synced to rotating OAuth credentials, a merge loop contract (clean state, latest-run-per-check green, one APPROVED review, delete head branch so stacked children re-target), and disposing of stacked, oversize, and superseded PRs without losing work. Triggers: 'merge all open PRs', 'zero open PRs', 'review council not approving', 'vibecodereview failing', 'chair posted no review', 'PR queue backlog', 'unstack PRs', 'approve PRs'. Also covers landing a stacked queue across many new repos: recording branch tips so `rebase --onto` survives squash merges, GitHub's secondary content-creation limit, restacking `file:` dependencies onto published versions, and the ship-sync branch for a second release into a squash-merged production branch. Triggers: 'land a stack', 'secondary rate limit', 'release PR conflicts', 'restack branches'."
 ---
 
 # Drain a PR queue
@@ -116,6 +116,73 @@ on a dead base and can never merge.
   first or mark needs-human.
 - **Oversize**: re-measure *after* unstacking — foreign lineage inflates the
   counted diff. Still over the cap means split by subsystem, one issue per split.
+
+## Land a stacked queue at fleet scale
+
+This part is for the opposite problem: a fleet built many stacked branches
+locally, across many new repos, and one lead now lands them. It worked for
+about 370 PRs over 19 repos.
+
+### Record the tips before you touch a branch
+
+Write each branch name and its tip SHA to a file before any rename or rebase.
+A squash merge puts the parent's change on `main` as a new commit, so the
+child still carries the parent's old commits. Rebase the child onto `main`
+from the parent's recorded tip:
+
+```bash
+git rebase --onto origin/main <recorded tip of parent> <child>
+```
+
+Without the recorded tip, the rebase replays the parent's commits again and
+conflicts with their squashed copy.
+
+### Stay under the secondary limit
+
+GitHub limits content creation to about 80 requests a minute and 500 an hour.
+This limit is separate from the 5,000 GraphQL points, and it answers `403`
+while `gh api rate_limit` still shows a full quota. Six repos landing at once
+hit it.
+
+- Create issues and PRs with REST (`gh api repos/<o>/<r>/pulls -f ...`), not
+  `gh pr create`, except when you need `--attach`.
+- Poll check runs with REST on the head SHA every 30 seconds:
+  `gh api repos/<o>/<r>/commits/<sha>/check-runs`.
+- Merge at most about three repos in one round, then wait.
+- Keep the merge itself out of the landing script. The script opens the PR and
+  waits for checks. A person or the lead agent reads the result and merges.
+
+### Restack `file:` dependencies onto published versions
+
+Branches built before their sibling packages were on npm depend on them with
+`file:` paths. When the packages publish, replay each branch onto the new base
+one commit at a time:
+
+1. `git cherry-pick -n <commit>`.
+2. Rewrite each `file:` spec for a published package to its range.
+3. Regenerate the lockfile only when `package.json` changed.
+4. `git commit -C <commit>` to keep the message and the author.
+
+Commit by commit keeps a tests-first history visible. Stop on a conflict in
+any file other than `package.json` or the lockfile: that is a real conflict.
+Keep worktrees inside the project tree, because pnpm writes `file:` paths to
+the lockfile as relative paths.
+
+### Ship a second release into a squash-merged branch
+
+When `main` merges into `release` by squash, the first `main` to `release` PR
+is clean. The second one conflicts, because the two branches share no recent
+ancestor. Build a sync branch that holds `main`'s exact tree and records
+`release` as a parent:
+
+```bash
+git checkout -B <prefix>-<issue>-ship-sync origin/main
+git merge -s ours --no-edit origin/release
+git diff --quiet origin/main && echo "tree equals main"
+```
+
+Open it against `release` with a full standard body and its own issue. Do not
+put the word `release` in the branch name: the fleet pre-push hook blocks it.
 
 ## Budget the seats
 
