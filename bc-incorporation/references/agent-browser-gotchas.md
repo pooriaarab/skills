@@ -48,6 +48,12 @@ an empty `listbox` ref. Dump the DOM instead:
 
 The country list alone is ~250 entries.
 
+The DOM dump reads only the rows the menu has rendered. To reach an option
+that is not on screen (for example a country late in the alphabet), type the
+first letters into the field when it filters, or scroll the menu element
+(`.v-menu__content`) step by step and dump again after each step. Select the
+row only when its text matches exactly.
+
 ## Nested-selects are custom
 
 The Name Request "Action" and business-type fields use a `nested-select`
