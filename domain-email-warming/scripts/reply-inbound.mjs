@@ -34,11 +34,11 @@ if (!CONFIG || !DB) {
 const MIME = { ".pdf": "application/pdf", ".png": "image/png", ".jpg": "image/jpeg", ".txt": "text/plain", ".csv": "text/csv" };
 
 const REPLIES = [
-  "Thanks for getting back to me. Nothing further needed at your end for now.",
-  "Appreciated — I have noted that. I will send the paperwork across shortly.",
-  "That works. I have attached the summary so you have it on file.",
-  "Good to know, thank you. I will follow up once the dates are confirmed.",
-  "Thanks for confirming. I have attached the document for your records.",
+  "Thanks for getting back to me. Nothing more needed at your end for now.",
+  "Noted, thanks. I will send the paperwork across shortly.",
+  "That works. I attached the summary so you have it on file.",
+  "Good to know, thank you. I will follow up once dates firm up.",
+  "Thanks for confirming. I attached the document for your records.",
 ];
 
 /**
@@ -106,15 +106,11 @@ const rows = parseRows(await wrangler([
   `WHERE direction='inbound' AND received_at >= ${since} ORDER BY received_at DESC LIMIT ${LIMIT}`,
 ]));
 
-// Only answer a human. Our own addresses would loop — including a seed's
-// engage-side reply, which lands here as ordinary inbound mail — and a bounce
-// sender is not a correspondent.
+// Only answer a human. Our own addresses would loop, and a bounce sender is not
+// a correspondent.
 const targets = rows.filter((r) => {
   const from = String(r.from_address ?? "").toLowerCase();
-  if (!from || /mailer-daemon|postmaster|no-?reply|bounce/.test(from)) return false;
-  if (ours.has(from)) return false;
-  if (seeds.has(from.replace(/\+[^@]*@/, "@"))) return false;
-  return true;
+  return from && !ours.has(from) && !/mailer-daemon|postmaster|no-?reply|bounce/.test(from);
 });
 
 console.log(`${targets.length} reply-able message(s)${APPLY ? "" : " (DRY RUN)"}\n`);

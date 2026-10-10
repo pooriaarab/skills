@@ -67,6 +67,32 @@ env -i HOME="$HOME" PATH=/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin \
 That is the run that found the TCC failure above. The same invocation from an
 interactive shell succeeded, which is exactly why it was not noticed first.
 
+## gog's OAuth tokens live in the login keychain, which cron cannot unlock
+
+`gog` stores its Gmail OAuth tokens in the macOS login keychain by default. A
+cron job runs in a background session where that keychain stays locked, so
+every `gog` call fails with `No auth for gmail <account>` — while the same
+command in your shell works perfectly. This is the same shape as the TCC
+failure: dead under the scheduler, alive in the terminal.
+
+Before the fix, `warmctl engage` recorded each failed lookup as `not_found`.
+The fleet accumulated ~15,000 `not_found` rows while the mail sat in the
+mailbox the whole time. The instrument was dead and the report read it as
+absence — the precise failure mode this skill exists to prevent. Engage now
+probes each receiving account once per run and exits non-zero when an account
+is unreachable, so the failure lands in the scheduler's log instead of the
+state file's placement column.
+
+Fix the credential, do not route around it:
+
+- `gog config set keyring_backend file` plus one interactive `gog auth add`
+  stores the tokens in a file cron can read. `gog auth list` then shows the
+  account under the file backend.
+- Or run `engage` from a user session (launchd agent, not a global daemon) so
+  the login keychain is unlocked.
+
+Verify with the `env -i` invocation above after whichever fix you choose.
+
 ## Check the log, not the crontab
 
 A crontab entry proves a job is scheduled, not that it works. After the first
