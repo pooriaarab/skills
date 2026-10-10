@@ -1,6 +1,6 @@
 ---
 name: browser-extension
-description: "Use when building a cross-browser (Firefox + Chrome) Manifest V3 web extension from scratch and/or submitting it to the stores. Covers the one-manifest-two-browsers layout, the CSP rules that break WebAssembly and web workers (and the same-origin-worker fix), on-device AI via Firefox `browser.trial.ml` and Chrome's built-in Prompt API, `web-ext` build/lint, and the full store-submission flow per browser — AMO (addons.mozilla.org) including the mandatory 2FA/AAL2 gate, and the Chrome Web Store. Triggers: 'build a browser/Firefox/Chrome extension', 'MV3 extension', 'submit to AMO', 'publish to Chrome Web Store', 'web-ext', 'sign my add-on', 'extension CSP blocks my worker/wasm', 'local AI in an extension'. Also covers, once built: inserting text into a rich-text composer from a content script (Draft.js/Quill/Lexical) when the post/send button stays disabled, storing per-device auth/session state (storage.local vs sync, self-heal, sign-up races), and QA'ing a loaded unpacked extension via browser automation. Triggers: 'reply/post button disabled after inserting text', 'execCommand insertText', 'content script into X/LinkedIn composer', 'chrome.storage.sync keeps restoring old token', 'test/QA a loaded extension', 'drive extension with browser automation', 'chrome ignores --load-extension'. ALSO covers the stores beyond Chrome and Firefox: Microsoft Edge Add-ons (free, Partner Center, same Chromium zip, has a REST submission API that belongs in CI), Opera Add-ons and Naver Whale (free, same zip, dashboard-only), and why Safari is usually a rewrite rather than a port — safari-web-extension-converter produces an Xcode app needing the $99/yr Apple Developer Program, and Safari has no `offscreen` and no `sidePanel` API. Triggers: 'submit to Edge Add-ons', 'Microsoft Partner Center extension', 'publish to Opera', 'Naver Whale store', 'safari-web-extension-converter', 'port my extension to Safari', 'which stores can I publish my extension to'."
+description: "Use when building a cross-browser (Firefox + Chrome) Manifest V3 web extension from scratch and/or submitting it to the stores. Covers the one-manifest-two-browsers layout, the CSP rules that break WebAssembly and web workers (and the same-origin-worker fix), on-device AI via Firefox `browser.trial.ml` and Chrome's built-in Prompt API, `web-ext` build/lint, and the full store-submission flow per browser — AMO (addons.mozilla.org) including the mandatory 2FA/AAL2 gate, and the Chrome Web Store. Triggers: 'build a browser/Firefox/Chrome extension', 'MV3 extension', 'submit to AMO', 'publish to Chrome Web Store', 'web-ext', 'sign my add-on', 'extension CSP blocks my worker/wasm', 'local AI in an extension'. Also covers, once built: inserting text into a rich-text composer from a content script (Draft.js/Quill/Lexical) when the post/send button stays disabled, storing per-device auth/session state (storage.local vs sync, self-heal, sign-up races), and QA'ing a loaded unpacked extension via browser automation. Triggers: 'reply/post button disabled after inserting text', 'execCommand insertText', 'content script into X/LinkedIn composer', 'chrome.storage.sync keeps restoring old token', 'test/QA a loaded extension', 'drive extension with browser automation', 'chrome ignores --load-extension'. ALSO covers the stores beyond Chrome and Firefox: Microsoft Edge Add-ons (free, Partner Center, same Chromium zip, has a REST submission API that belongs in CI), Opera Add-ons and Naver Whale (free, same zip, dashboard-only), and why Safari is usually a rewrite rather than a port — safari-web-extension-converter produces an Xcode app needing the $99/yr Apple Developer Program, and Safari has no `offscreen` and no `sidePanel` API. Triggers: 'submit to Edge Add-ons', 'Microsoft Partner Center extension', 'publish to Opera', 'Naver Whale store', 'safari-web-extension-converter', 'port my extension to Safari', 'which stores can I publish my extension to'. ALSO covers Firefox-only facts for agent extensions: no SharedArrayBuffer in extension pages, the `sandbox` manifest key and its CSP trap, event pages that unload with a port open, WebRTC that escapes `webRequest` and `proxy`, WebDriver BiDi QA of `moz-extension:` pages, and AMO signing in CI (per-account throttle on new add-ons, re-runnable release). Triggers: 'SharedArrayBuffer in extension', 'manifest sandbox key', 'BiDi screenshot moz-extension', 'AMO throttled', 'container leaks WebRTC'."
 ---
 
 # Cross-Browser Web Extension: Build & Ship
@@ -404,3 +404,110 @@ The publish script reads the store's current version before uploading. If it mat
 ### Version landmine
 
 If your build toolchain injects a four-part version like `${version}.${Date.now()}` into the built manifest (e.g. a watch-mode reloader), Chrome will reject it — the fourth part exceeds the 65535-per-part limit. Guard: check the built manifest version shape (1–4 dot-separated integers, each between 0 and 65535, no leading zeros on non-zero components) before uploading, so bad builds fail locally with a readable error instead of remotely with a status code.
+
+---
+
+## 14. Firefox-only facts for agent extensions
+
+Each fact below cost a build or a review round on Firefox 153 to 157. Set
+`strict_min_version` to the current ESR and feature-detect anything newer.
+
+### Platform limits
+
+- **No `SharedArrayBuffer` in extension pages.** Firefox ignores the
+  `cross_origin_embedder_policy` and `cross_origin_opener_policy` manifest keys
+  (bug 1673477). WASM threads do not work there. Use single-thread WASM, or run
+  the threaded code on an `https:` page that sends COOP and COEP, and talk to it
+  with `postMessage`.
+- **The MV3 background is an event page with a DOM.** There is no service
+  worker and no `offscreen`. The page unloads after about 30 seconds idle. In
+  testing on Firefox 157, an open `runtime.Port` from a sidebar did not keep it
+  loaded. Save state in
+  `storage.session` or `storage.local`, and wake the page with `alarms`. A model
+  loaded in the event page goes away with it.
+- **No `debugger` permission and no CDP.** Synthetic events from
+  `scripting.executeScript` have `isTrusted: false`. For trusted input, drive
+  Firefox from an outside helper over WebDriver BiDi.
+- **`scripting.executeScript({ func })` sends the function as source text.**
+  The function must be self-contained. Pass data in `args`.
+
+### The `sandbox` manifest key
+
+Firefox 157 honoured this key in testing. Check MDN compatibility data for the
+first version that supports it. `sandbox.pages` plus `content_security_policy.sandbox` gives a page an opaque
+origin, no extension APIs, `eval`, and its own CSP. `connect-src 'none'` makes it
+a no-network room.
+
+**Caution:** the manifest sandbox CSP applies only when the host iframe has no
+`sandbox` attribute. With the attribute, Firefox 157 dropped the manifest CSP,
+and `fetch`, `XMLHttpRequest` and `WebSocket` reached a local probe server. Put
+the same policy in a `<meta http-equiv="Content-Security-Policy">` tag in the
+sandbox page, and keep it in every mode. Firefox 153 ignores the key: have the
+page check at start that its origin is opaque and that `browser` is absent, and
+refuse to run if not. `web-ext lint` then warns `UNSUPPORTED_BY_MIN_VERSION` for
+the key. Allow that one warning by code in your lint script, not all warnings.
+
+### Containers and network isolation
+
+- Containers (`contextualIdentities`) and `cookieStoreId` work in `tabs`,
+  `cookies`, `browsingData.remove`, and `proxy.onRequest`. This is how you give
+  an agent one site's login in its own cookie jar.
+- **Warning:** WebRTC escapes both `webRequest` and `proxy.onRequest`. A page in
+  the container can open an `RTCPeerConnection` to a STUN or TURN server and
+  send UDP that neither guard sees. Turn off
+  `privacy.network.peerConnectionEnabled` while the isolated task runs, and give
+  the old value back after. The setting is browser-wide.
+- A speculative `<link rel="preconnect">` skips `webRequest`. Route blocked
+  hosts in `proxy.onRequest` to a `socks` proxy that does not exist, with
+  `proxyDNS: true`. `proxyDNS` applies only to `socks` and `socks4` proxies.
+  Turn off `privacy.network.networkPredictionEnabled` to stop DNS prefetch.
+- If `privacy.*.set()` answers `false` (a policy or another extension controls
+  it), refuse the task. Do not run with the channel open.
+- If the user removes host access in `about:addons`, Firefox stops sending
+  requests to your blocking listeners and they all pass. Check
+  `permissions.contains({ origins: ["<all_urls>"] })` before the task, and stop
+  every task on `permissions.onRemoved`.
+- A blocking `webRequest` listener that throws lets the request pass. Catch
+  inside the listener and cancel.
+
+### Tabs
+
+`tabs.group` and `tabGroups` put each agent task in a named group. Both worked
+in testing on Firefox 157. Feature-detect them before use.
+`tabs.hide` (permission `tabHide`) keeps agent tabs out of the strip.
+
+### Test with WebDriver BiDi
+
+- Start Firefox with `-remote-allow-system-access`, or BiDi refuses
+  `moz-extension:` pages.
+- BiDi sends no navigation events for `moz-extension:` pages, so a Puppeteer
+  `goto()` never resolves. Poll `location.href` and `document.readyState`.
+- BiDi cannot screenshot a `moz-extension:` page ("unsupported operation").
+  For PR proof, serve the built page over `http://localhost` with a stub
+  `browser` object that returns the real state your E2E test read, then
+  screenshot that. Or screenshot a normal web page the extension changes. Say
+  in the PR which one you used.
+
+### AMO rules that block a submission
+
+- `data_collection_permissions` is required for new add-ons. Page text sent to
+  the user's own model key counts: declare `websiteContent` under `optional`.
+- AMO allows the `userScripts` API only for user-script managers. Never run
+  model-written JavaScript. Bundle the action functions and pass data as `args`.
+- Extensions must not relax a page's CSP, also through `filterResponseData`.
+
+### Sign with AMO in CI
+
+`web-ext sign --channel=unlisted --api-key="$AMO_JWT_ISSUER" --api-secret="$AMO_JWT_SECRET"`
+signs the `.xpi` for a GitHub release. Fail the step with a clear message when
+either secret is empty.
+
+- **AMO throttles new add-on submissions per account.** The error says
+  `Expected available in N seconds`. N was 873 on the first try and 4169 on a
+  later one, so signing 17 new add-ons took hours.
+- **Make the release re-runnable.** If the job publishes to npm before it
+  signs, a re-run stops at `npm publish`, because npm refuses a version twice.
+  Skip the publish when `npm view "$NAME@$VER" version` succeeds. Then
+  `gh run rerun <id> --failed` reaches the signing step.
+- To retry many repos, read N from `gh run view <id> --log-failed`, wait N plus
+  a margin, then re-run. Stop on a failure that has no `available in` line.
