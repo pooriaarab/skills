@@ -57,6 +57,8 @@ A full-screen capture leaks the menu bar, OS notifications and other apps' windo
   prints can be later than the moment the window closed, and the frames between show the desktop. Sample
   frames around the end of each run and cut before the last product frame.
 - Review the tail of every segment frame by frame before you share anything.
+- Cut harness segments that show a user name or account, not only the frames after the last product frame. A
+  harness log line such as `"user":"<name>"` on screen is a leak too.
 - Record the last product frame of each source file (for example 38.45 s), and make the build refuse any
   clip whose `data-media-start + data-duration × rate` reads past it. A cut made 0.3 s too late put a private
   notes window into a finished social video. The guard turns that mistake into a build error.
@@ -94,12 +96,13 @@ Write the plan before any HTML. A frame change here costs a minute; after a rend
 - **Proof from measured runs only.** Use the numbers your harness measured (a timing, a pass count, "0
   network requests"). Do not invent a statistic for impact.
 - **End card.** Name, one-line description, where to get it. Do not claim a store listing that is still
-  under review.
+  under review. Copy the install line exactly from the README (`npm create <name>@latest`,
+  `npm i -g <name>`, `npm i <name>-agent`). A generic `npm i <name>` is wrong for most packages.
 - Present it as a proposal: one line saying "this video tells [audience] that [message]", then a table of
   frame, beat, on screen and why. Cut any frame whose "why" does not trace back to the message.
 
-**Start from the [style library](styles/README.md).** It holds the proven looks (Keynote whip, Dossier, Pop flats)
-and the [presenter](styles/presenter.md) module, each specified down to the copy, eases, music prompt and SFX cues.
+**Start from the [style library](styles/README.md).** It holds every proven look, with a
+table to choose from, and the [presenter](styles/presenter.md) module, each specified down to the copy, eases, music prompt and SFX cues.
 
 **Give each video its own style.** A first pass where three videos shared one look (dark radial gradient,
 every line fading up, 13 s scenes) came back as "too generic". What fixed it:
@@ -107,8 +110,8 @@ every line fading up, 13 s scenes) came back as "too generic". What fixed it:
 - One style per video, each with its own ground, type pair, ease family and tempo band. For example: a
   light gray stage with white cards and exponential whips; cream paper with a dot grid and giant serif beats;
   flat color grounds that cut on the beat, with condensed display type.
-- Shorter: 20 to 26 seconds, with shots of 1 to 1.5 s and about 6 to 9 cuts per 10 s. Hold longer only on
-  the scene that carries the message.
+- Shorter: 20 to 26 seconds, cut on beats. Fast cuts suit pure graphic frames; any frame with text holds
+  long enough to read (see the polish rules below).
 - A clear arc: hook, stakes, value, demo on the musical drop, payoff, end card.
 - Varied text entrances: masked per-word rise, velocity-matched waterfall (the first word travels furthest),
   blur-to-sharp scale slam, frame-stepped typing, hard-cut word swaps on beats, wide-to-tight tracking.
@@ -124,10 +127,67 @@ seams, pacing, sound cues and story arcs.
 look: centered text, gradient background, everything fading in. For a big launch, ask for three storyboard
 variants and pick one.
 
+### Polish rules
+
+A second round on a 19-video set fixed what the owner still disliked: too much text, too many screenshots,
+and cuts too fast to read. Apply these from the first storyboard.
+
+- **Reading pace.** Hold a frame with a sentence until a slow reader finishes: about 3.5 s, plus 0.3 s
+  for each word over six. A text frame has at most about 8 words. When in doubt, cut words, not time. That gives about 8 to 10 shots in 20 to 26 s. Cut on beats, but
+  skip beats.
+- **One idea per frame.** Text or a graphic is the hero, not both. One visual action per shot: never stack
+  a screenshot, a scan, a callout and a label in one frame.
+- **Graphics are the story.** Draw the UI as animated SVG in the video's style: a cursor clicks, a toggle
+  flips, a form fills itself, a stamp lands, a shield blocks an arrow. Use at most one real screenshot per
+  video, as a quick "this is real" beat, cropped tight. No terminal, code, JSON or log shots unless the
+  viewer needs that exact command.
+- **Less text.** At most about 40% of shots carry a text line. The rest carry a 1 to 3 word label at most.
+  No two shots in a row use the same entrance.
+- **A copy frame per video.** Pick PAS (problem, agitate, solve), BAB (before, after, bridge) or AIDA, and
+  vary it across the set. Open on an everyday situation or the worst case, in plain words for a viewer who
+  knows nothing about the field. "Do you remember what you ordered yesterday? Neither does your AI."
+- **Proof that lands.** Do not put "N/N checks pass" in every video. Prefer one concrete outcome ("0
+  requests left your laptop"), and keep numbers only where they carry the story.
+- **Frame 0 is the poster.** The first frame is a finished graphic with the hook line, never blank, black
+  or a fade-in. Export it as `<name>-poster.png` next to the MP4; it is the social thumbnail.
+- **Truth.** Never present a scripted or test agent as a real one; label it "scripted" or "test agent".
+  Show no invented URL or domain, only the real repository and package names. Do not invent incidents,
+  and name a company as breached only when it is public record.
+
+### The why behind the polish rules
+
+A third round of owner notes came with a reason for each. Apply the reason, not only the rule.
+
+- **One solid ground per video.** A busy or shifting background competes with the graphic, so the eye
+  cannot find the one idea. Let the graphic carry the contrast. Use no background you would not pick on
+  purpose; if in doubt, use a solid or a subtle gradient in the palette.
+- **Graphics explain, they do not decorate.** A graphic that does not show the mechanism is noise. Each
+  one shows cause and effect at a glance: what goes in, what is blocked, what comes out.
+- **Show, don't tell.** People remember a story and a metaphor, not a claim. Find the product's metaphor
+  and build the video on it: a needle in a haystack, a web page seen as a painting, footprints that leave
+  damage.
+- **Art direction can follow the music.** Under an artistic score, a literal UI demo feels flat. Lean into
+  the art reference: a website painted as a famous modern painting, a magnifier that sweeps a haystack of
+  UI and zooms in on the one target.
+- **Hidden versus visible must be obvious.** A prompt-injection video fails if the viewer cannot see what
+  a person sees and what the agent reads. Show the visible page, then reveal the hidden layer with patterns
+  real sites use: a hidden div, an `aria-label` or `alt` text, white-on-white or 1 px text, off-screen
+  text, an HTML comment, zero-width characters. Never name a real site as compromised.
+- **Real logos for real services.** A known logo makes a viewer relate in a fraction of a second; text
+  cannot. Use the official SVG (Simple Icons, CC0, or the brand's press kit), unmodified and at a normal
+  size, only to name a service the product works with or compares against. Never imply an endorsement.
+- **Draw AI the way people see it now.** A cartoon robot reads as dated. Use the current assistant
+  language: a soft orb, pulsing dots, a sparkle, a minimal face. Draw your own; do not copy a company's mark.
+- **The poster is a thumbnail.** Header and footer text make it unreadable at small size. Use one hook
+  line and one strong graphic or logo.
+- **Exact alignment.** An overlay that sits a few pixels off (a replacement word not directly over the
+  word it replaces) reads as fake and breaks the trust the video builds. Check every overlay in the stills
+  review.
+
 ## 4. Music bed
 
 - Generate an instrumental per video at the exact length you need. On WaveSpeed, `elevenlabs/music` takes
-  `music_length_ms` and `force_instrumental` (about $0.10 per track). State a tempo, "starts on a strong
+  `music_length_ms` and `force_instrumental`. It bills $0.01 per second, so a 25 s track costs $0.25. State a tempo, "starts on a strong
   downbeat, no long intro" and "clean ending on the final bar" in the prompt.
 - Check every file. Equal byte sizes are normal for constant-bitrate output; compare checksums to confirm the
   tracks differ.
@@ -136,14 +196,20 @@ variants and pick one.
   112 BPM is 2.143 s.
 - Match the genre to the story, and make the genres differ across a set of videos: a thriller cue with a
   drop for a "caught in time" story, funk-pop for a "clearing clutter" story, a sparse keynote bed under a voice.
-- Generate two variants per video from two models, then choose by energy curve, not by name. Print the
+- Generate two variants per video from two models, then choose by energy curve, not by name. Under a
+  $0.30 cap per video, make the second variant with `minimax/music-02` (about $0.03), not
+  `minimax/music-2.6`. `music-02` has no instrumental flag: put "instrumental only, no vocals" in the
+  prompt and run speech-to-text on the result to check for lyrics. Print the
   loudness per second (`ebur128`) and look for the shape the story needs: a strong first second, a drop
   where the demo starts, a clean end. Trim a long track to its best section instead of regenerating.
 - Add SFX on the story's actions: a whoosh on each whip, a click and pop on taps, a stamp or hit on the
   slams, typing under typed text, a chime on success. `elevenlabs/sound-effects-v2` on WaveSpeed costs
   about $0.002 per effect. Give each SFX `<audio>` its own track and a slot equal to the file length.
 - Put every scene boundary on a bar. Hard cuts inside a scene go on beats.
-- Under a voice, duck the bed to about 0.26 while the voice plays and bring it up as the voice ends.
+- Under a voice, duck the bed to about 0.26 while the voice plays and bring it up as the voice ends. Keep
+  SFX at 0.3 or less under the voice and 0.6 or less elsewhere. The voice must sit clearly on top.
+- Run a final `loudnorm` pass on the rendered file (about −16 to −14 LUFS integrated, peak below −1 dB).
+  The renderer can ignore the mix volumes, so measure the output, not the composition.
 - Fade the bed in over the first 0.4 s and out over the last 1.5 s, using a volume automation lane, not a
   timeline tween. Target about −16 dB mean and a peak below −1 dB.
 
@@ -182,10 +248,23 @@ footage; a short founder intro over it works.
   `aspect_ratio: "1:1"`, `resolution`, optional `voice_settings.speed`), then poll `GET /v3/videos/{id}`.
   List looks with `GET /v3/avatars/looks` (`limit` at most 50). The v2 endpoints return a sunset warning.
 - Prefer the user's own digital twin and cloned voice. Check every claim in the script against the
-  product, the same as on-screen copy.
+  product, the same as on-screen copy. Keep the script to about 40 to 50 words.
+- The default Avatar IV engine gave the twin fake, veneer-like teeth. Render with
+  `engine: {type: "avatar_v", reference_look_id: <the filmed twin's look>}` instead.
+- For a new outfit or angle, edit real photos of the person, not a text-to-image portrait: an image-edit
+  model (WaveSpeed `google/nano-banana-2/edit`) with four original photos as references, then a HeyGen
+  photo look in the twin's group (about $1.32 each). Use a different outfit in every avatar video of a set.
+- Talking-photo models on WaveSpeed were weaker. InfiniteTalk came closest and cheapest (about $0.07 per
+  second) but still lost to Avatar V; Kling, LongCat and Pruna were rejected.
+- For voice only, HeyGen `POST /v3/voices/speech` with engine `orca` costs about $0.004 per second and
+  matched the speaker at 0.954 similarity.
 - Keep the avatar's own background and put it in a rounded card. A solid card needs no alpha channel;
   transparent WebM needs a matting-enabled avatar.
 - Keep the avatar's sound on its `<video>` (`data-has-audio="true"`), and duck the music under it.
+- Measure the avatar clip with `ffprobe` before you time the scenes. A clip can come back shorter than the
+  plan, and a fixed timeline then holds a silent end card for 5 s. Fit the end card to the clip.
+- Vary the look across a set: other outfits and camera angles of the same twin (`GET /v3/avatars/looks`)
+  keep several avatar videos from reading as one recording.
 
 ### Asset paths in sub-compositions
 

@@ -9,6 +9,22 @@ and videos in different styles never look alike.
 | [Keynote whip](keynote-whip.md) | An Apple keynote: calm, confident, fast | A capability that "just works" (an agent, an automation) | about 120 BPM | 26 s |
 | [Dossier](dossier.md) | A case file: tension, then relief | Safety, privacy, "caught in time" stories | about 119 BPM, with a drop | 22.5 s |
 | [Pop flats](pop-flats.md) | A satisfying clean-up: loud, playful, quick | Annoyance killers, "never again" products | 120 BPM | 23 s |
+| [Brutalist mono](brutalist-mono.md) | A stark spec sheet: hard grid, one acid accent | Scaffolders and one-command CLIs | 126 BPM | 23 s |
+| [CRT terminal](crt-terminal.md) | A glowing 80s terminal: commands and logs | Developer tools that survive a crash or a kill | 112 BPM | 24 s |
+| [Dark halftone](dark-halftone.md) | A threat briefing: black, teal dots, one red word | Security tools that catch an attack | 100 BPM | 22 s |
+| [Paper cutout](paper-cutout.md) | Handmade stop-motion: warm, bouncy | Friendly local-first tools | 108 BPM | 24 s |
+| [Neon synthwave](neon-synthwave.md) | An 80s outrun night: neon sign, sunset grid | Gates and switches with a hard yes or no | 118 BPM | 23.5 s |
+| [Museum archive labels](museum-archive-labels.md) | A quiet gallery: framed exhibits, wall labels | Inspectors and tools that read what is on screen | 100 BPM | 21.5 s |
+| [Risograph duotone](risograph-duotone.md) | A two-ink print: warm, a little off-register | Pairing and approval flows | about 110 BPM | 24 s |
+| [Retro desktop OS](retro-desktop-os.md) | A 90s desktop: every line is a dialog box | Account links, tokens and permission prompts | 124 BPM | 22.5 s |
+| [Pixel arcade](pixel-arcade.md) | An 8-bit game: stages and a boss fight | Stories with an attacker to beat | 140 BPM | 22.3 s |
+| [Whiteboard marker](whiteboard-marker.md) | A hand-drawn explainer: circled words, ticks | A loop or a flow that needs a diagram | 107 BPM | 20.7 s |
+| [Blueprint](blueprint.md) | An engineering drawing: grid, dimension lines, a spec sheet | Benchmarks and tools that prove a claim | 124 BPM | 24 s |
+| [Editorial magazine](editorial-magazine.md) | A print feature: cover line, drop cap, white stock | Calm, personal tools such as memory or notes | 112 BPM | 23.5 s |
+| [Financial ticker](financial-ticker.md) | A trading terminal: tickers, live numbers | Payments, budgets and spend limits | 118 BPM | 25.6 s |
+| [Glass on shader](glass-on-shader.md) | Frosted glass panels over moving light | Abstract AI products; sits well under a voice | 100 BPM | 22.8 s |
+| [Newsprint zine](newsprint-zine.md) | A photocopied punk zine: cut-out words, stamps | Tamper detection and "caught it" stories | 128 BPM | 21.8 s |
+| [Swiss grid](swiss-grid.md) | International Typographic: a visible 12-column grid | Rule engines and policy gates | 120 BPM | 24.5 s |
 
 [Presenter](presenter.md) is a module, not a style: a talking-head avatar card that any style can carry.
 
@@ -23,9 +39,11 @@ and videos in different styles never look alike.
 - **Arc:** hook in outcome language (0 to 2 s) → the stakes or a second hook beat → product name and promise by beat
   two → the demo, landing on the musical drop or build → one measured proof → end card. Each claim traces to a
   measured run.
-- **Pace:** shots of 1 to 1.5 s, about 6 to 9 cuts per 10 s. Hold longer only on the scene that carries the message.
+- **Pace:** about 8 to 10 shots in 20 to 26 s. Hold a sentence about 3.5 s; cut fast only between pure
+  graphic frames. See the polish rules in `SKILL.md`.
 - **Grid:** every scene starts on a detected beat. Write scene lengths in beats, not seconds.
-- **Footage:** the real product in a styled card. Push in on the subject; full browser frames are unreadable on a phone.
+- **Graphics first:** draw the product's UI as animated SVG in the style. Use at most one real screenshot, in a
+  styled card, pushed in on the subject; full browser frames are unreadable on a phone.
 - **Sound:** an instrumental bed chosen by its energy curve, and SFX on every cut, tap and slam.
 - **Gates:** stills for every scene before the render; a frame audit of the final file before anyone sees it.
 
@@ -43,4 +61,5 @@ Do not add a style that has not shipped at least one video.
 7. **Footage treatment** — card, frame, tilt, zoom values.
 8. **Music** — the generation prompt, the model, the tempo and how the variant was chosen.
 9. **SFX cue map** — which sound lands on which event.
-10. **Reference build** — the example spec and builder in `pooriaarab/scripts` `demo-video/`.
+10. **Reference build** — the example spec and builder in `pooriaarab/scripts` `demo-video/`. Until a
+    style has a builder there, name the video it first shipped on.
