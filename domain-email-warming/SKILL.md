@@ -142,6 +142,29 @@ sending-domain registration, the DNS each asks for, apex MX and routing rules
 to the inbound worker. Sending registration alone leaves a domain able to send
 but unable to receive (see [references/multi-domain.md](references/multi-domain.md)).
 
+### Fleet sweeps
+
+One config directory (`*.warmup.json`, identities only) feeds every sweep. Each
+is a dry run unless passed `--apply`, dedupes every send in state, and spreads
+work across mailboxes and days rather than bursting.
+
+| Script | Does |
+|---|---|
+| `signup-sweep.py` | Signs warmup mailboxes up for agent-facing services (OTP loop); trashes consumed codes so the seed inbox stays clean |
+| `subscribe-sweep.mjs` | Subscribes mailboxes to announce-only newsletters (59 lists) and completes confirmations |
+| `vendor-outreach.mjs` | Sends pre-sales questions to vendor support/sales inboxes; each vendor hears from at most 6 domains with unique copy each |
+| `contact-sweep.mjs` | Submits vendor contact/sales web forms; targets ship unpiloted until `--pilot` proves the field map |
+| `invite-sweep.mjs` | Trades same-domain calendar invites (`.ics`) between mailboxes, 2 per domain per week |
+| `confirm-subscriptions.mjs` | Completes double-opt-in confirmations for list mail |
+| `reply-inbound.mjs` | Replies to real human mail that reaches warmup boxes |
+| `dmarc-report.mjs` | Reads DMARC aggregate reports from the seed inbox, summarizes pass/fail per domain |
+| `validate-newsletters.mjs` | Checks subscribed newsletters still arrive |
+
+Note: the cross-mailbox self-mail loop (`warm-tick.sh`/`warm-all.sh` plus
+warmctl `send`/`engage`) is currently parked by operator decision — configs
+carry no seeds and the schedule is disabled. The sweeps above are the active
+program. Re-enable by restoring seeds and the schedule.
+
 Configure with `examples/imecore.warmup.json` as the template. The Cloudflare adapter is
 one file (`scripts/lib/cloudflare.mjs`); another provider means replacing that file, not
 the tool.
