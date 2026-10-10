@@ -33,7 +33,7 @@ import { cfEnv, sendEmail } from "./lib/cloudflare.mjs";
 const execFile = promisify(execFileCb);
 const STATE_DEFAULT = join(homedir(), ".local/state/domain-email-warming/subscribe-sweep.json");
 const PICKS_PER_MAILBOX = 2;
-const MAX_PER_RUN = 8;
+const MAX_PER_RUN = 24;
 const CONFIRM_WINDOW_MS = 24 * 3600 * 1000;
 const MAX_ATTEMPTS = 3;
 
@@ -57,6 +57,110 @@ const LISTS = [
     domain: "googlegroups.com", confirm: "reply" },
   { key: "pgsql-announce", to: "pgsql-announce+subscribe@lists.postgresql.org",
     domain: "postgresql.org", confirm: "click" },
+  // NOTE 2026-10-09: googlegroups confirms arrive SLOW (k8s probe took
+  // ~2h). The 24h CONFIRM_WINDOW covers it; do not mistake delay for failure.
+  { key: "k8s-announce", to: "kubernetes-announce+subscribe@googlegroups.com",
+    domain: "googlegroups.com", confirm: "reply" },
+  { key: "freebsd-announce", to: "freebsd-announce+subscribe@freebsd.org",
+    domain: "freebsd.org", confirm: "reply" },
+  { key: "fedora-announce", to: "announce-join@lists.fedoraproject.org",
+    domain: "lists.fedoraproject.org", confirm: "reply" },
+  { key: "ubuntu-announce", to: "ubuntu-announce-join@lists.ubuntu.com",
+    domain: "lists.ubuntu.com", confirm: "reply" },
+  { key: "gentoo-announce", to: "gentoo-announce+subscribe@lists.gentoo.org",
+    domain: "lists.gentoo.org", confirm: "reply" },
+  { key: "gentoo-dev-announce", to: "gentoo-dev-announce+subscribe@lists.gentoo.org",
+    domain: "lists.gentoo.org", confirm: "reply" },
+  { key: "freebsd-security-notifications", to: "freebsd-security-notifications+subscribe@freebsd.org",
+    domain: "freebsd.org", confirm: "reply" },
+  { key: "freebsd-errata-notifications", to: "freebsd-errata-notifications+subscribe@freebsd.org",
+    domain: "freebsd.org", confirm: "reply" },
+  { key: "freebsd-snapshots", to: "freebsd-snapshots+subscribe@freebsd.org",
+    domain: "freebsd.org", confirm: "reply" },
+  { key: "freebsd-ports-announce", to: "freebsd-ports-announce+subscribe@freebsd.org",
+    domain: "freebsd.org", confirm: "reply" },
+  { key: "freebsd-status-calls", to: "freebsd-status-calls+subscribe@freebsd.org",
+    domain: "freebsd.org", confirm: "reply" },
+  { key: "debian-security-announce", to: "debian-security-announce-REQUEST@lists.debian.org",
+    domain: "lists.debian.org", confirm: "reply" },
+  { key: "debian-stable-announce", to: "debian-stable-announce-REQUEST@lists.debian.org",
+    domain: "lists.debian.org", confirm: "reply" },
+  { key: "debian-lts-announce", to: "debian-lts-announce-REQUEST@lists.debian.org",
+    domain: "lists.debian.org", confirm: "reply" },
+  { key: "debian-backports-announce", to: "debian-backports-announce-REQUEST@lists.debian.org",
+    domain: "lists.debian.org", confirm: "reply" },
+  { key: "fedora-devel-announce", to: "devel-announce-join@lists.fedoraproject.org",
+    domain: "lists.fedoraproject.org", confirm: "reply" },
+  { key: "opensuse-mirror", to: "mirror-subscribe@lists.opensuse.org",
+    domain: "lists.opensuse.org", confirm: "reply" },
+  { key: "gdb-announce", to: "gdb-announce-join@sourceware.org",
+    domain: "sourceware.org", confirm: "reply" },
+  { key: "libc-announce", to: "libc-announce-join@sourceware.org",
+    domain: "sourceware.org", confirm: "reply" },
+  { key: "cygwin-announce", to: "cygwin-announce-join@cygwin.com",
+    domain: "cygwin.com", confirm: "reply" },
+  { key: "libffi-announce", to: "libffi-announce-join@sourceware.org",
+    domain: "sourceware.org", confirm: "reply" },
+  { key: "info-guix", to: "info-guix-request@gnu.org",
+    domain: "gnu.org", confirm: "reply" },
+  { key: "samba-announce", to: "samba-announce-subscribe@lists.samba.org",
+    domain: "lists.samba.org", confirm: "reply" },
+  { key: "nginx-announce", to: "nginx-announce-join@nginx.org",
+    domain: "nginx.org", confirm: "reply" },
+  { key: "php-announce", to: "php-announce+subscribe@lists.php.net",
+    domain: "lists.php.net", confirm: "reply" },
+  { key: "dbi-announce", to: "dbi-announce-subscribe@perl.org",
+    domain: "perl.org", confirm: "reply" },
+  { key: "httpd-announce", to: "announce-subscribe@httpd.apache.org",
+    domain: "httpd.apache.org", confirm: "reply" },
+  { key: "mariadb-announce", to: "announce-join@lists.mariadb.org",
+    domain: "lists.mariadb.org", confirm: "reply" },
+  { key: "ghc-releases", to: "ghc-releases-join@haskell.org",
+    domain: "haskell.org", confirm: "reply" },
+  { key: "kde-announce", to: "kde-announce-subscribe@kde.org",
+    domain: "kde.org", confirm: "reply" },
+  { key: "xorg-announce", to: "xorg-announce-request@lists.x.org",
+    domain: "lists.x.org", confirm: "reply" },
+  { key: "fdo-announce", to: "announce-request@lists.freedesktop.org",
+    domain: "lists.freedesktop.org", confirm: "reply" },
+  { key: "gstreamer-announce", to: "gstreamer-announce-request@lists.freedesktop.org",
+    domain: "lists.freedesktop.org", confirm: "reply" },
+  { key: "mesa-announce", to: "mesa-announce-request@lists.freedesktop.org",
+    domain: "lists.freedesktop.org", confirm: "reply" },
+  { key: "osm-announce", to: "announce-request@openstreetmap.org",
+    domain: "openstreetmap.org", confirm: "reply" },
+  { key: "osgeo-announce", to: "announce-request@lists.osgeo.org",
+    domain: "lists.osgeo.org", confirm: "reply" },
+  { key: "postfix-announce", to: "postfix-announce-join@postfix.org",
+    domain: "postfix.org", confirm: "click" },
+  { key: "tdf-announce", to: "announce+subscribe@documentfoundation.org",
+    domain: "documentfoundation.org", confirm: "reply" },
+  { key: "openstack-announce", to: "openstack-announce-join@lists.openstack.org",
+    domain: "lists.openstack.org", confirm: "click" },
+  { key: "openldap-announce", to: "openldap-announce-join@openldap.org",
+    domain: "openldap.org", confirm: "click" },
+  { key: "ceph-announce", to: "ceph-announce-join@ceph.io",
+    domain: "ceph.io", confirm: "click" },
+  { key: "dovecot-news", to: "dovecot-news-join@dovecot.org",
+    domain: "dovecot.org", confirm: "click" },
+  { key: "django-announce", to: "django-announce+subscribe@googlegroups.com",
+    domain: "googlegroups.com", confirm: "reply" },
+  { key: "ansible-announce", to: "ansible-announce+subscribe@googlegroups.com",
+    domain: "googlegroups.com", confirm: "reply" },
+  { key: "prometheus-announce", to: "prometheus-announce+subscribe@googlegroups.com",
+    domain: "googlegroups.com", confirm: "reply" },
+  { key: "flutter-announce", to: "flutter-announce+subscribe@googlegroups.com",
+    domain: "googlegroups.com", confirm: "reply" },
+  { key: "jenkinsci-advisories", to: "jenkinsci-advisories+subscribe@googlegroups.com",
+    domain: "googlegroups.com", confirm: "reply" },
+  { key: "nodejs-sec", to: "nodejs-sec+subscribe@googlegroups.com",
+    domain: "googlegroups.com", confirm: "reply" },
+  { key: "riscv-tech", to: "tech-announce+subscribe@lists.riscv.org",
+    domain: "lists.riscv.org", confirm: "reply" },
+  { key: "spdx-announce", to: "spdx-tech-announce+subscribe@lists.spdx.org",
+    domain: "lists.spdx.org", confirm: "reply" },
+  { key: "openchain-spec", to: "specification+subscribe@lists.openchainproject.org",
+    domain: "lists.openchainproject.org", confirm: "reply" },
 ];
 
 // Confirmation links only: the deny list wins over the allow list because an
@@ -153,6 +257,9 @@ async function saveState(path, state) {
 }
 
 async function mailboxes(dir) {
+  // All identities: sending subdomains (mail./news./go.) carry route MX and
+  // deliver through Email Routing like the apex (verified by probe
+  // 2026-10-09), so list confirmations reach them.
   const { readdir } = await import("node:fs/promises");
   const out = [];
   for (const f of (await readdir(dir)).filter((f) => f.endsWith(".warmup.json")).sort()) {
@@ -182,6 +289,14 @@ async function main() {
       if (!pairs[k]) pairs[k] = { list: l.key, status: "new", attempts: 0, sentAt: 0 };
     }
   }
+  // Retire unfinished pairs for mailboxes that left the configs.
+  // Finished pairs stay as history.
+  const inboxable = new Set(boxes.map((b) => b.address));
+  for (const [k, p] of Object.entries(pairs)) {
+    if (!inboxable.has(k.split("|")[0]) && p.status !== "confirmed" && p.status !== "failed") {
+      delete pairs[k];
+    }
+  }
 
   const envByDomain = new Map();
   const envFor = (b) => {
@@ -190,22 +305,37 @@ async function main() {
     return envByDomain.get(d);
   };
 
-  // 1. Complete pending confirmations: one gog search per list domain, then
-  //    match confirmation mail to the mailbox it reached.
-  for (const l of LISTS) {
-    const pend = Object.entries(pairs).filter(
-      ([, p]) => p.list === l.key && p.status === "requested" &&
-                 now - p.sentAt < CONFIRM_WINDOW_MS);
-    if (!pend.length) continue;
-    const query = `in:anywhere ${l.domain} newer_than:2d`;
+  // 1. Complete pending confirmations: ONE gog search across all lists with
+  //    pending pairs (50 lists would otherwise mean 50 searches per run),
+  //    then match each confirmation mail to the mailbox it reached. Domains
+  //    go out in chunks of 15 so the query stays short.
+  const pendingLists = LISTS.filter((l) =>
+    Object.values(pairs).some((p) => p.list === l.key && p.status === "requested" &&
+                                    now - p.sentAt < CONFIRM_WINDOW_MS));
+  const seenMsg = new Set();
+  for (let c = 0; c < pendingLists.length; c += 15) {
+    const chunk = pendingLists.slice(c, c + 15);
+    const query = `in:anywhere newer_than:2d (${chunk.map((l) => l.domain).join(" OR ")})`;
     for (const msg of await gogSearch(opts.gog, opts.account, query)) {
       const mid = msg.id ?? msg.messageId;
-      if (!mid) continue;
+      if (!mid || seenMsg.has(mid)) continue;
+      seenMsg.add(mid);
       const body = await gogBody(opts.gog, opts.account, mid);
       const to = toAddr(body);
       if (!to || !CONFIRM_SUBJECT.test(msg.subject ?? "")) continue;
+      // The mail names its list by sender address: match the join localpart
+      // root first (several lists share one domain, e.g. googlegroups), then
+      // the domain, then the only requested pair for this mailbox. A wrong
+      // attribution still sends the reply to the right place (it answers the
+      // mail in hand) but marks the wrong pair confirmed, so prefer precision.
+      const rootOf = (l) => l.to.split("@")[0].split("+")[0].replace(/-(join|subscribe)$/, "");
+      const cands = pendingLists.filter((l) => pairs[`${to}|${l.key}`]?.status === "requested");
+      const low = body.toLowerCase();
+      const l = cands.find((x) => low.includes(rootOf(x).toLowerCase()) && low.includes(x.domain.toLowerCase()))
+        ?? cands.find((x) => low.includes(x.domain.toLowerCase()))
+        ?? (cands.length === 1 ? cands[0] : null);
+      if (!l) continue;
       const k = `${to}|${l.key}`;
-      if (!pairs[k] || pairs[k].status !== "requested") continue;
       if (!opts.apply) {
         console.log(`would confirm ${to} on ${l.key}`);
         continue;
