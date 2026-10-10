@@ -107,6 +107,9 @@ def save_state(state):
     os.replace(tmp, STATE_PATH)
 
 def mailboxes():
+    # All identities: sending subdomains (mail./news./go.) carry route MX
+    # and deliver through Email Routing like the apex (verified by probe
+    # 2026-10-09), so OTP and verification mail reach them.
     out = []
     for f in sorted(CONFIG_DIR.glob("*.warmup.json")):
         cfg = json.loads(f.read_text())
@@ -120,8 +123,8 @@ def strip_preamble(out):
     i = out.find("{")
     return out[i:] if i >= 0 else out
 
-def gmail_search(query):
-    rc, out = run([GOG, "-a", ACCOUNT, "gmail", "messages", "search", query, "--max", "50", "-j"])
+def gmail_search(query, limit=50):
+    rc, out = run([GOG, "-a", ACCOUNT, "gmail", "messages", "search", query, "--max", str(limit), "-j"])
     try:
         return json.loads(strip_preamble(out)).get("messages", [])
     except (json.JSONDecodeError, AttributeError):
@@ -130,6 +133,13 @@ def gmail_search(query):
 def gmail_body(mid):
     rc, out = run([GOG, "-a", ACCOUNT, "gmail", "get", mid, "--format", "full"])
     return out
+
+def gmail_trash(mids):
+    # OTP mail is trashed (reversible, auto-purges in 30 days), never
+    # permanently deleted: a misclassified mail can be untrashed.
+    mids = [m for m in dict.fromkeys(mids) if m]
+    for i in range(0, len(mids), 50):
+        run([GOG, "-a", ACCOUNT, "gmail", "trash", *mids[i:i + 50]])
 
 def curl_json(method, url, payload, headers=()):
     # Auth headers go through --config stdin so bearer keys never appear in
@@ -160,7 +170,17 @@ def retry_after_seconds(body):
 def permanent_refusal(detail):
     d = detail.lower()
     return any(w in d for w in ("disposable", "not allowed", "blocked", "blocklist",
-                                "already been taken"))
+                                "already been taken",
+                                # Policy refusals observed live 2026-10-09: the
+                                # service will never accept this domain/address.
+                                "not accepted", "domain is forbidden",
+                                "forbidden domain",
+                                "invalid email domain",
+                                "not available for this email",
+                                "limit_reached", "already has",
+                                # Send-only subdomain identities have no inbound
+                                # MX by design; no OTP can ever arrive.
+                                "no mx", "no mail server"))
 
 def to_addr(body):
     # gog get dumps headers as "to<TAB>addr"; raw mail uses "To: <addr>";
@@ -212,6 +232,9 @@ def cosmic_request(email, pair):
     rc, out = run([COSMIC, "agent-signup", "-e", email, "-p", proj,
                    "--prompt-hint", "project inbox"])
     detail = "created" if rc == 0 else out.strip()[:120]
+    # A daily cap will not clear in minutes; sleep hours, not 3x interval.
+    if rc != 0 and "daily" in out.lower() and "cap" in out.lower():
+        return False, detail, 6 * 3600, False
     # A domain-policy refusal will not clear on retry — fail it terminal.
     return rc == 0, detail, None, permanent_refusal(out)
 
@@ -416,6 +439,8 @@ def mailboxkit_request(email, pair):
         pair["meta"] = {"inbox": b.get("email"), "inbox_id": b.get("inbox_id")}
         return True, "verification email sent", None, False
     d = str(b.get("error", b.get("message", f"http {rc}")))[:200]
+    if "too many attempts" in d.lower() and retry_after_seconds(b) is None:
+        return False, d, 3600, False
     return False, d, retry_after_seconds(b), permanent_refusal(d)
 
 def agentpub_request(email, pair):
@@ -545,9 +570,11 @@ ADAPTERS = [
     {"name": "agentpub", "interval": 20, "in_flight": 8,
      "request": agentpub_request, "query": lambda: "in:anywhere agentpub newer_than:20m",
      "extract": agentpub_extract, "verify": agentpub_verify},
-    {"name": "generalcompute", "interval": 20, "in_flight": 8,
-     "request": generalcompute_request, "query": lambda: "in:anywhere generalcompute newer_than:20m",
-     "extract": six_digit, "verify": generalcompute_verify},
+    # generalcompute DISABLED 2026-10-09: endpoint answers 500 to every
+    # signup (600/600 pairs failed). Re-probe before re-enabling.
+    # {"name": "generalcompute", "interval": 20, "in_flight": 8,
+    #  "request": generalcompute_request, "query": lambda: "in:anywhere generalcompute newer_than:20m",
+    #  "extract": six_digit, "verify": generalcompute_verify},
     {"name": "didit", "interval": 20, "in_flight": 8,
      "request": didit_request, "query": lambda: "in:anywhere didit newer_than:20m",
      "extract": didit_extract, "verify": didit_verify},
@@ -597,12 +624,13 @@ def tick(state):
             # Search returns newest first; a mailbox can hold several codes,
             # so keep the first (freshest) hit, never overwrite with older.
             if got and got[0].lower() not in hits:
-                hits[got[0].lower()] = got[1]
+                hits[got[0].lower()] = (got[1], mid)
         for k in pend:
             e = k.split("|")[0]
-            code = hits.get(e.lower())
-            if not code:
+            hit = hits.get(e.lower())
+            if not hit:
                 continue
+            code, mid = hit
             try:
                 ok, detail, cred = ad["verify"](e, code, pairs[k])
             except Exception as ex:
@@ -613,6 +641,9 @@ def tick(state):
             pairs[k]["attempts"] += 1
             if ok:
                 store_cred(ad["name"], e, cred or pairs[k].get("cred", ""))
+                # Code consumed: trash the OTP mail so the seed inbox stays
+                # clean. A failed verify keeps its mail for the next attempt.
+                gmail_trash([mid])
             log(ad["name"], e, ok, detail)
 
     # 2. Expire stale codes back to retry.
@@ -621,6 +652,34 @@ def tick(state):
             s["status"] = "retry" if s["attempts"] < MAX_ATTEMPTS else "failed"
             s["next_at"] = t + 60
             log(s["service"], k.split("|")[0], False, "otp expired")
+
+    # 2b. Janitor, hourly: trash service mail older than an hour. Codes die
+    # after 14 minutes, so anything this old is guaranteed useless. Verified
+    # codes are trashed at use; this catches expired, failed and welcome mail.
+    if t - state.get("last_janitor", 0) > 3600:
+        state["last_janitor"] = t
+        # Adapter queries carry newer_than:20m for polling; the janitor
+        # replaces it with older_than:1h (both together match nothing).
+        janitor_queries = [re.sub(r"newer_than:\S+\s*", "", ad["query"]()).replace("in:anywhere", "in:inbox")
+                             for ad in ADAPTERS if not ad.get("request_only")] + [
+            "in:inbox cloudinary",
+            "in:inbox clawdmail",
+            "in:inbox agentboxd",
+            "in:inbox mailboxkit",
+        ]
+        trashed = 0
+        for q in janitor_queries:
+            try:
+                mails = gmail_search(q + " older_than:1h", limit=200)
+            except Exception:
+                continue
+            mids = [m.get("id") or m.get("messageId") for m in mails]
+            mids = [m for m in mids if m]
+            if mids:
+                gmail_trash(mids)
+                trashed += len(mids)
+        if trashed:
+            log("janitor", "-", True, f"trashed {trashed} stale service mails")
 
     # 3. Request fresh codes within each service's pace and in-flight cap.
     for k, s in pairs.items():

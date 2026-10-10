@@ -1,6 +1,6 @@
 ---
 name: drain-a-pr-queue
-description: "Use when a repo accumulates a large open-PR backlog and an LLM review council gates merges — the chair posts a state comment but never a formal review, so nothing can land. Covers diagnosing council starvation (metered lens keys at a monthly cap or credits depleted, OAuth seats expired), re-pointing council lenses at live subscription seats via the council_models override, the rerun trap (a re-run uses the workflow file pinned at trigger time, so only a fresh synchronize picks up the fix), the empty-commit kick recipe that needs no checkout, keeping repo secrets synced to rotating OAuth credentials, a merge loop contract (clean state, latest-run-per-check green, one APPROVED review, delete head branch so stacked children re-target), and disposing of stacked, oversize, and superseded PRs without losing work. Triggers: 'merge all open PRs', 'zero open PRs', 'review council not approving', 'vibecodereview failing', 'chair posted no review', 'PR queue backlog', 'unstack PRs', 'approve PRs'."
+description: "Use when a repo accumulates a large open-PR backlog and an LLM review council gates merges — the chair posts a state comment but never a formal review, so nothing can land. Covers diagnosing council starvation (metered lens keys at a monthly cap or credits depleted, OAuth seats expired), re-pointing council lenses at live subscription seats via the council_models override, the rerun trap (a re-run uses the workflow file pinned at trigger time, so only a fresh synchronize picks up the fix), the empty-commit kick recipe that needs no checkout, keeping repo secrets synced to rotating OAuth credentials, a merge loop contract (clean state, latest-run-per-check green, one APPROVED review, delete head branch so stacked children re-target), and disposing of stacked, oversize, and superseded PRs without losing work. Triggers: 'merge all open PRs', 'zero open PRs', 'review council not approving', 'vibecodereview failing', 'chair posted no review', 'PR queue backlog', 'unstack PRs', 'approve PRs'. Also covers landing a stacked queue across many new repos: recording branch tips so `rebase --onto` survives squash merges, GitHub's secondary content-creation limit, restacking `file:` dependencies onto published versions, and the ship-sync branch for a second release into a squash-merged production branch. Triggers: 'land a stack', 'secondary rate limit', 'release PR conflicts', 'restack branches'."
 ---
 
 # Drain a PR queue
@@ -116,6 +116,89 @@ on a dead base and can never merge.
   first or mark needs-human.
 - **Oversize**: re-measure *after* unstacking — foreign lineage inflates the
   counted diff. Still over the cap means split by subsystem, one issue per split.
+
+## Land a stacked queue at fleet scale
+
+This part is for the opposite problem: a fleet built many stacked branches
+locally, across many new repos, and one lead now lands them. It worked for
+about 370 PRs over 19 repos.
+
+### Record the tips before you touch a branch
+
+Write each branch name and its tip SHA to a file before any rename or rebase.
+A squash merge puts the parent's change on `main` as a new commit, so the
+child still carries the parent's old commits. Rebase the child onto `main`
+from the parent's recorded tip:
+
+```bash
+git rebase --onto origin/main <recorded tip of parent> <child>
+```
+
+Without the recorded tip, the rebase replays the parent's commits again and
+conflicts with their squashed copy.
+
+### Stay under the secondary limit
+
+GitHub limits content creation to about 80 requests a minute and 500 an hour.
+This secondary limit is separate from the primary limits (5,000 REST requests
+and 5,000 GraphQL points an hour). It answers `403` or `429` while
+`gh api rate_limit` still shows a full quota. It counts REST and GraphQL
+writes alike, so a change of API does not avoid it. Six repos landing at once
+hit it.
+
+- When a response is `403` or `429`, wait for the `retry-after` header if it
+  is present, else at least one minute, before the next write.
+- Poll check runs with REST on the head SHA every 30 seconds:
+  `gh api repos/<o>/<r>/commits/<sha>/check-runs`.
+- Merge at most about three repos in one round, then wait.
+- Keep the merge itself out of the landing script. The script opens the PR and
+  waits for checks. A person or the lead agent reads the result and merges.
+
+### Restack `file:` dependencies onto published versions
+
+Branches built before their sibling packages were on npm depend on them with
+`file:` paths. When the packages publish, replay each branch onto the new base
+one commit at a time:
+
+1. `git cherry-pick -n <commit>`.
+2. Rewrite each `file:` spec for a published package to its range.
+3. Regenerate the lockfile only when `package.json` changed.
+4. `git commit -C <commit>` to keep the message and the author.
+
+Commit by commit keeps a tests-first history visible. Stop on a conflict in
+any file other than `package.json` or the lockfile: that is a real conflict.
+pnpm writes `file:` paths to the lockfile as relative paths, so keep the same
+relative layout as the main checkout for every worktree.
+
+### Ship a second release into a squash-merged branch
+
+When `main` merges into `release` by squash, the first `main` to `release` PR
+is clean. The second one conflicts, because the two branches share no recent
+ancestor. Build a sync branch that holds `main`'s exact tree and records
+`release` as a parent:
+
+```bash
+git checkout -B <prefix>-<issue>-ship-sync origin/main
+git merge -s ours --no-edit origin/release
+git diff --quiet origin/main && echo "tree equals main"
+```
+
+**Caution:** `-s ours` drops every change that exists only on `release`, for
+example a hotfix made there. First run `git log origin/main..origin/release`.
+Each squash commit shows there, so also compare `release` with the `main`
+commit it last shipped:
+
+```bash
+git diff --stat <main SHA of the last ship> origin/release
+```
+
+An empty diff means `release` holds nothing that `main` lacks. If the diff
+shows changes, stop. Port those changes to `main` first.
+
+Open it against `release` with a full standard body and its own issue. Some
+pre-push guards block any branch whose name contains `release`, because they
+protect release branches. The sync branch is not a release push, so name it
+`ship-sync`.
 
 ## Budget the seats
 
