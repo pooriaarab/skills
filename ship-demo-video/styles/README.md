@@ -39,9 +39,11 @@ and videos in different styles never look alike.
 - **Arc:** hook in outcome language (0 to 2 s) → the stakes or a second hook beat → product name and promise by beat
   two → the demo, landing on the musical drop or build → one measured proof → end card. Each claim traces to a
   measured run.
-- **Pace:** shots of 1 to 1.5 s, about 6 to 9 cuts per 10 s. Hold longer only on the scene that carries the message.
+- **Pace:** about 8 to 10 shots in 20 to 26 s. Hold a sentence about 3.5 s; cut fast only between pure
+  graphic frames. See the polish rules in `SKILL.md`.
 - **Grid:** every scene starts on a detected beat. Write scene lengths in beats, not seconds.
-- **Footage:** the real product in a styled card. Push in on the subject; full browser frames are unreadable on a phone.
+- **Graphics first:** draw the product's UI as animated SVG in the style. Use at most one real screenshot, in a
+  styled card, pushed in on the subject; full browser frames are unreadable on a phone.
 - **Sound:** an instrumental bed chosen by its energy curve, and SFX on every cut, tap and slam.
 - **Gates:** stills for every scene before the render; a frame audit of the final file before anyone sees it.
 
