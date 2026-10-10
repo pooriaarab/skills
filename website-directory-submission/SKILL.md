@@ -136,11 +136,11 @@ endpoint is worse than none.
 
 | Directory | Entry point | Gate / note |
 |---|---|---|
-| Official MCP registry | `server.json` with `remotes[]` → `mcp-publisher publish` | Remote-only is supported: `{"type": "streamable-http", "url": "https://site/mcp"}`. Namespace `io.github.<user>/*` via GitHub login. Highest leverage — PulseMCP/Glama auto-ingest from it. See `mcp-directory-submission` §1. |
+| Official MCP registry | `server.json` with `remotes[]` → `mcp-publisher publish` | Remote-only is supported: `{"type": "streamable-http", "url": "https://site/mcp"}`. DNS login checks a TXT at the **apex** domain (not `_mcp.`): `v=MCPv1; k=ed25519; p=<base64 pubkey>`. `description` must be ≤100 chars and the registry JWT expires fast — login, then publish immediately. Highest leverage — PulseMCP/Glama auto-ingest from it. See `mcp-directory-submission` §1. |
 | [awesome-remote-mcp-servers](https://github.com/punkpeye/awesome-remote-mcp-servers) | GitHub PR to the README | Specifically for hosted/remote servers — where punkpeye's list redirects remote-only entries. Entry = name + URL + Glama connector badge + one-line description under the closest category, alphabetical. |
-| [Glama](https://glama.ai/mcp/servers) | Web form ("Add server") + auto-crawl | Login required. Favours repos with a real README + install snippet. |
-| [mcp.so](https://mcp.so) | GitHub issue on `chatmcp/mcp-directory` | Fill the template: name, description, repo URL, client-config JSON block. |
-| [Smithery](https://smithery.ai/new) | Web flow, URL method | For already-hosted servers. Login required. |
+| [Glama](https://glama.ai/mcp/servers) | "Add Server" → "Hosted endpoint" tab | GitHub OAuth login. Remote endpoints use the second tab — the first ("Runs from source") demands a public repo + Dockerfile and silently fails validation on a URL. A "pending review" email per server is the authoritative confirmation. |
+| [mcp.so](https://mcp.so) | GitHub issue on `chatmcp/mcpso` | Fill the template: name, description, repo URL, client-config JSON block. Issues queue for human review. |
+| [Smithery](https://smithery.ai/new) | Web flow, URL method | For already-hosted servers. GitHub OAuth login → slug + upstream URL → step 2 "Skip" needs real mouse events (`mousedown`+`click`+`mouseup`; a plain `.click()` no-ops) → lands on `/servers/<ns>/<slug>/releases` with SUCCESS. The public page 200s immediately. |
 | [mcpservers.org](https://mcpservers.org) | Site submit flow | Community index; check the current submit path before spending time. |
 | [FindMCP](https://findmcp.dev/submit) | Public form | Low friction. |
 | [MCP Hunt](https://mcp-hunt.com) | Site submit flow | Launch-style MCP index. |
@@ -149,7 +149,7 @@ endpoint is worse than none.
 | PulseMCP | — | Submissions paused (mid-2026); ingests the official registry. Publish to the registry and wait. |
 | [awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers) | GitHub PR | Use the ☁️ cloud-hosted marker for remote-only servers. See `mcp-directory-submission` §2. |
 | [mcp.tc](https://mcp.tc) | `POST https://mcp.tc/submit` | JSON `{url, note}`, no account; a person reviews before the link goes live. |
-| [AllMCPs](https://allmcps.com) | `submit_mcp_server` tool on their own MCP endpoint | Contact email required; hosting their badge verifies instantly. |
+| [AllMCPs](https://allmcps.com) | `/submit` wizard (the .io domain is dead) | URL → details → wait for the Cloudflare Turnstile to show "Success!" (submitting earlier no-ops silently) → "Submit to AllMCPs". A confirmation email arrives per submission. Has a hosted-endpoint field and an agent prompt on the page. |
 | [402.ad](https://402.ad) | `POST /v1/submit` | $0.10 USDC via x402 for the programmatic path, or a free form with questions. |
 | [MCPCentral](https://mcpcentral.io) | `npx mcp-submit` | The CLI also files mcp.so issues and awesome-list PRs for local stdio servers; remote endpoints file the API rows directly. |
 | [Docker MCP Registry](https://github.com/docker/mcp-registry) | GitHub PR | Needs a Dockerfile — only worth it for packaged servers. |
@@ -171,7 +171,10 @@ the order. A remote-only server skips every npm/`mcpName`/MCPB step there.
 5. **Long tail (§3)** in DR order, batched.
 6. **Human-gated forms last**: Product Hunt (see `product-hunt-launch`),
    BetaList, review-site profiles, Glama/Smithery logins. An agent prepares
-   every field and asset; a human completes the logged-in submit.
+   every field and asset; a human completes the logged-in submit — or an
+   agent drives the owner's already-logged-in browser profile
+   (`browser-personal`), which passes OAuth and Turnstile gates a clean
+   session never will.
 7. **Channels outside the tier tables (§7)** wherever they fit — cheap to
    file, disproportionately GEO-friendly.
 
@@ -206,23 +209,36 @@ Smaller surfaces that sit next to the numbered tiers. Cheap to file and
 disproportionately GEO-friendly, so file them on every launch.
 
 - **Human-edited web directories.** [Curlie](https://curlie.org) (DR 82, the
-  DMOZ successor) and [Jasmine](https://www.jasminedirectory.com) (DR 62)
-  still confer a real dofollow link. Both need an account and a patient
-  editor review; pick the tightest category.
+  DMOZ successor) still confers a real dofollow link. The free account at
+  `/public/applypublic` plus email verification is fully automatable, but a
+  directory listing requires a human volunteer-editor application — stop at
+  the verified account and hand that step to the owner.
+  [Jasmine](https://www.jasminedirectory.com) (DR 62) is paid-only now; skip
+  on a free-lane run.
 - **llms.txt registries.** If the site serves `/llms.txt`, file
   [llms-txt-hub](https://github.com/thedaviddias/llms-txt-hub) (a PR adds one
-  MDX under `packages/content/data/websites/`) and
+  MDX under `packages/content/data/websites/`),
+  [directory.llmstxt.cloud](https://directory.llmstxt.cloud/submit) (Cloudflare
+  Turnstile auto-passes in a real browser profile — the result is "You're on
+  the waitlist!", so list it as pending), and
   [llmstxt.site](https://llmstxt.site/submit) (form + contact email). GEO
   surface, not backlinks.
 - **Indie search engines.** [Mojeek](https://www.mojeek.com),
-  [Wiby](https://wiby.me) (captcha), [Marginalia](https://marginalia-search.com),
+  [Wiby](https://wiby.me/submit/) (image captcha — screenshot it, read it
+  visually, expect 1–3 tries per site; keep `worksafe` checked),
+  [Marginalia](https://marginalia-search.com),
   and [Entireweb](https://www.entireweb.com/free_submission/) are independent
   crawl paths, not Google. `GET https://web.archive.org/save/<url>` snapshots
-  the site into the largest public archive with no account.
+  the site into the largest public archive with no account (a 302 is success).
 - **Agent-submittable APIs.** [submitby.ai](https://submitby.ai) (MCP tool or
-  `POST /api/v1/submissions`; free with their badge on the site or $4.99,
-  needs a verification file deployed on the domain),
-  [directree](https://www.directree.io) (free agent API),
+  `POST /api/v1/submissions`; free with their badge on the site or $4.99.
+  The `Idempotency-Key` goes in an HTTP header, not the body; the platform
+  value is `web`. Save the returned `control_token` — it is unrecoverable.
+  Deploy the badge into server-rendered HTML, then `POST
+  /api/v1/submissions/:id/verify` with the token as Bearer — clean
+  submissions publish within minutes),
+  [directree](https://www.directree.io) (its agent API only updates
+  already-claimed listings — not a first-submission path),
   [justlaunch](https://justlaunch.org) (paid REST API across ~35 platforms),
   [Launch Llama](https://tools.launchllama.co) (MCP opens drafts; the founder
   finishes the submit), [AI Directories](https://www.aidirectori.es) (partner
@@ -244,7 +260,10 @@ synced copy.
 - [ ] Awesome-list PRs opened + mcp.so issue filed (if the site ships `/mcp`).
 - [ ] AI/GEO directories submitted (if the product has a real AI surface).
 - [ ] Long tail batched in DR order.
-- [ ] `submissions.csv` tracks every directory, date, and status.
+- [ ] `submissions.csv` tracks every directory, date, and status. Use honest
+  status words: `listed` (publicly visible), `pending` (filed, awaiting
+  review), `draft` (needs one more step — e.g. site verification), `blocked`
+  (gate named), `paid` (skipped on free lanes), `dead` (URL unreachable).
 - [ ] Human-gated submits (Product Hunt, BetaList, logins) handed off with fields + assets ready.
 
 ## See also
