@@ -12,6 +12,9 @@ Per domain it ensures, idempotently:
   3. Apex MX -> route{1,2,3}.mx.cloudflare.net and apex SPF (Email Routing)
   4. Literal routing rules for every warm-up mailbox -> the inbound Worker,
      plus a catch-all so role addresses and bounce traffic land too
+  5. Route MX on mail./news./go. so subdomain identities can receive
+  6. MTA-STS + TLS-RPT DNS (policy served by the shared worker; attach its
+     route via wrangler after this runs)
 
 Requires CLOUDFLARE_API_TOKEN. Zone IDs are resolved, never hardcoded.
 
@@ -37,7 +40,7 @@ LOCALPARTS = [
     "notes", "hi", "legal", "privacy", "billing", "accounts", "sales",
     "careers", "press", "partners", "help", "admin",
     "postmaster", "abuse", "security", "hostmaster", "webmaster",
-    "no-reply", "noreply", "dmarc", "bounces",
+    "no-reply", "noreply", "dmarc", "tlsrpt", "bounces",
 ]
 
 def cf(path, method="GET", body=None):
@@ -130,6 +133,16 @@ def provision(apex, zid, worker):
             for r in cur:
                 cf(f"/zones/{zid}/dns_records/{r['id']}", "PUT", {"type": "TXT", "name": name, "content": content, "ttl": 1})
             print(f"    ~ restored {name} (registration had overwritten it)")
+            cur = cf(f"/zones/{zid}/dns_records?type=TXT&name={name}").get("result") or []
+        # Registration sometimes ADDS a record instead of replacing: two DMARC
+        # records is invalid and receivers then apply no policy at all. Merge
+        # down to one, preferring the pre-existing record with its rua= intact.
+        if len(cur) > 1:
+            keep = next((r for r in cur if r["content"] == content), max(cur, key=lambda r: len(r["content"])))
+            for r in cur:
+                if r["id"] != keep["id"]:
+                    cf(f"/zones/{zid}/dns_records/{r['id']}", "DELETE")
+            print(f"    ~ merged {len(cur)} _dmarc records at {name} into one")
 
     # 2. DNS per sending name. Records are fetched AFTER registration because
     #    Cloudflare writes the cf-bounce MX set itself during step 1; a
@@ -178,6 +191,27 @@ def provision(apex, zid, worker):
         })
         if ok(res, "catch-all"):
             print(f"    + catch-all -> {worker}")
+
+    # 5. Receiving on the sending subdomains: route MX on mail./news./go. so
+    #    those identities can take replies, OTPs and list mail. Older zones got
+    #    these automatically at registration; newer ones do not.
+    for sub in SUBDOMAIN_PREFIXES:
+        name = f"{sub}.{apex}"
+        if not any(r["type"] == "MX" and r["name"] == name for r in recs):
+            for prio, mx in [(6, "route2.mx.cloudflare.net"), (18, "route1.mx.cloudflare.net"), (91, "route3.mx.cloudflare.net")]:
+                add_dns(zid, recs, "MX", name, mx, prio)
+
+    # 6. MTA-STS + TLS-RPT. DNS half only: the policy itself is served by the
+    #    shared worker (warmup-mta-sts-policy), whose route needs Workers scope
+    #    this token does not have — attach `mta-sts.<apex>/*` via wrangler
+    #    deploy after this runs, then verify the policy URL before calling it done.
+    if not any(r["type"] == "A" and r["name"] == f"mta-sts.{apex}" for r in recs):
+        res = cf(f"/zones/{zid}/dns_records", "POST", {"type": "A", "name": f"mta-sts.{apex}",
+                 "content": "192.0.2.1", "ttl": 1, "proxied": True})
+        if ok(res, f"A mta-sts.{apex}"):
+            print(f"    + A mta-sts.{apex} -> worker (proxied)")
+    add_dns(zid, recs, "TXT", f"_mta-sts.{apex}", "v=STSv1; id=20261009")
+    add_dns(zid, recs, "TXT", f"_smtp._tls.{apex}", f"v=TLSRPTv1; rua=mailto:tlsrpt@{apex}")
 
 def main():
     args = sys.argv[1:]

@@ -82,9 +82,19 @@ grep -q "subscribe a@t.example ->" "$ROOT/out2.txt" && ok "subscribe sent" || ba
 python3 -c "import json;s=json.load(open('$ROOT/state/sub.json'));print([p['status'] for p in s['pairs'].values()])" > "$ROOT/st.txt"
 grep -q "requested" "$ROOT/st.txt" && ok "pairs marked requested" || bad "status: $(cat "$ROOT/st.txt")"
 
-# 3. Confirm mail for a reply-list: reply goes out, pairs confirmed.
+# 3. Confirm mail for a reply-list: seed a requested srht pair for a@
+# (hash picks drift as the catalog grows; the seeded pair keeps this test
+# about reply-confirm logic, not about which lists a mailbox draws).
+python3 - <<PY
+import json
+s=json.load(open('$ROOT/state/sub.json'))
+s['pairs']['a@t.example|srht-announce']={
+ 'list':'srht-announce','status':'requested','attempts':1,
+ 'sentAt':__import__('time').time()*1000-1000}
+json.dump(s,open('$ROOT/state/sub.json','w'))
+PY
 T_CONFIRM=1 T_FROM="~sircmpwn/sr.ht-announce+confirm-subscribe@lists.sr.ht" run --apply > "$ROOT/out3.txt"
-grep -q "confirmed a@t.example on" "$ROOT/out3.txt" && ok "reply confirm completed" || bad "confirm: $(cat "$ROOT/out3.txt")"
+grep -q "confirmed a@t.example on srht-announce" "$ROOT/out3.txt" && ok "reply confirm completed" || bad "confirm: $(cat "$ROOT/out3.txt")"
 
 # 4. Click-confirm list: seed a requested pgsql pair for b@, then confirm it.
 python3 - <<PY
