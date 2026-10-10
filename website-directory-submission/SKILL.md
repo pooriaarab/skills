@@ -149,7 +149,7 @@ endpoint is worse than none.
 | PulseMCP | — | Submissions paused (mid-2026); ingests the official registry. Publish to the registry and wait. |
 | [awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers) | GitHub PR | Use the ☁️ cloud-hosted marker for remote-only servers. See `mcp-directory-submission` §2. |
 | [mcp.tc](https://mcp.tc) | `POST https://mcp.tc/submit` | JSON `{url, note}`, no account; a person reviews before the link goes live. |
-| [AllMCPs](https://allmcps.com) | `/submit` wizard (the .io domain is dead) | URL → details → wait for the Cloudflare Turnstile to show "Success!" (submitting earlier no-ops silently) → "Submit to AllMCPs". A confirmation email arrives per submission. Has a hosted-endpoint field and an agent prompt on the page. |
+| [AllMCPs](https://allmcps.com) | `/submit` wizard (the .io domain is dead) | URL → details → wait for the Cloudflare Turnstile to show "Success!" (submitting earlier no-ops silently) → "Submit to AllMCPs". The form is React-controlled: eval-setter fills change the DOM but not React state, so the submit handler reads empty values and silently no-ops (zero network calls). Drive it with `agent-browser fill` / real CDP input, and verify with a `fetch` hook on `/api/submit` returning 200 — "in the queue" is static marketing text, not a success signal. A newsletter modal can also wipe the fields mid-flow; close it and re-check values. A confirmation email arrives per submission. Has a hosted-endpoint field and an agent prompt on the page. |
 | [402.ad](https://402.ad) | `POST /v1/submit` | $0.10 USDC via x402 for the programmatic path, or a free form with questions. |
 | [MCPCentral](https://mcpcentral.io) | `npx mcp-submit` | The CLI also files mcp.so issues and awesome-list PRs for local stdio servers; remote endpoints file the API rows directly. |
 | [Docker MCP Registry](https://github.com/docker/mcp-registry) | GitHub PR | Needs a Dockerfile — only worth it for packaged servers. |
@@ -243,6 +243,43 @@ disproportionately GEO-friendly, so file them on every launch.
   [Launch Llama](https://tools.launchllama.co) (MCP opens drafts; the founder
   finishes the submit), [AI Directories](https://www.aidirectori.es) (partner
   key and fee, AI tools only).
+- **Agent & bot platform directories.** If the site ships a hosted `/mcp`,
+  these put it inside the assistants themselves — the highest-GEO surface on
+  this list. Each needs an account on the platform (a paid plan for two of
+  them), and two need a small asset built first:
+  - [Claude Connectors Directory](https://claude.ai/directory/manage) —
+    submit the remote MCP server through the developer portal, choose "MCP
+    connector". Anyone on a paid Claude plan can submit. Anthropic reviews,
+    then lists it as a Community connector reachable from every Claude
+    surface. Public docs link required by publish date; test every tool in
+    the MCP Inspector first — reviewers exercise them.
+  - [ChatGPT plugin directory](https://chatgpt.com/plugins) — submit via the
+    OpenAI Platform dashboard. Custom GPTs retire Dec 2026, so this is the
+    live path: verified org, `api.apps.write` permission, public HTTPS MCP
+    URL, CSP allow-listing your fetch origins. Dashboard review flow; a
+    demo account is required only if the app authenticates.
+  - [cursor.directory](https://cursor.directory/mcp/new) — GitHub or Google
+    OAuth, then a short form (name, description, install-instructions URL,
+    optional Cursor deep link). Lists remote MCP servers directly. A
+    repo-root `.mcp.json` also makes the `/plugins/new` auto-detect path
+    work.
+  - Grok bot templates — create the bot inside Grok first (X Premium), grab
+    the `https://x.ai/bot/…` template link, then file the directories:
+    [grokbots.best](https://grokbots.best) has a JSON API
+    (`POST /api/bots/submit` with `link`, optional `categories`,
+    `integrations`; 409 = already listed),
+    [templatebot.lol](https://templatebot.lol) has an agent API
+    (`POST /api/agent/templates`), [grokbot.wtf](https://grokbot.wtf) is a
+    PR to `keshav-exe/bot-directory`, and [grok-bot.app](https://grok-bot.app)
+    is a human-reviewed form.
+  - [Poe](https://poe.com/create_bot) — a prompt bot (instructions pointing
+    at the site or its `/mcp`) publishes immediately at `poe.com/<handle>`;
+    no review for basic bots. Browser-gated by a Poe account.
+  - The pattern generalizes: platform-native surfaces (plugin stores,
+    connector directories, bot marketplaces) outrank any web directory for
+    GEO, but each requires the platform's own account and usually a
+    platform-native asset — an app manifest, a bot template link, a plugin
+    bundle. Budget the asset build before the submission.
 
 The canonical machine-readable list — every tier above plus these channels,
 with a `method` field per entry — lives in `pooriaarab/scripts` at
@@ -258,6 +295,9 @@ synced copy.
 - [ ] Tier-1 web directories submitted (§1), Gartner triple via one onboarding.
 - [ ] `server.json` with `remotes[]` published to the official registry (if the site ships `/mcp`).
 - [ ] Awesome-list PRs opened + mcp.so issue filed (if the site ships `/mcp`).
+- [ ] Agent/bot platforms filed where the account + asset exist: Claude
+  connector (paid plan), ChatGPT plugin (verified org), cursor.directory,
+  Grok template dirs (needs the `x.ai/bot` link first), Poe bot.
 - [ ] AI/GEO directories submitted (if the product has a real AI surface).
 - [ ] Long tail batched in DR order.
 - [ ] `submissions.csv` tracks every directory, date, and status. Use honest
