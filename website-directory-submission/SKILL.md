@@ -137,7 +137,7 @@ endpoint is worse than none.
 | Directory | Entry point | Gate / note |
 |---|---|---|
 | Official MCP registry | `server.json` with `remotes[]` → `mcp-publisher publish` | Remote-only is supported: `{"type": "streamable-http", "url": "https://site/mcp"}`. Namespace `io.github.<user>/*` via GitHub login. Highest leverage — PulseMCP/Glama auto-ingest from it. See `mcp-directory-submission` §1. |
-| [awesome-remote-mcp-servers](https://github.com/sylviangth/awesome-remote-mcp-servers) | GitHub PR to the README | Specifically for hosted/remote servers. Entry = name + URL + Offers + Access lines under the closest category. |
+| [awesome-remote-mcp-servers](https://github.com/punkpeye/awesome-remote-mcp-servers) | GitHub PR to the README | Specifically for hosted/remote servers — where punkpeye's list redirects remote-only entries. Entry = name + URL + Glama connector badge + one-line description under the closest category, alphabetical. |
 | [Glama](https://glama.ai/mcp/servers) | Web form ("Add server") + auto-crawl | Login required. Favours repos with a real README + install snippet. |
 | [mcp.so](https://mcp.so) | GitHub issue on `chatmcp/mcp-directory` | Fill the template: name, description, repo URL, client-config JSON block. |
 | [Smithery](https://smithery.ai/new) | Web flow, URL method | For already-hosted servers. Login required. |
@@ -148,6 +148,12 @@ endpoint is worse than none.
 | [Cline MCP Marketplace](https://github.com/cline/mcp-marketplace) | GitHub issue | Needs a 400×400 PNG logo; quality-gated on traction. Defer for brand-new servers. |
 | PulseMCP | — | Submissions paused (mid-2026); ingests the official registry. Publish to the registry and wait. |
 | [awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers) | GitHub PR | Use the ☁️ cloud-hosted marker for remote-only servers. See `mcp-directory-submission` §2. |
+| [mcp.tc](https://mcp.tc) | `POST https://mcp.tc/submit` | JSON `{url, note}`, no account; a person reviews before the link goes live. |
+| [AllMCPs](https://allmcps.com) | `submit_mcp_server` tool on their own MCP endpoint | Contact email required; hosting their badge verifies instantly. |
+| [402.ad](https://402.ad) | `POST /v1/submit` | $0.10 USDC via x402 for the programmatic path, or a free form with questions. |
+| [MCPCentral](https://mcpcentral.io) | `npx mcp-submit` | The CLI also files mcp.so issues and awesome-list PRs for local stdio servers; remote endpoints file the API rows directly. |
+| [Docker MCP Registry](https://github.com/docker/mcp-registry) | GitHub PR | Needs a Dockerfile — only worth it for packaged servers. |
+| [appcypher/awesome-mcp-servers](https://github.com/appcypher/awesome-mcp-servers) | GitHub PR | One PR per suggestion, added at the bottom of the category; installable servers, not remote-only. |
 
 Full per-directory mechanics (manifest schemas, CLI login quirks, the
 `mcpName`/100-char traps for packaged servers) live in
@@ -166,6 +172,8 @@ the order. A remote-only server skips every npm/`mcpName`/MCPB step there.
 6. **Human-gated forms last**: Product Hunt (see `product-hunt-launch`),
    BetaList, review-site profiles, Glama/Smithery logins. An agent prepares
    every field and asset; a human completes the logged-in submit.
+7. **Channels outside the tier tables (§7)** wherever they fit — cheap to
+   file, disproportionately GEO-friendly.
 
 ## 6. Gotchas
 
@@ -191,6 +199,41 @@ the order. A remote-only server skips every npm/`mcpName`/MCPB step there.
 - **Resubmission bans.** Some directories never let you resubmit a rejected
   URL. Verify the site (200, real content, production canonical) before the
   first submit.
+
+## 7. Channels outside the tier tables
+
+Smaller surfaces that sit next to the numbered tiers. Cheap to file and
+disproportionately GEO-friendly, so file them on every launch.
+
+- **Human-edited web directories.** [Curlie](https://curlie.org) (DR 82, the
+  DMOZ successor) and [Jasmine](https://www.jasminedirectory.com) (DR 62)
+  still confer a real dofollow link. Both need an account and a patient
+  editor review; pick the tightest category.
+- **llms.txt registries.** If the site serves `/llms.txt`, file
+  [llms-txt-hub](https://github.com/thedaviddias/llms-txt-hub) (a PR adds one
+  MDX under `packages/content/data/websites/`) and
+  [llmstxt.site](https://llmstxt.site/submit) (form + contact email). GEO
+  surface, not backlinks.
+- **Indie search engines.** [Mojeek](https://www.mojeek.com),
+  [Wiby](https://wiby.me) (captcha), [Marginalia](https://marginalia-search.com),
+  and [Entireweb](https://www.entireweb.com/free_submission/) are independent
+  crawl paths, not Google. `GET https://web.archive.org/save/<url>` snapshots
+  the site into the largest public archive with no account.
+- **Agent-submittable APIs.** [submitby.ai](https://submitby.ai) (MCP tool or
+  `POST /api/v1/submissions`; free with their badge on the site or $4.99,
+  needs a verification file deployed on the domain),
+  [directree](https://www.directree.io) (free agent API),
+  [justlaunch](https://justlaunch.org) (paid REST API across ~35 platforms),
+  [Launch Llama](https://tools.launchllama.co) (MCP opens drafts; the founder
+  finishes the submit), [AI Directories](https://www.aidirectori.es) (partner
+  key and fee, AI tools only).
+
+The canonical machine-readable list — every tier above plus these channels,
+with a `method` field per entry — lives in `pooriaarab/scripts` at
+`scripts/directory-submission/directories.json`. `check.mjs` next to it
+lists entries, probes their liveness, and prints a per-domain plan. New
+directories go there first; the template's `data/directories.json` is a
+synced copy.
 
 ## Checklist
 
