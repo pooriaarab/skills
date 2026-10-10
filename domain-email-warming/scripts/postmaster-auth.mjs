@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // One-time Google consent for the Postmaster Tools API. Domain verification
 // is already done via the Site Verification API; this only adds the
-// postmaster.readonly scope, which the stored Search Console token lacks.
+// postmaster scopes (v2 needs the full scope, not just readonly), which the
+// stored Search Console token lacks.
 //
 // Run it, open the printed URL in a browser signed in as the Google account
 // that owns the verifications, approve, and the local callback captures the
@@ -22,6 +23,8 @@ const flag = (n, d = null) => {
 const GOOGLE_JSON = flag("google-json", `${homedir()}/.config/search-console/google.json`);
 const OUT = flag("out", `${homedir()}/.config/search-console/postmaster.json`);
 const SCOPES = [
+  "https://www.googleapis.com/auth/postmaster",
+  "https://www.googleapis.com/auth/postmaster.domain",
   "https://www.googleapis.com/auth/postmaster.readonly",
   "https://www.googleapis.com/auth/siteverification",
   "https://www.googleapis.com/auth/webmasters",
@@ -40,10 +43,14 @@ const { code, redirect } = await new Promise((resolve, reject) => {
       res.end();
       return;
     }
-    res.writeHead(200, { "content-type": "text/plain" });
+    res.writeHead(200, { "content-type": "text/plain", connection: "close" });
     res.end("Approved. Return to the terminal.");
     const got = { code: u.searchParams.get("code"), ok: u.searchParams.get("state") === state };
-    server.close(() => (got.ok && got.code ? resolve({ ...got, redirect }) : reject(new Error("bad callback"))));
+    // Resolve at once: server.close's callback waits for the browser to drop
+    // its keep-alive connection, which Chrome holds, so the save hung until
+    // the 5-minute timer killed it.
+    server.close();
+    got.ok && got.code ? resolve({ ...got, redirect }) : reject(new Error("bad callback"));
   });
   let redirect;
   server.listen(0, "127.0.0.1", () => {
