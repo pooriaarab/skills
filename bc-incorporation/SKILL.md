@@ -59,6 +59,7 @@ digraph inc {
   "Submit NR + pay $31.50" [shape=box];
   "Wait for approval; NR lands in My List" [shape=box];
   "Register Now -> incorporation application" [shape=box];
+  "Start a numbered company from the dashboard (no Name Request)" [shape=box];
   "Review gate: present full filing" [shape=diamond];
   "File and Pay $351.50" [shape=doublecircle];
 
@@ -68,7 +69,8 @@ digraph inc {
   "Create account (Individual or Business)" -> "My Business Registry > Get Started";
   "My Business Registry > Get Started" -> "Named or numbered?";
   "Named or numbered?" -> "Name Request: action, type, name, designation" [label="named"];
-  "Named or numbered?" -> "Register Now -> incorporation application" [label="numbered"];
+  "Named or numbered?" -> "Start a numbered company from the dashboard (no Name Request)" [label="numbered"];
+  "Start a numbered company from the dashboard (no Name Request)" -> "Review gate: present full filing";
   "Name Request: action, type, name, designation" -> "Check name (structure + similar)";
   "Check name (structure + similar)" -> "Submit NR + pay $31.50";
   "Submit NR + pay $31.50" -> "Wait for approval; NR lands in My List";
@@ -77,6 +79,11 @@ digraph inc {
   "Review gate: present full filing" -> "File and Pay $351.50" [label="approved"];
 }
 ```
+
+A numbered company has no Name Request, so it never gets the "Register Now"
+action in My List. Start it from the Business Registry dashboard's
+numbered-company option instead. The live session did not walk this path, so
+read the exact label from the snapshot before you click.
 
 ### Step 1 — Launch headed
 
