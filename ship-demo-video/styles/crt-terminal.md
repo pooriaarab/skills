@@ -12,3 +12,7 @@ First used for: foxrunner (24 s).
 - **Music prompt:** "Retro 1980s home-computer synthwave, 112 BPM, arpeggiated square-wave lead, analog bass, gated drums, chiptune textures, determined mood. Instrumental only, no vocals. Strong first downbeat, no intro. Full drums drop at 8 seconds. Clean ending on the final bar." (The elevenlabs take faded at 18 s; the minimax/music-2.6 take, trimmed from 4 s, held -11 to -13 LUFS and won.)
 - **SFX cue map:** type under every typed line; glitch on every collapse; click as each footage shot lands; hit plus glitch on the kill; chime when the tasks finish; riser under the wordmark promise; stamp on the second stat.
 - **Copy pattern:** a shell command as the hook (`$ kill -9 firefox`), the outcome in amber ("your task: still running."), caps wordmark, `> lower-case log captions` per shot, stats as huge VT323 figures ("15/15", "2 attempts. / 1 side effect."), feature list as `> lines`, end card with `$ npm i <name>`.
+
+## v2 polish (foxrunner, second round)
+- Phosphor line drawings replace the screenshots: a progress bar and step boxes, a moon with Zs, a lightning bolt, a step chain with a travelling dot and disk blinks, try 1/2/3 stamps, two attempt lines that meet at "1", and a clock with sweeping hands. A drop-shadow glow on the SVG layer gives the bloom.
+- Labels are typed `> lower-case lines` at the bottom. Only the hook, the promise and the end card carry a sentence.

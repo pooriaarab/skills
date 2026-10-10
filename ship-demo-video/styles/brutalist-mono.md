@@ -13,3 +13,8 @@ First used for: foxkit (23 s).
 - **Music prompt:** "Minimal industrial techno, 126 BPM, hard dry kick, metallic clanks, sharp percussive clicks, distorted bass stabs, stark and mechanical. Instrumental only, no vocals. Strong downbeat at the very start, no intro. Full drop at 6 seconds. Hard stop on the final bar." (elevenlabs/music gave a flat -11 LUFS bed with a hard stop at 23 s: ideal.)
 - **SFX cue map:** click on every hard cut and checklist row; glitch on each inversion; hit on the second word of an inverted line; stamp on block wipes, the stat and the end card; type under typed lines.
 - **Copy pattern:** two-word caps hook ("ONE COMMAND." / "A WHOLE REPO."), wordmark on an acid block with a typed promise, numbered footage tags ("0N / WHAT IT PROVES"), then measured numbers as giant mono figures ("17/17", "0 ERRORS / 0 WARNINGS"), a checklist, and an end card of shell commands in black and acid chips.
+
+## v2 polish (foxkit, second round)
+- Drawn props in the same language: chore blocks with tick squares, a giant ENTER keycap, a folder with 31 file squares, a browser outline with a puzzle piece, MARKED and PASS slabs, a conveyor with a package, a PUBLISHED stamp, an envelope, a receipt that prints in 12 steps.
+- SVG text uses a CSS class for fill. An attribute `fill` loses to the class, so put the colour in `style="fill:..."`.
+- Every cut gets a hard one-frame black inversion flash.
