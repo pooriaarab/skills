@@ -132,8 +132,8 @@ variants and pick one.
 A second round on a 19-video set fixed what the owner still disliked: too much text, too many screenshots,
 and cuts too fast to read. Apply these from the first storyboard.
 
-- **Reading pace.** Hold any frame with text for at least 2.5 s, plus about 0.3 s for each word over six.
-  A text frame has at most about 8 words. That gives about 8 to 10 shots in 20 to 26 s. Cut on beats, but
+- **Reading pace.** Hold a frame with a sentence until a slow reader finishes: about 3.5 s, plus 0.3 s
+  for each word over six. A text frame has at most about 8 words. When in doubt, cut words, not time. That gives about 8 to 10 shots in 20 to 26 s. Cut on beats, but
   skip beats.
 - **One idea per frame.** Text or a graphic is the hero, not both. One visual action per shot: never stack
   a screenshot, a scan, a callout and a label in one frame.
@@ -153,6 +153,36 @@ and cuts too fast to read. Apply these from the first storyboard.
 - **Truth.** Never present a scripted or test agent as a real one; label it "scripted" or "test agent".
   Show no invented URL or domain, only the real repository and package names. Do not invent incidents,
   and name a company as breached only when it is public record.
+
+### The why behind the polish rules
+
+A third round of owner notes came with a reason for each. Apply the reason, not only the rule.
+
+- **One solid ground per video.** A busy or shifting background competes with the graphic, so the eye
+  cannot find the one idea. Let the graphic carry the contrast. Use no background you would not pick on
+  purpose; if in doubt, use a solid or a subtle gradient in the palette.
+- **Graphics explain, they do not decorate.** A graphic that does not show the mechanism is noise. Each
+  one shows cause and effect at a glance: what goes in, what is blocked, what comes out.
+- **Show, don't tell.** People remember a story and a metaphor, not a claim. Find the product's metaphor
+  and build the video on it: a needle in a haystack, a web page seen as a painting, footprints that leave
+  damage.
+- **Art direction can follow the music.** Under an artistic score, a literal UI demo feels flat. Lean into
+  the art reference: a website painted as a famous modern painting, a magnifier that sweeps a haystack of
+  UI and zooms in on the one target.
+- **Hidden versus visible must be obvious.** A prompt-injection video fails if the viewer cannot see what
+  a person sees and what the agent reads. Show the visible page, then reveal the hidden layer with patterns
+  real sites use: a hidden div, an `aria-label` or `alt` text, white-on-white or 1 px text, off-screen
+  text, an HTML comment, zero-width characters. Never name a real site as compromised.
+- **Real logos for real services.** A known logo makes a viewer relate in a fraction of a second; text
+  cannot. Use the official SVG (Simple Icons, CC0, or the brand's press kit), unmodified and at a normal
+  size, only to name a service the product works with or compares against. Never imply an endorsement.
+- **Draw AI the way people see it now.** A cartoon robot reads as dated. Use the current assistant
+  language: a soft orb, pulsing dots, a sparkle, a minimal face. Draw your own; do not copy a company's mark.
+- **The poster is a thumbnail.** Header and footer text make it unreadable at small size. Use one hook
+  line and one strong graphic or logo.
+- **Exact alignment.** An overlay that sits a few pixels off (a replacement word not directly over the
+  word it replaces) reads as fake and breaks the trust the video builds. Check every overlay in the stills
+  review.
 
 ## 4. Music bed
 
