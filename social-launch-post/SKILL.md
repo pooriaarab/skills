@@ -58,7 +58,32 @@ Attach a ready `media_id` to a post via the `media_ids` array field on that post
 
 Setting `{"publish_at": "now"}` via the API can return `{"error": {"code": "FORBIDDEN", "message": "This is not allowed by X policy. Direct publishing of X drafts containing URLs is blocked."}}`. This is a real anti-spam/anti-automation policy enforced server-side by Typefully on X's behalf — it applies identically regardless of which client hits the API (REST or an MCP wrapper share the same backend check), so there's no legitimate way around it via API. **Don't try to route around it** (splitting/obfuscating the URL, posting the link in a follow-up edit, etc.) — that's evading an anti-spam control, not solving a technical problem. The correct move: leave the draft ready via the API, and have the human publish it manually through Typefully's own UI, which is designed to satisfy whatever additional human-in-the-loop step X's policy requires.
 
-## 5. Video aspect ratio for cross-posting
+## 5. A launch series where each X post quotes the last one
+
+A series reads as one story when each launch quote-posts the previous launch, and the newest one is pinned.
+Set the quote with `quote_post_url` on the first X post. It applies to X only; the other platforms post the
+text and media.
+
+- **A post has no URL until it publishes, so the chain fills one link at a time.** Schedule only the first
+  post. Keep every later post an unscheduled draft. When post N goes live, read its `x_published_url`, set it
+  as the next draft's `quote_post_url`, and schedule that draft (for example 2 days after N). A draft that is
+  scheduled before its quote is set goes out unquoted.
+- **Run that step from a job, not from a session.** A chat session closes; a series of 20 posts takes 6
+  weeks. `typefully-quote-chain` in `pooriaarab/scripts` is a launchd job that does this every 15 minutes
+  and stops when the chain is done. The job waits on a post that never publishes, so check that each one
+  went live.
+- **Each platform keeps its own text.** An owner who edits a draft in the Typefully editor often changes only
+  the X text; LinkedIn, Threads and Bluesky keep the old copy. After any owner edit, compare every enabled
+  platform's text with X's and sync the ones that differ. On one series, 15 of 19 drafts had drifted.
+- **A PATCH re-sends every enabled platform.** Build the `platforms` object from the draft you just read,
+  change only what you mean to change, and check the response: same text, same `media_ids`, same platforms.
+- **Open question: does a scheduled X post with a URL publish?** Section 4's block was seen on
+  `publish_at: "now"`. Scheduling a URL post for later returned `status: scheduled`, but whether X lets it
+  publish was not yet observed. Watch the first one at its time. If it fails, publish it in Typefully's UI;
+  the chain continues once the post has a URL.
+- Pinning has no API. Pin each new launch by hand on X.
+
+## 6. Video aspect ratio for cross-posting
 
 A launch video built at 1:1 (square) — the natural choice if the storyboard/generation pipeline (`launch-video-generation`) was built that way — will get pillarboxed (black bars) in vertical-feed players expecting 9:16. Two fixes, and the plainer one is usually the better call:
 
