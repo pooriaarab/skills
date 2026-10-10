@@ -13,7 +13,10 @@ concurrency:
 jobs:
   vibecodereview:
     # Only review the repo owner's own PRs (cost + injection guard on public repos).
-    if: github.event.pull_request.user.login == github.repository_owner
+    # The owner can pause the council with the repo variable VIBECODEREVIEW_OFF=true,
+    # for example while its OAuth tokens are revoked. A paused job is skipped, so its
+    # check does not stay red. Set the variable back to false to turn the council on.
+    if: github.event.pull_request.user.login == github.repository_owner && vars.VIBECODEREVIEW_OFF != 'true'
     # Public repo: GitHub-hosted minutes are free here, so the fleet's
     # Ubicloud rule (which covers the private repos) does not apply.
     runs-on: ubuntu-latest
@@ -29,7 +32,14 @@ jobs:
           vibetrace_ingest_token: ${{ secrets.VIBETRACE_INGEST_TOKEN }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_code_oauth_token_2: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN_2 }}
+          claude_code_oauth_token_3: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN_3 }}
+          claude_code_oauth_token_4: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN_4 }}
           github_token: ${{ github.token }}
+          # Metered lenses are exhausted (monthly caps, depleted credits).
+          # Council runs on the live Claude OAuth seats instead (#480).
+          council_models: >-
+            claude2|claude-sonnet-5|Claude Sonnet 5|correctness,
+            claude3|claude-sonnet-5|Claude Sonnet 5|security
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           moonshot_api_key: ${{ secrets.MOONSHOT_API_KEY }}

@@ -26,6 +26,20 @@ nobody received.
 inverts the meaning of the whole report. The tool retries every miss with an
 `in:anywhere` query before it accepts that a message is absent.
 
+**A failed lookup is not a miss.** The queries above can fail — a dead OAuth
+token, a missing `gog` binary, a provider error — and a failure that is stamped
+`not_found` rewrites the report as mail that never arrived. The tool keeps the
+two apart: a query that ran and found nothing is `not_found`; a query that
+never really ran is `lookup_failed`, which stays unresolved and retries on the
+next pass.
+
+`engage` also probes each receiving account once per run before trusting its
+answers — a single `in:anywhere` search proves the mailbox can be read at all,
+even when it is empty. An unreachable account fails the command loudly rather
+than marking its pending sends `not_found`. Before concluding anything from an
+absence, confirm the instrument can see a positive case; the probe is that
+confirmation, run every time.
+
 Do not invent your own Message-ID and pass it as a header. Cloudflare rejects a
 caller-supplied `Message-ID` with `email.sending.error.email.invalid`, which reads like
 a bad address and sends you hunting in the wrong place.
