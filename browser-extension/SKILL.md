@@ -111,6 +111,21 @@ It's a multi-step wizard. In order:
 
 ---
 
+### The AMO upload throttle
+
+AMO limits how many uploads one account makes in a period. A batch of new add-ons hits it fast.
+
+- **It covers new uploads on every route.** The API (`web-ext sign`) answers `Request was throttled.
+  Expected available in N seconds`. The web form ("Submit a New Add-on") validates the file, then refuses it
+  with "You have submitted too many uploads recently." The browser is not a way past it.
+- **Retrying while throttled makes the wait longer.** On one run, three tries 15 minutes apart moved the
+  window from about 4 hours to about 13.7 hours. Make one try when the window opens; do not loop.
+- **Edits to an existing version are not limited the same way.** When an API `PATCH` of `source` on a
+  version was throttled, the version page's **Source code** field and **Save Changes** accepted the same
+  zip at once. Use the form for source, notes and listing edits while uploads are blocked.
+- **Make CI safe to re-run.** Before `web-ext sign`, check whether AMO already has this exact version
+  (listed); skip the upload if it does. Then a manual upload and a CI retry cannot submit one version twice.
+
 ## 7. Submit to Chrome (Chrome Web Store)
 
 The **same zip** works — Chrome reads `manifest_version`, `background.service_worker`, `content_security_policy.extension_pages`, `permissions`, `icons`, and **ignores the Firefox-only keys** (`browser_specific_settings`, `background.scripts`). No separate Chrome package needed.
