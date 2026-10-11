@@ -1,6 +1,6 @@
 ---
 name: growth-cold-email
-description: "Stand up cold email for a product without burning the domain that carries your transactional mail or breaking anti-spam law — the CASL implied-consent basis a conspicuously published business address gives you and the three things that expire it, the identification/mailing-address/unsubscribe trio every commercial message must carry, why transactional-versus-bulk is a provider TERMS question rather than a technical one (and why the asymmetric downside is losing appointment reminders, not marketing), separate sending domain versus subdomain, verifying a list before the first send with real hit rates and per-address cost, why named addresses beat role addresses and how that ratio moves with market size, suppression that survives a contact merge, and three-touch sequences. Use when setting up cold outreach, choosing a sending domain or ESP, writing a first campaign, deciding whether a send is transactional or bulk, or debugging a list that bounces. Pairs with growth-prospect-list (building the list) and growth-cold-calling (the phone channel, whose consent rule is the inverse)."
+description: "Use when setting up cold email outreach without burning the transactional-mail domain or breaking CASL: choosing a sending domain or ESP, writing a first campaign, deciding transactional vs bulk, or debugging a list that bounces."
 ---
 
 # growth-cold-email
@@ -8,6 +8,12 @@ description: "Stand up cold email for a product without burning the domain that 
 Cold email fails in two ways that look nothing alike. Either you break a law and find out from a regulator, or you burn a sending reputation and find out from silence. Both are cheap to avoid at setup and expensive afterwards.
 
 This skill is the setup. `growth-prospect-list` builds the list; `growth-cold-calling` covers the phone, whose consent rule runs the opposite direction.
+
+## When to use
+
+- **Triggers:** 'cold email', 'sending domain', 'CASL consent', 'is this email transactional', 'list bounces', 'verify my list'.
+- CASL implied consent from a conspicuously published address and the three things that expire it; the identification, mailing-address and unsubscribe trio.
+- Transactional vs bulk is a provider terms question (the risk is losing appointment reminders); separate domain vs subdomain; list verification with real hit rates and cost; named vs role addresses by market size; suppression that survives a merge; three-touch sequences. Pairs with growth-prospect-list and growth-cold-calling.
 
 ## Get the legal floor right first, because it shapes the list
 

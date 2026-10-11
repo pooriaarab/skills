@@ -1,11 +1,17 @@
 ---
 name: superhuman-docs-pack
-description: "Build and PUBLISH a Superhuman Docs pack (formerly Coda; a @codahq/packs-sdk TypeScript pack under integrations/<name>/) — a pack that adds formulas/actions/sync-tables that call your API, e.g. 'schedule a social post'. Use when creating a Superhuman Docs / Coda pack, wiring a pack action to an external REST API, or actually shipping one with the packs CLI. Covers the whole path plus the traps that each cost a real round-trip: Coda rebranded to Superhuman Docs (2026-07-08) but the SDK package is UNCHANGED (@codahq/packs-sdk) and the CLI binary is now `packs` (old `coda` still aliases); the build/upload SEGFAULTS on Node 22+/25 (needs Node 20); publishing is token-only via register→create→upload→release BUT a Pack-scoped token is required (an MCP/doc-data token cannot publish); `release` prompts on a real TTY (fails headless with /dev/tty errors) and warns when releasing from a non-main branch; and the public gallery listing is a review-gated web action, not a CLI/API call. Triggers: 'build a Coda pack', 'Superhuman Docs pack', 'packs CLI', 'coda release /dev/tty error', 'coda build segfault', 'publish a pack', 'packs register token'."
+description: "Use when building or publishing a Superhuman Docs pack (formerly Coda, @codahq/packs-sdk) that adds formulas, actions or sync tables calling your API, with the packs CLI."
 ---
 
 # Building + publishing a Superhuman Docs pack
 
 Superhuman Docs is the 2026-07-08 rebrand of **Coda**. A pack is a `@codahq/packs-sdk` TypeScript module (`pack.ts`) whose formulas / actions / sync tables call your own REST API. It runs inside Superhuman Docs docs. Source in `integrations/<name>/`. Command playbook: `pooriaarab/scripts` `scripts/superhuman-docs-pack/README.md`.
+
+## When to use
+
+- **Triggers:** 'build a Coda pack', 'Superhuman Docs pack', 'packs CLI', 'coda release /dev/tty error', 'coda build segfault', 'publish a pack', 'packs register token'.
+- Coda became Superhuman Docs (2026-07-08); the SDK package is unchanged and the CLI is now `packs` (`coda` still aliases). Build and upload segfault on Node 22+; use Node 20.
+- Publishing is register, create, upload, release with a Pack-scoped token (an MCP or doc-data token cannot publish); `release` needs a real TTY and warns off main; the public gallery listing is a review-gated web action.
 
 ## The rename: almost nothing in the code changes
 

@@ -1,6 +1,6 @@
 ---
 name: nextjs-to-tanstack-migration
-description: "Use when migrating a Next.js App Router app (especially on Cloudflare Workers/OpenNext) to TanStack Start + Vite, or planning such a migration. Covers the proof-first phase plan that de-risks a big-bang rewrite (inventory the surface, prove every build-sensitive capability, then a GO/STOP gate before bulk conversion), the gradual composed-apex cutover (run both apps behind one Worker, delete Next source last), and the concrete route-conversion patterns that make each page-family a small PR — import the Next page component/MDX in place (no fork), import.meta.glob registries for large families, splat routes for MDX trees, and reading metadata vs frontmatter for the document head. Also the traps that each cost a real CI round-trip: routeTree.gen.ts counts toward a per-PR size cap (batch individual routes), 'use client' + useSearchParams / *.client islands can't be imported in place, runtime WebAssembly.instantiate is banned on Workers, and the @/ path alias must be wired into the Vite/tsconfig of every app that imports shared components. Triggers: 'migrate Next.js to TanStack', 'Next App Router to TanStack Start', 'TanStack Start on Cloudflare', 'createFileRoute', 'import.meta.glob routes', 'OpenNext to Vite', 'port marketing site to TanStack', 'routeTree too big', 'MDX in TanStack'."
+description: "Use when migrating or planning to migrate a Next.js App Router app (especially on Cloudflare Workers or OpenNext) to TanStack Start plus Vite, page family by page family."
 ---
 
 # nextjs-to-tanstack-migration
@@ -20,6 +20,13 @@ Two ideas carry the whole thing:
 2. **One apex, two apps.** Put a thin composed Worker at the domain that routes each path to either
    the Next app or the TanStack app by an ownership table. Convert a family, flip its paths, watch
    it, move on. The Next source stays until its paths have been the apex long enough to trust.
+
+## When to use
+
+- **Triggers:** 'migrate Next.js to TanStack', 'Next App Router to TanStack Start', 'TanStack Start on Cloudflare', 'createFileRoute', 'import.meta.glob routes', 'OpenNext to Vite', 'port marketing site to TanStack', 'routeTree too big', 'MDX in TanStack'.
+- A proof-first phase plan (inventory, prove every build-sensitive capability, a GO/STOP gate) and a gradual composed-apex cutover (both apps behind one Worker, delete Next source last).
+- Route patterns: import the Next page or MDX in place, import.meta.glob registries, splat routes for MDX trees, metadata vs frontmatter for the head.
+- Traps: routeTree.gen.ts counts toward the PR size cap, 'use client' with useSearchParams and *.client islands cannot be imported in place, runtime WebAssembly.instantiate is banned on Workers, and the @/ alias must be in every app's Vite and tsconfig.
 
 ## The phase plan
 

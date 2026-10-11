@@ -1,6 +1,6 @@
 ---
 name: google-workspace-addon
-description: "Build, test, deploy, and publish a Google Workspace add-on (an Apps Script + CardService add-on under integrations/google-workspace-addon/ that runs in the Docs/Sheets sidebars) and get it listed on the Google Workspace Marketplace. Use when creating a new Workspace add-on, writing CardService cards, calling an external API from Apps Script, deploying with clasp, configuring appsscript.json scopes, or figuring out why the OAuth consent screen or marketplace review bounces. Covers the whole path plus the traps that each cost a round-trip: there is no fetch in Apps Script (UrlFetchApp only, and it needs the script.external_request scope plus a urlFetchWhitelist entry or the call is refused), oauthScopes must match across manifest, consent screen, and code, homepage triggers return Cards but action handlers return ActionResponses, user keys belong in user properties not script properties, and the real submission wall is Google's OAuth verification (demo video, days-to-weeks), not the listing form. Sibling of the other integration skills (canva-app, adobe-express-addon, figma-plugin, shopify-app, connector-directory-submission). Triggers: 'build a Google Workspace add-on', 'Apps Script CardService', 'appsscript.json oauthScopes', 'publish to the Google Workspace Marketplace', 'UrlFetchApp can't reach my API', 'OAuth verification rejected', 'clasp push', 'Google Workspace Marketplace SDK'."
+description: "Use when building, deploying or publishing a Google Workspace add-on (Apps Script plus CardService in the Docs and Sheets sidebars): cards, external API calls, clasp, appsscript.json scopes, and OAuth verification or Marketplace review that bounces."
 ---
 
 # Building a Google Workspace add-on
@@ -11,6 +11,13 @@ functions that return cards. Source lives in `integrations/google-workspace-addo
 is a thin client over your own public REST API: CardService renders the UI, `UrlFetchApp`
 calls the API with a Bearer key. Read this before the first file; the command-level
 playbook is `pooriaarab/scripts` `scripts/google-workspace-addon/README.md`.
+
+## When to use
+
+- **Triggers:** 'build a Google Workspace add-on', 'Apps Script CardService', 'appsscript.json oauthScopes', 'publish to the Google Workspace Marketplace', 'UrlFetchApp can't reach my API', 'OAuth verification rejected', 'clasp push', 'Google Workspace Marketplace SDK'.
+- No fetch in Apps Script: UrlFetchApp needs the script.external_request scope and a urlFetchWhitelist entry. oauthScopes must match across manifest, consent screen and code.
+- Homepage triggers return Cards; action handlers return ActionResponses. User keys go in user properties, not script properties. The real wall is Google's OAuth verification (demo video, days to weeks), not the listing form.
+- Siblings: canva-app, adobe-express-addon, figma-plugin, shopify-app, connector-directory-submission.
 
 ## The trap that wastes a day: there is no `fetch`
 

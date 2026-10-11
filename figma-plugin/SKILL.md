@@ -1,11 +1,18 @@
 ---
 name: figma-plugin
-description: "Build, debug, and run a Figma plugin (a code.js sandbox + ui.html iframe pair under integrations/figma-plugin/, built on the Figma Plugin API). Use when creating a new Figma plugin, wiring a 'select a frame → export it → call your API' flow, deciding whether fetch belongs in the sandbox or the iframe UI, adding networkAccess.allowedDomains to manifest.json, or storing an API key in figma.clientStorage. Covers the build path plus the traps that each cost a build round-trip: the two-context split (the sandbox has no DOM but no CORS; the iframe has DOM but full CORS — fetch in the wrong side fails with a useless error), every external origin must be allow-listed in manifest networkAccess.allowedDomains or the request dies at runtime, the sandbox has no FormData/Blob so multipart uploads are hand-rolled byte arrays, the UI must ship as one self-contained HTML file inlined via __html__, and export is async via exportAsync. Sibling of figma-plugin-submission (the Community publish path) and of the other integration skills (canva-app, browser-extension, shopify-app, connector-directory-submission). Triggers: 'build a Figma plugin', 'Figma Plugin API', 'exportAsync', 'figma.clientStorage', 'networkAccess allowedDomains', 'my Figma plugin fetch fails'."
+description: "Use when building or debugging a Figma plugin (code.js sandbox plus ui.html iframe): export a frame and call an API, decide where fetch runs, set networkAccess.allowedDomains, or store a key in figma.clientStorage. Publishing is figma-plugin-submission."
 ---
 
 # Building a Figma plugin
 
 A Figma plugin is **two programs talking over `postMessage`**: `code.js` runs in Figma's plugin sandbox (no DOM, no `window`) and `ui.html` runs in an iframe (full DOM). `manifest.json` declares both (`main`, `ui`) plus `networkAccess.allowedDomains`. Source lives in `integrations/figma-plugin/`. It is a thin frontend over your own backend — your product's SDK or public REST API. Read this before the first file; the command-level playbook is in `pooriaarab/scripts` `scripts/figma-plugin/README.md`. To publish to Community, use `figma-plugin-submission`.
+
+## When to use
+
+- **Triggers:** 'build a Figma plugin', 'Figma Plugin API', 'exportAsync', 'figma.clientStorage', 'networkAccess allowedDomains', 'my Figma plugin fetch fails'.
+- The two-context split: the sandbox has no DOM but no CORS; the iframe has DOM and full CORS. Every external origin must be in networkAccess.allowedDomains.
+- The sandbox has no FormData or Blob, so multipart uploads are hand-built byte arrays; the UI ships as one HTML file inlined via __html__; export is async via exportAsync.
+- Siblings: figma-plugin-submission, canva-app, browser-extension, shopify-app, connector-directory-submission.
 
 ## The trap that wastes a day: fetch in the wrong context
 

@@ -1,6 +1,6 @@
 ---
 name: e2e-ci-economics
-description: "Use when a browser end-to-end suite (Playwright, Cypress, WebdriverIO) is the slowest thing in CI, or when someone proposes to add a browser to the matrix, raise the worker count, cache the suite, or mark the suite `continue-on-error`. Covers the rule that a non-gating job must never sit on the critical path, why `continue-on-error: true` plus a `pull_request` trigger is the worst of both states, gating on a minimal browser set and running the full matrix nightly, why you shard instead of raising `workers`, the fixed per-shard cost that sets the floor on sharding, why an E2E result cannot go in a task-runner cache and must not, the default-branch alert that catches the suite everyone stopped reading, and how to report a retry-pass instead of absorbing it, and why you address a collection member by a stable key rather than by index. Says which of these a linter can enforce and which needs run timings. Triggers: 'E2E is slow', 'the e2e job takes forever', 'add WebKit to the matrix', 'raise Playwright workers', 'shard the e2e suite', 'cache the e2e job', 'mark e2e continue-on-error', 'e2e is flaky', 'e2e has been red on main', 'the e2e test fails but the endpoint works'."
+description: "Use when a browser E2E suite (Playwright, Cypress, WebdriverIO) is the slowest thing in CI, or someone proposes another browser in the matrix, more workers, caching the suite, or `continue-on-error`."
 ---
 
 # e2e-ci-economics
@@ -12,6 +12,8 @@ Two repositories built from one template were cut 85% and 83% in one campaign. I
 dominant defect was in the E2E suite, not elsewhere in the pipeline.
 
 ## When to use this
+
+- **Triggers:** 'E2E is slow', 'the e2e job takes forever', 'add WebKit to the matrix', 'raise Playwright workers', 'shard the e2e suite', 'cache the e2e job', 'mark e2e continue-on-error', 'e2e is flaky', 'e2e has been red on main', 'the e2e test fails but the endpoint works'.
 
 **Use this skill** when the long pole is a browser E2E job, or before you change the browser
 matrix, the worker count, the shard count, or the `continue-on-error` flag.

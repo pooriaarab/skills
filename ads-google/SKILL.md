@@ -1,6 +1,6 @@
 ---
 name: ads-google
-description: "Wire up Google Ads + GA4 conversion tracking for a web app — the three layers (GA4 client gtag, GA4 server-side Measurement Protocol, Google Ads conversion import from GA4), the Measurement Protocol api_secret that silently no-ops a server purchase when unset, importing/enabling/marking-Primary a GA4 conversion action in Google Ads, Google Ads API launch nuances (containsEuPoliticalAdvertising, text-only search ads, OAuth-project enablement), and server-side verification via the GA4 Data API and GAQL. Also covers audience expansion via Customer Match (crm_based_user_list + OfflineUserDataJob, since classic similar-audiences was deprecated, ~1,000-member serve floor), a gtag page_view ordering bug that silently zeroes GA4 pageviews, and small-budget Search campaign setup — the defaults that burn budget (Display Network/Search partners on by default, All-languages targeting, missing negative keywords), bid-strategy choice when you have no conversion history (Manual CPC / Maximize Clicks vs a Smart Bidding learning phase), long-tail vs unaffordable head terms, and a pre-spend search-volume check. Use when setting up a Google Ads search campaign, launching a small paid test, setting up Google Ads purchase tracking, debugging 0 conversions, or validating an MP secret without waiting."
+description: "Use when setting up Google Ads plus GA4 conversion tracking, launching a small Search campaign or paid test, debugging zero conversions, building Customer Match audiences, or validating a Measurement Protocol secret."
 ---
 
 # ads-google
@@ -12,6 +12,13 @@ Google Ads conversion tracking for a web app has **three layers**, and they stac
 3. **Google Ads conversion import from GA4** — Google Ads doesn't track the purchase itself; it *imports* the GA4 `purchase` event as a conversion action. If GA4 never recorded the event, there is nothing to import.
 
 You configure these in order. Skipping layer 2 is the usual reason "it worked in testing but production shows nothing."
+
+## When to use
+
+- **Triggers:** 'Google Ads conversion tracking', 'GA4 Measurement Protocol', '0 conversions', 'import GA4 conversion', 'small Search campaign', 'Customer Match', 'GA4 pageviews zero'.
+- Three layers: GA4 client gtag, GA4 server Measurement Protocol (an unset api_secret silently no-ops), and Google Ads import of a GA4 conversion marked Primary. Verification via the GA4 Data API and GAQL.
+- API launch nuances (containsEuPoliticalAdvertising, text-only search ads, OAuth project enablement); Customer Match via crm_based_user_list and OfflineUserDataJob (about 1,000-member floor); a gtag page_view ordering bug that zeroes GA4 pageviews.
+- Small-budget Search setup: defaults that burn money (Display Network, Search partners, all languages, no negatives), bidding with no history (Manual CPC or Maximize Clicks), long-tail vs head terms, and a search-volume check before spend.
 
 ## GA4 client tag (gtag)
 

@@ -1,6 +1,6 @@
 ---
 name: ci-speed-diagnosis
-description: "Use when CI is slow and the optimisations are already configured — a remote cache that is switched on, an actions/cache step that reports green, a suite that is already sharded. Finds out why they do nothing before you add more. Covers the measure-first order, the checklist of defects that fail silently (a secret holding an empty value, a task runner stripping its own variables from child processes, a build output glob that sweeps the incremental cache into the artifact, ref-scoped duplicate caches, restore-keys with no lockfile-independent fallback, an mtime cache strategy that checkout defeats, an upload cap in the cache server, a stale deploy of the fixed server), and the bug shape that recurs most: a mitigation calibrated for one host, applied unconditionally on every host. Adds the measurement discipline — measure a CI change in CI, report CPU time when you cannot, trust a log line over a listing API, and say whether you bought latency or machine time. Triggers: 'CI is still slow', 'the cache never hits', 'Remote caching disabled', 'our cache is empty', 'CI cache quota is full', 'make CI faster', 'why did that optimisation not help'."
+description: "Use when CI is slow even though the optimizations are already on (a remote cache, a green actions/cache step, a sharded suite), to find why they do nothing before adding more."
 ---
 
 # ci-speed-diagnosis
@@ -10,6 +10,8 @@ green, and they do nothing. **Diagnose the silence first. Add levers last.** Eac
 was found this way, and each one hid behind a green check.
 
 ## When to use this
+
+- **Triggers:** 'CI is still slow', 'the cache never hits', 'Remote caching disabled', 'our cache is empty', 'CI cache quota is full', 'make CI faster', 'why did that optimisation not help'.
 
 **Use this skill** when someone already added caching, a remote cache, or sharding, and CI is
 still slow. Also use it before you buy a bigger runner.
