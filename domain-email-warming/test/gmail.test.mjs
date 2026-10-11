@@ -182,4 +182,20 @@ describe("mutations", () => {
       /reply failed/,
     );
   });
+
+  it("setLabels adds and removes in one modify call", async () => {
+    const exec = fakeExec(["{}"]);
+    await makeGmail(exec).setLabels("acct", "m1", { add: ["warmup"], remove: ["INBOX"] });
+    const a = exec.calls[0].args;
+    assert.equal(a[a.indexOf("--add") + 1], "warmup");
+    assert.equal(a[a.indexOf("--remove") + 1], "INBOX");
+  });
+
+  it("list returns id+labels hits and reports lookup failure distinctly", async () => {
+    const exec = fakeExec([JSON.stringify({ messages: [{ id: "m1", labels: ["SPAM"] }, { id: "m2" }] })]);
+    const r = await makeGmail(exec).list("acct", "in:spam", 10);
+    assert.equal(r.ok, true);
+    assert.deepEqual(r.messages, [{ id: "m1", labels: ["SPAM"] }, { id: "m2", labels: [] }]);
+    assert.equal(exec.calls[0].args[exec.calls[0].args.indexOf("--max") + 1], "10");
+  });
 });
