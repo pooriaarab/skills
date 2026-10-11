@@ -253,6 +253,24 @@ disproportionately GEO-friendly, so file them on every launch.
     then lists it as a Community connector reachable from every Claude
     surface. Public docs link required by publish date; test every tool in
     the MCP Inspector first — reviewers exercise them.
+    - Automate it with `scripts/claude-connector/submit.mjs` in
+      pooriaarab/scripts: one JSON config per site, `--dry-run`,
+      `--status`, `--publish`. It drives the 10-step wizard
+      (connection → tools → listing → use cases → company → auth →
+      data handling → test & launch → compliance → review) in
+      browser-personal Chrome, resumes mid-draft, and refuses to print
+      DONE unless the wizard confirms the state.
+    - Server-side trap: the wizard's probe sends *its*
+      `mcp-protocol-version` header on `initialize`. A server that 400s
+      unknown headers there reads as "0 Tools" and cannot proceed.
+      Negotiate via `params.protocolVersion` on `initialize`; enforce
+      the header only on later requests (fleet fix:
+      directory-template#275).
+    - States: `In review` → `Ready to publish` → `Published (done)`.
+      The publish confirmation is a `position:fixed` alertdialog —
+      invisible to `offsetParent` checks — and its button needs the
+      full mouse-event dispatch, not a bare `.click()`. `--publish`
+      handles both.
   - [ChatGPT plugin directory](https://chatgpt.com/plugins) — submit via the
     OpenAI Platform dashboard. Custom GPTs retire Dec 2026, so this is the
     live path: verified org, `api.apps.write` permission, public HTTPS MCP
