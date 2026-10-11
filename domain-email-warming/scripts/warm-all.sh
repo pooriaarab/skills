@@ -7,6 +7,13 @@
 #   warm-all.sh <config-dir> <env-file>
 set -uo pipefail
 
+# cron's PATH excludes Homebrew, so `node` is not found and every scheduled run
+# dies on its first command. Found in the log of a real cron run — a hand-picked
+# PATH in a manual test had Homebrew on it and hid this completely.
+# Appended, not prepended: cron's PATH has no node so this is identical in
+# production, and it lets tests shadow node with a stub earlier on PATH.
+export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
 DIR="${1:?usage: warm-all.sh <config-dir> <env-file>}"
 ENV_FILE="${2:?usage: warm-all.sh <config-dir> <env-file>}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

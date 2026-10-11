@@ -13,6 +13,11 @@
 # The env file supplies the provider credentials and is sourced, never logged.
 set -euo pipefail
 
+# cron's PATH excludes Homebrew, so `node` is not found and every scheduled run
+# dies on its first command. Found in the log of a real cron run — a hand-picked
+# PATH in a manual test had Homebrew on it and hid this completely.
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
 CONFIG="${1:?usage: warm-tick.sh <config.json> <env-file>}"
 ENV_FILE="${2:?usage: warm-tick.sh <config.json> <env-file>}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
