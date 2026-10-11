@@ -1,11 +1,17 @@
 ---
 name: trello-powerup
-description: "Build and list a Trello Power-Up — a fully static multi-page iframe app under integrations/trello-powerup/ that declares its capabilities at runtime — in the Trello Power-Ups directory. Use when adding a card button, card badge, board button, or settings popup to Trello, storing per-card or per-board state, or working out why a declared capability never appears. Covers the whole path plus the traps that each cost a round-trip: there is no manifest file at all — Trello loads one connector URL and everything is declared in the initialize() call, the client library has no npm package and must come from Trello's CDN, storage scope choice is a correctness decision rather than a style one, and every popup is its own HTML entry point so a single-page router cannot work. Sibling of the other integration skills (miro-app, monday-app, browser-extension, connector-directory-submission). Triggers: 'build a Trello Power-Up', 'TrelloPowerUp.initialize', 'Trello card button', 'card badges', 'trello t.get t.set', 'my Power-Up capability is missing', 'submit a Power-Up to Trello'."
+description: "Use when building or listing a Trello Power-Up (a static multi-page iframe app): card buttons, badges, board buttons, settings popups, per-card or per-board storage, or a declared capability that never appears."
 ---
 
 # Building a Trello Power-Up
 
 A Power-Up is a **fully static site of small HTML pages** loaded in sandboxed iframes inside Trello. There is no server requirement and no build-time manifest: Trello loads a single **iframe connector URL**, and that page tells Trello what the Power-Up can do. Source lives in `integrations/trello-powerup/`.
+
+## When to use
+
+- **Triggers:** 'build a Trello Power-Up', 'TrelloPowerUp.initialize', 'Trello card button', 'card badges', 'trello t.get t.set', 'my Power-Up capability is missing', 'submit a Power-Up to Trello'.
+- No manifest file: Trello loads one connector URL and everything is declared in initialize(). The client library comes from Trello's CDN, not npm.
+- Storage scope is a correctness choice; every popup is its own HTML entry, so a single-page router cannot work. Siblings: miro-app, monday-app, browser-extension, connector-directory-submission.
 
 ## The trap that wastes a day: capabilities are declared at runtime, in one file
 

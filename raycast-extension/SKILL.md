@@ -1,11 +1,17 @@
 ---
 name: raycast-extension
-description: "Build, run, and submit a Raycast extension (TypeScript + React commands on @raycast/api, source under integrations/raycast-extension/) and get it merged into the Raycast Store. Use when creating a new Raycast command, wiring package.json commands/preferences, debugging ray develop/ray build/ray lint, reading an API key from extension preferences, or figuring out why the store PR bounces. Covers the whole path plus the traps that each cost a build/submit round-trip: package.json IS the manifest (a command's name must equal its src/ filename or the command silently doesn't exist), author must be a registered Raycast username, API keys belong in password preferences never in code, raycast-env.d.ts is generated (edit package.json instead), and submission is a PR into the raycast/extensions monorepo — not npm publish. Sibling of the other integration skills (browser-extension, figma-plugin, canva-app, connector-directory-submission). Triggers: 'build a Raycast extension', 'Raycast command', '@raycast/api', 'ray develop', 'ray build fails', 'publish to the Raycast Store', 'Raycast preferences API key', 'raycast/extensions PR rejected'."
+description: "Use when building or submitting a Raycast extension (TypeScript and React on @raycast/api): commands and preferences in package.json, ray develop, build and lint errors, API keys, and a Raycast Store PR that bounces."
 ---
 
 # Building a Raycast extension
 
 A Raycast extension is **TypeScript + React on `@raycast/api`**: each command is a file in `src/` that default-exports a React component (`List`, `Form`, `Detail`) or a plain async function. Source lives in `integrations/raycast-extension/` as an isolated package that consumes your product's SDK / public REST API like any external consumer. **`package.json` is the manifest** — commands, preferences, categories, author, icon all live there, not in code. Read this before the first file; the command-level playbook is `scripts/raycast-extension/README.md` in the sibling scripts repo. Docs: `developers.raycast.com`.
+
+## When to use
+
+- **Triggers:** 'build a Raycast extension', 'Raycast command', '@raycast/api', 'ray develop', 'ray build fails', 'publish to the Raycast Store', 'Raycast preferences API key', 'raycast/extensions PR rejected'.
+- package.json is the manifest: a command name must equal its src/ filename. author must be a registered Raycast username. API keys go in password preferences. raycast-env.d.ts is generated.
+- Submission is a PR into the raycast/extensions monorepo, not npm publish. Siblings: browser-extension, figma-plugin, canva-app, connector-directory-submission.
 
 ## The trap that wastes a day: package.json IS the manifest
 

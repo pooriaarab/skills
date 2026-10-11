@@ -1,11 +1,18 @@
 ---
 name: ads-meta
-description: "Set up Meta (Facebook) Pixel + server-side Conversions API (CAPI) purchase tracking for a web app — the client Pixel (fbq base + Purchase) and server CAPI (Graph /{pixel-id}/events) shipped together with a shared event_id dedup key, the CAPI access token that silently no-ops a server event when unset, why you fire on hashed-email match (not on fbclid) so organic purchases still report, advanced matching for match quality, the app-capability 400s (Advanced Access for ads_management, promotable Page), seeding a Lookalike from a hashed-email Custom Audience (USER_PROVIDED_ONLY / EMAIL_SHA256, ≥100 matched-user floor), why a Purchase that misfires on a free signup is usually the Automatic Events console setting rather than code, and server-side verification via the Graph stats/last_fired_time endpoints. Also covers running the Meta Ads MCP in the Claude Code CLI: the official hosted MCP (mcp.facebook.com/ads) OAuth fails in the CLI with 'URL Blocked / redirect_uris not registered' (localhost-loopback redirect isn't whitelisted; works only on claude.ai web / Desktop), the token-based MCP fix (pipeboard-co/meta-ads-mcp + META_ACCESS_TOKEN), and the exact Business Settings clickpath to mint a non-expiring System User token (app-role → scopes+SMS-2FA → ad-account assignment three-layer chain). Use when wiring up Meta ad conversion tracking, building a Custom Audience / Lookalike, debugging 0 (or phantom) Purchase events, when the pixel looks dead in a headless browser, or when the Meta Ads MCP won't authenticate / a Meta access token returns an empty adaccounts list."
+description: "Use when wiring Meta Pixel plus Conversions API purchase tracking, building a Custom Audience or Lookalike, debugging zero or phantom Purchase events, or when the Meta Ads MCP will not authenticate in Claude Code or a token returns no ad accounts."
 ---
 
 # ads-meta
 
 Meta conversion tracking has two halves — a client-side **Pixel** (fires in the browser on page load and on purchase) and a server-side **Conversions API (CAPI)** call (fires from your backend after the charge actually happens, e.g. a payment webhook). Ship both together with a shared dedup key, or purchases get double-counted.
+
+## When to use
+
+- **Triggers:** 'Meta pixel', 'Conversions API', 'CAPI', 'Purchase events missing', 'phantom Purchase on signup', 'Lookalike audience', 'Meta Ads MCP URL Blocked', 'System User token', 'empty adaccounts'.
+- Client Pixel (fbq base plus Purchase) and server CAPI (Graph /{pixel-id}/events) with a shared event_id dedup key; the unset CAPI token that silently no-ops; firing on hashed-email match, not fbclid, so organic purchases report; advanced matching.
+- App-capability 400s (Advanced Access for ads_management, promotable Page); Lookalikes from a hashed-email Custom Audience (USER_PROVIDED_ONLY, EMAIL_SHA256, 100 matched-user floor); a Purchase on free signup is usually the Automatic Events setting; verification via Graph stats and last_fired_time.
+- Meta Ads MCP in the CLI: the hosted mcp.facebook.com/ads OAuth fails with 'URL Blocked / redirect_uris not registered' (works only on claude.ai web or Desktop); the token fix with pipeboard-co/meta-ads-mcp and META_ACCESS_TOKEN; the Business Settings path to a non-expiring System User token (app role, scopes with SMS 2FA, ad-account assignment).
 
 ## Setup, in order
 

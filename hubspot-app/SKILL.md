@@ -1,11 +1,17 @@
 ---
 name: hubspot-app
-description: "Build and list a HubSpot public app — a CRM card UI extension plus a serverless function, shipped as a HubSpot project (integrations/hubspot-app/) — on the HubSpot App Marketplace. Use when adding a card to a contact/company/deal/ticket record, calling an external API from inside HubSpot, wiring HubSpot OAuth, or working out why `hs project upload` or marketplace review bounces. Covers the whole path plus the traps that each cost a round-trip: a card can only fetch URLs pre-declared in permittedUrls.fetch and localhost is blocked outright (so you cannot develop a card against a local API), marketplace review demands at least three active installs on unaffiliated production portals, secrets live in HubSpot not in the bundle, and per-function hsmeta files replaced the deprecated single serverless.json. Sibling of the other integration skills (highlevel-app, monday-app, webflow-app, connector-directory-submission). Triggers: 'build a HubSpot app', 'HubSpot CRM card', 'HubSpot UI extensions', 'hs project upload', 'runServerless', 'submit to the HubSpot App Marketplace', 'my HubSpot card can''t reach my API'."
+description: "Use when building or listing a HubSpot public app (a CRM card UI extension plus a serverless function in a HubSpot project): record cards, external API calls, HubSpot OAuth, and `hs project upload` or Marketplace review failures."
 ---
 
 # Building a HubSpot public app
 
 A HubSpot app is a **project** (`hsproject.json` + a `src/` tree of `*-hsmeta.json` configs) that ships a **UI extension** — a React card rendered inside a CRM record — and, usually, a **serverless function** that talks to your backend. Source lives in `integrations/hubspot-app/`. The card is a thin frontend; all logic stays in your API.
+
+## When to use
+
+- **Triggers:** 'build a HubSpot app', 'HubSpot CRM card', 'HubSpot UI extensions', 'hs project upload', 'runServerless', 'submit to the HubSpot App Marketplace', 'my HubSpot card can't reach my API'.
+- A card fetches only URLs in permittedUrls.fetch and localhost is blocked, so you cannot develop a card against a local API. Review needs three active installs on unaffiliated production portals.
+- Secrets live in HubSpot, not the bundle; per-function hsmeta files replaced serverless.json. Siblings: highlevel-app, monday-app, webflow-app, connector-directory-submission.
 
 ## The trap that wastes a day: a card cannot fetch your local API
 

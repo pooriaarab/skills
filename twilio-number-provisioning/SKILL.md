@@ -1,12 +1,19 @@
 ---
 name: twilio-number-provisioning
-description: "Use when buying and provisioning a Twilio phone number for a product — a memorable/vanity number, and wiring it to WhatsApp Cloud API, SMS, and voice. Covers the Twilio CLI (auth, searching available numbers, buying), scoring numbers for memorability (repeating/pattern digits, the '888 is least-scammy toll-free' rule, why vanity like 1-8XX-BRAND rarely exists in self-serve inventory), and the big trap: a brand-new TOLL-FREE number CANNOT send/receive SMS until its toll-free registration is approved (days), so WhatsApp/OTP verification codes silently never arrive — a local 10-digit number verifies far more reliably. Then: registering the number with WhatsApp Cloud API (the number gets consumed for WhatsApp; verify by SMS or VOICE), a ZERO-SERVER trick to auto-capture a spoken voice verification code via a Twilio Studio Flow, the Twilio toll-free registration intake form field-by-field (legal name vs DBA, non-US business registration number, opt-in proof + the consent language carriers require on your Terms/Privacy), and the env vars an app needs. Triggers: 'buy a twilio number', 'get a memorable phone number', 'twilio whatsapp verification not arriving', 'register toll-free', 'toll-free SMS not working', 'set up a business phone number', 'read the SMS/voice OTP from twilio', 'twilio number for whatsapp'."
+description: "Use when buying and provisioning a Twilio phone number for a product (memorable or vanity) and wiring it to WhatsApp Cloud API, SMS and voice, or when verification codes to a new number never arrive."
 ---
 
 # Twilio number provisioning
 
 Buy a number, then wire it to WhatsApp / SMS / voice. The order and the number *type*
 matter more than anything — pick wrong and verification silently fails for days.
+
+## When to use
+
+- **Triggers:** 'buy a twilio number', 'get a memorable phone number', 'twilio whatsapp verification not arriving', 'register toll-free', 'toll-free SMS not working', 'set up a business phone number', 'read the SMS/voice OTP from twilio', 'twilio number for whatsapp'.
+- Twilio CLI auth, number search and purchase; scoring numbers for memorability (pattern digits, 888 as the least scammy toll-free, why 1-8XX-BRAND vanity is rarely in self-serve stock).
+- The trap: a new toll-free number cannot send or receive SMS until toll-free registration is approved (days), so OTPs silently never arrive. A local 10-digit number verifies more reliably.
+- Registering the number with WhatsApp Cloud API (verify by SMS or voice), a zero-server Twilio Studio Flow that captures a spoken code, the toll-free registration form field by field (legal name vs DBA, non-US registration number, opt-in proof and consent language), and the app env vars.
 
 ## Twilio CLI setup
 
