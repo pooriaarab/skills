@@ -272,10 +272,30 @@ disproportionately GEO-friendly, so file them on every launch.
       full mouse-event dispatch, not a bare `.click()`. `--publish`
       handles both.
   - [ChatGPT plugin directory](https://chatgpt.com/plugins) — submit via the
-    OpenAI Platform dashboard. Custom GPTs retire Dec 2026, so this is the
-    live path: verified org, `api.apps.write` permission, public HTTPS MCP
-    URL, CSP allow-listing your fetch origins. Dashboard review flow; a
-    demo account is required only if the app authenticates.
+    OpenAI Platform dashboard → Plugins → "Upload new or existing plugin".
+    Verified developer identity required. The package is a ZIP containing
+    `<slug>-plugin/.mcp.json` (one remote server, `"type": "http"`) and
+    `.codex-plugin/plugin.json` (author + interface + the
+    `extensions.com.openai` review block: 5 positive + 3 negative test
+    cases, `commerce`, release notes). `pooriaarab/scripts`
+    `scripts/chatgpt-plugin/build.mjs` builds it from a site config.
+    - Validator traps: `interface.shortDescription` ≤ 30 chars,
+      `displayName` must carry the domain brand (`Example.fyi` — a bare
+      noun fails "name too generic"), no pricing words ("free", "$") in
+      `longDescription`, `logo`+`composerIcon` paths to a bundled square
+      icon (SVG allowed), all four listing URLs (`websiteURL`,
+      `supportURL`, `privacyPolicyURL`, `termsOfServiceURL`).
+    - Domain verification serves a plain-text token at
+      `/.well-known/openai-apps-challenge`. Sites on Workers **custom
+      domains** can't serve it from a zone route (custom domains bypass
+      routes) — a zone *redirect rule* runs first, so 302 to a workers.dev
+      URL that returns the token. `setup-challenge.sh` next to the builder
+      automates it.
+    - Ordering: upload → Connect → verify domain → Connect/Continue →
+      tool scan → Submit for review (six attestations). The submit call
+      400s "wait for the attached app's review" until the app-level review
+      finishes (~10–30 min); retry, then `In review`. One MCP URL per org
+      — delete stale drafts via More plugin actions → Delete plugin.
   - [cursor.directory](https://cursor.directory/mcp/new) — GitHub or Google
     OAuth, then a short form (name, description, install-instructions URL,
     optional Cursor deep link). Lists remote MCP servers directly. A
