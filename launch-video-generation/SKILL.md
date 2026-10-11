@@ -5,6 +5,8 @@ description: "Plan and generate a short (15-60s) launch/announcement video from 
 
 # launch-video-generation
 
+**Fox launch or demo harness?** For a fox* primitive launch, or any repo with a demo harness, use `ship-demo-video`. Also read the series brief and style library in `pooriaarab/fox-media` (`styles/BRIEF.md` and `styles/*.md`). A first attempt that skipped them produced an off-series video.
+
 Empirical, from building a real launch video (slackclaw) end to end: storyboard → generation → assembly → a redo after the first cut's on-screen text and scene transitions came out wrong.
 
 ## 1. Storyboard first, always
