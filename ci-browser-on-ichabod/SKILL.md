@@ -185,7 +185,7 @@ connect), extension install 260 to 330, first page 1600 to 2200, an 8-check flow
 teardown about 210.
 
 From a laptop, outside CI: warm `session.new` 0.2 to 0.7 s, a cold start 9 to 11 s, a page load on
-a held session 110 to 650 ms. Each `page.evaluate` is a round trip to the cloud browser, so a
+a held session 110 to 650 ms. One session stayed up for 35 minutes, including a 10-minute idle gap. Each `page.evaluate` is a round trip to the cloud browser, so a
 polling-heavy test runs slower than on a local Firefox. Batch reads into one `evaluate`.
 
 ## Related
