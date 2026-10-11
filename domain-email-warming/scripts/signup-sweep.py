@@ -205,6 +205,9 @@ def six_digit(body):
 #   query()                    -> gmail search that finds this service's mail
 #   extract(body)              -> (to_address, code) or None
 #   verify(email, code, pair)  -> (ok, detail, credential_or_None)
+# Link-verify adapters (formsubmit) pass a URL as the "code" and visit it.
+# A service mail with no code or link at all verifies as FORWARDED: its
+# arrival inside the poll window already proves inbound delivery works.
 # `request_only` adapters complete on request success (account made, mail sent).
 # Sender cadence comes from `interval`; at most `in_flight` unverified codes.
 
@@ -536,6 +539,46 @@ def whisper_verify(email, code, pair):
         return True, "verified", b["api_key"]
     return False, str(b.get("error", b.get("message", "verify failed")))[:200], None
 
+def formsubmit_request(email, pair):
+    # Form-to-email forwarding: the first submit needs activation (a link by
+    # mail), later submits forward straight to the mailbox. The endpoint
+    # refuses calls without web Origin/Referer, so use the mailbox's own
+    # domain. Piloted live 2026-10-10: activation mail, link click (200,
+    # "Form Activated"), then a delivered forward.
+    dom = email.split("@")[1]
+    rc, b = curl_json("POST", f"https://formsubmit.co/ajax/{email}",
+                      {"name": "Warmup", "message": "Warm-up program mailbox check.",
+                       "_subject": "warmup check-in"},
+                      headers=[f"Origin: https://{dom}", f"Referer: https://{dom}/contact"])
+    msg = str(b.get("message", ""))
+    if "needs activation" in msg.lower():
+        return True, "activation sent", None, False
+    if str(b.get("success")).lower() == "true":
+        return True, "submitted (active)", None, False
+    d = (msg or str(b.get("error", f"http {rc}")))[:200]
+    return False, d, retry_after_seconds(b), permanent_refusal(d)
+
+def formsubmit_extract(body):
+    t = to_addr(body)
+    if not t:
+        return None
+    m = re.search(r"https://formsubmit\.co/confirm/[0-9a-f]+", body)
+    if m:
+        return (t, m.group(0))
+    # No confirm link: an already-active form's forward. Its arrival proves
+    # the channel works, so it verifies the same as a clicked link.
+    if "formsubmit" in body.lower():
+        return (t, "FORWARDED")
+    return None
+
+def formsubmit_verify(email, code, pair):
+    if code == "FORWARDED":
+        return True, "forward received", f"https://formsubmit.co/ajax/{email}"
+    rc, out = run([CURL, "-sS", code])
+    if rc == 0 and ("now active" in out.lower() or "form activated" in out.lower()):
+        return True, "activated", f"https://formsubmit.co/ajax/{email}"
+    return False, (out.strip()[:120] or f"http {rc}"), None
+
 ADAPTERS = [
     # OTP mail is routine spam-foldered; every query must use in:anywhere.
     {"name": "herenow", "interval": 20, "in_flight": 8,
@@ -581,6 +624,10 @@ ADAPTERS = [
     {"name": "whisper", "interval": 20, "in_flight": 8,
      "request": whisper_request, "query": lambda: "in:anywhere whisper newer_than:20m",
      "extract": six_digit, "verify": whisper_verify},
+    # Small free service: gentler pace than the OTP adapters.
+    {"name": "formsubmit", "interval": 30, "in_flight": 4,
+     "request": formsubmit_request, "query": lambda: "in:anywhere formsubmit newer_than:20m",
+     "extract": formsubmit_extract, "verify": formsubmit_verify},
 ]
 
 def service_names(email):
@@ -660,12 +707,16 @@ def tick(state):
         state["last_janitor"] = t
         # Adapter queries carry newer_than:20m for polling; the janitor
         # replaces it with older_than:1h (both together match nothing).
-        janitor_queries = [re.sub(r"newer_than:\S+\s*", "", ad["query"]()).replace("in:anywhere", "in:inbox")
+        # in:anywhere (not in:inbox): a Gmail filter auto-archives warmup
+        # mail out of the inbox at delivery, so inbox-scoped queries would
+        # silently stop finding it. Sent and Drafts stay excluded - the
+        # operator's own mail about a service is not service mail.
+        janitor_queries = [re.sub(r"newer_than:\S+\s*", "", ad["query"]()).replace("in:anywhere", "in:anywhere -in:sent -in:draft")
                              for ad in ADAPTERS if not ad.get("request_only")] + [
-            "in:inbox cloudinary",
-            "in:inbox clawdmail",
-            "in:inbox agentboxd",
-            "in:inbox mailboxkit",
+            "in:anywhere -in:sent -in:draft cloudinary",
+            "in:anywhere -in:sent -in:draft clawdmail",
+            "in:anywhere -in:sent -in:draft agentboxd",
+            "in:anywhere -in:sent -in:draft mailboxkit",
         ]
         trashed = 0
         for q in janitor_queries:
