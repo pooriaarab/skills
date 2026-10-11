@@ -111,9 +111,23 @@ Lower DR each, near-zero marginal cost once the packet exists. Work top-down
 by DR; stop when the approval rate drops below the time cost.
 
 Launch: [Uneed](https://www.uneed.best) (DR 32) · [Fazier](https://fazier.com)
-(DR 45) · [Launched.io](https://launched.io) (DR 35) · [MicroLaunch](https://microlaunch.net)
-(DR 30) · [Open Launch](https://openlaunch.ai) (DR 30) · [Launch Vault](https://www.launchvault.dev)
-(DR 30) · [NextGen Tools](https://www.nxgntools.com) (DR 25).
+(DR 45) · [Launched.io](https://launched.io) (DR 35) · [Open Launch](https://openlaunch.ai)
+(DR 30) · [Launch Vault](https://www.launchvault.dev) (DR 30) ·
+[NextGen Tools](https://www.nxgntools.com) (DR 25).
+[MicroLaunch](https://microlaunch.net) went paid-only in 2026-11 — the launch
+dialog offers Pro ($39) and Plus ($79) only, no free queue. Skip it.
+
+Uneed's free path is a waiting line, not instant: the product needs a logo
+uploaded on the Media tab before "Schedule your launch" enables, then "Join
+the free waiting line" queues ~13 months out. Its `join-waiting-line` endpoint
+429s after a burst of rapid clicks — space joins minutes apart, and upload the
+logo by dispatching a synthetic `drop` event with a `DataTransfer` if the file
+input is hidden. Fazier's free launch gates behind three approved comments on
+other products plus its badge embedded in the homepage HTML — Verify Badge
+fetches the page and looks for the embed anchor, so the site needs the chip
+deployed before the check passes. Its Google OAuth popup is also blocked for
+untrusted synthetic clicks; sign up by email and click the Gmail verify link,
+or invoke the React `onClick` prop directly to force the OAuth navigation.
 
 Startup: [SideProjectors](https://www.sideprojectors.com) (DR 45) ·
 [StartupBuffer](https://startupbuffer.com) (DR 44) · [Launching Next](https://www.launchingnext.com)
@@ -224,8 +238,11 @@ disproportionately GEO-friendly, so file them on every launch.
   [llmstxt.site](https://llmstxt.site/submit) (form + contact email). GEO
   surface, not backlinks.
 - **Indie search engines.** [Mojeek](https://www.mojeek.com),
-  [Wiby](https://wiby.me/submit/) (image captcha — screenshot it, read it
-  visually, expect 1–3 tries per site; keep `worksafe` checked),
+  [Wiby](https://wiby.me/submit/) (image captcha — securimage distortion is
+  heavy; about 1 in 12 screenshot reads land, so budget real retry time.
+  Always reload the whole page for a fresh code — the in-form reload link
+  desyncs the session image from the accepted answer; keep `worksafe`
+  checked),
   [Marginalia](https://marginalia-search.com),
   and [Entireweb](https://www.entireweb.com/free_submission/) are independent
   crawl paths, not Google. `GET https://web.archive.org/save/<url>` snapshots
