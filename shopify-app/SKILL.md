@@ -1,6 +1,6 @@
 ---
 name: shopify-app
-description: "Build, run, and submit a Shopify app (a Remix embedded app under integrations/shopify-app/ built on @shopify/shopify-app-remix + App Bridge) and get it listed on the Shopify App Store. Use when creating a new Shopify app, wiring OAuth + an embedded admin UI, subscribing to shop webhooks (products/orders), deploying shopify.app.toml changes, or figuring out why App Store review bounces. Covers the whole path plus the traps that each cost a build/submit round-trip: webhook routes must return 2xx even when your downstream work fails (Shopify retries non-2xx into a storm), the three GDPR privacy webhooks are mandatory for distribution even as no-ops, shopify.app.toml edits do nothing until `shopify app deploy`, the embedded frame needs the boundary error/headers exports or OAuth redirects die in the iframe, and review installs your app on a store with zero of your state. Sibling of the other integration skills (canva-app, figma-plugin, browser-extension, zapier-integration, connector-directory-submission). Triggers: 'build a Shopify app', 'shopify app dev', 'shopify.app.toml', 'App Bridge embedded app', 'Shopify webhook HMAC', 'GDPR webhooks customers/data_request', 'Shopify App Store review rejected'."
+description: "Use when building or submitting a Shopify app (embedded Remix app on @shopify/shopify-app-remix and App Bridge): OAuth, the admin UI, shop webhooks, shopify.app.toml deploys, and App Store review that bounces."
 ---
 
 # Building a Shopify app
@@ -14,6 +14,13 @@ product's SDK / public REST API — all secrets and business logic stay server-s
 (`.server.ts` modules). Config lives in **`shopify.app.toml`** (client_id, URLs,
 scopes, declarative webhook subscriptions). Read this before the first file; the
 command playbook is `scripts/shopify-app/README.md` in the scripts repo.
+
+## When to use
+
+- **Triggers:** 'build a Shopify app', 'shopify app dev', 'shopify.app.toml', 'App Bridge embedded app', 'Shopify webhook HMAC', 'GDPR webhooks customers/data_request', 'Shopify App Store review rejected'.
+- Webhook routes must return 2xx even when downstream work fails (non-2xx retries storm). The three GDPR privacy webhooks are mandatory, even as no-ops.
+- shopify.app.toml edits do nothing until `shopify app deploy`; the embedded frame needs the boundary error and headers exports or OAuth redirects die; review installs on a store with none of your state.
+- Siblings: canva-app, figma-plugin, browser-extension, zapier-integration, connector-directory-submission.
 
 ## The trap that wastes a day: webhooks must 2xx even when your work fails
 

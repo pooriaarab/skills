@@ -1,6 +1,6 @@
 ---
 name: connector-directory-submission
-description: "Use when the product ships automation-platform connectors or agent plugins — an n8n community node, a Make (Integromat) app, Pipedream components, a Zapier integration, a Claude Code plugin, or a ChatGPT/Codex Apps-SDK app — and you want them listed on the public directories/marketplaces (n8n verified nodes, Make apps directory, Pipedream registry, Zapier app directory, a Claude Code plugin marketplace repo, the ChatGPT Plugins Directory). Sibling of mcp-directory-submission (that one is MCP servers only). Covers which destinations index a plain npm package (n8n, npm auto), which are a PR into a vendor monorepo (Pipedream), which are a dev-portal review with a partner/active-user gate (Make, Zapier, ChatGPT), and which are just a git repo users add (Claude Code plugins). Per platform: the exact package.json/manifest field that gates discovery (n8n keyword + n8n object, Pipedream component key, plugin.json/marketplace.json), the real submission entry point (npm index, developers.make.com review form, PipedreamHQ/pipedream PR, zapier.com/app/developer, /plugin marketplace add, platform.openai.com/plugins), auth quirks, review gates, and the silent-rejection gotchas. Flags what a hosted-endpoint requirement (ChatGPT app needs a public /mcp URL) or a private repo blocks. Triggers: 'submit my n8n node', 'get the connector verified', 'publish to the Make apps directory', 'PR our Pipedream components', 'list our Zapier app', 'distribute the Claude Code plugin', 'submit the ChatGPT app', 'connector directory submission'."
+description: "Use when an n8n node, Make app, Pipedream component, Zapier integration, Claude Code plugin or ChatGPT/Codex Apps-SDK app should be listed on its public directory or marketplace. MCP servers go to mcp-directory-submission."
 ---
 
 # Connector directory submission
@@ -8,6 +8,13 @@ description: "Use when the product ships automation-platform connectors or agent
 The product ships one isolated `integrations/<name>/` package per platform. Each targets a **different** kind of directory with a different gate. Unlike MCP directories (where local/stdio is fine almost everywhere), connector directories split hard on npm-index vs monorepo-PR vs paid/partner-reviewed vs hosted-endpoint. Know the bucket before you spend effort.
 
 **The core asymmetry vs MCP**: npm auto-indexing gets you *installable* on n8n and *distributable* as a Claude plugin with zero human review — but the **verified badge / public directory listing** on n8n, Make, Zapier, and ChatGPT all require review, and two of them (Zapier, Make partner) gate on real usage or partner status you can't fake. Ship the installable version first; the badge is a slow second lap.
+
+## When to use
+
+- **Triggers:** 'submit my n8n node', 'get the connector verified', 'publish to the Make apps directory', 'PR our Pipedream components', 'list our Zapier app', 'distribute the Claude Code plugin', 'submit the ChatGPT app', 'connector directory submission'.
+- Which destinations index a plain npm package (n8n), which are a PR into a vendor monorepo (Pipedream), which are a dev-portal review with a partner or active-user gate (Make, Zapier, ChatGPT), and which are a git repo users add (Claude Code plugins).
+- Per platform: the field that gates discovery (n8n keyword and n8n object, Pipedream component key, plugin.json and marketplace.json), the real entry point (npm, developers.make.com, PipedreamHQ/pipedream PR, zapier.com/app/developer, /plugin marketplace add, platform.openai.com/plugins), auth quirks, review gates and silent rejections.
+- What a hosted-endpoint requirement (a ChatGPT app needs a public /mcp URL) or a private repo blocks.
 
 ## Buckets — check this first
 

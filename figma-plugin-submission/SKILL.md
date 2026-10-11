@@ -1,6 +1,6 @@
 ---
 name: figma-plugin-submission
-description: "Drive a Figma plugin from locally imported to Community-submitted through the Figma desktop app publish dialog. Use when you need to publish a Figma plugin to Community, mint a plugin ID before first publish, fill the Data security step, or fix figma.clientStorage throwing without a plugin ID. Carries the traps that cost real time and are not in the figma-plugin skill: figma.clientStorage throws 'Cannot access client storage without a plugin ID' until an id is in manifest.json so every locally imported build fails to save an API key, minting an ID via New plugin creates a second dev plugin you must not publish from, the thumbnail slot is 1920x1080 not 1920x960 and both thumbnail and 128x128 icon must be flattened with no alpha, the Data security step is five questions whose first answer demands a publicly documented vulnerability process, Figma needs no walkthrough video, and the playground file is optional. Sibling of figma-plugin (the build path). Triggers: 'submit Figma plugin', 'publish to Figma Community', 'Cannot access client storage without a plugin ID', 'Figma plugin thumbnail', 'Figma Data security', 'Figma plugin ID', 'figma.clientStorage throws', 'Figma plugin review rejected'."
+description: "Use when publishing a Figma plugin to Community from the desktop publish dialog: minting a plugin ID, fixing figma.clientStorage that throws without one, thumbnails, and the Data security step."
 ---
 
 # Submitting a Figma plugin through Community
@@ -18,6 +18,13 @@ Worked example: Content Rabbit, submitted 2026-08-28 —
 `integrations/figma-plugin/` in `pooriaarab/content-rabbit`, and the filled-in
 listing copy and data-security answers are in that repo's
 `.claude/docs/figma/submission.md`.
+
+## When to use
+
+- **Triggers:** 'submit Figma plugin', 'publish to Figma Community', 'Cannot access client storage without a plugin ID', 'Figma plugin thumbnail', 'Figma Data security', 'Figma plugin ID', 'figma.clientStorage throws', 'Figma plugin review rejected'.
+- figma.clientStorage throws until manifest.json has an id; minting via New plugin creates a second dev plugin you must not publish from.
+- The thumbnail is 1920x1080 (not 1920x960); thumbnail and 128x128 icon must be flattened with no alpha. Data security has five questions; the first demands a public vulnerability process. No video needed; the playground file is optional.
+- Sibling: figma-plugin (the build path).
 
 ## 1. `figma.clientStorage` throws without a plugin ID
 

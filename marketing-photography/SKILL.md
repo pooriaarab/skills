@@ -1,6 +1,6 @@
 ---
 name: marketing-photography
-description: "Plan and prompt MARKETING SITE and LANDING PAGE photography with an AI image model where the SAME PEOPLE must recur across many pages and sections and each image must earn its place next to specific copy — building a written CAST with one 4-frame casting reference sheet per character and generating every scene as an edit against those sheets, why a full animation-style model sheet degrades photoreal identity transfer, matching each shot to the claim its section makes, realism levers that stop renders reading as AI (real camera and lens, motivated mixed light, unretouched skin, mundane objects, nobody looking at the camera), designing garbled text out of every frame, sector-cliche negative lists, honesty rules for generated people (no names, no testimonials, no badges), and a QA loop with pre-sized AVIF and WebP output. Fully generic with fill-in-the-blank CHARACTER and SCENE templates. Use when a site or landing page needs consistent, believable photographic imagery across sections; pair with ad-creative-generation for disposable single ad images and ad-image-prompt-library for starting prompt recipes."
+description: "Use when a marketing site or landing page needs believable AI photography where the same people recur across sections and each image matches the copy beside it. For one-off ad images use ad-creative-generation."
 ---
 
 # marketing-photography
@@ -17,6 +17,12 @@ page reads as stock photography, and visitors stop trusting the page. This
 skill fixes identity first, then matches every shot to the section it sits in.
 For starting prompt recipes see `ad-image-prompt-library`. For text-heavy or
 UI-heavy creatives rendered as HTML see `ad-creative-templates`.
+
+## When to use
+
+- **Triggers:** 'site photography', 'consistent people across pages', 'landing page images', 'photoreal brand imagery', 'AI photos that do not look AI'.
+- A written cast with one 4-frame casting sheet per character, every scene an edit against those sheets (a full animation-style model sheet hurts photoreal identity), and each shot matched to its section's claim.
+- Realism levers (real camera and lens, motivated mixed light, unretouched skin, mundane objects, nobody facing the camera), designing garbled text out, sector-cliche negatives, honesty rules (no names, testimonials or badges), and QA with pre-sized AVIF and WebP. Generic CHARACTER and SCENE templates; pairs with ad-image-prompt-library.
 
 ## 1. Use this skill when it owns the job
 

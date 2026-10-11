@@ -1,11 +1,18 @@
 ---
 name: adobe-express-addon
-description: "Build, run, and submit an Adobe Express add-on (a React panel under integrations/adobe-express-addon/ built on the Adobe Express Add-on SDK) and get it listed via the Adobe Developer Console. Use when creating a new Express add-on, wiring a 'design → export it → call your API' flow, exporting the current document, adding an add-on that fetches an external API from inside Express, storing an API key in add-on client storage, or figuring out why distribution review bounces. Covers the whole path plus the traps that each cost a build/submit round-trip: the add-on runs in a sandboxed iframe (every external origin must be allow-listed in the manifest or the fetch dies), design export is async via createRenditions and returns blobs (not a synchronous getter), the manifest declares permissions that must match what the code actually uses, and review needs the add-on to work for a reviewer with none of your state. Sibling of the other integration skills (canva-app, figma-plugin, browser-extension, connector-directory-submission). Triggers: 'build an Adobe Express add-on', 'Express Add-on SDK', 'createRenditions', 'addOnUISdk', 'add-on manifest permissions', 'publish to Adobe Express', 'my Express add-on fetch is blocked', 'Express add-on review rejected'."
+description: "Use when building or submitting an Adobe Express add-on (a React panel on the Add-on SDK): exporting the document, calling an external API, storing an API key, and Adobe Developer Console distribution review."
 ---
 
 # Building an Adobe Express add-on
 
 An Express add-on is a **React panel that runs in a sandboxed iframe inside Adobe Express**, built on the **Add-on SDK** (`addOnUISdk` from the add-on UI runtime). Source lives in `integrations/adobe-express-addon/`. It is a thin frontend over your own backend — the SDK gives you the document + client storage; you supply the logic. Read this before the first file; the command-level playbook is in `pooriaarab/scripts` `scripts/adobe-express-addon/README.md`.
+
+## When to use
+
+- **Triggers:** 'build an Adobe Express add-on', 'Express Add-on SDK', 'createRenditions', 'addOnUISdk', 'add-on manifest permissions', 'publish to Adobe Express', 'my Express add-on fetch is blocked', 'Express add-on review rejected'.
+- The add-on runs in a sandboxed iframe: allow-list every external origin in the manifest. Export is async via createRenditions and returns blobs.
+- Manifest permissions must match what the code uses; review needs the add-on to work for a reviewer with none of your state.
+- Siblings: canva-app, figma-plugin, browser-extension, connector-directory-submission.
 
 ## The trap that wastes a day: the iframe blocks un-allow-listed origins
 

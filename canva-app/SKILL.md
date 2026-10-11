@@ -1,6 +1,6 @@
 ---
 name: canva-app
-description: "Build, run, and submit a Canva app (a React app on the Canva Apps SDK) and get it listed on the Canva App Marketplace. Use when creating a new Canva app, wiring a 'design → do something with it' flow, exporting the current design, calling an external API from inside Canva, or working out why the Developer Portal will not let you submit. Covers the whole path plus the traps that each cost a round-trip: submission is blocked until you upload a JSON file of translated UI strings and an empty one is rejected, so every user-facing string must go through react-intl; the portal's forms save on blur, so filling the last field and navigating away silently reverts it; Canva's own eslint plugin forbids raw <img> and <input>; scopes must match the SDK calls you actually make; and the final gate is a legal attestation plus identity documents that only the account owner can complete. Sibling of the other integration skills (figma-plugin, adobe-express-addon, shopify-app, connector-directory-submission). Triggers: 'build a Canva app', 'Canva Apps SDK', 'export the Canva design', 'publish to the Canva App Marketplace', 'Canva app review rejected', 'Canva translation required'."
+description: "Use when building or submitting a Canva app on the Canva Apps SDK: exporting the design, calling an external API, and working out why the Developer Portal will not let you submit to the App Marketplace."
 ---
 
 # Building and submitting a Canva app
@@ -10,6 +10,13 @@ A Canva app is a **React app that runs in an iframe inside the Canva editor**, b
 It is a thin frontend over your own API: the SDK gives you the design content and the UI kit,
 you supply the logic. The command-level playbook is in `pooriaarab/scripts`
 `scripts/canva-app/README.md`.
+
+## When to use
+
+- **Triggers:** 'build a Canva app', 'Canva Apps SDK', 'export the Canva design', 'publish to the Canva App Marketplace', 'Canva app review rejected', 'Canva translation required'.
+- Submission needs an uploaded JSON of translated UI strings (an empty one is rejected), so every string goes through react-intl. Portal forms save on blur and silently revert the last field.
+- Canva's eslint plugin forbids raw <img> and <input>; scopes must match the SDK calls; the final gate is a legal attestation and ID documents only the account owner can complete.
+- Siblings: figma-plugin, adobe-express-addon, shopify-app, connector-directory-submission.
 
 ## The gate that actually blocks submission: translations
 

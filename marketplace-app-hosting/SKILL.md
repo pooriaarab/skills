@@ -1,11 +1,18 @@
 ---
 name: marketplace-app-hosting
-description: "Use when you have built one or more iframe marketplace apps (Shopify, Wix, Whop, monday, Webflow, HubSpot, HighLevel, Miro, Trello, etc.) and need to HOST them at a live HTTPS URL so the marketplace can embed them — the deploy half of the 0→1 that sits between 'built' and 'submittable'. Covers the one-Cloudflare-Worker-serves-all-apps pattern: a standalone Worker with Static Assets serving each app's built bundle at apps.<domain>/<app>/, per-marketplace frame-ancestors CSP so each store can iframe it, custom_domain routing, and the run_worker_first gotcha (Static Assets bypass the Worker for existing files, so headers never apply unless you force the Worker to run first). Also: which app types need hosting (dashboard/OAuth apps embed a URL) vs which do NOT (design-tool apps like Canva/Figma/Adobe are bundle-UPLOAD, no URL). Sibling of the per-marketplace build skills (shopify-app, whop-app, …). Triggers: 'host my marketplace apps', 'embed URL for the app', 'apps subdomain', 'frame-ancestors CSP for an iframe app', 'my app loads but the marketplace won't embed it', 'X-Frame-Options blocks the iframe', 'run_worker_first', 'Cloudflare custom domain for a worker'."
+description: "Use when built iframe marketplace apps (Shopify, Wix, Whop, monday, Webflow, HubSpot, HighLevel, Miro, Trello and others) need a live HTTPS URL the marketplace can embed, or when a store refuses to iframe the app."
 ---
 
 # Hosting iframe marketplace apps
 
 A marketplace that embeds your app in an `<iframe>` (Shopify admin, Wix dashboard, a Whop, a monday board, …) asks for **one thing: a live HTTPS URL**. Your built app (`dist/`) sitting in a repo has no URL — it must be *served*. This skill is the deploy half of the app 0→1: **one Cloudflare Worker serving every app** at `apps.<domain>/<app>/`. Command-level playbook: `pooriaarab/scripts` `scripts/marketplace-app-hosting/README.md`.
+
+## When to use
+
+- **Triggers:** 'host my marketplace apps', 'embed URL for the app', 'apps subdomain', 'frame-ancestors CSP for an iframe app', 'my app loads but the marketplace won't embed it', 'X-Frame-Options blocks the iframe', 'run_worker_first', 'Cloudflare custom domain for a worker'.
+- One Cloudflare Worker with Static Assets serves every app at apps.<domain>/<app>/, with per-marketplace frame-ancestors CSP and custom_domain routing.
+- The run_worker_first trap: Static Assets bypass the Worker for existing files, so headers never apply unless the Worker runs first.
+- Dashboard and OAuth apps need hosting; design-tool apps (Canva, Figma, Adobe) are bundle uploads with no URL. Siblings: the per-marketplace build skills.
 
 ## First: not every app needs hosting
 

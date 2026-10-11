@@ -1,6 +1,6 @@
 ---
 name: marketing-site
-description: "Build the whole public site for a product, not one landing page — a content model that generates page families (per audience, per use case, per module, per competitor), an animated shell with mega-menu header and full-taxonomy footer, free browser tools as an organic channel, real lead forms, and tests that guard every claim the copy makes. Use when a product has one thin landing page and needs a site, when someone asks for 'pages for each use case', '/partners', 'a page per competitor', 'programmatic SEO pages', or 'a site like <competitor>', or when a marketing site needs to scale past the point where each page is hand-written. Starts from a competitor design audit so the brief comes from evidence rather than taste. Covers the architecture, the copy discipline that keeps generated pages honest, brand assets with no design tools, and the seven failures that cost real time: a registry that drifts from the pages it lists, prerendered routes that 404 only in production, delegated copy that invents plausible numbers, staging getting indexed, a reveal wrapper that leaves the hero blank, a title template defined but never wired, and a merged PR that never reaches production because main deploys to staging. Stops where landing-page, impeccable, geo-aeo, and saas-brand-system begin."
+description: "Use when a product with one thin landing page needs a whole public site: page families per audience, use case, module or competitor, programmatic SEO pages, a mega-menu shell, free browser tools and real lead forms, with tests that guard every claim."
 ---
 
 # marketing-site
@@ -11,6 +11,13 @@ tests that stop the copy claiming things that are not true.
 
 **Worked example:** `pooriaarab/imecore` PR #45 — 60 pages, 26 free tools, 73
 browser tests, built in one session from a seven-competitor audit.
+
+## When to use
+
+- **Triggers:** 'pages for each use case', '/partners', 'a page per competitor', 'programmatic SEO pages', 'a site like <competitor>', 'scale the marketing site'.
+- Starts from a competitor design audit; covers the content model, the animated shell and full-taxonomy footer, copy discipline for generated pages, and brand assets with no design tools.
+- Seven failures: a registry that drifts from its pages, prerendered routes that 404 only in production, delegated copy with invented numbers, staging getting indexed, a reveal wrapper that blanks the hero, an unwired title template, and a merged PR that never reaches production because main deploys to staging.
+- Stops where landing-page, impeccable, geo-aeo and saas-brand-system begin.
 
 ## What this owns, and what it does not
 

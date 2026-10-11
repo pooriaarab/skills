@@ -1,6 +1,6 @@
 ---
 name: drain-a-pr-queue
-description: "Use when a repo accumulates a large open-PR backlog and an LLM review council gates merges — the chair posts a state comment but never a formal review, so nothing can land. Covers diagnosing council starvation (metered lens keys at a monthly cap or credits depleted, OAuth seats expired), re-pointing council lenses at live subscription seats via the council_models override, the rerun trap (a re-run uses the workflow file pinned at trigger time, so only a fresh synchronize picks up the fix), the empty-commit kick recipe that needs no checkout, keeping repo secrets synced to rotating OAuth credentials, a merge loop contract (clean state, latest-run-per-check green, one APPROVED review, delete head branch so stacked children re-target), and disposing of stacked, oversize, and superseded PRs without losing work. Triggers: 'merge all open PRs', 'zero open PRs', 'review council not approving', 'vibecodereview failing', 'chair posted no review', 'PR queue backlog', 'unstack PRs', 'approve PRs'. Also covers landing a stacked queue across many new repos: recording branch tips so `rebase --onto` survives squash merges, GitHub's secondary content-creation limit, restacking `file:` dependencies onto published versions, and the ship-sync branch for a second release into a squash-merged production branch. Triggers: 'land a stack', 'secondary rate limit', 'release PR conflicts', 'restack branches'."
+description: "Use when a repo has a large open-PR backlog that an LLM review council blocks (the chair never posts a formal review), or when landing a stacked PR queue across many repos."
 ---
 
 # Drain a PR queue
@@ -12,6 +12,14 @@ merges. It is the review gate.
 This skill is the recovery playbook for the failure that wedges everything: the
 LLM review council stops posting formal reviews, so every PR sits unapproved no
 matter how green its checks are.
+
+## When to use
+
+- **Triggers:** 'merge all open PRs', 'zero open PRs', 'review council not approving', 'vibecodereview failing', 'chair posted no review', 'PR queue backlog', 'unstack PRs', 'approve PRs', 'land a stack', 'secondary rate limit', 'release PR conflicts', 'restack branches'.
+- Diagnosing council starvation (metered lens keys capped or out of credit, expired OAuth seats), re-pointing lenses at live seats via the council_models override, and syncing repo secrets to rotating OAuth credentials.
+- The rerun trap (a re-run uses the workflow pinned at trigger time; only a fresh synchronize picks up the fix) and the empty-commit kick that needs no checkout.
+- A merge loop contract (clean state, latest run per check green, one APPROVED review, delete the head branch so stacked children re-target) and disposal of stacked, oversize and superseded PRs without losing work.
+- Landing stacks across new repos: recorded branch tips so `rebase --onto` survives squash merges, GitHub's secondary content-creation limit, restacking `file:` dependencies onto published versions, and the ship-sync branch for a second release.
 
 ## Diagnose council starvation first
 

@@ -1,6 +1,6 @@
 ---
 name: growth-cold-calling
-description: "Plan a B2B cold-calling campaign under Canada's CRTC Unsolicited Telecommunications Rules — when a human may dial versus when a machine may (ADAD/auto-dialer express-consent rule with no existing-business-relationship exemption, the opposite of CASL email's conspicuous-publication implied consent), where the National DNCL does and does not apply (business-to-business calls are exempt from DNCL but still bound by the Telemarketing and ADAD Rules), permitted calling hours, mandatory identification and callback-number display, and why an AI voice agent looks cheap but is illegal without prior express consent at first-campaign volumes. Also covers call recording (Criminal Code one-party rule versus the OPC's notice-and-purpose requirement), reaching buyers email cannot (gatekeepers, role addresses, contact-form firms), the single qualifying question, logging call outcomes so the prospect list improves, and sharing one suppression list with the email channel. Pairs with growth-cold-email and growth-prospect-list. Use when planning phone outreach, deciding between human dialling and an AI voice agent, checking whether a call list is callable, or handling gatekeepers and callbacks."
+description: "Use when planning B2B phone outreach in Canada under the CRTC telemarketing rules, choosing between human dialling and an AI voice agent, checking whether a call list is callable, or handling gatekeepers and callbacks."
 ---
 
 # growth-cold-calling
@@ -11,6 +11,13 @@ Pairs with `growth-cold-email` (the email channel and its CASL rules) and
 
 Every legal claim below is **Canada**. Other countries run their own regimes —
 do not assume any of this travels.
+
+## When to use
+
+- **Triggers:** 'cold calling', 'can I call this list', 'AI voice agent for outreach', 'DNCL', 'call recording consent', 'gatekeeper'.
+- When a human may dial vs a machine (ADAD needs express consent, no existing-relationship exemption, the opposite of CASL email); B2B calls are exempt from the National DNCL but not the Telemarketing and ADAD Rules; calling hours; identification and callback number.
+- Why an AI voice agent is illegal without prior express consent at first-campaign volumes; call recording (one-party rule vs OPC notice and purpose).
+- Reaching buyers email cannot (gatekeepers, role addresses, contact-form firms), one qualifying question, outcome logging, and one suppression list shared with email. Pairs with growth-cold-email and growth-prospect-list.
 
 ## The failure this skill prevents
 
