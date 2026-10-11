@@ -31,9 +31,9 @@ import { warmupFiles } from "./lib/configs.mjs";
 const execFile = promisify(execFileCb);
 const STATE_DEFAULT = path.join(os.homedir(), ".local/state/domain-email-warming/digests.json");
 
-// Flow ops: fill {match, value} | click {match} | uncheck-all | expect {match}.
-// {match} is a case-insensitive substring over the snapshot's text/label.
-// {mailbox} in a value is replaced with the target address.
+// Flow ops: fill {match, value} | click {match} | click-near {match, click} |
+// expect {match}. {match} is a case-insensitive substring over the
+// snapshot's text/label. {mailbox} in a value is replaced with the target.
 const PUBLICATIONS = [
   {
     key: "lenny",
@@ -41,16 +41,16 @@ const PUBLICATIONS = [
     subscribeUrl: "https://www.lennysnewsletter.com/subscribe",
     sender: "lennysnewsletter.com",
     pilot: false,
-    evidence: null,
+    evidence: "2026-10-11: attended funnel passed (fill, subscribe, free Select, Skip, Skip, Maybe later, landing shows title; no captcha). Scripted --pilot re-proves after the snapshot fix.",
     flow: [
       { op: "fill", match: "email", value: "{mailbox}" },
       { op: "click", match: "subscribe" },
-      // Plan picker: the free tier's Select sits beside paid Selects; the
-      // free radio's accessible name contains "NoneFree".
-      { op: "click-near", match: "NoneFree", click: "Select" },
-      { op: "uncheck-all" },
-      { op: "click", match: "Continue" },
-      { op: "click", match: "Skip" },
+      // Plan picker: the free tier's Select sits beside paid Selects.
+      // Anchor on "Free" (the "None" prefix seen once is a plan-code leak
+      // that may vanish; nothing else on the page says free).
+      { op: "click-near", match: "Free", click: "Select" },
+      { op: "click", match: "Skip" }, // recommendations: skip beats unchecking
+      { op: "click", match: "Skip" }, // app interstitial
       { op: "click", match: "Maybe later" },
       { op: "expect", match: "Lenny's Newsletter" },
     ],
@@ -111,23 +111,22 @@ async function sh(exec, bin, args) {
 }
 
 async function snapshot(exec) {
+  // Real CLI shape: {data:{snapshot:text, refs:{e7:{name,role}}}}.
+  // Order follows the text (tree order) so click-near anchors correctly;
+  // refs missing from the text sort after, numerically.
   const raw = await sh(exec, BROWSER, ["snapshot", "-i", "-c", "--json"]);
   const i = raw.indexOf("{");
   if (i < 0) throw new Error(`unparseable snapshot: ${raw.slice(0, 120)}`);
-  return JSON.parse(raw.slice(i));
-}
-
-function flatten(tree, out = []) {
-  // agent-browser --json nests node lists under nodes/elements/children.
-  const nodes = Array.isArray(tree) ? tree : [tree];
-  for (const n of nodes) {
-    if (!n || typeof n !== "object") continue;
-    out.push(n);
-    for (const k of ["children", "nodes", "elements"]) {
-      if (Array.isArray(n[k])) flatten(n[k], out);
-    }
-  }
-  return out;
+  const d = JSON.parse(raw.slice(i));
+  const refs = d?.data?.refs ?? null;
+  if (!refs || typeof refs !== "object") throw new Error(`snapshot has no refs map: ${raw.slice(0, 120)}`);
+  // Markers carry attributes ([checked=false, ref=e7]); match any of them.
+  const order = [...String(d?.data?.snapshot ?? "").matchAll(/\[([^\]]*?)ref=(e\d+)\]/g)].map((m) => m[2]);
+  const rank = new Map(order.map((k, n) => [k, n]));
+  const num = (k) => Number(k.slice(1));
+  return Object.entries(refs)
+    .sort(([a], [b]) => (rank.get(a) ?? 1e9) - (rank.get(b) ?? 1e9) || num(a) - num(b))
+    .map(([k, v]) => ({ ref: `@${k}`, name: v?.name ?? "", role: v?.role ?? "" }));
 }
 
 function nodeText(n) {
@@ -139,12 +138,29 @@ function findRef(nodes, match) {
   return nodes.find((n) => n.ref && nodeText(n).includes(m))?.ref ?? null;
 }
 
+function satisfied(flat, step) {
+  // Pre-check for the retry loop: is this step's target on the page yet?
+  if (step.op === "click-near") {
+    const ai = flat.findIndex((n) => nodeText(n).includes(step.match.toLowerCase()));
+    return ai >= 0 && flat.slice(ai).some((n) => n.ref && nodeText(n).includes(step.click.toLowerCase()));
+  }
+  if (step.op === "fill" || step.op === "click" || step.op === "expect") {
+    return findRef(flat, step.match) !== null;
+  }
+  return true;
+}
+
 async function runFlow(exec, pub, mailbox, log) {
   await sh(exec, BROWSER, ["open", pub.subscribeUrl]);
   await sh(exec, BROWSER, ["wait", "3000"]);
   for (const step of pub.flow) {
-    const tree = await snapshot(exec);
-    const flat = flatten(tree.nodes ?? tree.elements ?? tree);
+    // Slow pages render targets after the click wait; re-snapshot a few
+    // times before calling a target missing (the picker once needed two).
+    let flat = await snapshot(exec);
+    for (let t = 0; t < 4 && !satisfied(flat, step); t++) {
+      await sh(exec, BROWSER, ["wait", "3000"]);
+      flat = await snapshot(exec);
+    }
     if (step.op === "fill") {
       const ref = findRef(flat, step.match);
       if (!ref) throw new Error(`fill target not found: ${step.match}`);
@@ -156,19 +172,18 @@ async function runFlow(exec, pub, mailbox, log) {
       // text matches, else the first match after the anchor in tree order.
       let ref = findRef(flat, step.op === "click-near" ? step.click : step.match);
       if (step.op === "click-near") {
+        // Never degrade to a plain first-match click: on the plan picker
+        // that silently buys the paid tier (observed live 2026-10-11).
         const ai = flat.findIndex((n) => nodeText(n).includes(step.match.toLowerCase()));
-        const after = flat.slice(Math.max(0, ai)).find((n) => n.ref && nodeText(n).includes(step.click.toLowerCase()));
-        if (after) ref = after.ref;
+        if (ai < 0) throw new Error(`click-near anchor not found: ${step.match}`);
+        const after = flat.slice(ai).find((n) => n.ref && nodeText(n).includes(step.click.toLowerCase()));
+        if (!after) throw new Error(`click-near button not found after anchor: ${step.click}`);
+        ref = after.ref;
       }
       if (!ref) throw new Error(`click target not found: ${step.match}`);
       await sh(exec, BROWSER, ["click", ref]);
       await sh(exec, BROWSER, ["wait", "2500"]);
       log(`clicked ${step.match}`);
-    } else if (step.op === "uncheck-all") {
-      for (const n of flat.filter((x) => x.ref && /checkbox/i.test(x.role ?? "") && x.checked !== false)) {
-        await sh(exec, BROWSER, ["uncheck", n.ref]);
-      }
-      log("unchecked upsells");
     } else if (step.op === "expect") {
       if (!findRef(flat, step.match)) throw new Error(`expected text missing: ${step.match}`);
       log(`saw ${step.match}`);
@@ -267,4 +282,4 @@ async function main(argv, deps = {}) {
 
 const invoked = process.argv[1] && path.resolve(process.argv[1]) === new URL(import.meta.url).pathname;
 if (invoked) main(process.argv.slice(2)).then((c) => process.exit(c), (e) => { console.error(e.message ?? e); process.exit(1); });
-export { main, runFlow, findRef, flatten, hashPick, PUBLICATIONS };
+export { main, runFlow, findRef, hashPick, PUBLICATIONS };
