@@ -25,6 +25,7 @@ and videos in different styles never look alike.
 | [Glass on shader](glass-on-shader.md) | Frosted glass panels over moving light | Abstract AI products; sits well under a voice | 100 BPM | 22.8 s |
 | [Newsprint zine](newsprint-zine.md) | A photocopied punk zine: cut-out words, stamps | Tamper detection and "caught it" stories | 128 BPM | 21.8 s |
 | [Swiss grid](swiss-grid.md) | International Typographic: a visible 12-column grid | Rule engines and policy gates | 120 BPM | 24.5 s |
+| [Patch bay](patch-bay.md) | A modular-synth panel: jacks, lamps, patch cables | Connectors and direct links with no server between | 112 BPM | 27 s |
 
 [Presenter](presenter.md) is a module, not a style: a talking-head avatar card that any style can carry.
 

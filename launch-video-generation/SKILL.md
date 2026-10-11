@@ -5,6 +5,8 @@ description: "Plan and generate a short (15-60s) launch/announcement video from 
 
 # launch-video-generation
 
+**Start with `ship-demo-video`.** For any product's launch, demo or announcement video, fox* or not, follow `ship-demo-video` first: its stages, gates, polish rules and style library. This skill is the generation-technique reference it draws on (generated stills, image-to-video, music and voice models).
+
 Empirical, from building a real launch video (slackclaw) end to end: storyboard → generation → assembly → a redo after the first cut's on-screen text and scene transitions came out wrong.
 
 ## 1. Storyboard first, always
