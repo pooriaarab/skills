@@ -310,6 +310,27 @@ disproportionately GEO-friendly, so file them on every launch.
     (`POST /api/agent/templates`), [grokbot.wtf](https://grokbot.wtf) is a
     PR to `keshav-exe/bot-directory`, and [grok-bot.app](https://grok-bot.app)
     is a human-reviewed form.
+    - Bot creation flow (grok.com, signed in): sidebar **Bots → New bot**,
+      name it the domain (`Example.fyi`), then chat it its persona: "Here
+      is how you work, permanently: you are the assistant for
+      example.fyi… Save this as your standing instruction." The bot
+      browses the live site while it works — expect it to flag real
+      inconsistencies (ours caught a "US directory" label on a site that
+      also lists UK homes).
+    - Template export: **More → Create template** posts a canned message;
+      the bot builds the template asynchronously (~30s) and drops a card
+      with an **Unpublished** badge. A first message before the persona
+      lands makes an empty v1 — publish only after the instruction is in.
+      The **Publish** button is a human click the bot cannot do; **Copy
+      Link** then writes `x.ai/bot/<id>` to the clipboard.
+    - Field/enum traps: grokbots.best rejects `categories` values outside
+      its enum ("directory" → 400; "Productivity" accepted);
+      templatebot.lol wants `shareUrl`, not `link`; grokbot.wtf scaffolds
+      entries via `pnpm template:new` then `pnpm template:check` +
+      `template:verify-shares --slug`; grok-bot.app's form has fixed
+      categories (Research/Engineering/Product/Content/Operations) and
+      separate fields for job, standing instructions, source URL, share
+      URL.
   - [Poe](https://poe.com/create_bot) — a prompt bot (instructions pointing
     at the site or its `/mcp`) publishes immediately at `poe.com/<handle>`;
     no review for basic bots. Browser-gated by a Poe account.
