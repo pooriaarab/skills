@@ -1,18 +1,67 @@
 ---
 name: self-hosted-runner-fleet
-description: "Run GitHub Actions on your own machine, and know when not to. Use when asked to cut Actions minutes or queue time, add a machine to a runner fleet, decide which jobs are safe to move off hosted runners, choose between self-hosted and a managed ephemeral runner, or debug a self-hosted runner whose jobs die, queue forever, or report offline while busy. Covers Linux hosts and Windows hosts running the runner inside WSL2, and the operational costs that decide whether it is worth it."
+description: "Run GitHub Actions on your own machine, and know when not to. Use when asked to cut Actions minutes or queue time, add a machine to a runner fleet, decide which jobs are safe to move off hosted runners, choose between self-hosted and a managed ephemeral runner, or debug a self-hosted runner whose jobs die, queue forever, or report offline while busy. Covers the Boat JIT pool for private Linux CI, pool costs, and retired desktop troubleshooting on Linux and Windows/WSL2."
 ---
 
 # Self-hosted runner fleet
 
-A spare desktop is faster per job than a hosted runner and costs nothing per minute. The
-work is not installing the runner — that takes a minute. The work is knowing which jobs may
-move, which host details silently kill jobs, and whether you want to own a machine at all.
+Use the Boat JIT pool for private Linux CI. The desktop fleet below is retired.
+Read its sections only to maintain a host that needs special hardware or an OS.
+Public repos stay on GitHub-hosted runners. A fork PR can run code on a runner.
 
-Read the last section first if you are deciding rather than debugging: the fleet this skill
-documents was built across fifteen repositories and then **retired within days** in favour
-of managed ephemeral runners. Everything here still applies to a host you choose to run;
-none of it argues that you should.
+## Boat JIT runner pool
+
+Use `runs-on: boat` for build, lint, typecheck, test, E2E, deploy and API waits.
+Use `runs-on: boat-8` only for a heavy production build. Keep macOS and Windows
+jobs on GitHub-hosted images.
+
+Do not create a fresh VM for each job on a provider with start limits. A burst
+can exhaust that limit before jobs run. Keep a pool of always-on Boxes. Each
+Box runs one JIT runner at a time. A completed runner exits; the next job gets
+a new JIT config on the same Box. The VM and caches persist between jobs.
+This is runner isolation, not a fresh VM trust boundary. Admit only trusted CI.
+
+The broker is a Cloudflare Worker. It receives `workflow_job` webhooks and
+calls GitHub `generate-jitconfig`. The Box agent requests a config and runs
+it. Keep the GitHub token in the broker. Never store it on a Box. Code lives
+in `pooriaarab/scripts`: `workers/boat-runners/`, `boat-runner-agent` and
+`boat-pool` (work in progress in #508 and #509).
+
+A JIT runner gets ONLY the labels passed to `generate-jitconfig`. It does not
+get `self-hosted` by default. Pass `boat` or `boat-8` and use that single label
+in `runs-on`. A list such as `[self-hosted, boat]` cannot match this runner.
+
+Declare the labels for actionlint in `.github/actionlint.yaml`:
+
+```yaml
+self-hosted-runner:
+  labels: [boat, boat-8]
+```
+
+Boxes run Ubuntu 24.04 with passwordless sudo, Docker 29, Node 24 and Bun.
+Keep `~/.bun`, Playwright browsers and Docker images warm between jobs.
+Clean the job workspace and leftover services without deleting those caches.
+One job per Box avoids concurrent fixed-port service collisions. Check cleanup
+before dispatching the next job. Do not apply disposable-VM disk or swap hacks.
+
+Prices measured 2026-10-11:
+
+| Box | vCPU / RAM | Hourly price | Label |
+| --- | --- | --- | --- |
+| small | 2 / 4 GB | $0.018 | no fleet label assigned |
+| default | 4 / 8 GB | $0.036 | `boat` |
+| large | 8 / 16 GB | $0.072 | `boat-8` |
+
+For comparison, Ubicloud standard-2/4/8 costs $0.075/$0.15/$0.30 per hour.
+$1 buys 100,000 Box-seconds. An always-on pool bills wall time, including idle
+and queue time, not job time. N default Boxes cost N × $0.036 per hour.
+Size the pool from peak job demand, queue delay and idle cost. Check memory
+limits before a tier drop; a 12 GB Node heap cannot fit on an 8 GB Box.
+
+## Retired desktop procedure
+
+The following sections describe the old persistent desktop fleet. They do not
+set job placement for the Boat pool. Use the label and broker procedure above.
 
 Keep host specifics (address, SSH key, account names, service paths) in a private host
 overlay, not in this skill and not in a public repo.

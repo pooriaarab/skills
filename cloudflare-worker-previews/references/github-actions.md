@@ -31,7 +31,7 @@ permissions:
 jobs:
   build:
     if: github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubicloud-standard-8
+    runs-on: ${{ github.event.repository.private && 'boat-8' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:

@@ -18,7 +18,7 @@ jobs:
     # check does not stay red. Set the variable back to false to turn the council on.
     if: github.event.pull_request.user.login == github.repository_owner && vars.VIBECODEREVIEW_OFF != 'true'
     # Public repo: GitHub-hosted minutes are free here, so the fleet's
-    # Ubicloud rule (which covers the private repos) does not apply.
+    # Boat rule (which covers the private repos) does not apply.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:

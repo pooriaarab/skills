@@ -1,47 +1,38 @@
 ---
 name: high-volume-ci-optimization
-description: "Use when many agent-generated PRs per hour across many repos make CI feel slow or expensive, and you need it instant and cheap on infrastructure anyone can reproduce. Covers a three-tier runner model, collapsing job fan-out, host-local caches outside the workspace, in-job parallelism caps, fixed-port services, duplicate-work filters, affected-only builds, a remote cache, cache-masking hazards, timing APIs, per-minute cost, and security invariants. Cross-references self-hosted-runner-fleet for host setup rather than repeating it."
+description: "Use when many agent-generated PRs per hour across many repos make CI feel slow or expensive, and you need it instant and cheap on infrastructure anyone can reproduce. Covers a warm Boat JIT pool, collapsing job fan-out, host-local caches outside the workspace, in-job parallelism caps, fixed-port services, duplicate-work filters, affected-only builds, a remote cache, cache-masking hazards, timing APIs, pool wall-time cost, and security invariants. Cross-references self-hosted-runner-fleet for host setup rather than repeating it."
 ---
 
 # High-volume CI optimization
 
-CI feels instant when the jobs that run on every PR hit a warm cache on a host you already own, and still complete when that host is down because two other independent tiers exist. This skill is the job-placement and cost playbook. How to register and operate the host is in [self-hosted-runner-fleet](../self-hosted-runner-fleet/SKILL.md). Do not copy that setup here.
+Use the warm Boat pool for private Linux CI. Keep public repos on GitHub-hosted
+runners. This skill covers job placement and cost. Pool setup lives in
+[self-hosted-runner-fleet](../self-hosted-runner-fleet/SKILL.md).
 
 **Measure before you place.** [ci-speed-diagnosis](../ci-speed-diagnosis/SKILL.md) is the entry point of this family. It names the critical path, so you move the job that matters instead of the job you noticed. Moving a job that is not on the critical path buys machine time only.
 
-## Three-tier runner model
+## Runner placement
 
-Assign each job to the cheapest tier that can actually run it. Keep two independent paid-or-hosted tiers so that when the self-hosted host dies, CI still runs.
+| Job | Runner |
+| --- | --- |
+| Private build, lint, typecheck, test, E2E, deploy and API waits | `boat` (4 vCPU, 8 GB) |
+| Private heavy production build | `boat-8` (8 vCPU, 16 GB) |
+| Public repo jobs | GitHub-hosted `ubuntu-latest` |
+| macOS and Windows jobs | Existing GitHub-hosted image |
 
-| Job type | Runner | Why |
-| --- | --- | --- |
-| lint, typecheck, build, AI review | Self-hosted host you own | Caches stay warm between runs. Marginal cost is electricity. |
-| Jobs with fixed-port `services:` containers, e2e that needs those containers, burst fan-out, overflow | Ephemeral cloud runners (per-job VM, for example Ubicloud at about $0.0008/min) | Each job gets its own network namespace and ports. Extra capacity appears only when a burst needs it. See [e2e-ci-economics](../e2e-ci-economics/SKILL.md) before you decide how many e2e legs run per PR. |
-| deploy, release, publish, macOS/iOS images, SARIF upload jobs, comment-triggered workflows | Vendor-hosted (GitHub-hosted) | Image, secret, and trust constraints that a spare Linux box cannot meet. See [Security invariants](#security-invariants). |
+Run one JIT runner at a time on each always-on Box. Keep package caches,
+Playwright browsers and Docker images between jobs. The broker hands JIT
+configs to the agent and keeps the GitHub token off the Boxes. A start-limited
+provider cannot supply a fresh VM for every job in a burst.
 
-Same job, job execution time (not run wall clock), median and best:
+JIT runners get only the labels passed, without `self-hosted`. Use `boat` or
+`boat-8` alone. Declare both in `.github/actionlint.yaml`; see the pool skill.
+The pool code is in progress in `pooriaarab/scripts` #508 and #509. Confirm
+capacity before changing workflows. Check queue delay and idle cost together.
 
-| Runner | Median | Best |
-| --- | --- | --- |
-| self-hosted host you own | 43s | 26s |
-| ephemeral cloud VM (2 vCPU) | 50s | 48s |
-| vendor-hosted | 58s | 51s |
-
-The self-hosted host is the fastest tier per job. Cloud runners buy capacity, not speed. An earlier claim that cloud is 5x faster compared run wall clock including queue against job time. Compare job time to job time and wall clock to wall clock.
-
-The self-hosted host is the default for private-repo compile work because a warm package-manager cache and task-runner cache turn a multi-minute install into seconds. It is not the default for anything that needs a unique port, a vendor image, or a trust boundary the host should never cross.
-
-Keep the ephemeral cloud tier even after the host is humming. A single machine is a single failure domain. When it reboots, fills the disk, or hits load average 30, the cloud label still has to dispatch. That independence is the reason there are three tiers rather than "everything self-hosted, hosted as a last resort."
-
-### What happened when this model was run for real
-
-One fleet, one host, so read this as a data point rather than a verdict. The host won on per-job speed and lost anyway. Per job it was the fastest tier, 43s median against 50s hosted. It ran a fixed 4 runner services, so it executed at most 4 concurrent jobs across every branch, and median queue was 46-52s against 2s vendor-hosted. The queue number decides this, not the per-job number.
-
-The failure mode is the part the per-job number hides. When the host went offline, the repos pinned to it did not get slow CI, they got **dead** CI. Jobs died with "the runner has received a shutdown signal" or queued until timeout, and seven repos went down at once.
-
-**Decision rule.** A host you own pays off while concurrency stays low and you can absorb it being a single point of failure. It stops paying the moment many branches compete for it, which is exactly what happens once agents open pull requests in volume. Size the runner services against your real concurrent-branch count before you make the host a default, and keep the second tier genuinely independent so a dead host is a slow day rather than a stopped one.
-
-Point self-hosted jobs at the fleet label from [self-hosted-runner-fleet](../self-hosted-runner-fleet/SKILL.md). Point overflow and `services:` jobs at the ephemeral provider's label. Leave vendor-hosted jobs on `ubuntu-latest` or the macOS/iOS image they already use.
+The retired desktop was fast per job but had a fixed service count and host
+outages. Those measurements do not predict Boat queue delay. A pool still has
+a capacity limit: N Boxes run at most N jobs at once. Measure recent runs.
 
 ## The job fan-out tax
 
@@ -55,19 +46,10 @@ Do not collapse jobs that must run on different tiers. A SARIF upload and a comp
 
 ## Caches must live outside the workspace
 
-`actions/checkout` cleans the workspace, so any cache inside it is deleted every run. Put content-addressed caches on the host and inject them into every runner service with a systemd drop-in `Environment=` line.
-
-```ini
-# /etc/systemd/system/actions.runner.*.service.d/caches.conf
-[Service]
-Environment=npm_config_cache=/opt/ci-cache/npm
-Environment=TURBO_CACHE_DIR=/opt/ci-cache/turbo
-Environment=PLAYWRIGHT_BROWSERS_PATH=/opt/ci-cache/ms-playwright
-```
-
-Package-manager caches, task-runner caches, and browser downloads are content-addressed. Two repos can share `/opt/ci-cache` without clobbering each other. After `systemctl daemon-reload`, restart the runner services so they pick up the drop-in.
-
-Keep each runner service's `HOME` separate. Concurrent installs race on the package manager's home directory and fail with `Text file busy`. Share the caches, not the home. A typical layout is `HOME=/opt/actions-runner/<repo>` per service and `/opt/ci-cache/...` for everything hashed by content.
+`actions/checkout` cleans the workspace. Keep caches outside it. On Boat,
+keep `~/.bun`, Playwright browser downloads and Docker images warm. Set task
+cache paths outside the checkout. Clean leftover containers after each job.
+Do not run several agents on one Box or delete caches during workspace cleanup.
 
 `runner.environment` cannot separate two self-hosted fleets. It reads `self-hosted` for a spare box and for managed cloud runners. If you use it in a cache key, both fleets share one cache. A native addon built against one kernel restores onto the other and fails. Key on distro plus kernel release instead, for example `runner.os` plus `uname -r`.
 
@@ -79,37 +61,26 @@ Cloud and vendor-hosted jobs still need a cache they can see. That is the remote
 
 ## Cap in-job parallelism
 
-A 20-thread host with five concurrent jobs and uncapped workers reached load average 30. CI queued for about 30 minutes, unrelated SSH sessions stopped answering, and file-sync subprocesses were killed.
+Set task concurrency and test workers within the Box's CPU and memory limits.
+A default Box has 4 vCPU and 8 GB. A large Box has 8 vCPU and 16 GB. More workers
+can cause memory failures without reducing latency. Measure before raising caps.
 
-Set the task runner's concurrency and the test runner's worker count so that `(runner services) × (workers per job)` stays near the core count, not several times above it. A 20-thread host with three runner services wants roughly `--concurrency=6` (or `vitest --maxWorkers=6`) per job, not the tool default of "all cores" on every job at once.
+## Fixed-port service containers
 
-The failure mode looks like a dead host, not a slow test. Load average 30 with SSH unanswered is scheduler starvation. Cap first, then add services.
+One job per Box permits fixed-port `services:` containers. Separate Boxes have
+separate port spaces. Stop leftover containers before the next runner starts.
+Do not put several runners on one Box to increase concurrency.
 
-## Fixed-port services containers mean one job per host
+Review every `sudo`, absolute path and cache key when moving a workflow. Boxes
+persist. Steps that delete toolchains, recreate swap or change kernel settings
+can break later jobs. Remove disposable-VM cleanup steps before the move.
 
-Three test shards that each bind the same database port cannot share a machine. The second container fails with `port is already allocated`.
+## Pool concurrency
 
-GitHub `services:` maps container ports onto the runner's network namespace. On a persistent host that namespace is the host itself, so the first job owns `5432` until it exits. A single host can only serialize that class of job.
-
-Ephemeral per-job runners fix it: each VM (or each job network) gets its own port space, so the three shards run at the same time. Send any workflow that uses fixed-port `services:` to the ephemeral cloud tier. Do not try to make them share the self-hosted host.
-
-A job carries its runner assumptions when you move it. A step that frees disk by deleting vendor-hosted toolchain paths, runs `swapoff -a`, recreates `/swapfile` and sets `vm.swappiness` is correct on a runner it owns outright. On a shared host, concurrent copies do all that to each other. Re-read every `sudo`, absolute path and cache key when you change `runs-on`.
-
-## Runner services per repo
-
-One service per repo serializes that repo's jobs. Adding a second service for the same repo raises concurrency for that repo. It does not raise throughput once the host is CPU-bound. Check load average before adding. If the host is already at the cap from [Cap in-job parallelism](#cap-in-job-parallelism), another service only lengthens the queue you thought you were draining.
-
-Removing a service: delete the registration through the API first, then stop and remove the service. Deleting the service first leaves an orphaned registration the API refuses to delete while it looks busy. The API sequence is `DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}`, then `systemctl stop` and disable, then delete the install directory.
-
-How to register a service, one per repository, is in [self-hosted-runner-fleet](../self-hosted-runner-fleet/SKILL.md).
-
-## Parallelism is a count of machines, not a setting
-
-A self-hosted host with N runner services runs at most N concurrent jobs across every branch of a repo. There is no switch to turn on. No config raises that count except adding a service.
-
-Diagnostic pattern: on a pull request, every vendor-hosted and cloud check runs concurrently while only the self-hosted checks sit queued. That queue points at the host concurrency cap, not at job slowness.
-
-The bottleneck relocates rather than disappears. After this campaign moved the heavy jobs off the host, the host went fully idle and the queue reappeared against the vendor-hosted concurrency limit. Re-measure after every move. The next constraint is somewhere else.
+One Box runs one job. Add pool capacity only after measuring queue delay,
+CPU use and idle cost. Extra runner services on one Box do not create capacity.
+Track offline Boxes and broker dispatch failures. A label with no live matching
+runner leaves jobs queued. Re-measure after each change.
 
 ## Stop paying for duplicate work
 
@@ -143,7 +114,7 @@ A browser E2E shard has a much higher floor, because it boots a server as well. 
 
 A cache on one host does nothing for cloud runners. A shared remote cache (the task runner's remote cache on object storage you already pay for) makes every tier warm: the self-hosted host, the ephemeral VM, and a laptop running the same tasks.
 
-Without it, the three-tier model leaks. Overflow jobs on ephemeral runners rebuild from zero while the host next to them has a hot `/opt/ci-cache`. Point `TURBO_REMOTE_CACHE` / `NX_SELF_HOSTED_REMOTE_CACHE` / the vendor remote-cache URL at the same bucket from every tier. Local `/opt/ci-cache` remains the first hit on the host. The remote cache is what the other machines see.
+Without it, a job on a different Box rebuilds work already cached elsewhere. Point the task runner remote-cache URL at the same bucket from each Box. Keep a local cache outside the checkout for the first hit. The remote cache shares results across Boxes.
 
 **Before you wire the credentials into a workflow, ask two questions, not one.** A sweep of 19 candidate workflows for a missing remote-cache env block found 19 correct skips. The near-miss: one workflow genuinely ran the task runner, but both its tasks were pinned `cache: false` — correctly, since a cache hit on a `*:fix` task would skip the fix and still report success. Wiring the credentials in would have let it reach a cache it could never legitimately read. So confirm both: does the tool run here, **and** are these specific tasks cacheable.
 
@@ -166,7 +137,7 @@ Pull a sample of recent runs before changing labels. If the long pole is already
 Track two numbers. Never collapse them into one.
 
 - **Latency** - wall clock, run created to last job finished, queue included. What a person waiting on a PR feels.
-- **Machine seconds** - sum of each job duration. What metered runners bill.
+- **Machine seconds** - sum of each job duration. Useful work; pool billing also includes idle wall time.
 
 They move independently. Collapsing job fan-out cuts machine seconds and barely touches latency. Adding runners cuts latency and does not touch machine seconds. A single CI time number hides which one moved, so you cannot tell whether a change did what you thought.
 
@@ -181,24 +152,22 @@ Latency fell 67 percent. Machine seconds fell only 34 percent. Most of the work 
 
 ## Cost comparison
 
-Price per minute for a 2 vCPU Linux runner:
+Prices measured 2026-10-11:
 
-| Runner | Price per minute | Custody |
-| --- | --- | --- |
-| Vendor-hosted (GitHub-hosted) | about $0.008 | Vendor holds the checkout |
-| Managed ephemeral cloud runners | about $0.0008, roughly ten times cheaper | Provider holds the checkout |
-| Mid-tier providers | about $0.004, with a shared layer cache | Provider holds the checkout |
-| Runners launched in your own cloud account | about $0.001 plus the instance | The checkout stays in your account |
-| A host you already own | effectively free at the margin | The checkout stays on hardware you control |
+| Provider | 2 vCPU / hour | 4 vCPU / hour | 8 vCPU / hour |
+| --- | --- | --- | --- |
+| Boat | $0.018 | $0.036 | $0.072 |
+| Ubicloud (comparison) | $0.075 | $0.15 | $0.30 |
 
-Any third-party runner holds a checkout of private source. Only the run-in-your-own-account option, and the host you already own, avoid handing that checkout to someone else. Price is not the only column. If the repository cannot leave your account, skip the managed rows even though they are cheaper per minute.
-
-Use the ephemeral cloud tier for burst and `services:` work anyway when the alternative is stalling the self-hosted host. Ten times cheaper than vendor-hosted is still the right overflow valve. It is not a reason to point a public repository at your desktop.
+An always-on pool bills wall time, not job time. Include idle Boxes in the cost.
+$1 buys 100,000 Box-seconds. N default Boxes cost N × $0.036 per hour online.
+Boat holds private checkouts, so confirm the provider meets the repo's data rules.
+Public repos use free GitHub-hosted runners and do not enter this pool.
 
 ## Security invariants
 
 - Never copy secret values onto a self-hosted host. The provider injects repository secrets into trusted self-hosted jobs. A secret that lives in a file on the host is a secret that survives the job and is visible to every later job on that runner.
-- Never point a public repo at a self-hosted runner. A fork pull request would execute untrusted code on your hardware. Public repos stay on vendor-hosted or ephemeral runners that are destroyed after the job.
+- Never point a public repo at a self-hosted runner. A fork pull request would execute untrusted code on your hardware. Public repos stay on GitHub-hosted runners.
 - Keep comment-triggered workflows vendor-hosted, because they execute text an attacker can supply. A persistent host with a warm checkout is the wrong place for `@bot do this`.
 - Keep SARIF-upload scanners vendor-hosted. The upload step cannot resolve paths from a self-hosted workspace: it treats the runner home as the artifact root, and a workspace under `/opt/actions-runner` is not a child of that home.
 

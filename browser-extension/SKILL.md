@@ -378,7 +378,7 @@ on:
 
 jobs:
   publish:
-    runs-on: ubicloud-standard-4
+    runs-on: ${{ github.event.repository.private && 'boat' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
