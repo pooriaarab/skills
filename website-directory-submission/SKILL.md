@@ -122,10 +122,14 @@ uploaded on the Media tab before "Schedule your launch" enables, then "Join
 the free waiting line" queues ~13 months out. Its `join-waiting-line` endpoint
 429s after a burst of rapid clicks — space joins minutes apart, and upload the
 logo by dispatching a synthetic `drop` event with a `DataTransfer` if the file
-input is hidden. Fazier's free launch gates behind three approved comments on
+input is hidden. Free accounts hold ONE scheduled launch at a time — a second
+join errors "upgrade to Pro for parallel launches", so a multi-site fleet needs
+one account per site (or a paid plan). Fazier's free launch gates behind three approved comments on
 other products plus its badge embedded in the homepage HTML — Verify Badge
 fetches the page and looks for the embed anchor, so the site needs the chip
-deployed before the check passes. Its Google OAuth popup is also blocked for
+deployed before the check passes. Remote badge images count against the site
+CSP: add the badge origin to `img-src` (submitby.ai, fazier.com) or the
+security-headers E2E fails on the blocked image. Its Google OAuth popup is also blocked for
 untrusted synthetic clicks; sign up by email and click the Gmail verify link,
 or invoke the React `onClick` prop directly to force the OAuth navigation.
 
