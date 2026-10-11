@@ -25,7 +25,8 @@ import os
 SERVICE_WORDS = (
     "here.now cosmicjs.com agentmail inkbox recoupable cloudinary tinysend "
     "clawdmail chronary agentboxd mailboxkit agentpub generalcompute didit "
-    "whisper npmjs allmcps glama formsubmit substack blogtrottr"
+    "whisper npmjs allmcps glama formsubmit substack blogtrottr "
+    "alerts-noreply"
 ).split()
 
 # Announce-list sender domains, from subscribe-sweep.mjs LISTS (minus

@@ -54,7 +54,7 @@ esac
 for d in a.example mail.a.example b.example; do
   case "$Q" in *"$d"*) ok "domain present: $d" ;; *) bad "domain missing: $d" ;; esac
 done
-case "$Q" in *"formsubmit"*substack*blogtrottr*) ok "new sender words present" ;; *) bad "sender words missing" ;; esac
+case "$Q" in *"formsubmit"*substack*blogtrottr*alerts-noreply*) ok "new sender words present" ;; *) bad "sender words missing" ;; esac
 
 # 2. Backstop dry-run lists matches without modifying.
 export SWEEP_FAKE_HITS="m1,m2"
