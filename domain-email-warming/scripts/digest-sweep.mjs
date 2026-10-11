@@ -26,6 +26,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
+import { warmupFiles } from "./lib/configs.mjs";
 
 const execFile = promisify(execFileCb);
 const STATE_DEFAULT = path.join(os.homedir(), ".local/state/domain-email-warming/digests.json");
@@ -87,10 +88,10 @@ function saveState(p, s) {
 }
 
 function mailboxes(configDir) {
+  // Recursive via warmupFiles: apex configs beside domains/ count too.
   const out = [];
-  for (const f of fs.readdirSync(configDir)) {
-    if (!f.endsWith(".warmup.json")) continue;
-    const cfg = JSON.parse(fs.readFileSync(path.join(configDir, f), "utf8"));
+  for (const fp of warmupFiles(configDir)) {
+    const cfg = JSON.parse(fs.readFileSync(fp, "utf8"));
     for (const i of cfg.identities ?? []) if (i.address) out.push(i.address);
   }
   return [...new Set(out)].sort();

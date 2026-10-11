@@ -86,4 +86,19 @@ describe("main", () => {
     assert.equal(await main([...args], { resolver, checkDomain }), 0);
     assert.equal(await main([...args, "--fail-on", "warn"], { resolver, checkDomain }), 2);
   });
+
+  it("reads apex plus nested configs, not just the top dir", async () => {
+    const dir = configDir();
+    fs.mkdirSync(path.join(dir, "domains"));
+    fs.writeFileSync(path.join(dir, "domains", "u.warmup.json"), JSON.stringify({
+      sendingDomain: "other.example",
+      identities: [{ address: "b@other.example" }],
+    }));
+    const seen = [];
+    const resolver = { resolve4: async () => { throw nxdomain(); } };
+    const checkDomain = async (d) => { seen.push(d); return { findings: [] }; };
+    const code = await main(["--config-dir", dir, "--no-blacklist"], { resolver, checkDomain });
+    assert.equal(code, 0);
+    assert.deepEqual(seen.sort(), ["example.com", "other.example"]);
+  });
 });

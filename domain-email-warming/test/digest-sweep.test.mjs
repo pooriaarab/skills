@@ -117,4 +117,27 @@ describe("main", () => {
     assert.match(out, /would subscribe: m@x\.io\|tp/);
     PUBLICATIONS.pop();
   });
+
+  it("draws mailboxes from apex plus nested configs", async () => {
+    const dir = configDirWith("a@apex.example");
+    fs.mkdirSync(path.join(dir, "domains"));
+    fs.writeFileSync(path.join(dir, "domains", "u.warmup.json"), JSON.stringify({
+      identities: [{ address: "b@sub.example" }],
+    }));
+    const state = path.join(dir, "s.json");
+    fs.writeFileSync(state, JSON.stringify({ subs: {}, pilots: { lenny: true } }));
+    let out = "";
+    const origLog = console.log;
+    console.log = (m) => { out += m + "\n"; };
+    try {
+      const code = await main(["--config-dir", dir, "--account", "seed@example.com", "--state", state],
+        { exec: fakeExec(async () => { throw new Error("dry-run must not call out"); }) });
+      assert.equal(code, 0);
+    } finally {
+      console.log = origLog;
+    }
+    assert.match(out, /would subscribe: a@apex\.example\|lenny/);
+    assert.match(out, /would subscribe: b@sub\.example\|lenny/);
+    PUBLICATIONS.find((p) => p.key === "lenny").pilot = false;
+  });
 });
