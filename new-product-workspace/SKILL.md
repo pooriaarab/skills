@@ -98,15 +98,18 @@ branches are `main` and `release` simply never runs. There is no failure and no
 run, so nothing reports it. Every time you add or copy a workflow, read its
 `branches:` filter against the branches that actually exist (`git branch -r`).
 
-**CI runners.** Every job on a private `pooriaarab/*` repo runs on an Ubicloud
-managed runner. The self-hosted Dell fleet (`[self-hosted, linux, dell-ci]`) is
-retired: never write that label and never add a fallback to it.
+**CI runners.** Private `pooriaarab/*` repos use the warm Boat JIT pool.
+Public repos use GitHub-hosted runners because fork PRs run untrusted code.
+macOS and Windows jobs keep their GitHub-hosted images. The Dell fleet is
+retired. JIT runners get only the labels passed; do not add `self-hosted`.
+Declare `boat` and `boat-8` in `.github/actionlint.yaml`; see
+[self-hosted-runner-fleet](../self-hosted-runner-fleet/SKILL.md).
 
 | Job | `runs-on` |
 | --- | --- |
-| build, lint, typecheck, test | `ubicloud-standard-4` |
-| heavy Next.js production build | `ubicloud-standard-8` |
-| waits on an external API (LLM review, notify, deploy trigger, secret scan) | `ubicloud-standard-2` |
+| build, lint, typecheck, test, E2E, deploy | `boat` |
+| heavy Next.js production build | `boat-8` |
+| waits on an external API (LLM review, notify, deploy trigger, secret scan) | `boat` |
 
 **PR review.** Every repo gets `.github/workflows/vibecodereview.yml`, which
 calls `pooriaarab/vibecodereview@v1`. Copy the current canonical file instead of
@@ -142,7 +145,7 @@ The workspace is now ready. Next:
       or `production`.
 - [ ] `.github/workflows/vibecodereview.yml` copied from `imecore`;
       `OPENROUTER_API_KEY` set.
-- [ ] Every `runs-on` is an Ubicloud label; every `branches:` filter names a
+- [ ] Every `runs-on` matches repo visibility and OS; every `branches:` filter names a
       branch that exists.
 - [ ] Domain **not** purchased unless the user asked.
 
