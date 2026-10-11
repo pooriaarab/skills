@@ -23,6 +23,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { Resolver } from "node:dns/promises";
 import { checkDomain, organizationalDomain } from "./lib/preflight.mjs";
+import { warmupFiles } from "./lib/configs.mjs";
 
 const BLOCKLISTS = ["multi.surbl.org", "dbl.spamhaus.org"];
 
@@ -75,9 +76,9 @@ async function main(argv, deps = {}) {
   const resolver = deps.resolver ?? new Resolver();
   const check = deps.checkDomain ?? checkDomain;
   const report = { at: new Date().toISOString(), domains: {}, summary: { fail: 0, warn: 0, ok: 0 } };
-  const files = fs.readdirSync(o.configDir).filter((f) => f.endsWith(".warmup.json")).sort();
-  for (const f of files) {
-    const cfg = JSON.parse(fs.readFileSync(path.join(o.configDir, f), "utf8"));
+  const files = warmupFiles(o.configDir);
+  for (const fp of files) {
+    const cfg = JSON.parse(fs.readFileSync(fp, "utf8"));
     for (const { domain, role, returnPath } of sendingDomains(cfg)) {
       if (report.domains[domain]) continue;
       const auth = await check(domain, {
