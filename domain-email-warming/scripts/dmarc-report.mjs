@@ -129,7 +129,7 @@ async function main() {
   // No quoted phrases: they break gog's query parsing. subject:report
   // matches "Report domain:" and "[Preview] Report Domain:" alike.
   const query = `in:anywhere newer_than:${DAYS}d (subject:report-domain OR subject:report OR subject:dmarc)`;
-  const found = looseJson(await gog(["-a", ACCOUNT, "gmail", "messages", "search", query, "--max", "100", "-j"]));
+  const found = looseJson(await gog(["-a", ACCOUNT, "gmail", "messages", "search", "--max", "100", "-j", "--", query]));
   const msgs = found?.messages ?? [];
   if (!msgs.length) {
     console.log(`no DMARC reports in the last ${DAYS}d`);
