@@ -67,6 +67,9 @@ const LISTS = [
     domain: "lists.fedoraproject.org", confirm: "reply" },
   { key: "ubuntu-announce", to: "ubuntu-announce-join@lists.ubuntu.com",
     domain: "lists.ubuntu.com", confirm: "reply" },
+  // Piloted 2026-10-10: join accepted, classic mailman reply-confirm arrived.
+  { key: "ubuntu-security-announce", to: "ubuntu-security-announce-join@lists.ubuntu.com",
+    domain: "lists.ubuntu.com", confirm: "reply" },
   { key: "gentoo-announce", to: "gentoo-announce+subscribe@lists.gentoo.org",
     domain: "lists.gentoo.org", confirm: "reply" },
   { key: "gentoo-dev-announce", to: "gentoo-dev-announce+subscribe@lists.gentoo.org",
