@@ -1,6 +1,6 @@
 ---
 name: ship-demo-video
-description: "Turn real footage of your own product into a short, social-ready demo video, repeatably: capture the product working from an automation harness (window-region recording, privacy-safe crops, cut before the browser closes), make a plain captioned cut, then build a designed cut with HyperFrames (outcome-language hook, value by beat two, footage cards with push-ins, proof stats from measured runs only, end card) on a generated instrumental music bed with cuts on detected bars. Approval gates between stages: storyboard, one still per scene, preview with director notes, verified render. Covers the traps from a real run: screencapture writes no file when a parent stops it with a signal, beat detectors that report double tempo, HyperFrames fromTo rendering its from-state at build time, untimed card wrappers, sub-composition and contrast lint findings, zoom math that exposes frame edges, and buffered harness logs that hide when the browser closed. Use for a product demo, feature demo, extension or app walkthrough, or a launch clip built from screen recordings. Generated launch films (AI stills, image-to-video) are launch-video-generation."
+description: "Use for any product's launch, demo or announcement video, built from real footage of the product working: capture from its own harness, a plain captioned cut, then a designed 20-26 s HyperFrames cut on a generated instrumental bed with cuts on detected beats. Holds the series brief, polish rules, privacy audit, spend caps and a style library of proven looks with music prompts and SFX cue maps, plus HyperFrames traps from real renders. Draws on launch-video-generation for generated stills and image-to-video."
 ---
 
 # Demo videos from real product footage
@@ -9,9 +9,47 @@ A demo cut from real footage proves the product works. Generated imagery cannot.
 from "it runs in a test harness" to a 20 to 30 second video that is ready to post, and back again
 when the product changes.
 
-**Boundary.** Use this skill when the footage is your own product running for real. For a launch film built
-from generated stills and image-to-video clips, use `launch-video-generation`. For the post that carries the
-video, use `social-launch-post`.
+**Start here for any product video.** Use this skill first for every launch, demo or announcement video,
+whatever the product. When a shot needs generated imagery (AI stills, image-to-video, a cinematic scene),
+take the technique from `launch-video-generation`. For the post that carries the video, use
+`social-launch-post`.
+
+## Series brief
+
+Every video in a set follows these rules. When several agents make a set, copy them into one shared brief
+and add only the per-video facts: product, style, install line, avatar look.
+
+- **Length and grid.** 20 to 26 s. Pure graphic shots last 1 to 1.5 s; text shots hold for the reading pace
+  (see the polish rules). Cut on beats detected with `npx hyperframes beats`, and skip beats as needed.
+- **Arc.** Hook in outcome language → value (name and promise) by beat two → the demo on the musical drop →
+  proof from measured numbers only (the product's own tests or artifacts; never invent a number) → end card
+  with the exact install command and the repository URL.
+- **Frame 0 is a hook.** The first frame is a finished graphic with the hook line, never a logo, a title or a
+  fade-in. A viewer decides in that frame.
+- **One idea per screen.** One hero (text or a graphic), one visual action.
+- **Detailed art, not flat shapes.** Draw high-quality, detailed SVG art. Flat circles and rectangles read as
+  childish. For isometric objects and figures, use the `anatomy` skill (wheresryan22/anatomy).
+- **Reuse a proven style.** Pick a style from the [library](styles/README.md) and reuse its music prompt and
+  SFX pack. Inside one set, give each video a different style. Invent a new style only when the library runs
+  out, and write its spec after it ships.
+- **Names.** Do not use a host platform's trademark as the product name; "for Firefox" or "runs in Chrome" is
+  fine. No "demo" in an on-screen product name. Read the package name from `package.json`; it can differ from
+  the repository name.
+- **Plain language.** Write for a viewer who knows nothing about the field: short sentences, active voice,
+  common words. Run the `humanizer` skill on the copy.
+- **Music.** Two instrumental variants per video, chosen by the per-second loudness curve (stage 4). SFX on
+  cuts, clicks and slams.
+- **Spend cap.** Set a hard cap per video before the first call, for example $0.30 for music and SFX and
+  $0.15 for images. Check the provider balance before each call, log each charge to `spend.jsonl`, and stop
+  and report when the shared balance drops under $0.50.
+- **Keys.** Source each API key from its secrets file inside the command. Never print a key.
+- **Avatar.** Only on the videos that get one (see the presenter section). Duck the music to about 0.26 under
+  the voice. Build everything else first and add the avatar last.
+- **Privacy is a stop-ship.** Run the safe-end guard and the frame audit (stage 1 and stage 7) on every
+  render.
+- **Scope.** Work in a media folder outside the product repository. Do not commit media, push, open PRs or
+  post anything as part of making the video.
+- **Report per video.** Path, style, length, music model and cost, avatar look, audit result, blockers.
 
 ## Stages and gates
 
@@ -61,7 +99,16 @@ A full-screen capture leaks the menu bar, OS notifications and other apps' windo
   harness log line such as `"user":"<name>"` on screen is a leak too.
 - Record the last product frame of each source file (for example 38.45 s), and make the build refuse any
   clip whose `data-media-start + data-duration × rate` reads past it. A cut made 0.3 s too late put a private
-  notes window into a finished social video. The guard turns that mistake into a build error.
+  notes window into a finished social video. The guard turns that mistake into a build error:
+
+  ```python
+  SAFE = {"flights": 38.45, "maps": 38.65}  # last product frame of each source, in seconds
+  for cid, src, start, dur, media_start, rate in clips:
+      end = media_start + dur * rate
+      assert end <= SAFE[src], f"{cid} reads {src} to {end:.2f}s, past the safe end {SAFE[src]}s"
+  ```
+- Scrub the final frames for any personal window, notification, email address, file path with a user name,
+  or token. One leak stops the release.
 
 ### Third-party sites
 
@@ -264,7 +311,9 @@ footage; a short founder intro over it works.
 - Measure the avatar clip with `ffprobe` before you time the scenes. A clip can come back shorter than the
   plan, and a fixed timeline then holds a silent end card for 5 s. Fit the end card to the clip.
 - Vary the look across a set: other outfits and camera angles of the same twin (`GET /v3/avatars/looks`)
-  keep several avatar videos from reading as one recording.
+  keep several avatar videos from reading as one recording. Never repeat an outfit in a set.
+- Avatar clips cost about $0.05 to $0.09 per second, with a minimum per clip. Render one clip per video at
+  full script length (about 15 to 20 s); a short test clip still pays the minimum.
 
 ### Asset paths in sub-compositions
 
@@ -312,6 +361,32 @@ before the cut". "Make it better" gets random changes. Re-snapshot after each ro
   minute on a laptop.
 - Verify the file, not the log: `ffprobe` duration and streams (video and audio present), a frame grid
   across the whole video, and `volumedetect` for loudness.
+- Make the frame grid with this audit script, and read every tile before anyone sees the video
+  (`python3 audit.py <video.mp4> <grid.png> [...]`):
+
+  ```python
+  # Frame audit: one frame every STEP seconds of each video, tiled into a grid PNG.
+  import subprocess, sys
+  from io import BytesIO
+  from PIL import Image
+
+  STEP, W, COLS = 1.5, 320, 6
+  for path, out in zip(sys.argv[1::2], sys.argv[2::2]):
+      d = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                                "-of", "csv=p=0", path], capture_output=True, text=True).stdout)
+      imgs, t = [], 0.7
+      while t < d:
+          png = subprocess.run(["ffmpeg", "-loglevel", "error", "-ss", f"{t:.2f}", "-i", path,
+                                "-frames:v", "1", "-vf", f"scale={W}:-1", "-f", "image2pipe",
+                                "-vcodec", "png", "-"], capture_output=True).stdout
+          imgs.append(Image.open(BytesIO(png))); t += STEP
+      h, rows = imgs[0].height, (len(imgs) + COLS - 1) // COLS
+      sheet = Image.new("RGB", (COLS * W, rows * h), "black")
+      for i, im in enumerate(imgs):
+          sheet.paste(im, ((i % COLS) * W, (i // COLS) * h))
+      sheet.save(out)
+      print(out, len(imgs), "frames")
+  ```
 - Deliver into the product's media folder, outside the repository. Never commit media to a repo whose
   checks reject committed proof files. Open the folder for the human.
 
@@ -328,6 +403,8 @@ repeated, a gate that was missing. The next agent reads the skill, not this chat
 
 ## Related skills
 
-- `launch-video-generation`: generated launch films, image-to-video, AI stills.
+- `launch-video-generation`: generation techniques this skill draws on: image-to-video, AI stills, music
+  and voice models.
+- `anatomy`: detailed isometric SVG figures for graphic shots.
 - `social-launch-post`: the post that carries the video.
 - `app-screenshots`: store screenshots from the same product runs.
