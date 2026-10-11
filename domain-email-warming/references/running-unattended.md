@@ -121,3 +121,12 @@ Every `gog` caller needs the file keyring backend (above), and every sender
 needs the Cloudflare env sourced from `~/.config`, never `~/Documents`. New
 jobs inherit both constraints; verify each one with the `env -i` invocation
 before trusting its schedule.
+
+## Second filter: Glama connector notes
+
+The main rule only matches mail to warmed addresses. Glama's
+"connector pending review" notes go to the seed Gmail directly, so they
+need their own rule: query `from:support@glama.ai subject:"pending
+review"`, action Skip Inbox plus a `glama` label, unread kept. The
+sender pins the template, so human mail from Glama staff
+(frank@glama.ai) stays in the inbox.

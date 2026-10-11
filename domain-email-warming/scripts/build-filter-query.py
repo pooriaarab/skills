@@ -22,10 +22,14 @@ import os
 
 # Signup-service keywords mirror the signup-sweep janitor (same match set the
 # sweeps already trash after an hour) plus observed non-adapter senders.
+# No npmjs on purpose: every npm mail to a warmed address is the
+# operator's own (publish receipts, token notices) — verified 50/50 on
+# 2026-10-11 — and no signup adapter needs it. Receipts belong in the
+# inbox, not under warmup.
 SERVICE_WORDS = (
     "here.now cosmicjs.com agentmail inkbox recoupable cloudinary tinysend "
     "clawdmail chronary agentboxd mailboxkit agentpub generalcompute didit "
-    "whisper npmjs allmcps glama formsubmit substack blogtrottr "
+    "whisper allmcps glama formsubmit substack blogtrottr "
     "alerts-noreply"
 ).split()
 
