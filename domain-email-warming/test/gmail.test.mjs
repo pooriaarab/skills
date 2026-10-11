@@ -199,3 +199,21 @@ describe("mutations", () => {
     assert.equal(exec.calls[0].args[exec.calls[0].args.indexOf("--max") + 1], "10");
   });
 });
+
+describe("search separator", () => {
+  it("puts -- before the query so a leading dash cannot parse as a flag", async () => {
+    const exec = fakeExec([none]);
+    await makeGmail(exec).list("acct", "-to:x@y.z in:spam", 5);
+    const a = exec.calls[0].args;
+    assert.equal(a[a.length - 2], "--");
+    assert.equal(a[a.length - 1], "-to:x@y.z in:spam");
+  });
+
+  it("keeps flags ahead of -- on the findByMessageId path too", async () => {
+    const exec = fakeExec([none, none]);
+    await makeGmail(exec).findByMessageId("acct", "abc@d.com");
+    for (const c of exec.calls) {
+      assert.ok(c.args.indexOf("--") > c.args.indexOf("-j"));
+    }
+  });
+});

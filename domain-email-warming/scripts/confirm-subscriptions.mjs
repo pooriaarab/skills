@@ -88,8 +88,8 @@ async function recentInboundGmail() {
   const days = Math.max(1, Math.ceil(HOURS / 24));
   const out = await gog([
     "-a", ACCOUNT, "gmail", "messages", "search",
+    "--max", "50", "-j", "--",
     `newer_than:${days}d in:anywhere (confirm OR verify OR subscribe OR "opt in")`,
-    "--max", "50", "-j",
   ]);
   const i = out.search(/[[{]/);
   if (i === -1) {
@@ -165,7 +165,7 @@ function extractLinks(raw) {
  * Errors propagate to the caller's try/catch, which already reports them per
  * row instead of being masked into a false "no confirmation link found". */
 async function bodyForGmail(row) {
-  const out = await gog(["-a", ACCOUNT, "gmail", "messages", "search", `rfc822msgid:${row.id}`, "--max", "1", "-j"]);
+  const out = await gog(["-a", ACCOUNT, "gmail", "messages", "search", "--max", "1", "-j", "--", `rfc822msgid:${row.id}`]);
   return `${row.subject}\n${out}`;
 }
 

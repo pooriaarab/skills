@@ -53,7 +53,9 @@ export function makeGmail(execFile = execFileDefault) {
    * placement report as not_found.
    */
   async function search(account, query) {
-    const res = await gog(["-a", account, "gmail", "messages", "search", query, "--max", "1", "-j"]);
+    // Flags before `--`, query last: a query starting with `-` (the filter
+    // query starts with `-to:`) would otherwise parse as a gog flag.
+    const res = await gog(["-a", account, "gmail", "messages", "search", "--max", "1", "-j", "--", query]);
     const parsed = parseJson(res.stdout);
     // A parsed payload is the truth even when the exit code disagrees - gog
     // can exit non-zero while still printing results on stdout.
@@ -67,7 +69,7 @@ export function makeGmail(execFile = execFileDefault) {
    * search — ok:false means the lookup failed, never "no mail matched".
    */
   async function list(account, query, max = 100) {
-    const res = await gog(["-a", account, "gmail", "messages", "search", query, "--max", String(max), "-j"]);
+    const res = await gog(["-a", account, "gmail", "messages", "search", "--max", String(max), "-j", "--", query]);
     const parsed = parseJson(res.stdout);
     if (parsed) {
       const list = Array.isArray(parsed) ? parsed : parsed.messages ?? [];

@@ -231,7 +231,7 @@ function headerField(raw, name) {
 async function gogSearch(bin, account, query) {
   try {
     const { stdout } = await execFile(bin, ["-a", account, "gmail", "messages", "search",
-                                          query, "--max", "50", "-j"], { timeout: 60_000 });
+                                          "--max", "50", "-j", "--", query], { timeout: 60_000 });
     const i = stdout.indexOf("{");
     return JSON.parse(stdout.slice(i)).messages ?? [];
   } catch {
