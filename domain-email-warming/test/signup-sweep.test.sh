@@ -55,6 +55,15 @@ case "$url" in
   *api/signup/verify*)
     echo '{"api_key":"whisper-key"}'
     ;;
+  *formsubmit.co/ajax*)
+    case "${SWEEP_FAKE_FORMSUBMIT:-new}" in
+      new)    echo '{"success":"false","message":"This form needs Activation. We sent an Activate Form link."}' ;;
+      active) echo '{"success":"true","message":"The form was submitted successfully."}' ;;
+    esac
+    ;;
+  *formsubmit.co/confirm*)
+    echo '<html>Form Activated! This form is now active.</html>'
+    ;;
   *) echo "stub curl: refused url: $url" >&2; exit 9 ;;
 esac
 STUB
@@ -177,7 +186,30 @@ st=$(pair 'z@t.example|cloudinary' status)
 [ "$st" = "verified" ] && ok "cloudinary request-only verified" || bad "cloudinary status=$st"
 [ -f "$ROOT/state/creds/cloudinary/z_t.example" ] && ok "cloudinary credential stored" || bad "no cloudinary credential"
 
-# 10. Missing config dir exits 1.
+# 10. formsubmit: activation link extracts and verifies by visit.
+seed 'f@t.example|formsubmit' '{"service":"formsubmit","status":"new","attempts":0,"sent_at":0,"next_at":0}'
+pace
+SWEEP_FAKE_BODY="" SWEEP_FAKE_FORMSUBMIT=new python3 "$SCRIPT" --once >/dev/null
+st=$(pair 'f@t.example|formsubmit' status)
+[ "$st" = "requested" ] && ok "formsubmit activation requested" || bad "formsubmit status=$st"
+python3 -c "import json;s=json.load(open('$SWEEP_STATE'));s['pairs']['f@t.example|formsubmit']['sent_at']-=60;json.dump(s,open('$SWEEP_STATE','w'))"
+SWEEP_FAKE_TO="f@t.example" SWEEP_FAKE_BODY="Click https://formsubmit.co/confirm/abc123def456 to activate." python3 "$SCRIPT" --once >/dev/null
+st=$(pair 'f@t.example|formsubmit' status)
+[ "$st" = "verified" ] && ok "formsubmit link verified" || bad "formsubmit verify status=$st"
+grep -q 'formsubmit.co/ajax/f@t.example' "$ROOT/state/creds/formsubmit/f_t.example" && ok "formsubmit endpoint stored" || bad "no formsubmit credential"
+
+# 11. formsubmit: already-active form verifies on the forward alone.
+seed 'g@t.example|formsubmit' '{"service":"formsubmit","status":"new","attempts":0,"sent_at":0,"next_at":0}'
+pace
+SWEEP_FAKE_BODY="" SWEEP_FAKE_FORMSUBMIT=active python3 "$SCRIPT" --once >/dev/null
+st=$(pair 'g@t.example|formsubmit' status)
+[ "$st" = "requested" ] && ok "formsubmit active submit requested" || bad "formsubmit active status=$st"
+python3 -c "import json;s=json.load(open('$SWEEP_STATE'));s['pairs']['g@t.example|formsubmit']['sent_at']-=60;json.dump(s,open('$SWEEP_STATE','w'))"
+SWEEP_FAKE_TO="g@t.example" SWEEP_FAKE_BODY="FormSubmit forward: warmup check-in" python3 "$SCRIPT" --once >/dev/null
+st=$(pair 'g@t.example|formsubmit' status)
+[ "$st" = "verified" ] && ok "formsubmit forward verified" || bad "formsubmit forward status=$st"
+
+# 12. Missing config dir exits 1.
 SWEEP_CONFIG_DIR="$ROOT/nope" python3 "$SCRIPT" --once >/dev/null 2>&1
 [ $? -eq 1 ] && ok "missing config dir exits 1" || bad "missing config dir exit=$?"
 
