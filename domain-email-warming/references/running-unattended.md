@@ -99,3 +99,25 @@ A crontab entry proves a job is scheduled, not that it works. After the first
 scheduled hour, read the log and confirm you see a preflight block and a `send`
 line. An empty log means the job never fired; a log with one permission error
 means it fired and died.
+
+## Scheduling the sweeps and the watchers
+
+The sweeps run alongside `warm-tick.sh`, each on its own cadence, each with
+its own state file and log so one failure never masks another:
+
+| Job | Cadence | Notes |
+|---|---|---|
+| `signup-sweep.py --daemon` | always-on (launchd KeepAlive) | OTP polling is latency-sensitive; cron's one-minute floor is too slow |
+| `subscribe-sweep.mjs --apply` | daily | `--max` caps subscribes per run; confirms complete in-band |
+| `confirm-subscriptions.mjs --apply` | daily, after subscribe-sweep | generic double-opt-in completion, also serves digest-sweep |
+| `vendor-outreach.mjs --apply` | daily | strict per-vendor caps; see its header |
+| `inbox-backstop.py` | hourly | reruns the filter query; needs `--account` |
+| `notify-sweep.mjs --apply` | weekly | `--max` caps drips; per-mailbox `--min-days` spacing |
+| `engage-seed.mjs --apply` | weekly | rescue, star sample, read the stale tail |
+| `reputation-monitor.mjs` | daily | exits 2 when action is needed; alert on that, not on output |
+| `digest-sweep.mjs` | manual only | browser-driven and pilot-gated; never schedule an unpiloted publication |
+
+Every `gog` caller needs the file keyring backend (above), and every sender
+needs the Cloudflare env sourced from `~/.config`, never `~/Documents`. New
+jobs inherit both constraints; verify each one with the `env -i` invocation
+before trusting its schedule.
