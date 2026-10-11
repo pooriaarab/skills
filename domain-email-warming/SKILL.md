@@ -159,11 +159,28 @@ work across mailboxes and days rather than bursting.
 | `reply-inbound.mjs` | Replies to real human mail that reaches warmup boxes |
 | `dmarc-report.mjs` | Reads DMARC aggregate reports from the seed inbox, summarizes pass/fail per domain |
 | `validate-newsletters.mjs` | Checks subscribed newsletters still arrive |
+| `digest-sweep.mjs` | Subscribes the seed to newsletters and alerts via a real browser; publications ship unpiloted until `--pilot` proves the loop |
+| `notify-sweep.mjs` | Nudges activated form endpoints for on-demand notification drips |
+| `engage-seed.mjs` | Seed-side engagement: rescues warmup mail from spam, stars a sample, reads the stale tail |
+| `reputation-monitor.mjs` | Standing watch: fleet DNS auth plus SURBL/Spamhaus listings, exits 2 when action is needed |
+| `inbox-backstop.py` | Re-applies the warmup filter rule to mail Gmail's own filter skipped |
 
 Note: the cross-mailbox self-mail loop (`warm-tick.sh`/`warm-all.sh` plus
 warmctl `send`/`engage`) is currently parked by operator decision — configs
 carry no seeds and the schedule is disabled. The sweeps above are the active
 program. Re-enable by restoring seeds and the schedule.
+
+Browser and web sweeps follow the pilot-gate convention: a target ships with
+`pilot:false` plus the observed evidence, and `--apply` refuses it until an
+attended `--pilot` run proves the full loop (submit, confirmation mail,
+verified receipt). Probe before you scale.
+
+Seed-inbox mail from all of the above stays out of the operator's face with
+one Gmail filter (Skip Inbox, apply the `warmup` label). The filter query is
+generated, not hand-written: `build-filter-query.py` builds it from the live
+configs, and `inbox-backstop.py` re-applies it hourly to anything Gmail's own
+filter skipped. Regenerate the query when warmed domains or warmup senders
+change, then update the filter to match.
 
 Configure with `examples/imecore.warmup.json` as the template. The Cloudflare adapter is
 one file (`scripts/lib/cloudflare.mjs`); another provider means replacing that file, not
