@@ -134,6 +134,8 @@ cut slips.
 ## 3. Storyboard the designed cut
 
 Write the plan before any HTML. A frame change here costs a minute; after a render it costs a cycle.
+For the script itself (beats, hooks, second-by-second turns, the call to action), use
+`launch-video-screenwriting` first, then lay out the frames below.
 
 - **Hook in outcome language.** The first beat says what the viewer gains or avoids, not what the product is.
   "You're one Enter away from pasting your email into an AI" beats "PII Guard detects PII".
@@ -405,6 +407,7 @@ repeated, a gate that was missing. The next agent reads the skill, not this chat
 
 - `launch-video-generation`: generation techniques this skill draws on: image-to-video, AI stills, music
   and voice models.
+- `launch-video-screenwriting`: script craft for the storyboard: beats, hooks, value turns per shot.
 - `anatomy`: detailed isometric SVG figures for graphic shots.
 - `social-launch-post`: the post that carries the video.
 - `app-screenshots`: store screenshots from the same product runs.
