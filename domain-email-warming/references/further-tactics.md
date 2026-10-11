@@ -303,6 +303,40 @@ cost money for something you partly get free by seeding your own accounts. Worth
 it when you are about to spend real money on a campaign; not worth it to watch a
 warm-up tick over.
 
+## Third-party inbound: what pilots proved (2026-10-10)
+
+**industry, with receipts.** The program earns mail from real third parties
+rather than only mailing itself. Each source below was probed live before any
+sweep was allowed to touch it; the pilot-gate convention in the sweeps exists
+so this list stays honest.
+
+Proven, running:
+
+- **Agent-service signups** (`signup-sweep.py`, 15 adapters). OTP/verify mail
+  plus ongoing notifications per mailbox. Newest adapter: FormSubmit, whose
+  full loop was piloted live — ajax submit, activation mail, link click,
+  delivered forward — including the finding that its endpoint refuses calls
+  without web Origin/Referer headers.
+- **Announce lists** (`subscribe-sweep.mjs`). Subscribe-by-email with in-band
+  confirms. Newest: ubuntu-security-announce (classic mailman reply-confirm).
+- **On-demand notification drips** (`notify-sweep.mjs`). Re-submits each
+  mailbox's activated FormSubmit endpoint on a slow rotation; a real third
+  party mails the mailbox on demand.
+
+Probed and parked, with the reason:
+
+- **Blogtrottr** (RSS-to-email): subscribe form demands a Turnstile challenge.
+- **Substack**: direct API answers 200 and never mails; the browser funnel
+  completes end to end with no captcha but produced zero mail in 40+ minutes.
+  Retest before scaling, not during.
+- **Google Alerts**: needs a Google session per mailbox; no automation path.
+- **Talkwalker, beehiiv, Ghost pubs, status pages**: JS apps, 403s, or moved
+  endpoints — nothing curl-reachable at probe time.
+- **Have I Been Pwned notifications**: Turnstile on the notify flow.
+- **High-volume discussion lists** (python-list joins fine by email): dozens
+  of mails a day flood a mailbox instead of warming it. Announce-only stays
+  the rule.
+
 ## What to do first
 
 If you do four things, do these:
