@@ -63,6 +63,21 @@ export function makeGmail(execFile = execFileDefault) {
   }
 
   /**
+   * List form of search: up to `max` {id, labels} hits. Same contract as
+   * search — ok:false means the lookup failed, never "no mail matched".
+   */
+  async function list(account, query, max = 100) {
+    const res = await gog(["-a", account, "gmail", "messages", "search", query, "--max", String(max), "-j"]);
+    const parsed = parseJson(res.stdout);
+    if (parsed) {
+      const list = Array.isArray(parsed) ? parsed : parsed.messages ?? [];
+      return { ok: true, error: null, messages: list.map((m) => ({ id: m.id, labels: m.labels ?? [] })) };
+    }
+    if (!res.ok) return { ok: false, error: res.error ?? "gog failed", messages: [] };
+    return { ok: false, error: "unparseable gog output", messages: [] };
+  }
+
+  /**
    * Positive-case instrument check: can this account be read at all? An empty
    * result still passes - the point is proving auth and connectivity before a
    * run of "not found" answers is trusted. Under cron a dead OAuth token fails
@@ -114,6 +129,16 @@ export function makeGmail(execFile = execFileDefault) {
     return gog(["-a", account, "gmail", "messages", "modify", id, "--add", "STARRED", "-y"]);
   }
 
+  async function setLabels(account, id, { add = [], remove = [] } = {}) {
+    // General label change. Names or IDs both work; INBOX/SPAM/TRASH are
+    // labels like any other, so rescue-then-archive composes from this.
+    const args = ["-a", account, "gmail", "messages", "modify", id];
+    if (add.length) args.push("--add", add.join(","));
+    if (remove.length) args.push("--remove", remove.join(","));
+    args.push("-y");
+    return gog(args);
+  }
+
   async function reply(account, { replyToMessageId, to, subject, body }) {
     const res = await gog([
       "-a", account, "gmail", "send",
@@ -127,7 +152,7 @@ export function makeGmail(execFile = execFileDefault) {
     return res;
   }
 
-  return { probe, findByMessageId, rescueFromSpam, markRead, star, reply };
+  return { probe, findByMessageId, list, rescueFromSpam, markRead, star, reply, setLabels };
 }
 
 /**
@@ -155,7 +180,9 @@ export const GOOD_PLACEMENTS = new Set(["primary"]);
 const shared = makeGmail();
 export const probe = shared.probe;
 export const findByMessageId = shared.findByMessageId;
+export const listMessages = shared.list;
 export const rescueFromSpam = shared.rescueFromSpam;
 export const markRead = shared.markRead;
 export const star = shared.star;
 export const reply = shared.reply;
+export const setLabels = shared.setLabels;
