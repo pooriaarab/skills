@@ -176,7 +176,8 @@ attended `--pilot` run proves the full loop (submit, confirmation mail,
 verified receipt). Probe before you scale.
 
 Seed-inbox mail from all of the above stays out of the operator's face with
-one Gmail filter (Skip Inbox, apply the `warmup` label). The filter query is
+Gmail filters: the warm-up rule (Skip Inbox, apply the `warmup` label) plus
+a Glama-only rule (see running-unattended.md). The warm-up query is
 generated, not hand-written: `build-filter-query.py` builds it from the live
 configs, and `inbox-backstop.py` re-applies it hourly to anything Gmail's own
 filter skipped. Regenerate the query when warmed domains or warmup senders
