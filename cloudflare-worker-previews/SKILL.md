@@ -239,6 +239,46 @@ final bundle through trusted code that treats it only as data.
 Forked pull requests must not receive secrets. Never use `pull_request_target` or
 privileged `workflow_run` jobs to execute pull-request code.
 
+### Skip when preview secrets are not configured
+
+When the preview infrastructure is new (or the repo is a fork where secrets are
+unavailable), gate the workflow so it stays green instead of failing:
+
+```yaml
+- id: preview_gate
+  name: Skip when preview secrets are not configured
+  env:
+    CLOUDFLARE_PREVIEW_API_TOKEN: ${{ secrets.CLOUDFLARE_PREVIEW_API_TOKEN }}
+    CF_PREVIEW_HOST_SUFFIX: ${{ vars.CF_PREVIEW_HOST_SUFFIX }}
+    PREVIEW_BYOK_ENCRYPTION_KEY: ${{ secrets.PREVIEW_BYOK_ENCRYPTION_KEY }}
+  run: |
+    if [[ -n "$CLOUDFLARE_PREVIEW_API_TOKEN" && -n "$CF_PREVIEW_HOST_SUFFIX" \
+          && -n "$PREVIEW_BYOK_ENCRYPTION_KEY" ]]; then
+      echo "configured=true" >> "$GITHUB_OUTPUT"
+    else
+      echo "configured=false" >> "$GITHUB_OUTPUT"
+      echo "::notice title=Preview skipped::Worker Preview secrets are not configured yet. \
+Set CLOUDFLARE_PREVIEW_API_TOKEN, CF_PREVIEW_HOST_SUFFIX, and \
+PREVIEW_BYOK_ENCRYPTION_KEY, then re-run."
+    fi
+```
+
+Every downstream step is guarded with `if: steps.preview_gate.outputs.configured == 'true'`.
+A `::notice` is used rather than `::warning` or `::error` so the job stays green.
+Also guard against forks so the workflow never attempts to provision resources it
+could not authenticate to. Replace `<your-org>` with the actual GitHub org:
+
+```yaml
+if: >-
+  github.event.action != 'closed' &&
+  github.event.pull_request.head.repo.full_name == github.repository &&
+  github.repository_owner == '<your-org>'
+```
+
+See the `replytosocial` [`worker-preview.yml`](https://github.com/pooriaarab/replytosocial/tree/main/.github/workflows/worker-preview.yml)
+for a complete example that checks the three values at the top, then guards every
+provision/deploy/verify/cleanup step with the same `configured` output.
+
 ## Delete the Preview
 
 Delete by the same validated branch name when the PR closes:

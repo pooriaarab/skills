@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   coverage:
-    runs-on: ubicloud-standard-4   # private pooriaarab/* repos run every job on Ubicloud
+    runs-on: ${{ github.event.repository.private && 'boat' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2

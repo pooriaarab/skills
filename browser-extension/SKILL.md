@@ -1,6 +1,6 @@
 ---
 name: browser-extension
-description: "Use when building a cross-browser (Firefox + Chrome) Manifest V3 web extension from scratch and/or submitting it to the stores. Covers the one-manifest-two-browsers layout, the CSP rules that break WebAssembly and web workers (and the same-origin-worker fix), on-device AI via Firefox `browser.trial.ml` and Chrome's built-in Prompt API, `web-ext` build/lint, and the full store-submission flow per browser — AMO (addons.mozilla.org) including the mandatory 2FA/AAL2 gate, and the Chrome Web Store. Triggers: 'build a browser/Firefox/Chrome extension', 'MV3 extension', 'submit to AMO', 'publish to Chrome Web Store', 'web-ext', 'sign my add-on', 'extension CSP blocks my worker/wasm', 'local AI in an extension'. Also covers, once built: inserting text into a rich-text composer from a content script (Draft.js/Quill/Lexical) when the post/send button stays disabled, storing per-device auth/session state (storage.local vs sync, self-heal, sign-up races), and QA'ing a loaded unpacked extension via browser automation. Triggers: 'reply/post button disabled after inserting text', 'execCommand insertText', 'content script into X/LinkedIn composer', 'chrome.storage.sync keeps restoring old token', 'test/QA a loaded extension', 'drive extension with browser automation', 'chrome ignores --load-extension'."
+description: "Use when building, QA'ing or publishing a Manifest V3 browser extension: one manifest for Firefox and Chrome, CSP fixes for workers and wasm, on-device AI, content-script text insertion, storage, and store submission to AMO, Chrome Web Store, Edge, Opera, Whale or Safari."
 ---
 
 # Cross-Browser Web Extension: Build & Ship
@@ -10,6 +10,14 @@ description: "Use when building a cross-browser (Firefox + Chrome) Manifest V3 w
 Describe-only: this documents the approach and the gotchas. Write the actual extension code in the target repo.
 
 ---
+
+## When to use
+
+- **Triggers:** 'build a browser/Firefox/Chrome extension', 'MV3 extension', 'submit to AMO', 'publish to Chrome Web Store', 'web-ext', 'sign my add-on', 'extension CSP blocks my worker/wasm', 'local AI in an extension', 'reply/post button disabled after inserting text', 'execCommand insertText', 'content script into X/LinkedIn composer', 'chrome.storage.sync keeps restoring old token', 'test/QA a loaded extension', 'drive extension with browser automation', 'chrome ignores --load-extension', 'submit to Edge Add-ons', 'Microsoft Partner Center extension', 'publish to Opera', 'Naver Whale store', 'safari-web-extension-converter', 'port my extension to Safari', 'which stores can I publish my extension to', 'SharedArrayBuffer in extension', 'manifest sandbox key', 'BiDi screenshot moz-extension', 'AMO throttled', 'container leaks WebRTC'.
+- The one-manifest-two-browsers layout; CSP rules that break WebAssembly and web workers, and the same-origin-worker fix; on-device AI via Firefox `browser.trial.ml` and Chrome's Prompt API; `web-ext` build and lint.
+- Store flows: AMO with its mandatory 2FA/AAL2 gate, the Chrome Web Store, Edge Add-ons (free, Partner Center, REST submission API for CI), Opera and Naver Whale (same zip, dashboard only), and why Safari is a rewrite (Xcode app, $99/yr program, no `offscreen` or `sidePanel`).
+- After the build: text into Draft.js/Quill/Lexical composers when the send button stays disabled, per-device auth state (storage.local vs sync, self-heal, sign-up races), and QA of an unpacked extension with browser automation.
+- Firefox agent-extension facts: no SharedArrayBuffer in extension pages, the `sandbox` key and its CSP trap, event pages that unload with a port open, WebRTC that escapes `webRequest` and `proxy`, WebDriver BiDi QA of `moz-extension:` pages, and AMO signing in CI (per-account throttle, re-runnable release).
 
 ## 1. Project layout
 
@@ -111,6 +119,21 @@ It's a multi-step wizard. In order:
 
 ---
 
+### The AMO upload throttle
+
+AMO limits how many uploads one account makes in a period. A batch of new add-ons hits it fast.
+
+- **It covers new uploads on every route.** The API (`web-ext sign`) answers `Request was throttled.
+  Expected available in N seconds`. The web form ("Submit a New Add-on") validates the file, then refuses it
+  with "You have submitted too many uploads recently." The browser is not a way past it.
+- **Retrying while throttled makes the wait longer.** On one run, three tries 15 minutes apart moved the
+  window from about 4 hours to about 13.7 hours. Make one try when the window opens; do not loop.
+- **Edits to an existing version are not limited the same way.** When an API `PATCH` of `source` on a
+  version was throttled, the version page's **Source code** field and **Save Changes** accepted the same
+  zip at once. Use the form for source, notes and listing edits while uploads are blocked.
+- **Make CI safe to re-run.** Before `web-ext sign`, check whether AMO already has this exact version
+  (listed); skip the upload if it does. Then a manual upload and a CI retry cannot submit one version twice.
+
 ## 7. Submit to Chrome (Chrome Web Store)
 
 The **same zip** works — Chrome reads `manifest_version`, `background.service_worker`, `content_security_policy.extension_pages`, `permissions`, `icons`, and **ignores the Firefox-only keys** (`browser_specific_settings`, `background.scripts`). No separate Chrome package needed.
@@ -154,6 +177,85 @@ When agent-browser `--auto-connect` reports "No running Chrome instance found" (
 - **Profile selection without guessing:** the devconsole URL opens in the *last-active* profile — often the wrong one (see the account trap above). Instead find the window whose tabs prove the right Google session (e.g. an open Gmail tab for the owner account) and `make new tab` *in that window*; a clean load (no `/register` redirect) confirms the owner account.
 - **Zip upload without the native file chooser.** The chooser is painful to automate, and `fetch('http://localhost:…')` from the page trips Chrome's local-network permission prompt ("wants to access other apps and services on this device"). Skip the network entirely: `base64` the zip, inject it into `window.__b64` in ~200 KB chunks via repeated `execute javascript`, then in-page: `atob → Uint8Array → new File([bytes], name, {type:'application/zip'}) → DataTransfer → input.files = dt.files → dispatchEvent(new Event('change',{bubbles:true}))` targeting `input[type=file][accept*=".zip"]`. Angular may **clear `input.files` as it consumes them**, so `files[0]` can be undefined immediately after — that's success, not failure. Verify on the **Package** tab that the draft shows the new version + permissions.
 - **Confirm submission on the Status tab** ("This draft is pending review") — the header badge lags behind the actual state.
+
+---
+
+## 7b. The other stores (Edge, Opera, Whale — and why not Safari)
+
+Chrome and Firefox are not the whole map. Three more stores take the package you
+already built; the fourth is a different product wearing the same name.
+
+| Store | Cost | Takes the Chromium zip as-is? | API? | Verdict |
+|---|---|---|---|---|
+| **Microsoft Edge Add-ons** | Free | Yes | **Yes** — REST | Do it. Best ratio in the table. |
+| **Opera Add-ons** | Free | Yes | No, dashboard only | Cheap. Slow review. |
+| **Naver Whale** | Free | Yes | No | Only if you want Korean reach. |
+| **Safari** | **$99/yr** | **No** — needs an Xcode app wrapper | App Store Connect | Usually no. See below. |
+
+Brave, Vivaldi, Arc and most Chromium forks install **from the Chrome Web Store**.
+There is nothing to submit to them. Chrome + Edge + Firefox covers nearly everyone.
+
+### Microsoft Edge Add-ons
+
+Register in **Partner Center** (`partner.microsoft.com/dashboard/microsoftedge`).
+No fee, unlike Chrome's $5.
+
+Edge is Chromium, so the same zip uploads unchanged — including `offscreen`, which
+Edge supports. Do not rebuild.
+
+It has a **REST submission API**, which is the reason to prioritise it: it slots
+into the same CI job as §13 rather than becoming a manual step forever. Auth is an
+Azure AD client-credentials pair (client id + secret + an access-token URL) scoped
+to a product id, not the Google OAuth dance. Broadly: POST the package to a draft,
+poll the operation until it reports complete, then POST publish. Treat the exact
+endpoint shape as **unverified here** and read the current Partner Center API docs
+before wiring it — Microsoft has revised this API at least once.
+
+Known friction, in rough order of how much time it costs:
+- Partner Center account creation is slower than Chrome's. It can require identity
+  verification before the first submission, so start it early rather than on the day
+  you want to ship.
+- The listing form is separate from the package upload; both must be complete before
+  Submit enables, with the same silent-greyed-button behaviour as Chrome (§12).
+
+### Opera Add-ons
+
+`addons.opera.com/developer/`. Free, Chromium, same zip.
+
+Dashboard-only — no publish API, so it stays a manual step. Review is human and
+historically slower than Chrome's. Opera also asks for its own listing assets rather
+than reusing the Chrome ones.
+
+### Naver Whale
+
+`store.whale.naver.com`. Chromium, same zip, needs a Naver account.
+
+Expect the listing to want Korean copy. Worth it only if Korean users are a real
+target, otherwise it is a listing you will not maintain.
+
+### Safari — read this before agreeing to it
+
+Safari "web extensions" share the WebExtension API surface but **not the delivery
+model**. `xcrun safari-web-extension-converter <ext-dir>` generates an **Xcode
+project** that wraps the extension inside a macOS or iOS app. You then ship that app
+through the App Store, which needs the **Apple Developer Program at $99/yr**.
+
+So it is not a repackage. It is a second product with its own build toolchain,
+signing identity, review queue and release cadence.
+
+Two API gaps decide it for most extensions, and they are the ones MV3 pushed people
+onto in the first place:
+
+- **No `offscreen` API.** This is Chrome-specific. Any extension using an offscreen
+  document to hold something an MV3 service worker cannot — `RTCPeerConnection` is
+  the common case, because a worker can be killed mid-session — has no equivalent on
+  Safari and needs its architecture changed, not ported.
+- **No `sidePanel` API.** Chrome's `side_panel` and Firefox's `sidebar_action` both
+  have no Safari counterpart. A side-panel-shaped product has no home there.
+
+Check both against your own manifest before quoting a timeline. If either appears,
+Safari is a rewrite wearing the costume of a port. Say so plainly and early — it is a
+much cheaper conversation before the Apple Developer purchase than after.
 
 ---
 
@@ -220,7 +322,7 @@ Auth tokens and per-device session ids belong in `chrome.storage.local`. `chrome
 
 ## 11. QA a loaded (unpacked) extension via browser automation
 
-- **Recent Chrome ignores `--load-extension`** on a normal profile (anti-abuse). Load once via `chrome://extensions` → Developer mode → Load unpacked; it persists across restarts. To pick up a rebuild without GUI, **quit + relaunch** the browser — the unpacked registration persists.
+- **Chrome ignores `--load-extension`** on a normal profile (anti-abuse); the flag was removed around Chrome 137 and confirmed still inert on 152. `--enable-unsafe-extension-debugging` does **not** bring it back — verified: only Chrome's built-in extension targets appear over CDP, none for yours. Do not spend time on flags. Load once via `chrome://extensions` → Developer mode → Load unpacked; it persists across restarts. To pick up a rebuild without GUI, **quit + relaunch** the browser — the unpacked registration persists.
 - A DOM-automation tool that connects **through an installed helper extension** can drive content injected into normal web pages, but usually **cannot open `chrome://` or `chrome-extension://`** pages (the extension's own popup/side panel). Drive those with screen automation, or design the test to avoid them.
 - Screen-automation focus is unreliable when several terminal/agent windows compete for foreground (clicks/keystrokes land in the wrong window). **Activate the target app deterministically via the OS scripting layer first** (macOS: `osascript -e 'tell application "Google Chrome" to activate'`, then open the URL), and confirm the intended window is frontmost before acting.
 - **Fastest way to seed a known-good session into a content script for a test:** create a valid session against the API, then set the token/id into the **page origin's `localStorage`** (content scripts read page `localStorage`, and a well-written client uses it as a fallback) — sidesteps the extension's `chrome://`-only storage UI entirely.
@@ -254,4 +356,181 @@ Review takes days–weeks. Set a **durable cloud schedule** (claude.ai routine +
 - [ ] Pre-submission audit (§8): own code free of `eval`/dynamic-`innerHTML`/remote code; vendored libs shipped **unminified** + licensed; `web-ext lint` 0 errors; minimal justified permissions; privacy policy URL live.
 - [ ] Content-script insertion (§9): activate the field, insert via `execCommand('insertText')` (not `textContent`), and confirm the target's Post/Send button actually **enables**.
 - [ ] Session state (§10): tokens in `storage.local` not `sync`; concurrent auto-sign-ups de-duped via one in-flight promise; self-heal (clear + re-auth) on 401/403.
+- [ ] Other stores (§7b): Edge submitted (free, same zip, has an API — wire it into §13); Opera/Whale decided; Safari explicitly ruled in or out against the `offscreen`/`sidePanel` gaps.
 - [ ] QA (§11): loaded via `chrome://extensions` (not `--load-extension`); target app activated deterministically before automation; screenshot→click coordinates scaled; test HTTP calls send a browser UA + `Origin`.
+
+---
+
+## 13. CI publish via Chrome Web Store API (GitHub Actions)
+
+Once an extension is stable enough to ship from CI, use the Chrome Web Store Publish API so every `release` push publishes both the Worker backend and the extension from the same commit.
+
+### Workflow pattern (see [`publish-extension.yml`](https://github.com/pooriaarab/replytosocial/tree/main/.github/workflows/publish-extension.yml) for a working example)
+
+```yaml
+name: Publish extension
+on:
+  push:
+    branches: [release]
+    paths:
+      - 'apps/extension/**'
+      - '.github/workflows/publish-extension.yml'
+
+jobs:
+  publish:
+    runs-on: ${{ github.event.repository.private && 'boat' || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install && bun run build
+      - name: Package
+        run: cd build && zip -qrX ../extension.zip .
+      - name: Upload and publish
+        env:
+          CHROME_WEBSTORE_EXTENSION_ID: ${{ vars.CHROME_WEBSTORE_EXTENSION_ID }}
+          CHROME_WEBSTORE_CLIENT_ID: ${{ secrets.CHROME_WEBSTORE_CLIENT_ID }}
+          CHROME_WEBSTORE_CLIENT_SECRET: ${{ secrets.CHROME_WEBSTORE_CLIENT_SECRET }}
+          CHROME_WEBSTORE_REFRESH_TOKEN: ${{ secrets.CHROME_WEBSTORE_REFRESH_TOKEN }}
+          EXTENSION_ZIP: extension.zip
+        run: node scripts/publish-extension.mjs
+```
+
+### Credentials
+
+| Name | Kind | Purpose |
+|------|------|--------|
+| `CHROME_WEBSTORE_EXTENSION_ID` | repository **variable** | public item id from the store URL |
+| `CHROME_WEBSTORE_CLIENT_ID` | **secret** | OAuth Desktop app client id |
+| `CHROME_WEBSTORE_CLIENT_SECRET` | **secret** | OAuth Desktop app client secret |
+| `CHROME_WEBSTORE_REFRESH_TOKEN` | **secret** | long-lived token from the consent flow |
+
+Minting the OAuth triple is a one-time browser session — the consent screen cannot be automated:
+
+1. Enable **Chrome Web Store API** in Google Cloud Console.
+2. Create an **OAuth client ID** of type **Desktop app**. (A Web client will be refused — Google shut down `urn:ietf:wg:oauth:2.0:oob`.)
+3. Start a local listener (`nc -l 8080`) and open the auth URL in the browser signed in as the listing owner. Include `&access_type=offline&prompt=consent` — without `prompt=consent` the refresh token is returned only on the very first authorization.
+4. The redirect dumps `?code=...` into `nc`. Exchange it:
+   ```sh
+   curl -s https://oauth2.googleapis.com/token \
+     -d client_id=<ID> -d client_secret=<SECRET> \
+     -d code=<CODE> -d grant_type=authorization_code \
+     -d redirect_uri=http://localhost:8080
+   ```
+5. Store the four values with `gh secret set` / `gh variable set`.
+
+The refresh token does not expire on a timer but is revoked if the owner changes their password or removes the app's access. When the job starts failing at "OAuth token exchange", repeat from step 3.
+
+### Idempotency (skip when version matches)
+
+The publish script reads the store's current version before uploading. If it matches the built version the job is a no-op — a `release` push that only changes the backend stays green instead of failing on "version already exists". Bump `manifest.json` to publish again.
+
+### Version landmine
+
+If your build toolchain injects a four-part version like `${version}.${Date.now()}` into the built manifest (e.g. a watch-mode reloader), Chrome will reject it — the fourth part exceeds the 65535-per-part limit. Guard: check the built manifest version shape (1–4 dot-separated integers, each between 0 and 65535, no leading zeros on non-zero components) before uploading, so bad builds fail locally with a readable error instead of remotely with a status code.
+
+---
+
+## 14. Firefox-only facts for agent extensions
+
+Each fact below cost a build or a review round on Firefox 153 to 157. Set
+`strict_min_version` to the current ESR and feature-detect anything newer.
+
+### Platform limits
+
+- **No `SharedArrayBuffer` in extension pages.** Firefox ignores the
+  `cross_origin_embedder_policy` and `cross_origin_opener_policy` manifest keys
+  (bug 1673477). WASM threads do not work there. Use single-thread WASM, or run
+  the threaded code on an `https:` page that sends COOP and COEP, and talk to it
+  with `postMessage`.
+- **The MV3 background is an event page with a DOM.** There is no service
+  worker and no `offscreen`. The page unloads after about 30 seconds idle. In
+  testing on Firefox 157, an open `runtime.Port` from a sidebar did not keep it
+  loaded. Save state in
+  `storage.session` or `storage.local`, and wake the page with `alarms`. A model
+  loaded in the event page goes away with it.
+- **No `debugger` permission and no CDP.** Synthetic events from
+  `scripting.executeScript` have `isTrusted: false`. For trusted input, drive
+  Firefox from an outside helper over WebDriver BiDi.
+- **`scripting.executeScript({ func })` sends the function as source text.**
+  The function must be self-contained. Pass data in `args`.
+
+### The `sandbox` manifest key
+
+Firefox 157 honoured this key in testing. Check MDN compatibility data for the
+first version that supports it. `sandbox.pages` plus `content_security_policy.sandbox` gives a page an opaque
+origin, no extension APIs, `eval`, and its own CSP. `connect-src 'none'` makes it
+a no-network room.
+
+**Caution:** the manifest sandbox CSP applies only when the host iframe has no
+`sandbox` attribute. With the attribute, Firefox 157 dropped the manifest CSP,
+and `fetch`, `XMLHttpRequest` and `WebSocket` reached a local probe server. Put
+the same policy in a `<meta http-equiv="Content-Security-Policy">` tag in the
+sandbox page, and keep it in every mode. Firefox 153 ignores the key: have the
+page check at start that its origin is opaque and that `browser` is absent, and
+refuse to run if not. `web-ext lint` then warns `UNSUPPORTED_BY_MIN_VERSION` for
+the key. Allow that one warning by code in your lint script, not all warnings.
+
+### Containers and network isolation
+
+- Containers (`contextualIdentities`) and `cookieStoreId` work in `tabs`,
+  `cookies`, `browsingData.remove`, and `proxy.onRequest`. This is how you give
+  an agent one site's login in its own cookie jar.
+- **Warning:** WebRTC escapes both `webRequest` and `proxy.onRequest`. A page in
+  the container can open an `RTCPeerConnection` to a STUN or TURN server and
+  send UDP that neither guard sees. Turn off
+  `privacy.network.peerConnectionEnabled` while the isolated task runs, and give
+  the old value back after. The setting is browser-wide.
+- A speculative `<link rel="preconnect">` skips `webRequest`. Route blocked
+  hosts in `proxy.onRequest` to a `socks` proxy that does not exist, with
+  `proxyDNS: true`. `proxyDNS` applies only to `socks` and `socks4` proxies.
+  Turn off `privacy.network.networkPredictionEnabled` to stop DNS prefetch.
+- If `privacy.*.set()` answers `false` (a policy or another extension controls
+  it), refuse the task. Do not run with the channel open.
+- If the user removes host access in `about:addons`, Firefox stops sending
+  requests to your blocking listeners and they all pass. Check
+  `permissions.contains({ origins: ["<all_urls>"] })` before the task, and stop
+  every task on `permissions.onRemoved`.
+- A blocking `webRequest` listener that throws lets the request pass. Catch
+  inside the listener and cancel.
+
+### Tabs
+
+`tabs.group` and `tabGroups` put each agent task in a named group. Both worked
+in testing on Firefox 157. Feature-detect them before use.
+`tabs.hide` (permission `tabHide`) keeps agent tabs out of the strip.
+
+### Test with WebDriver BiDi
+
+- Start Firefox with `-remote-allow-system-access`, or BiDi refuses
+  `moz-extension:` pages.
+- BiDi sends no navigation events for `moz-extension:` pages, so a Puppeteer
+  `goto()` never resolves. Poll `location.href` and `document.readyState`.
+- BiDi cannot screenshot a `moz-extension:` page ("unsupported operation").
+  For PR proof, serve the built page over `http://localhost` with a stub
+  `browser` object that returns the real state your E2E test read, then
+  screenshot that. Or screenshot a normal web page the extension changes. Say
+  in the PR which one you used.
+
+### AMO rules that block a submission
+
+- `data_collection_permissions` is required for new add-ons. Page text sent to
+  the user's own model key counts: declare `websiteContent` under `optional`.
+- AMO allows the `userScripts` API only for user-script managers. Never run
+  model-written JavaScript. Bundle the action functions and pass data as `args`.
+- Extensions must not relax a page's CSP, also through `filterResponseData`.
+
+### Sign with AMO in CI
+
+`web-ext sign --channel=unlisted --api-key="$AMO_JWT_ISSUER" --api-secret="$AMO_JWT_SECRET"`
+signs the `.xpi` for a GitHub release. Fail the step with a clear message when
+either secret is empty.
+
+- **AMO throttles new add-on submissions per account.** The error says
+  `Expected available in N seconds`. N was 873 on the first try and 4169 on a
+  later one, so signing 17 new add-ons took hours.
+- **Make the release re-runnable.** If the job publishes to npm before it
+  signs, a re-run stops at `npm publish`, because npm refuses a version twice.
+  Skip the publish when `npm view "$NAME@$VER" version` succeeds. Then
+  `gh run rerun <id> --failed` reaches the signing step.
+- To retry many repos, read N from `gh run view <id> --log-failed`, wait N plus
+  a margin, then re-run. Stop on a failure that has no `available in` line.

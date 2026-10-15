@@ -1,6 +1,6 @@
 ---
 name: ci-cost-at-agent-scale
-description: "Use when CI spend, CI queueing, or CI wall-clock becomes a problem on a repo where agents open most of the pull requests — hundreds of workflow runs a day, review bots that push their own fix commits, or a fleet of parallel workers each blocking on its own checks. Audits where the runs actually come from before changing anything, then fixes in cost order: delete work that produces nothing, add concurrency groups so superseded runs cancel, path-filter the heavy suites, share a build cache, and only then move to a cheaper runner. Explains why a per-minute price cut is the wrong first move, why the real ceiling is usually concurrent-job limits rather than minutes, and why agent sandboxes (E2B, Daytona, Modal, Cloudflare Sandbox SDK) cannot replace a CI runner no matter how cheap they look. Triggers: 'CI is too expensive', 'CI is queueing', 'switch off GitHub Actions', 'cheaper CI runners', 'Blacksmith / Depot / Ubicloud / RunsOn', 'run CI in a sandbox', 'our agents are burning CI minutes', 'why is CI slow at scale'."
+description: "Use when CI spend, CI queueing, or CI wall-clock becomes a problem on a repo where agents open most of the pull requests — hundreds of workflow runs a day, review bots that push their own fix commits, or a fleet of parallel workers each blocking on its own checks. Audits where the runs actually come from before changing anything, then fixes in cost order: delete work that produces nothing, add concurrency groups so superseded runs cancel, path-filter the heavy suites, share a build cache, and only then move to a cheaper runner. Explains why a per-minute price cut is the wrong first move, why the real ceiling is usually concurrent-job limits rather than minutes, and why agent sandboxes need a runner control plane and how Boat uses one. Triggers: 'CI is too expensive', 'CI is queueing', 'switch off GitHub Actions', 'cheaper CI runners', 'Boat / Blacksmith / Depot / RunsOn', 'run CI in a sandbox', 'our agents are burning CI minutes', 'why is CI slow at scale'."
 ---
 
 # ci-cost-at-agent-scale
@@ -165,22 +165,36 @@ ambushing whoever pushes next.
 
 ### 5. Change runners — price decides this, not queue time
 
-**Default to a managed runner (Ubicloud and peers) on a private repo generally, not only once a
-concurrency ceiling forces it. Price alone justifies the move.**
+Use the warm Boat JIT pool for private `pooriaarab/*` Linux CI. Use `boat`
+for build, lint, typecheck, test, E2E, deploy and API waits. Use `boat-8` for a
+heavy production build. Public repos and macOS/Windows jobs stay GitHub-hosted.
 
 ```yaml
-runs-on: ubicloud-standard-4   # was ubuntu-latest
+runs-on: boat
 ```
 
-| Provider | 2-core | 4-core | 8-core |
-|---|---|---|---|
-| GitHub-hosted (private repo) | $0.008/min | $0.016/min | $0.032/min |
-| Ubicloud | $0.00125/min | $0.0025/min | $0.005/min |
+Prices measured 2026-10-11:
 
-Ubicloud runs **about 6x cheaper per minute**, and its 4-core rate still undercuts GitHub's
-2-core rate. GitHub also **bills a private-repo job rounded up to the next whole minute** — an
-8-second job bills a full minute. That rounding waste falls hardest on the short jobs a
-queue-time argument sends to the expensive runner, not on the long ones.
+| Provider | 2 vCPU / hour | 4 vCPU / hour | 8 vCPU / hour |
+| --- | --- | --- | --- |
+| Boat | $0.018 (4 GB) | $0.036 (8 GB) | $0.072 (16 GB) |
+| Ubicloud (comparison) | $0.075 | $0.15 | $0.30 |
+
+Boat's 4 vCPU rate is 24% of the comparison rate. An always-on pool bills
+wall time, not job time. Include idle Boxes in the cost. $1 buys 100,000
+Box-seconds. N default Boxes cost N × $0.036 × hours online.
+
+Keep Boxes warm; run one JIT runner at a time on each. The broker holds the
+GitHub token and hands configs to the Box agent. JIT labels do not include
+`self-hosted` unless passed. See [self-hosted-runner-fleet](../self-hosted-runner-fleet/SKILL.md)
+for pool setup and actionlint labels. These components are in progress in
+`pooriaarab/scripts` #508 and #509; a label edit alone does not create capacity.
+
+### Historical managed-runner comparison
+
+The arm and queue measurements below came from the retired Ubicloud setup.
+They are comparison data, not Boat sizing or dispatch instructions. Measure
+Boat queue delay and memory use before changing pool size.
 
 **Do not move to arm64 for a PR gate. It is measurably more expensive.** The pricing table
 makes it look free: Ubicloud arm64 costs *exactly the same per minute* as x64 at every tier, an
@@ -237,7 +251,7 @@ just a much smaller number than a 6x price gap plus round-up waste, so it is not
 keep short jobs on the expensive runner. **A latency measurement without a cost measurement is
 half an answer** — this same table, read alone, argues the other way, and did once already.
 
-**Exceptions — keep these on GitHub-hosted:** a macOS/iOS toolchain, an action that only works
+**Exceptions — keep these on GitHub-hosted:** public repos, macOS/iOS or Windows, an action that only works
 on the GitHub-hosted image, or preinstalled software a managed runner doesn't carry. If the
 driver is queueing rather than price, only a provider running in **your own** infrastructure
 lifts the concurrency ceiling — a cheaper managed runner usually carries its own limit too.
@@ -252,7 +266,7 @@ medians. Every one was **n=1, from a burst rollout nine days earlier**, and none
 since. Optimizing them would have moved nothing. Before you trust any per-repo ranking, check
 when each sample last ran — a median over one stale observation is not a median.
 
-## Agent sandboxes are not CI runners
+## Agent sandboxes need a runner control plane
 
 This proposal recurs, so it gets its own section. E2B, Daytona, Modal, Vercel Sandbox and
 Cloudflare's Sandbox SDK are **compute primitives**: call an API, get a container, run code, tear
@@ -264,8 +278,8 @@ it down. What they do not have:
 
 To use one as CI you write: webhook listener → mint a JIT runner token → boot the sandbox →
 install the runner agent → register → run → tear down → ship logs. **That control plane is
-precisely the product the managed-runner vendors sell.** You would build it and pay roughly 3–4×
-a managed runner for the compute.
+precisely the product the managed-runner vendors sell.** Compare the full pool wall-time cost before choosing the compute provider.
+Boat uses this pattern with warm Boxes instead of a fresh sandbox per job.
 
 They also tend to be sized for short-lived agent tasks, not builds. Check the disk ceiling before
 anything else — a serverless container platform capping at tens of gigabytes of *ephemeral* disk
@@ -288,6 +302,37 @@ Whatever review or fix bot runs on your PRs, two settings dominate its cost:
 And the structural lever, which beats every tuning knob above: **fewer, larger PRs.** Batching a
 fleet's output into one PR per logical change cuts the multiplier at the source instead of making
 each multiplied run cheaper.
+
+## Per-author CI credentials on GitHub Actions
+
+A repo owner wants contributor B's CI runs off his personal AI subscription tokens. GitHub
+offers no per-user secret for this. Secrets are repository-scoped: a workflow triggered by
+contributor B still reads the repo's secrets. Adding secrets needs ADMIN — a collaborator
+with write/push access cannot add their own.
+
+Route by author with a ternary. It works reliably:
+
+```yaml
+env:
+  AI_API_KEY: ${{ github.actor == 'someone' && secrets.KEY_SOMEONE || secrets.KEY_DEFAULT }}
+```
+
+Prefer this over dynamic `secrets[format(...)]` indexing. Its behaviour in step-level
+`with:`/`env:` could not be confirmed from GitHub's documentation.
+
+Know what routing buys. It buys spend attribution: each author's runs bill their own token.
+It does not buy isolation. The owner still stores every contributor's token. For a same-repo
+(non-fork) `pull_request`, GitHub runs the workflow file as committed on the PR branch with
+full secrets access — a push-access collaborator can edit the workflow to reference any
+secret. An `if: actor == owner` guard is cosmetic, not a boundary.
+
+The only platform-enforced boundary is fork-based contribution: forked `pull_request` runs
+get zero base-repo secrets. Environments with required reviewers would impose a real gate,
+but on a private repo that protection rule needs **Enterprise**. Pro and Team buy you
+environments on a private repo, not the protection rules that would gate them.
+
+Use author routing for attribution on a trusted team. Require forks for untrusted
+contributors. Never present routing as isolation.
 
 ## Gotchas
 

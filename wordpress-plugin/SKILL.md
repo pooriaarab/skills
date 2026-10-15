@@ -1,11 +1,18 @@
 ---
 name: wordpress-plugin
-description: "Build, test, and submit a WordPress plugin (plain PHP under integrations/wordpress-plugin/, a thin client over your product's public REST API) and get it listed in the WordPress.org plugin directory. Use when creating a new WordPress plugin, wiring a 'post published → call my API' flow, adding a settings page or editor metabox, testing locally with wp-env, zipping for upload, or figuring out why the wordpress.org review bounced. Covers the whole path plus the traps that each cost a manual-review round-trip (days–weeks each): reviewers grep every $_POST/$_GET for nonce + capability + sanitize (the #1 rejection), output must be escaped late, readme.txt 'Stable tag' must equal the header Version AND a real SVN tag, plugin-page assets live in SVN /assets not trunk, and the folder/text-domain must match the approved slug. Sibling of the other integration skills (canva-app, zapier-integration, browser-extension, figma-plugin, connector-directory-submission). Triggers: 'build a WordPress plugin', 'submit a plugin to wordpress.org', 'plugin review rejected', 'readme.txt stable tag', 'plugins.svn.wordpress.org trunk tags', 'wp_remote_request', 'nonce verification', 'wp-env'."
+description: "Use when building, testing or submitting a WordPress plugin that is a thin PHP client over your product's REST API: settings page, metabox, wp-env, zipping, and WordPress.org review rejections."
 ---
 
 # Building a WordPress plugin
 
 A WordPress plugin is **plain PHP with a header-comment manifest** — no build step, no framework SDK. The main file's header block (`Plugin Name`, `Version`, `Text Domain`, …) IS the manifest WordPress reads. Source lives in `integrations/wordpress-plugin/`. It is a thin frontend over your own public REST API: WordPress hooks supply the events (`save_post`, settings pages, editor metaboxes); `wp_remote_request` calls your API with the user's own team API key. Read this before the first file; the command-level playbook is in `pooriaarab/scripts` `scripts/wordpress-plugin/README.md`.
+
+## When to use
+
+- **Triggers:** 'build a WordPress plugin', 'submit a plugin to wordpress.org', 'plugin review rejected', 'readme.txt stable tag', 'plugins.svn.wordpress.org trunk tags', 'wp_remote_request', 'nonce verification', 'wp-env'.
+- Reviewers grep every $_POST/$_GET for nonce, capability and sanitize (the top rejection); escape output late.
+- readme.txt 'Stable tag' must equal the header Version and a real SVN tag; plugin-page assets live in SVN /assets, not trunk; the folder and text domain must match the approved slug. Each review round costs days to weeks.
+- Siblings: canva-app, zapier-integration, browser-extension, figma-plugin, connector-directory-submission.
 
 ## The trap that wastes a week: review greps every `$_POST`, and each bounce re-queues you for days
 

@@ -1,0 +1,173 @@
+---
+name: google-takeout
+description: "Use when the user wants a Google Takeout, a Download Your Data archive, or a copy of Gmail, Drive, Photos, YouTube, Calendar, Fitbit / Google Health, or other Google-product data. Triggers: 'export my Google data', 'Takeout', 'download my Gmail', 'export Google Photos', 'Fitbit export after the Web API shutdown'."
+---
+
+# Google Takeout
+
+Request a copy of data Google holds for one Google Account.
+There is no API for this. The owner submits the form.
+
+Parent argument: [data-exports](../SKILL.md).
+
+## Request URL
+
+https://takeout.google.com/
+
+Official help: [How to download your Google data](https://support.google.com/accounts/answer/3024190).
+
+## Submit
+
+1. Sign in to the Google Account that owns the data. Stop. The owner signs in.
+2. Open https://takeout.google.com/. Google pre-selects every product that holds data.
+3. Click **Deselect all**, then tick only the products you want. A full dump of Photos plus Drive plus Mail is huge and slow. Prefer one product per request when the library is large.
+4. Some products expose **All data included**. Open it and drop folders or data types you do not need.
+5. Click **Next step**.
+6. **Delivery method:** choose **Send download link via email** unless you have a reason to land the archive in Drive, Dropbox, OneDrive, or Box. Cloud destinations count against that service's quota, and Google stops being responsible for the files once they arrive.
+7. **Frequency.** Three options, verified on the live page:
+   `Export once` (1 export), `Export every month for 1 year` (**12 exports**),
+   `Export every 2 months for 1 year` (6 exports).
+
+   **Prefer monthly.** It is the only mechanism any provider offers that turns
+   an export into a recurring source, which is the whole difficulty with
+   export-based ingestion. Confirmation reads
+   `Export 1 of 12 will start on <date>`.
+8. **File type:** `.zip` unless you already know you want `.tgz`.
+9. **Archive size:** pick a maximum part size. Google splits anything larger into multiple files. 50 GB is the largest option and reduces the number of parts.
+10. Click **Create export**.
+11. Wait for the email. Open **Download archive**. Re-enter the Google password if asked.
+
+Advanced Protection accounts: the first archive is scheduled two days out, and scheduled exports are not available.
+
+Workspace accounts: an admin can disable Takeout. If the page refuses, that is why.
+
+YouTube on a Brand Account: switch to that Brand Account before you export, or the videos will not be in the zip.
+
+## Which products to actually take
+
+A full Takeout can reach 180 GB, almost all of it Google Photos originals and
+Drive files. Do not take that whole for a personal record.
+
+- **Photos originals are pixels, not searchable text.** Their metadata — date,
+  geo, filename — is small and worth having, but the full-resolution files bury
+  storage and add nothing a query can use. Photos also already live in Google
+  Photos, which is their backup. Skip them.
+- **Drive** is files, not life-signal. Skip unless a specific document is the goal.
+- **Gmail, Contacts, Calendar** have live APIs. If a CLI already syncs them,
+  Takeout only duplicates them. Skip.
+
+For a queryable personal record, **Deselect all**, then take the small,
+text-based products with no good API:
+
+| Take | Why |
+|---|---|
+| Location History / Timeline | Where you were, over years. No API. |
+| My Activity (Search, YouTube) | What you searched and watched. High signal. |
+| Maps (your places, reviews) | Saved and rated places. |
+| Fit / Google Health | Only if not already pulled another way. |
+
+This turns a 180 GB request into a few GB that downloads in one pass and
+indexes cleanly. The rule matches the pipeline's principle: fetch what answers
+a question, not the rawest thing available.
+
+## What it contains
+
+Whatever you ticked, if Google still holds it. Official examples: email, documents, Calendar, Photos, YouTube videos, registration and account activity.
+
+Fitbit / Google Health is a Takeout product. After the Fitbit Web API turn-down in September 2026, this is the remaining official dump for a Google-signed-in Fitbit account. If the account still uses a legacy Fitbit login (not migrated to Google), use Fitbit Settings → Data Export instead. See [Google Health export help](https://support.google.com/fitbit/answer/14236615).
+
+Common formats inside the zip:
+
+| Product | Format |
+|---|---|
+| Gmail | `.mbox`, labels in an `X-Gmail-Labels` header |
+| Contacts | vCard |
+| Calendar | `.ics` |
+| Photos / videos | original file plus a sidecar `.json` (comments, album membership, extra metadata) |
+| YouTube | original format, or MP4 (H.264 + AAC) |
+| Drive | exported Google formats plus uploaded originals |
+
+The zip also has `archive_browser.html`. Open that on a desktop to see how to read each folder.
+
+## What it does not
+
+- Data already deleted from Google's storage. Items still in the deletion pipeline are omitted.
+- Changes made between the request and the moment Google builds the archive (Drive sharing, resolved comments, Photos added or removed).
+- A chosen date range. Takeout does not filter by time. You get all remaining data for the ticked products.
+- Another person's content that you merely have access to (a shared Drive you do not own, a Google Group you do not own).
+- Brand-Account YouTube videos from the wrong signed-in identity.
+
+## Delivery
+
+Google emails a link. Official range: a few minutes to a few days. Most people get it the same day.
+
+Click the link. You land on the Takeout downloads page, not on a raw file in the mail.
+
+## Reading the delivery email by API
+
+An agent can find the mail and extract the link. Two traps make this harder
+than it looks.
+
+**A Gmail CLI that only does search and modify cannot read a body.** Check the
+subcommands before you plan around one. If the tool offers `search` and
+`modify` and nothing that returns message text, the delivery mail is findable
+and unreadable. A thin wrapper over the raw API returns it:
+
+```
+<cli> gmail users messages get --params '{"userId":"me","id":"<id>","format":"full"}'
+```
+
+Use both tools. Search with the one that has a good query syntax to get the
+message id, then read that id with the one that reaches the raw API.
+
+**The body is base64url and nested.** A single top-level read reports
+`size: 0` and looks like an empty message. The text lives in `payload.parts`,
+sometimes several levels down, so walk the tree and decode each `body.data`.
+Treating the top level as the body is the most common way this fails silently.
+
+**Extracting the link does not remove the browser step.** The URL in the mail
+is signed and still redirects to a login, so it cannot be fetched with a plain
+HTTP client using the token alone. Expect to hand it to a signed-in browser.
+
+## Calendar does not need Takeout
+
+Calendar has an ordinary API. A CLI can page it directly, which is faster than
+requesting an archive and gives a live source rather than a snapshot.
+
+Two things to get right when paging it: a `--max` style cap applies per
+request, so walk the range in chunks rather than asking for everything at
+once; and recurring events repeat across chunk boundaries, so dedupe on the
+event id afterwards. On one real account that turned an apparent few hundred
+events into **1,698 spanning eleven years**.
+
+Check the same question for any product before requesting an archive. Takeout
+is for data with no API, not for data you have not looked for an API for.
+
+## Format
+
+`.zip` or `.tgz`, possibly split into numbered parts. One folder per product.
+
+## Gotchas
+
+- **The archive expires in about 7 days.** Request again after that. Expiry does not delete the live Google data.
+- **Each archive can be downloaded 5 times.** After that, request a new one.
+- **Split archives.** Anything over the size you picked arrives as multiple files. You need every part.
+- **`.tgz` plus unicode filenames.** Google warns that tgz parts can fail on unicode names. Prefer zip.
+- **Password again at download.** Expected. 2-Step Verification may add a second check.
+- **Failed export.** Retry. If it still fails, export one product at a time, or drop the part size.
+- **Do not download on a phone.** Official advice: use a desktop. Photos libraries are large.
+- **Drive delivery plus account deletion.** Move the archive off Drive before you delete the Google Account.
+- **No polling.** There is no Takeout API for "is it ready". Watch the inbox.
+  Scheduled exports still arrive by email — but a monthly schedule plus an
+  inbox watcher is as close to a pollable export as this ecosystem gets.
+- **Deselect all first.** 67 products are selected by default, and Gmail,
+  Photos and Drive together can run to hundreds of GB. `Deselect all` then
+  pick what is actually missing; the counter shows `N of 67 selected`.
+- Defaults on the delivery step: link by email, `.zip`, 2 GB parts.
+
+## Sources
+
+- https://takeout.google.com/
+- https://support.google.com/accounts/answer/3024190
+- https://support.google.com/fitbit/answer/14236615
+- https://developers.google.com/health/about

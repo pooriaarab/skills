@@ -1,11 +1,17 @@
 ---
 name: highlevel-app
-description: "Build and list a GoHighLevel marketplace app — an OAuth 2.0 app whose UI is a Custom Page (Menu Link iframe) inside a sub-account, source under integrations/highlevel-app/ — on the GoHighLevel Marketplace. Use when embedding a page in a HighLevel sub-account, wiring HighLevel OAuth, handling HighLevel webhooks, or working out why an install or the iframe fails. Covers the whole path plus the traps that each cost a round-trip: the install flow picks a location so tokens are per sub-account and not per company, the token endpoint host differs between accounts and answers invalid_client when you guess wrong, the platform appends locationId to the iframe src and every bit of stored state must be scoped to it, and the iframe dies silently unless frame-ancestors names the HighLevel domains. Sibling of the other integration skills (hubspot-app, monday-app, whop-app, connector-directory-submission). Triggers: 'build a GoHighLevel app', 'GHL marketplace app', 'HighLevel OAuth', 'chooselocation', 'HighLevel custom menu link', 'my GHL iframe is blank', 'submit to the GoHighLevel marketplace'."
+description: "Use when building or listing a GoHighLevel marketplace app (OAuth 2.0 with a Custom Page iframe in a sub-account): HighLevel OAuth, webhooks, and installs or iframes that fail."
 ---
 
 # Building a GoHighLevel marketplace app
 
 A HighLevel app is an **OAuth 2.0 app** installed into a **location (sub-account)**, whose UI is a **Custom Menu Link → Custom Page**: an iframe pointing at your hosted SPA. Source lives in `integrations/highlevel-app/`. The SPA is a thin frontend over your API; the small server exists only for the OAuth exchange and webhooks.
+
+## When to use
+
+- **Triggers:** 'build a GoHighLevel app', 'GHL marketplace app', 'HighLevel OAuth', 'chooselocation', 'HighLevel custom menu link', 'my GHL iframe is blank', 'submit to the GoHighLevel marketplace'.
+- Install picks a location, so tokens are per sub-account; the token endpoint host differs by account and answers invalid_client when guessed wrong.
+- The platform appends locationId to the iframe src, so scope all state to it; the iframe dies silently unless frame-ancestors names the HighLevel domains. Siblings: hubspot-app, monday-app, whop-app, connector-directory-submission.
 
 ## The trap that wastes a day: the tenant is the location, not the account
 

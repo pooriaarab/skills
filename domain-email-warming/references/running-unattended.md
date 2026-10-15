@@ -1,0 +1,132 @@
+# Running it unattended
+
+A warm-up that only runs when someone remembers to run it is not a warm-up. The
+ramp assumes a steady daily volume, and a three-day gap mid-ramp is a step
+change in the wrong direction.
+
+## Run hourly, not daily
+
+`warm-tick.sh` is an hourly job, not a daily one:
+
+```cron
+0 6-18 * * * /path/to/scripts/warm-tick.sh /path/to/config.json /path/to/env >> /path/to/log 2>&1
+```
+
+`send` releases only the messages the ramp says are due, so each pass sends a
+few and the day trickles out across a working window. A once-a-day invocation
+would send the whole day in one burst and undo the spreading the ramp exists to
+produce — sixteen messages leaving in the same second is a machine signature
+whatever they say.
+
+Every step is idempotent. A missed hour, a laptop that was asleep, or a retry
+after a failure tops up from recorded state rather than duplicating.
+
+## macOS: keep the credential out of ~/Documents
+
+**This will silently break the whole program, and the symptom looks like
+nothing at all.**
+
+macOS TCC blocks `cron` and `launchd` jobs from reading `~/Documents`, even as
+your own user. The job cannot source an env file there and dies with:
+
+```
+warm-tick.sh: line 23: /Users/you/Documents/.../creds.env: Operation not permitted
+```
+
+It fails in the log, not on your screen. The warm-up simply stops, and because a
+stalled warm-up produces no error anywhere you look, the first sign of trouble
+is a domain that never warmed.
+
+Keep the scheduler's copy of the credential under `~/.config`, which TCC does
+not gate:
+
+```
+~/.config/domain-email-warming/<program>.env      chmod 600
+```
+
+Treat it as a second copy of the secret and rotate both together. The
+alternative — granting cron Full Disk Access — is a far larger permission than
+this job needs.
+
+`~/.local/share` and `~/.local/state` are not gated either, so the toolkit and
+its state are fine there.
+
+## Verify under the scheduler's environment, not yours
+
+Your shell has a full `PATH`, a loaded profile and TCC permissions the scheduler
+does not have. A command that works when you type it proves very little about
+whether cron can run it.
+
+Reproduce the real conditions before trusting the schedule:
+
+```bash
+env -i HOME="$HOME" PATH=/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin \
+  /bin/sh -c '/path/to/warm-tick.sh /path/to/config.json /path/to/env'
+```
+
+That is the run that found the TCC failure above. The same invocation from an
+interactive shell succeeded, which is exactly why it was not noticed first.
+
+## gog's OAuth tokens live in the login keychain, which cron cannot unlock
+
+`gog` stores its Gmail OAuth tokens in the macOS login keychain by default. A
+cron job runs in a background session where that keychain stays locked, so
+every `gog` call fails with `No auth for gmail <account>` — while the same
+command in your shell works perfectly. This is the same shape as the TCC
+failure: dead under the scheduler, alive in the terminal.
+
+Before the fix, `warmctl engage` recorded each failed lookup as `not_found`.
+The fleet accumulated ~15,000 `not_found` rows while the mail sat in the
+mailbox the whole time. The instrument was dead and the report read it as
+absence — the precise failure mode this skill exists to prevent. Engage now
+probes each receiving account once per run and exits non-zero when an account
+is unreachable, so the failure lands in the scheduler's log instead of the
+state file's placement column.
+
+Fix the credential, do not route around it:
+
+- `gog config set keyring_backend file` plus one interactive `gog auth add`
+  stores the tokens in a file cron can read. `gog auth list` then shows the
+  account under the file backend.
+- Or run `engage` from a user session (launchd agent, not a global daemon) so
+  the login keychain is unlocked.
+
+Verify with the `env -i` invocation above after whichever fix you choose.
+
+## Check the log, not the crontab
+
+A crontab entry proves a job is scheduled, not that it works. After the first
+scheduled hour, read the log and confirm you see a preflight block and a `send`
+line. An empty log means the job never fired; a log with one permission error
+means it fired and died.
+
+## Scheduling the sweeps and the watchers
+
+The sweeps run alongside `warm-tick.sh`, each on its own cadence, each with
+its own state file and log so one failure never masks another:
+
+| Job | Cadence | Notes |
+|---|---|---|
+| `signup-sweep.py --daemon` | always-on (launchd KeepAlive) | OTP polling is latency-sensitive; cron's one-minute floor is too slow |
+| `subscribe-sweep.mjs --apply` | daily | `--max` caps subscribes per run; confirms complete in-band |
+| `confirm-subscriptions.mjs --apply` | daily, after subscribe-sweep | generic double-opt-in completion, also serves digest-sweep |
+| `vendor-outreach.mjs --apply` | daily | strict per-vendor caps; see its header |
+| `inbox-backstop.py` | hourly | reruns the filter query; needs `--account` |
+| `notify-sweep.mjs --apply` | weekly | `--max` caps drips; per-mailbox `--min-days` spacing |
+| `engage-seed.mjs --apply` | weekly | rescue, star sample, read the stale tail |
+| `reputation-monitor.mjs` | daily | exits 2 when action is needed; alert on that, not on output |
+| `digest-sweep.mjs` | manual only | browser-driven and pilot-gated; never schedule an unpiloted publication |
+
+Every `gog` caller needs the file keyring backend (above), and every sender
+needs the Cloudflare env sourced from `~/.config`, never `~/Documents`. New
+jobs inherit both constraints; verify each one with the `env -i` invocation
+before trusting its schedule.
+
+## Second filter: Glama connector notes
+
+The main rule only matches mail to warmed addresses. Glama's
+"connector pending review" notes go to the seed Gmail directly, so they
+need their own rule: query `from:support@glama.ai subject:"pending
+review"`, action Skip Inbox plus a `glama` label, unread kept. The
+sender pins the template, so human mail from Glama staff
+(frank@glama.ai) stays in the inbox.

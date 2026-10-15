@@ -1,6 +1,6 @@
 ---
 name: framer-plugin
-description: "Build, run, and publish a Framer plugin (a React app under integrations/framer-plugin/ built on the framer-plugin npm package, running in an iframe inside the Framer desktop app) and get it listed via the Framer Community / Marketplace. Use when creating a new Framer plugin, reading the current canvas selection (e.g. the selected image) into your API, wiring framer.json, debugging why the dev plugin won't load, packing the zip for publishing, or figuring out how Framer submission works. Covers the whole path plus the traps that each cost a build/submit round-trip: the dev server must be local HTTPS (Framer refuses plain http://localhost and fails with a blank panel), framer.showUI must run before the React render or the window never sizes, the current selection is read via framer.getImage()/subscribeToImage (canvas-mode only, no synchronous DOM access), the zip must have framer.json at its root (zip the CONTENTS of dist/, not the folder), and plugin data (framer.setPluginData) is stored per project file — the key is re-pasted per project. The big selling point: publishing is near-instant with light or no review — no days-long gate like Canva or Figma. Sibling of the other integration skills (canva-app, figma-plugin, browser-extension, connector-directory-submission). Triggers: 'build a Framer plugin', 'framer-plugin npm package', 'framer.json manifest', 'Framer dev plugin won't load', 'Framer plugin blank panel', 'get the current Framer selection', 'publish to the Framer Marketplace', 'Framer Community plugin'."
+description: "Use when building, debugging or publishing a Framer plugin (React on the framer-plugin package, in an iframe in Framer): framer.json, reading the canvas selection, a dev plugin that will not load or shows a blank panel, packing the zip, and Marketplace submission."
 ---
 
 # Building a Framer plugin
@@ -8,6 +8,13 @@ description: "Build, run, and publish a Framer plugin (a React app under integra
 A Framer plugin is a **React app that runs in an iframe inside the Framer desktop app**, built on the **`framer-plugin` npm package** (`@framer/plugin`). Source lives in `integrations/framer-plugin/`. It is a thin frontend over your product's SDK or public REST API — the SDK gives you the canvas/selection + plugin window; you supply the logic. Read this before the first file; the command-level playbook is the companion `scripts/framer-plugin/README.md`.
 
 The headline difference from other marketplaces: **publishing is near-instant, with light or no review.** No days-long review queue. That makes the build traps — not the submission — the whole game.
+
+## When to use
+
+- **Triggers:** 'build a Framer plugin', 'framer-plugin npm package', 'framer.json manifest', 'Framer dev plugin won't load', 'Framer plugin blank panel', 'get the current Framer selection', 'publish to the Framer Marketplace', 'Framer Community plugin'.
+- The dev server must be local HTTPS (plain http://localhost gives a blank panel); framer.showUI must run before the React render; the selection comes from framer.getImage()/subscribeToImage (canvas mode only).
+- The zip needs framer.json at its root (zip the contents of dist/); framer.setPluginData is per project file; publishing is near-instant with light or no review.
+- Siblings: canva-app, figma-plugin, browser-extension, connector-directory-submission.
 
 ## The trap that wastes a day: the dev plugin needs local HTTPS
 
