@@ -1,11 +1,18 @@
 ---
 name: notion-integration
-description: "Build, run, and submit a native Notion integration (a service under integrations/notion-integration/ built on the Notion API via @notionhq/client, distributed as a public OAuth integration) and get it listed in the Notion integration gallery. Use when creating a new Notion integration, wiring a 'Notion database → your product' sync, exchanging an OAuth code for a workspace token, debugging a database query that returns nothing or a write that fails validation, or figuring out why gallery submission bounces. Covers the whole path plus the traps that each cost a round-trip: internal vs public integrations (internal tokens are one-workspace, can never be listed, and can't be converted), the API only sees pages explicitly granted to the integration, status-vs-select filters and writes differ by property type, Notion does not auto-create status options via the API, and every property value is a typed envelope you must unwrap. Sibling of the other integration skills (canva-app, zapier-integration, figma-plugin, browser-extension, connector-directory-submission). Distinct from note-organizing skills — this is the Notion platform API + marketplace path. Triggers: 'build a Notion integration', 'Notion OAuth', 'public Notion integration', 'notion.so/integrations', 'query a Notion database', 'Notion API object_not_found', 'submit to the Notion integration gallery'."
+description: "Use when building or submitting a native Notion integration on the Notion API (@notionhq/client): public OAuth, database sync, queries that return nothing, writes that fail validation, and Notion integration gallery submission. Not for organizing notes."
 ---
 
 # Building a Notion integration
 
 A Notion integration is a **service that talks to the Notion API** (`https://api.notion.com/v1`), almost always via the official SDK **`@notionhq/client`**. Source lives in `integrations/notion-integration/`. It is a thin layer between Notion and your product's SDK / public REST API — Notion supplies content and database structure; your API supplies the business logic. Read this before the first file; the command-level playbook is `pooriaarab/scripts` `scripts/notion-integration/README.md`.
+
+## When to use
+
+- **Triggers:** 'build a Notion integration', 'Notion OAuth', 'public Notion integration', 'notion.so/integrations', 'query a Notion database', 'Notion API object_not_found', 'submit to the Notion integration gallery'.
+- Internal vs public integrations: internal tokens are one workspace, cannot be listed and cannot be converted. The API sees only pages granted to the integration.
+- Status and select filters and writes differ by property type; the API does not create status options; every property value is a typed envelope to unwrap.
+- Siblings: canva-app, zapier-integration, figma-plugin, browser-extension, connector-directory-submission.
 
 ## The trap that wastes a day: internal vs public integration
 

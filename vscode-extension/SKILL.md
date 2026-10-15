@@ -1,11 +1,17 @@
 ---
 name: vscode-extension
-description: "Build, package, and PUBLISH a VS Code extension (a TypeScript extension under integrations/<name>/, VS Code Extension API) to BOTH the Visual Studio Marketplace (vsce) and Open VSX (ovsx, which feeds Cursor / Windsurf / VSCodium / Gitpod). Use when creating a VS Code extension, packaging a .vsix, or shipping one to either marketplace. Covers the whole path plus the traps that each cost a round-trip: vsce/ovsx and their esbuild-based packaging SEGFAULT on Node 22+/25 (use Node 20); vsce REJECTS SVG images in README.md (use PNG or remove them); the VS Code Marketplace publisher is created via a browser form that is hostile to automation (create it by hand) and needs an Azure DevOps PAT; Open VSX is the easier, GitHub-login path (`ovsx create-namespace` + `ovsx publish -p <token>`) and reaches the arguably-better Cursor/Windsurf audience. Sibling of the other integration skills (raycast-extension, browser-extension). Triggers: 'build a VS Code extension', 'publish to the VS Code Marketplace', 'vsce package/publish', 'ovsx publish', 'Open VSX', 'vsce segfault', 'SVG restricted in README', 'create a Marketplace publisher'."
+description: "Use when building, packaging or publishing a VS Code extension to the Visual Studio Marketplace (vsce) and Open VSX (ovsx, which feeds Cursor, Windsurf, VSCodium and Gitpod)."
 ---
 
 # Building + publishing a VS Code extension
 
 A VS Code extension is a TypeScript module on the **Extension API** (`package.json` manifest with `contributes`, `activationEvents`, `main`). Source in `integrations/<name>/`. Publish to two marketplaces from one `.vsix`: the **Visual Studio Marketplace** (`vsce`) and **Open VSX** (`ovsx` — what Cursor / Windsurf / VSCodium / Gitpod install from). Command playbook: `pooriaarab/scripts` `scripts/vscode-extension/README.md`.
+
+## When to use
+
+- **Triggers:** 'build a VS Code extension', 'publish to the VS Code Marketplace', 'vsce package/publish', 'ovsx publish', 'Open VSX', 'vsce segfault', 'SVG restricted in README', 'create a Marketplace publisher'.
+- vsce, ovsx and their esbuild packaging segfault on Node 22+ (use Node 20); vsce rejects SVG images in README.md.
+- The Marketplace publisher needs a hand-filled browser form and an Azure DevOps PAT; Open VSX is a GitHub login (`ovsx create-namespace`, `ovsx publish -p <token>`). Siblings: raycast-extension, browser-extension.
 
 ## The trap that segfaults packaging: Node version
 

@@ -1,0 +1,9 @@
+{
+  "name": "claude-in-cloud-browser",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
+    "puppeteer-core": "^25.12.0"
+  }
+}

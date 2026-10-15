@@ -1,6 +1,6 @@
 ---
 name: messaging-bot-onboarding-setup
-description: "Use when wiring or debugging inbound messaging bots (iMessage/Sendblue, Telegram, WhatsApp Cloud API, Slack, Discord) for a product where a cold DM starts conversational onboarding — Content Rabbit-style 'text this number to do your marketing'. Covers the shared-secret webhook-auth pattern every provider uses (a secret the provider sends in a request header that the app compares to a deployed env secret) and the #1 production failure: the provider dashboard's secret field is left EMPTY, so real inbounds arrive with no/empty header and the route 401s every message while synthetic tests pass. Per platform: which header carries the secret, which dashboard field / API call sets it, the exact env var name, and the verify handshake. Plus: the Telegram bare-/start cold-onboarding gap (the Start button sends `/start`, which a connect-help intercept can swallow before onboarding runs); creating/reusing a Meta app for WhatsApp (add the 'Connect with customers through WhatsApp' use case to an existing business app vs a new app; test number vs production number vs business verification; the 5 WHATSAPP_ env vars); and how to e2e-verify a bot end to end with a synthetic signed webhook POST plus a DB row check instead of trusting a 200. Triggers: 'imessage bot 401', 'sendblue signing secret', 'telegram onboarding not firing', 'set up whatsapp cloud api', 'whatsapp phone number id', 'why does the bot never reply', 'verify the telegram webhook', 'messaging bot setup'."
+description: "Use when wiring or debugging inbound messaging bots (iMessage/Sendblue, Telegram, WhatsApp Cloud API, Slack, Discord) where a cold DM starts onboarding, especially when real inbounds get 401s or the bot never replies while synthetic tests pass."
 ---
 
 # Messaging-bot onboarding setup
@@ -9,6 +9,13 @@ A cold handle DMs a number → the app greets, gets consent, provisions a handle
 account, and hands off. Every platform delivers those inbounds to an HTTP webhook that must
 **authenticate the delivery** before acting. The auth is always the same shape — and the same
 shape fails the same way in production.
+
+## When to use
+
+- **Triggers:** 'imessage bot 401', 'sendblue signing secret', 'telegram onboarding not firing', 'set up whatsapp cloud api', 'whatsapp phone number id', 'why does the bot never reply', 'verify the telegram webhook', 'messaging bot setup'.
+- The shared-secret webhook pattern and its top failure: the provider dashboard's secret field is empty, so every real inbound 401s. Per platform: the header, the dashboard field or API call, the env var name and the verify handshake.
+- The Telegram bare /start gap (a connect-help intercept swallows it before onboarding); creating or reusing a Meta app for WhatsApp (use case, test vs production number, business verification, the five WHATSAPP_ env vars).
+- End-to-end checks with a synthetic signed webhook POST plus a DB row check instead of trusting a 200.
 
 ## The shared-secret pattern (learn this first)
 

@@ -1,6 +1,6 @@
 ---
 name: powerplatform-connector
-description: "Ship a Microsoft Power Platform custom connector — three declarative files under integrations/powerplatform-connector/ that expose your REST API to Power Automate, Power Apps, and Logic Apps — and list it publicly by opening a pull request against Microsoft's connectors repository. Use when wrapping an API for Power Automate, writing or fixing apiDefinition/apiProperties, validating with paconn, or preparing the independent-publisher submission. Covers the whole path plus the traps that each cost a round-trip: the submission stalls on an unsigned CLA that only a human can sign, the definition must be Swagger 2.0 and an OpenAPI 3 document is rejected outright, an icon.png does not belong in the submission at all, the API-key connection parameter makes users type the entire header value unless you template it, and the validator is a Python tool rather than an npm one. Sibling of the other integration skills (connector-directory-submission, zapier-integration, make-integration, mcp-directory-submission, pipedream-integration). Triggers: 'Power Platform connector', 'Power Automate custom connector', 'paconn validate', 'apiDefinition.swagger.json', 'independent publisher connector', 'submit a connector to Microsoft'."
+description: "Use when wrapping a REST API as a Microsoft Power Platform custom connector for Power Automate, Power Apps and Logic Apps, validating it with paconn, or submitting it as an independent-publisher PR to Microsoft's connectors repo."
 ---
 
 # Shipping a Power Platform connector
@@ -8,6 +8,13 @@ description: "Ship a Microsoft Power Platform custom connector — three declara
 A connector is not an app. It is **three declarative files** plus a pull request against
 Microsoft's public connectors repository. There is no bundle, no hosting, and no runtime of
 yours involved. Source lives in `integrations/powerplatform-connector/`.
+
+## When to use
+
+- **Triggers:** 'Power Platform connector', 'Power Automate custom connector', 'paconn validate', 'apiDefinition.swagger.json', 'independent publisher connector', 'submit a connector to Microsoft'.
+- Three declarative files: apiDefinition.swagger.json, apiProperties.json and readme.md. The definition must be Swagger 2.0; OpenAPI 3 is rejected. No icon.png in the submission.
+- The PR stalls on a CLA only a human can sign; template the API-key parameter or users type the whole header; paconn is a Python tool.
+- Siblings: connector-directory-submission, zapier-integration, make-integration, mcp-directory-submission, pipedream-integration.
 
 ## Read this first: the CLA is what actually blocks you
 

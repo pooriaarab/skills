@@ -31,7 +31,7 @@ permissions:
 jobs:
   build:
     if: github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubicloud-standard-8
+    runs-on: ${{ github.event.repository.private && 'boat-8' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -133,3 +133,47 @@ the manifest.
 Use deterministic PR names. Persist ownership after each mutation. Preserve the
 last valid manifest until all owned resources are gone. Mark the URL expired only
 after cleanup passes.
+
+## Skip-when-secrets-not-configured gate
+
+When a workflow depends on secrets that may not be set (new repo, fork, or
+infrastructure still being wired), gate the job so CI stays green instead of
+failing. Emit `configured=true|false` once; guard every downstream step with
+the same `if`.
+
+```yaml
+- id: preview_gate
+  name: Skip when preview secrets are not configured
+  env:
+    CLOUDFLARE_PREVIEW_API_TOKEN: ${{ secrets.CLOUDFLARE_PREVIEW_API_TOKEN }}
+    CF_PREVIEW_HOST_SUFFIX: ${{ vars.CF_PREVIEW_HOST_SUFFIX }}
+    PREVIEW_BYOK_ENCRYPTION_KEY: ${{ secrets.PREVIEW_BYOK_ENCRYPTION_KEY }}
+  run: |
+    if [[ -n "$CLOUDFLARE_PREVIEW_API_TOKEN" && -n "$CF_PREVIEW_HOST_SUFFIX" \
+          && -n "$PREVIEW_BYOK_ENCRYPTION_KEY" ]]; then
+      echo "configured=true" >> "$GITHUB_OUTPUT"
+    else
+      echo "configured=false" >> "$GITHUB_OUTPUT"
+      echo "::notice title=Preview skipped::Worker Preview secrets are not configured yet. \
+Set CLOUDFLARE_PREVIEW_API_TOKEN, CF_PREVIEW_HOST_SUFFIX, and \
+PREVIEW_BYOK_ENCRYPTION_KEY, then re-run."
+    fi
+
+- name: Provision / deploy / verify
+  if: steps.preview_gate.outputs.configured == 'true'
+  run: ...
+```
+
+### Rules
+
+1. **One gate at the top.** Check the union of every value the job needs in a
+   single step — a missing host suffix is as broken as a missing token.
+2. **Guard every downstream step** with `if: steps.<id>.outputs.configured == 'true'`.
+3. **Use `::notice`**, not `::warning` or `::error`, so the job stays green and
+   the skip is visible in the log without a yellow/red banner.
+4. **Keep a fork/ownership guard** so the workflow never tries to provision when
+   secrets are unavailable by design:
+   `github.event.pull_request.head.repo.full_name == github.repository`.
+
+Working example: private-repo-4ed5
+[`worker-preview.yml`](https://github.com/pooriaarab/private-repo-4ed5/tree/main/.github/workflows/worker-preview.yml).

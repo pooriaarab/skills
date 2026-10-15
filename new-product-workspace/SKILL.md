@@ -98,15 +98,18 @@ branches are `main` and `release` simply never runs. There is no failure and no
 run, so nothing reports it. Every time you add or copy a workflow, read its
 `branches:` filter against the branches that actually exist (`git branch -r`).
 
-**CI runners.** Every job on a private `pooriaarab/*` repo runs on an Ubicloud
-managed runner. The self-hosted Dell fleet (`[self-hosted, linux, dell-ci]`) is
-retired: never write that label and never add a fallback to it.
+**CI runners.** Private `pooriaarab/*` repos use the warm Boat JIT pool.
+Public repos use GitHub-hosted runners because fork PRs run untrusted code.
+macOS and Windows jobs keep their GitHub-hosted images. The Dell fleet is
+retired. JIT runners get only the labels passed; do not add `self-hosted`.
+Declare `boat` and `boat-8` in `.github/actionlint.yaml`; see
+[self-hosted-runner-fleet](../self-hosted-runner-fleet/SKILL.md).
 
 | Job | `runs-on` |
 | --- | --- |
-| build, lint, typecheck, test | `ubicloud-standard-4` |
-| heavy Next.js production build | `ubicloud-standard-8` |
-| waits on an external API (LLM review, notify, deploy trigger, secret scan) | `ubicloud-standard-2` |
+| build, lint, typecheck, test, E2E, deploy | `boat` |
+| heavy Next.js production build | `boat-8` |
+| waits on an external API (LLM review, notify, deploy trigger, secret scan) | `boat` |
 
 **PR review.** Every repo gets `.github/workflows/vibecodereview.yml`, which
 calls `pooriaarab/vibecodereview@v1`. Copy the current canonical file instead of
@@ -142,6 +145,40 @@ The workspace is now ready. Next:
       or `production`.
 - [ ] `.github/workflows/vibecodereview.yml` copied from `private-repo-f304`;
       `OPENROUTER_API_KEY` set.
-- [ ] Every `runs-on` is an Ubicloud label; every `branches:` filter names a
+- [ ] Every `runs-on` matches repo visibility and OS; every `branches:` filter names a
       branch that exists.
 - [ ] Domain **not** purchased unless the user asked.
+
+## Adopt the fleet PR and issue standards
+
+Do this before the first feature branch. A repo is non-conforming from the start if these are missing, and fixing them later means editing the same workflows a second time.
+
+Add the repo and a 2 to 4 letter lowercase prefix to `pooriaarab/scripts/repo-prefixes.json` before running the rollouts. The prefix lives in one place so the rollout does not derive it from the repo name. Deriving it twice is how two repos get the same prefix.
+
+Run `pr-standards-rollout --repo <new> --apply` from a checkout of `pooriaarab/scripts`. It writes its files from `pr-standards-templates/` in the same checkout. Naming the repo explicitly matters: run without `--repo`, and there is nothing to say this rollout means the repo you just created rather than any other repo eligible for it.
+
+`issue-standards-rollout --repo <new> --apply` does less. It creates the labels and prints the plan for everything else, because forms, the `AGENTS.md` block and the stub are a code change and go through one issue and one pull request like any other. Copy them from `issue-standards-templates/` yourself and open that pull request.
+
+Do not vendor either set of templates into this skill's own directory as a persistent second copy — that copy drifts, and the fleet has already paid for that drift three times. Copying the destination files themselves into the new repo, the way the adoption pull request above does, is the required delivery mechanism, not the drift this warns against.
+
+Run `pr-standards-rollout --repo <new>` first. `issue-standards-rollout --repo <new>` reads the prefix from `.github/pr-standards.json` to name the adoption branch.
+
+A conforming repo has all of these. The first rollout (`pr-standards-rollout`) writes item 1. `issue-standards-rollout --apply` creates item 4. Items 2, 3, and 5 arrive through the adoption pull request:
+
+1. `.github/pr-standards.json` with the registered prefix. The same rollout also writes `.github/pull_request_template.md` and `.github/workflows/pr-standards.yml` and inserts the `<!-- pr-standards:start -->` block into `AGENTS.md`.
+
+2. The `<!-- issue-standards:start -->` block in `AGENTS.md`.
+
+3. The four issue forms in `.github/ISSUE_TEMPLATE/`: `bug.yml`, `feature.yml`, `chore.yml`, `epic.yml`; plus `config.yml`.
+
+4. The 14 labels:
+
+| Group | Labels |
+|---|---|
+| Kind | `bug` `feature` `chore` `epic` |
+| Size | `mini` `standard` `deep` |
+| Route | `route:mechanical` `route:scoped` `route:judgement` |
+| State | `triage` `ready-for-agent` `needs-info` `blocked` |
+
+5. The `.agents/issues.md` stub from `issue-standards-templates/issues.md.stub`. Leave the TODOs. The stub asks for the repo's analytics helper and high-stakes paths, and neither exists before the product has real code. A guessed answer is worse than an empty one because the next agent will search for it and conclude the code is broken.
+

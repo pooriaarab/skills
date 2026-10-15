@@ -71,8 +71,8 @@ hatch, never the default fix.
 ## Rollout mechanics (fleet-scale)
 
 - **Fan-out unit = 2 self-contained files** (`.oxlintrc.json` + a standalone `oxlint.yml` that runs
-  `bunx oxlint` on `ubicloud-standard-4` — private `pooriaarab/*` repos run every job on an Ubicloud
-  runner, and the self-hosted Dell fleet is retired), independent of each repo's existing
+  `bunx oxlint` on `boat` for private `pooriaarab/*` repos, or `ubuntu-latest`
+  for public repos), independent of each repo's existing
   turbo/eslint pipeline. Uniform, minimal blast radius, no per-repo bespoke wiring.
 - **No local clone needed** — create the branch and both files through the `gh` contents API
   (the token needs `workflow` scope; a git *push* of a workflow file works, but the contents-API

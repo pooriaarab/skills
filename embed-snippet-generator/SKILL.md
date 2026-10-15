@@ -1,6 +1,6 @@
 ---
 name: embed-snippet-generator
-description: "Build and — critically — VERIFY a third-party embed/snippet catalog for a website builder, CMS, or page builder that exposes a 'custom code' / 'code embed' field. Covers the two distinct embed surfaces (site-wide <head> code vs a sandboxed per-section code-embed) and their different tag + character-limit rules; a provider catalog + snippet generator UI; and the part everyone skips — proving each snippet actually RENDERS by reproducing the host's real embed sandbox headless, not just that it passes a validator. Includes the hard-won gotchas: placeholder-id artifacts vs real bugs (a fake ID returning 404 is NOT a broken template), provider embed-format drift (rebrands, host renames, legacy→new loaders — always re-check the provider's CURRENT official docs before 'fixing'), logos via a build-time manifest instead of runtime svg/png guessing (the SSR/hydration onError race), protocol-relative // failing in a null-origin srcdoc iframe, per-account host subdomains (paste the full URL, don't hardcode a shared host + id), char-limit compliance mirroring the host's field limits, and the anti-pattern of a 'verified/works' badge. Use when building a code-embed/widget picker, a 'paste this to add Calendly/Stripe/a chat widget' helper, or when auditing whether such snippets are correct and current."
+description: "Use when building or auditing a third-party embed catalog (a 'paste this to add Calendly, Stripe or a chat widget' picker) for a site builder or CMS custom-code field, and proving each snippet really renders in the host's sandbox."
 ---
 
 # embed-snippet-generator
@@ -13,6 +13,12 @@ into a website builder's *custom code* / *code embed* field — and, more import
 **Activate:** "add a code-embed / widget picker," "generate a Stripe/Calendly/chat
 snippet," "let users paste third-party embeds," or "are our embed snippets correct
 and up to date?"
+
+## When to use
+
+- **Triggers:** 'embed snippet', 'code embed picker', 'custom code field', 'widget catalog', 'does this embed still work', 'snippet renders blank'.
+- Two embed surfaces (site-wide <head> code vs a sandboxed per-section embed) with different tag and character-limit rules; a provider catalog and generator UI; headless reproduction of the host's real sandbox, not just a validator.
+- Gotchas: a placeholder ID that 404s is not a broken template; provider format drift (re-check current official docs before a fix); logos from a build-time manifest (avoids the SSR onError race); protocol-relative // fails in a null-origin srcdoc iframe; per-account host subdomains; char-limit compliance; no 'verified' badge.
 
 ## The one lesson that matters
 
