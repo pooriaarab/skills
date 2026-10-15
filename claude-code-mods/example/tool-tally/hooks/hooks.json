@@ -1,0 +1,4 @@
+{
+  "description": "The tool-tally hooks module",
+  "modules": ["./register.js"]
+}
