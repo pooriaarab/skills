@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>Deck title</title>
+<style>
+  /* Fonts: @font-face with relative paths to files next to this page. No remote URLs. */
+  :root { --stage-w: 1920px; --stage-h: 1080px; }
+  [data-theme="dark"]  { --bg: #101114; --fg: #f3f1ec; --muted: #b9b5ab; --accent: #ffb547; --card: #1c1d22; }
+  [data-theme="light"] { --bg: #f6f2ea; --fg: #17171a; --muted: #4a4740; --accent: #b4430f; --card: #ffffff; }
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  #stage { position: absolute; left: 50%; top: 50%; width: var(--stage-w); height: var(--stage-h);
+           transform-origin: 0 0; background: var(--bg); color: var(--fg);
+           font: 500 44px/1.25 Inter, system-ui, sans-serif; }
+  .slide { position: absolute; inset: 0; display: none; padding: 120px 140px; box-sizing: border-box; background: var(--bg); }
+  .slide.on { display: grid; }
+  h1 { font-size: 120px; line-height: 1.02; letter-spacing: -0.03em; margin: 0; text-wrap: balance; }
+  .accent { color: var(--accent); }
+  /* One block per layout in the catalogue. */
+  [data-layout="statement"] { align-content: center; }
+  [data-layout="giant-number"] { grid-template-columns: 1.1fr 1fr; align-items: center; gap: 80px; }
+  [data-layout="giant-number"] .num { font-size: 360px; font-weight: 800; line-height: .9; color: var(--accent); }
+  [data-layout="quote-card"] { place-items: center; }
+  .quote { margin: 0; max-width: 1400px; padding: 72px 88px; border-radius: 28px; background: var(--card); }
+  .quote blockquote { margin: 0 0 40px; font-size: 64px; line-height: 1.15; } .quote figcaption { font-size: 36px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <!-- One focus per slide. data-layout names the catalogue entry. data-src ties a claim to SOURCES.md. -->
+  <section class="slide" data-layout="statement">
+    <h1>Your AI remembers everything. <span class="accent">Except you.</span></h1>
+  </section>
+  <section class="slide" data-layout="giant-number">
+    <div class="num" data-src="S1">96%</div>
+    <p>of ChatGPT memories were made <span class="accent">without being asked.</span></p>
+  </section>
+  <section class="slide" data-layout="quote-card">
+    <figure class="quote" data-src="Q1">
+      <blockquote>“The real switching cost is context rebuilding.”</blockquote>
+      <figcaption>Hiten Shah, @hnshah, 2 March 2026</figcaption>
+    </figure>
+  </section>
+</div>
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  const stage = document.getElementById('stage');
+  let i = 0;
+  const fit = () => stage.style.transform = `scale(${Math.min(innerWidth / 1920, innerHeight / 1080)}) translate(-50%, -50%)`;
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((el, k) => el.classList.toggle('on', k === i));
+    history.replaceState(null, '', location.search + '#' + (i + 1));
+  }
+  const fromHash = () => show((parseInt(location.hash.slice(1), 10) || 1) - 1);
+  const root = document.documentElement, theme = new URLSearchParams(location.search).get('theme');
+  if (theme) root.dataset.theme = theme;
+  addEventListener('keydown', e => {
+    if (['ArrowRight', 'PageDown', ' '].includes(e.key)) show(i + 1);
+    else if (['ArrowLeft', 'PageUp'].includes(e.key)) show(i - 1);
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+    else if (e.key === 't') root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  });
+  addEventListener('click', e => show(i + (e.clientX > innerWidth / 2 ? 1 : -1)));
+  addEventListener('hashchange', fromHash);
+  addEventListener('resize', fit);
+  fit(); fromHash();
+</script>
+</body>
+</html>
