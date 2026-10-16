@@ -65,6 +65,7 @@ service is not a listing route.
 
 - [`references/hosting.md`](references/hosting.md)
 - [`references/listings.md`](references/listings.md)
+- [`references/shipping-a-family.md`](references/shipping-a-family.md)
 - [`../paper-submission/SKILL.md`](../paper-submission/SKILL.md)
 - [`../mcp-directory-submission/SKILL.md`](../mcp-directory-submission/SKILL.md)
 - [`../website-directory-submission/SKILL.md`](../website-directory-submission/SKILL.md)

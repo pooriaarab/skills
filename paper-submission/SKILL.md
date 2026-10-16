@@ -120,6 +120,7 @@ login.
 - [`references/citation-and-discovery.md`](references/citation-and-discovery.md)
 - [`references/arxiv-independent-author.md`](references/arxiv-independent-author.md)
 - [`references/templates.md`](references/templates.md)
+- [`references/accounts-and-traps.md`](references/accounts-and-traps.md)
 - [`references/checklists.md`](references/checklists.md)
 - [`assets/arxiv-skeleton/`](assets/arxiv-skeleton/)
 - [`../benchmark-publishing/SKILL.md`](../benchmark-publishing/SKILL.md)
