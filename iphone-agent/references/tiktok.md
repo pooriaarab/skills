@@ -1,6 +1,7 @@
 # TikTok
 
-Open the app. Read the chrome. Do not scroll. Do not tap create, like, comment, or share.
+Open the app. Read the chrome. Do not scroll. Do not tap create, like, comment, or share
+— unless running the warmup scripts (see [Warmup](warmup.md)).
 
 This page records one phone on 2026-10-15. The frame was 500 by 1080.
 
@@ -13,6 +14,14 @@ This page records one phone on 2026-10-15. The frame was 500 by 1080.
 5. The top bar showed For You. Nearby, Following, and search were also in that bar.
 6. The bottom bar showed home, friends, create, inbox, and profile.
 7. Stop there. Do not tap create.
+
+## Warmup script
+
+```bash
+warmup-tiktok [--rounds N] [--auto]
+```
+
+Does: FYP scroll, like, comment, inbox, follow. Randomized patterns.
 
 ## Leave
 

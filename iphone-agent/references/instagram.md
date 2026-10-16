@@ -1,6 +1,7 @@
 # Instagram
 
-Open the app. Read the chrome. Leave. Do not like, comment, message, or open a story.
+Open the app. Read the chrome. Leave. Do not like, comment, message, or open a story
+— unless running the warmup scripts (see [Warmup](warmup.md)).
 
 This page records one phone on 2026-10-15. The frame was 500 by 1080.
 
@@ -14,6 +15,15 @@ This page records one phone on 2026-10-15. The frame was 500 by 1080.
 6. The title read Instagram. The header showed plus and a heart.
 7. The bottom bar showed home, video, a paper plane, search, and a profile.
 8. Stop there. Do not tap the heart. Do not open a story.
+
+## Warmup script
+
+```bash
+warmup-instagram [--rounds N] [--auto] [--dry-run]
+```
+
+Does: feed scroll, like, comment, stories, explore, check DMs.
+Every session is randomized (different action order, varied pauses, tap jitter).
 
 ## Leave
 

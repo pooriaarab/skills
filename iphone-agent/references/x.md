@@ -1,6 +1,7 @@
 # X
 
-Open the app. Read the chrome. Leave. Do not open a thread. Do not send.
+Open the app. Read the chrome. Leave. Do not open a thread. Do not send
+— unless running the warmup scripts (see [Warmup](warmup.md)).
 
 This page records one phone on 2026-10-16. The frame was 500 by 1080.
 
@@ -13,6 +14,14 @@ This page records one phone on 2026-10-16. The frame was 500 by 1080.
 5. A Search field was on the screen.
 6. The bottom bar showed home, search, a swirl, a bell, and a chat icon.
 7. Stop there. Do not open a thread.
+
+## Warmup script
+
+```bash
+warmup-x [--rounds N] [--auto]
+```
+
+Does: timeline scroll, like, reply, retweet, DMs, notifications. Randomized.
 
 ## Leave
 
