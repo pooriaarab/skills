@@ -98,10 +98,17 @@ to the skill that holds the lever. The others assume you already know which job 
 | [ci-cost-at-agent-scale](ci-cost-at-agent-scale/SKILL.md) | Fix CI cost and CI queueing on a repo where agents open most of the pull requests. Audits where the runs come from first, then fixes in cost order: delete workflows whose steps are all ref-gated (they install and exit green), add concurrency groups, path-filter the heavy suites, share the build cache, change runners last. Explains why the real ceiling is concurrent-job limits rather than minutes, why a review bot's fix commits multiply every other workflow, and why agent sandboxes cannot replace a CI runner. |
 | [self-hosted-runner-fleet](self-hosted-runner-fleet/SKILL.md) | Use a warm Boat JIT runner pool for private Linux CI. Covers labels, the broker and agent split, caches, one job per Box, pool wall-time costs, and the retired desktop procedure for hosts that need special hardware. |
 
+### iPhone agent
+
+Drive the owner's iPhone with [iphone-agent](iphone-agent/SKILL.md) through esp32-iphone-agent, UxPlay name iPhone Agent, and an ESP32-S3 USB HID mouse on AssistiveTouch. A recipe step is written only after the phone shows it. Messages, Safari, Phone, Settings, Mail, T3 Code, Notification Centre, Facebook, Instagram, and TikTok are verified opens. TikTok leave is not verified.
+
+`npx skills add pooriaarab/skills/iphone-agent`
+
 ### Standalone
 
 | Skill | Description |
 |-------|-------------|
+| [live-site-security-sweep](live-site-security-sweep/SKILL.md) | Scan every repo that serves a live domain with the claude-security method, then fix, review, merge and release each finding. Covers headless plugin runs, a Box fleet with non-Claude agents, Cloudflare TLS and HTTPS hardening, a header baseline, and the traps from the first run. |
 | [eco-mode](eco-mode/SKILL.md) | Cut token/CO₂ usage ~65% without quality loss. Caveman-inspired. |
 | [eco-analyze](eco-analyze/SKILL.md) | `/eco-analyze` — calculate your real carbon footprint from Claude Code history |
 | [multi-account-cli](multi-account-cli/SKILL.md) | One-command switching between work and personal accounts across gcloud, gws, Firebase, and Netlify. |
@@ -152,6 +159,8 @@ to the skill that holds the lever. The others assume you already know which job 
 | [name-a-product](name-a-product/SKILL.md) | Find a name that is available, memorable and clear — with the order inverted: check for competing COMPANIES before checking domains, because funded competitors already sit on the `try*.ai` / `get*.com` variants a domain sweep hands you as alternatives. RDAP for bulk sweeps, Cloudflare `domain-check` for price/tier, plus the empirical map of ~14 naming lanes that are already exhausted on `.com` and `.ai` (a simple one-word `.com` does not exist at register price, in any language), the connotation checklist, and the "trying too hard" register axis. |
 | [launch-seo](launch-seo/SKILL.md) | Make a newly-live docs/marketing/product site discoverable and shareable — sitemap.xml, a real robots.txt (don't trust your host's silent default), canonical/Open Graph/Twitter Card meta, a favicon, and submitting the sitemap in Google Search Console. Covers the hostname-aware robots.txt trap when staging and production share one static-asset bundle. |
 | [website-directory-submission](website-directory-submission/SKILL.md) | Submit a live website to free web directories for SEO backlinks, referral traffic, and GEO/AI visibility — tiered directory tables with DR/link-type/gate, the one submission packet, the order of operations, plus the remote-MCP-server path (registry `remotes[]`, awesome-remote-mcp-servers, Glama, mcp.so) for sites with a hosted `/mcp` endpoint. Runs after `launch-seo`/`geo-aeo`. |
+| [paper-submission](paper-submission/SKILL.md) | Choose a venue for a benchmark, dataset, or evaluation paper and take it from the official template through camera-ready. Decision tree, checked deadlines, anonymity and AI-use rules, checklists, and a plain arXiv skeleton. |
+| [benchmark-publishing](benchmark-publishing/SKILL.md) | List a benchmark outside the paper: Hugging Face dataset card, the official MCP registry, Zenodo citation files, eval harnesses, paper indexes, and aggregators. One packet, filled once. |
 | [launch-analytics](launch-analytics/SKILL.md) | Wire measurement into a live site/app — Google Analytics 4 (client gtag + server-side Measurement Protocol) and Microsoft Clarity — env-gated so staging never pollutes the prod property. Enforces the rule that every domain project has GA4 + Clarity + Search Console. Covers the MV3-CSP/double-fire trap (never hardcode tags in an app shell) and verifying GA4 server events via the `/debug/mp/collect` endpoint. |
 | [build-from-template](build-from-template/SKILL.md) | Bootstrap a web-app-shaped idea from `master-template-cloudflare` (Next.js on Workers/OpenNext, D1, R2, KV, Queues, Cron, Better Auth) instead of starting from scratch. |
 | [build-a-directory](build-a-directory/SKILL.md) | Turn one niche into a monetized, SEO- and GEO-ready listing directory on Cloudflare from a directory template: the four-test niche check, a read-only domain check with a no-purchase gate, licensed listing imports behind a thin-content gate, Stripe tiers, staging on `main` and production on `release`, the `search-console` launch, and a `geoaeo audit`. |
@@ -189,6 +198,7 @@ to the skill that holds the lever. The others assume you already know which job 
 | [slack-mcp-browser-auth](slack-mcp-browser-auth/SKILL.md) | Install a no-app Slack MCP server using browser session tokens (xoxc + xoxd cookie), including the Enterprise Grid `invalid_auth` fix — no Slack app or admin approval needed. |
 | [crabbox-worktree](crabbox-worktree/SKILL.md) | Offload per-worktree dev work (installs, builds, dev server) to a remote GCP VM via crabbox so your laptop stays cool — bakes a golden image and wires into worktree hooks. |
 | [schengen-visa-application](schengen-visa-application/SKILL.md) | Prep a short-stay Schengen (type C) visa application from Canada — finds the right per-country handler, builds the document set from your own local folders, fills the EU form, stops before in-person submission. Zero PII stored. |
+| [flipper-zero](flipper-zero/SKILL.md) | Use Flipper Zero lawfully — microSD sizing, official app install via qFlipper and Flipper Lab, defensive tools, and own-device NFC, IR, and Sub-GHz checks. |
 
 ### Workspace utilities
 

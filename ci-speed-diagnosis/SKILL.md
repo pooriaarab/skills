@@ -21,27 +21,57 @@ levers. Route by what you already know:
 
 | You know | Go to |
 | --- | --- |
-| nothing yet — CI is just slow | stay here, and run the four steps below |
+| nothing yet — CI is just slow | stay here, and run the steps below |
 | the pipeline has no caching at all | [ci-build-speed](../ci-build-speed/SKILL.md) |
 | the long pole is a browser E2E job | [e2e-ci-economics](../e2e-ci-economics/SKILL.md) |
 | jobs are on the wrong runner tier, or queueing behind each other | [high-volume-ci-optimization](../high-volume-ci-optimization/SKILL.md) |
 | the problem is spend, and agents open most of the pull requests | [ci-cost-at-agent-scale](../ci-cost-at-agent-scale/SKILL.md) |
 | you are setting up the host itself | [self-hosted-runner-fleet](../self-hosted-runner-fleet/SKILL.md) |
 
+## Match CI conditions before local checks
+
+A step command alone does not reproduce CI. Match its execution conditions before benchmarking or diagnosing a failure.
+
+1. Read the workflow at the tested revision. Resolve inherited settings from reusable workflows, composite actions, matrix entries, and package scripts.
+2. Record the effective workflow, job, and step environment, including `CI`, `NODE_OPTIONS`, and service URL variable names.
+   Supply values privately. Never copy secrets into logs or public evidence.
+   Check whether `ci:local` includes these settings; a script name does not prove that it does.
+3. Record the working directory, lockfile, tool versions, and browser installation.
+   Check which binaries `PATH` and `bunx` actually select. Setup action versions alone do not prove command resolution.
+4. Match CPU, available memory, heap limits, disk space, and test worker counts to the CI job.
+   An 8 GB Box does not reproduce a 16 GB runner.
+   A 2 GB Node heap does not match a CI step that sets `NODE_OPTIONS=--max-old-space-size=4096`.
+5. Start the declared services with matching versions, ports, and local credentials.
+   Confirm readiness with a positive control, such as a successful database query from the test context, before running dependent checks.
+   A missing PostgreSQL service or test URL cannot establish a source regression.
+
+Preserve the first failure logs, tested revision, command, resource readings, and non-secret configuration evidence.
+Correct missing local conditions before changing source code or workflow limits.
+Retry only the affected checks to diagnose the mismatch. Keep their results beside the original failure evidence.
+Then run the complete required local gate with matching conditions before every push.
+Report unresolved differences. Attribute a failure to source only after the relevant execution conditions match.
+
 ## Diagnose in this order
 
 Do not skip a step. Each one stops you from optimising a job that does not matter.
 
-1. **Name the metric.** Report latency and machine seconds separately. Latency is what a person
-   waits for. Machine seconds are what you pay for. They move independently, so one CI number
-   hides which one changed. Tool: `ci-pr-latency`.
-2. **Name the critical path.** Jobs run in parallel, so wall clock is the longest job, not the
-   sum. Write the per-job medians down. A win on any other job buys machine time only.
+1. **Name the metric.** Report queue time, execution time, and summed machine-seconds separately.
+   Record push-to-gate latency too. Jobs can overlap or wait on dependencies.
+   Machine-seconds measure compute use. Billed cost also depends on rates, rounding, and included minutes.
+   `ci-pr-latency` reports run-created-to-last-finish latency and summed job durations. Its latency includes waits.
+   It does not split queue time or report billed cost. Its money label is not billing evidence.
+   Read run `created_at` and job `started_at`/`completed_at` timestamps from the Actions API.
+   Execution is `completed_at - started_at`. Run creation to job start includes dependency waits and scheduling delay.
+   Separate dependency waits before labeling the remaining wait as queue time. Mark unknown splits as unknown.
+   Use billing records for money.
+2. **Name the critical path.** Trace job dependencies and queue waits through the final required check.
+   Write the per-job medians down. A win outside that path buys machine time only.
    Tool: `ci-job-timings`. **Also check whether the long pole can fail the run.** A job with
    `continue-on-error: true` gates nothing, so time spent there buys nothing — see
    [e2e-ci-economics](../e2e-ci-economics/SKILL.md), where the longest job in two pipelines was
    exactly that.
-3. **Prove the caches hit.** Read the job logs for payload size, primary-key hit rate, and
+3. **Prove the caches save time.** Compare cache overhead with a clean install, as described below.
+   Read the job logs for payload size, primary-key hit rate, and
    remote-cache state. A cache that restores 0 bytes still prints a green success line.
    Tool: `ci-cache-health`. **A primary-key hit is not proof the build used it** — a build tool
    can discard a correctly restored, correctly sized pack over a build dependency the key
@@ -53,6 +83,31 @@ Do not skip a step. Each one stops you from optimising a job that does not matte
 5. **Only now add a lever.** Spend on the critical path, in the sibling that owns it:
    `ci-build-speed` for the build, `e2e-ci-economics` for a browser suite,
    `high-volume-ci-optimization` for job placement.
+
+## Compare cache cost with a clean install
+
+A successful cache restore can cost more than the work it avoids. A high hit rate does not prove a saving.
+
+1. Record archive bytes, restore time, decompression time, install time, and post-job save time.
+   If restore time includes decompression, record that boundary. Do not count decompression twice.
+2. Compare restore plus install plus save with a clean install on the same runner type.
+   Include cache misses and unchanged-key hits. An unchanged-key hit usually skips saving.
+3. Use the same commit, lockfile, package manager version, and install flags for both paths.
+   Start each clean measurement without `node_modules` or a package store.
+4. Inspect the cache path before restoring it. Preloaded runners can hold packages from unrelated projects.
+   Measure directory bytes and archive bytes separately. Record whether the store belongs to the job or the image.
+5. For a cold Bun benchmark, set [`BUN_INSTALL_CACHE_DIR`](https://bun.sh/docs/pm/global-cache) to a fresh directory under `RUNNER_TEMP`.
+   Leave it empty before install. Do not clear a shared runner store.
+   Use a fresh job store in production only when the pilot shows a slower restore or preloaded store.
+   For explicit restore or save on an ephemeral runner, use the same directory as install.
+   Keep a scoped persistent warm store when measurements favor it. Keep it outside the workspace and `RUNNER_TEMP`.
+   Follow [persistent runner cache rules](../high-volume-ci-optimization/SKILL.md#caches-must-live-outside-the-workspace).
+   Do not archive the persistent store with `actions/cache`.
+6. Pilot the smaller cache or uncached install in CI. Keep the existing tests and failure checks.
+   Compare repeated successful runs before a wider rollout. An isolated install benchmark does not prove a CI speedup.
+
+Record the run URLs, runner type, cache state, sample count, and measurement window with each result.
+Keep private repository details in private evidence. Publish only results approved for public use.
 
 ## The bug shape that repeats: one host's mitigation, every host's cost
 
@@ -97,8 +152,9 @@ count, free disk. Do not gate it on `!dev`, on a branch name, or on a number som
 direction: a baseline taken while parallel agents drove the machine to load 65–160 read 1071s for
 a suite that runs in 125–131s on a quiet machine, an 8x inflation.
 
-**When you cannot measure in CI, report CPU time (user+sys), not wall clock.** CPU time survives
-contention. Wall clock does not.
+**When CI is unavailable, record wall time and CPU time (user+sys) separately.**
+Record host load too. Downloads, disk waits, and decompression can dominate cache work.
+CPU time alone cannot measure that overhead. Mark the result as an isolated benchmark.
 
 **Verify behaviour, not inventory.** The cache-list API showed no entries while the job logs
 proved the same caches saved and restored correctly. A log line is ground truth. A listing API is
