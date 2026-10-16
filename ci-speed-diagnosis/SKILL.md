@@ -35,7 +35,12 @@ Do not skip a step. Each one stops you from optimising a job that does not matte
 1. **Name the metric.** Report queue time, execution time, and summed machine-seconds separately.
    Record push-to-gate latency too. Jobs can overlap or wait on dependencies.
    Machine-seconds measure compute use. Billed cost also depends on rates, rounding, and included minutes.
-   Use billing records for money. Tool: `ci-pr-latency`.
+   `ci-pr-latency` reports run-created-to-last-finish latency and summed job durations. Its latency includes waits.
+   It does not split queue time or report billed cost. Its money label is not billing evidence.
+   Read run `created_at` and job `started_at`/`completed_at` timestamps from the Actions API.
+   Execution is `completed_at - started_at`. Run creation to job start includes dependency waits and scheduling delay.
+   Separate dependency waits before labeling the remaining wait as queue time. Mark unknown splits as unknown.
+   Use billing records for money.
 2. **Name the critical path.** Trace job dependencies and queue waits through the final required check.
    Write the per-job medians down. A win outside that path buys machine time only.
    Tool: `ci-job-timings`. **Also check whether the long pole can fail the run.** A job with
@@ -68,9 +73,13 @@ A successful cache restore can cost more than the work it avoids. A high hit rat
    Start each clean measurement without `node_modules` or a package store.
 4. Inspect the cache path before restoring it. Preloaded runners can hold packages from unrelated projects.
    Measure directory bytes and archive bytes separately. Record whether the store belongs to the job or the image.
-5. For Bun, set [`BUN_INSTALL_CACHE_DIR`](https://bun.sh/docs/pm/global-cache) to a fresh directory under `RUNNER_TEMP` for each job.
-   Use the same path for install and any explicit cache restore or save.
-   A clean-install measurement leaves that directory empty before install. Do not clear a shared runner store.
+5. For a cold Bun benchmark, set [`BUN_INSTALL_CACHE_DIR`](https://bun.sh/docs/pm/global-cache) to a fresh directory under `RUNNER_TEMP`.
+   Leave it empty before install. Do not clear a shared runner store.
+   Use a fresh job store in production only when the pilot shows a slower restore or preloaded store.
+   For explicit restore or save on an ephemeral runner, use the same directory as install.
+   Keep a scoped persistent warm store when measurements favor it. Keep it outside the workspace and `RUNNER_TEMP`.
+   Follow [persistent runner cache rules](../high-volume-ci-optimization/SKILL.md#caches-must-live-outside-the-workspace).
+   Do not archive the persistent store with `actions/cache`.
 6. Pilot the smaller cache or uncached install in CI. Keep the existing tests and failure checks.
    Compare repeated successful runs before a wider rollout. An isolated install benchmark does not prove a CI speedup.
 
