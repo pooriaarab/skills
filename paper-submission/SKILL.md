@@ -60,6 +60,12 @@ are open, use a rolling journal or arXiv and wait. Do not invent a date.
     section outline, figures, writing rules and a pre-submission checklist.
     ASD-STE100 is not for a research paper; the guide says what to use.
 
+11. **You want more places to send it.** The three `venues-extended-*`
+    files list 125 more venues with cost, fit, traps and sources. Send a paper
+    to one peer-reviewed venue at a time. A preprint server or an archive may
+    hold the same paper in parallel. Never submit one manuscript to two
+    peer-reviewed venues at once: that is dual submission.
+
 ## Steps
 
 1. **Pick the row.** Copy its deadline, archival flag, page limit, and review
@@ -121,6 +127,9 @@ login.
 ## See also
 
 - [`references/venues.md`](references/venues.md)
+- [`references/venues-extended-preprint.md`](references/venues-extended-preprint.md)
+- [`references/venues-extended-journals.md`](references/venues-extended-journals.md)
+- [`references/venues-extended-conferences.md`](references/venues-extended-conferences.md)
 - [`references/free-venues.md`](references/free-venues.md)
 - [`references/google-scholar.md`](references/google-scholar.md)
 - [`references/citation-and-discovery.md`](references/citation-and-discovery.md)
