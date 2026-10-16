@@ -88,11 +88,13 @@ Skip the run when the diff cannot affect the result.
 
 Use `paths-ignore` for docs-only changes so a markdown edit does not rebuild the app. Keep secret scanners out of that ignore list. A credential in a `.md` file is still a credential.
 
-Skip the redundant run on a merge commit. A PR that already ran `pull_request` checks does not need the same suite again on the merge commit unless the merge itself is the artifact you ship.
+Compare PR and merged-source verification before removing duplicate runs. A passing PR does not prove that concurrent changes compose. Keep coverage of the actual source that can reach deployment.
 
 Do not run the same suite on both `pull_request` and `push` for the same branch. Pick one event. `pull_request` is the PR gate. `push` on the default branch is the post-merge gate. Running both on `feature/*` doubles minutes for no extra signal.
 
-Once PR rate is high, use a merge queue. The queue tests the prospective merge once, then lands it. That replaces the pattern of "every PR rebased, every PR retested, then tested again on merge."
+Choose a merge queue from measured contention and integration risk, not PR count alone.
+Use the [merge and Preview throughput procedure](merge-and-preview-throughput.md)
+before changing queues, publication locks, or Preview requirements.
 
 ## Only run what changed
 
