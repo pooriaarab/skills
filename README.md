@@ -98,6 +98,12 @@ to the skill that holds the lever. The others assume you already know which job 
 | [ci-cost-at-agent-scale](ci-cost-at-agent-scale/SKILL.md) | Fix CI cost and CI queueing on a repo where agents open most of the pull requests. Audits where the runs come from first, then fixes in cost order: delete workflows whose steps are all ref-gated (they install and exit green), add concurrency groups, path-filter the heavy suites, share the build cache, change runners last. Explains why the real ceiling is concurrent-job limits rather than minutes, why a review bot's fix commits multiply every other workflow, and why agent sandboxes cannot replace a CI runner. |
 | [self-hosted-runner-fleet](self-hosted-runner-fleet/SKILL.md) | Use a warm Boat JIT runner pool for private Linux CI. Covers labels, the broker and agent split, caches, one job per Box, pool wall-time costs, and the retired desktop procedure for hosts that need special hardware. |
 
+### iPhone agent
+
+Drive the owner's iPhone with [iphone-agent](iphone-agent/SKILL.md) through esp32-iphone-agent, UxPlay name iPhone Agent, and an ESP32-S3 USB HID mouse on AssistiveTouch. A recipe step is written only after the phone shows it. Messages, Safari, Phone, Settings, Mail, T3 Code, Notification Centre, Facebook, Instagram, and TikTok are verified opens. TikTok leave is not verified.
+
+`npx skills add pooriaarab/skills/iphone-agent`
+
 ### Standalone
 
 | Skill | Description |
