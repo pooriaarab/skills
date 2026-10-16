@@ -41,6 +41,19 @@ not fill either from a deadline aggregator.
 If two rows fit, prefer the one whose deadline cell is still open. If none
 are open, use a rolling journal or arXiv and wait. Do not invent a date.
 
+8. **The goal is to be found and cited.** Read
+   [`references/google-scholar.md`](references/google-scholar.md) and
+   [`references/citation-and-discovery.md`](references/citation-and-discovery.md).
+   Scholar has no submit form. It indexes public pages. For an independent
+   author, arXiv plus a Scholar profile does the work. Zenodo does not put a
+   paper in Scholar.
+9. **You are an independent author.** Read
+   [`references/arxiv-independent-author.md`](references/arxiv-independent-author.md)
+   before you start the arXiv account. A new author needs one personal
+   endorser, and arXiv limits each author to 2 submissions a month. Put a
+   whole family of benchmarks in ONE paper. The same file gives the order of
+   operations and says which steps need a person's login.
+
 ## Steps
 
 1. **Pick the row.** Copy its deadline, archival flag, page limit, and review
@@ -102,6 +115,10 @@ login.
 ## See also
 
 - [`references/venues.md`](references/venues.md)
+- [`references/free-venues.md`](references/free-venues.md)
+- [`references/google-scholar.md`](references/google-scholar.md)
+- [`references/citation-and-discovery.md`](references/citation-and-discovery.md)
+- [`references/arxiv-independent-author.md`](references/arxiv-independent-author.md)
 - [`references/templates.md`](references/templates.md)
 - [`references/checklists.md`](references/checklists.md)
 - [`assets/arxiv-skeleton/`](assets/arxiv-skeleton/)
