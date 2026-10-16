@@ -1,0 +1,45 @@
+---
+name: iphone-agent
+description: "Use when driving the owner's iPhone through esp32-iphone-agent, UxPlay name iPhone Agent, and an ESP32-S3 USB HID mouse on AssistiveTouch."
+---
+
+# iPhone agent
+
+Drive the owner's iPhone through esp32-iphone-agent. The mirror name is iPhone Agent. The input is an ESP32-S3 USB HID mouse on AssistiveTouch.
+
+## References
+
+Read the file that fits the task:
+
+- [Setup](references/setup.md) — phone settings, cable roles, and radio limits.
+- [Devices](references/devices.md) — ports, iOS limits, and the proof rule.
+- [Calibration](references/calibration.md) — span measure and the center check.
+- [API](references/api.md) — HTTP routes, board lines, and error codes.
+- [Recipes](references/recipes.md) — only steps a frame has shown.
+- [Messages](references/messages.md) — open the list, then leave.
+- [Safari](references/safari.md) — open the browser, then leave.
+- [Phone](references/phone.md) — open Calls, then leave.
+- [Dock folder](references/t3.md) — the dark dock icon holds T3 Code and Muse.
+- [Settings](references/settings.md) — open Settings, then leave.
+- [Mail](references/mail.md) — open Mail, then leave.
+- [Notifications](references/notifications.md) — open Notification Centre, then leave.
+- [Facebook](references/facebook.md) — open Facebook, then leave.
+- [Instagram](references/instagram.md) — open Instagram, then leave.
+- [TikTok](references/tiktok.md) — open TikTok. Leave is not verified.
+
+## Gates
+
+- Do one named action.
+- Stop before send, post, comment, like, share, follow, call, pay, delete, sign-in, password, erase, or a permission grant.
+- Read the frame after every gesture.
+- Do not loop a feed.
+- The pointer is AssistiveTouch and apps can see it.
+- Do not restart the server.
+- Stay off the AssistiveTouch button.
+- Raw `home` only parks the pointer. Do not trust a home swipe until the frame shows the home screen. A slow drag from the bottom opens the app switcher.
+- A full iPhone is not claimed until the round pointer moves on that phone.
+
+## Scope
+
+- Send storage questions to org-iphone-storage.
+- Some3C and Novatek boards are out of scope.
