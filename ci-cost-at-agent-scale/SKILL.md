@@ -74,6 +74,21 @@ What the grouping tells you: a workflow appearing under both `pull_request` and 
 same branch is duplicated triggers. A high `cancelled` count is missing supersession. A workflow
 with many runs and nothing to show for them is the next section.
 
+## Prove savings before fleet rollout
+
+Use [ci-speed-diagnosis](../ci-speed-diagnosis/SKILL.md#compare-cache-cost-with-a-clean-install) to compare cache overhead with a clean install.
+Record queue time, execution time, summed machine-seconds, and billed cost as separate results.
+A faster install does not prove a faster gate. A lower compute total does not prove a lower bill.
+
+Run one real task through each chosen agent provider before dispatching fleet work.
+A provider in a catalog can still reject work because its quota is exhausted.
+Stop dispatching to that provider after a quota rejection. Resume after access or quota changes.
+
+Keep required tests, secret scans, reviews, and preview checks before merge.
+A new CI engine or scheduled post-merge suite must preserve those gates.
+Pilot one repository first. Report measured results before applying the change elsewhere.
+Do not present a target such as 5–10x as an achieved result.
+
 ## Fix in this order
 
 Each rung is cheaper and lower-risk than the one below it. Stop when the pain stops.
