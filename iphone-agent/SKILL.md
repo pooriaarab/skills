@@ -29,11 +29,13 @@ Read the file that fits the task:
 - [X](references/x.md) — open the Chat screen, then leave.
 - [LinkedIn](references/linkedin.md) — open LinkedIn, then leave.
 - [Camera](references/camera.md) — open Camera from App Library. Do not press the shutter.
+- [Warmup](references/warmup.md) — social media account warmup across Instagram, TikTok, X, LinkedIn, YouTube.
 
 ## Gates
 
 - Do one named action.
-- Stop before send, post, comment, like, share, follow, call, pay, delete, sign-in, password, erase, or a permission grant.
+- **Warmup scripts** override the interaction gates below (they perform likes, comments, DMs, follows intentionally). The gates remain for one-off manual tasks.
+- Stop before send, post, comment, like, share, follow, call, pay, delete, sign-in, password, erase, or a permission grant (unless called via `warmup-*` scripts).
 - Read the frame after every gesture. The first frame can still show the old screen. Wait, then save again, before you call the gesture a miss.
 - A click in the dark area leaves the app switcher onto the screen behind it. That screen can be the home screen, an open folder, or App Library.
 - Do not loop a feed.
