@@ -180,6 +180,10 @@ ambushing whoever pushes next.
 
 ### 5. Change runners — price decides this, not queue time
 
+For Boat CI, first apply the [qualification rules](boat-ci-qualification.md).
+Read them before changing labels, snapshots, pool capacity, or job isolation.
+
+
 Use the warm Boat JIT pool for private `pooriaarab/*` Linux CI. Use `boat`
 for build, lint, typecheck, test, E2E, deploy and API waits. Use `boat-8` for a
 heavy production build. Public repos and macOS/Windows jobs stay GitHub-hosted.
