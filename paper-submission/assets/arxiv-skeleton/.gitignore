@@ -1,0 +1,8 @@
+# Build output from tectonic. Do not commit.
+main.pdf
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.xdv
