@@ -54,6 +54,12 @@ are open, use a rolling journal or arXiv and wait. Do not invent a date.
    whole family of benchmarks in ONE paper. The same file gives the order of
    operations and says which steps need a person's login.
 
+10. **You want the paper to be good, not only accepted.** Read
+    [`references/paper-quality.md`](references/paper-quality.md): what
+    reviewers reward, the benchmark-quality frameworks to self-score, the
+    section outline, figures, writing rules and a pre-submission checklist.
+    ASD-STE100 is not for a research paper; the guide says what to use.
+
 ## Steps
 
 1. **Pick the row.** Copy its deadline, archival flag, page limit, and review
@@ -121,6 +127,7 @@ login.
 - [`references/arxiv-independent-author.md`](references/arxiv-independent-author.md)
 - [`references/templates.md`](references/templates.md)
 - [`references/accounts-and-traps.md`](references/accounts-and-traps.md)
+- [`references/paper-quality.md`](references/paper-quality.md)
 - [`references/checklists.md`](references/checklists.md)
 - [`assets/arxiv-skeleton/`](assets/arxiv-skeleton/)
 - [`../benchmark-publishing/SKILL.md`](../benchmark-publishing/SKILL.md)
