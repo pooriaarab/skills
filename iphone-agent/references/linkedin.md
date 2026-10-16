@@ -1,6 +1,7 @@
 # LinkedIn
 
-Open the app. Read the chrome. Leave. Do not open a post, a profile, or a message.
+Open the app. Read the chrome. Leave. Do not open a post, a profile, or a message
+— unless running the warmup scripts (see [Warmup](warmup.md)).
 
 This page records one phone on 2026-10-16. The frame was 500 by 1080.
 
@@ -13,6 +14,14 @@ This page records one phone on 2026-10-16. The frame was 500 by 1080.
 5. The screen showed a Search field.
 6. The bottom bar showed Home, Network, Notifications, Video, and Jobs.
 7. The feed was still placeholder bars. Stop there. Do not tap the bar.
+
+## Warmup script
+
+```bash
+warmup-linkedin [--rounds N] [--auto]
+```
+
+Does: feed scroll, like, comment, connection requests, notifications, network. Randomized.
 
 ## Leave
 
