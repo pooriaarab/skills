@@ -28,6 +28,29 @@ levers. Route by what you already know:
 | the problem is spend, and agents open most of the pull requests | [ci-cost-at-agent-scale](../ci-cost-at-agent-scale/SKILL.md) |
 | you are setting up the host itself | [self-hosted-runner-fleet](../self-hosted-runner-fleet/SKILL.md) |
 
+## Match CI conditions before local checks
+
+A step command alone does not reproduce CI. Match its execution conditions before benchmarking or diagnosing a failure.
+
+1. Read the workflow at the tested revision. Resolve inherited settings from reusable workflows, composite actions, matrix entries, and package scripts.
+2. Record the effective workflow, job, and step environment, including `CI`, `NODE_OPTIONS`, and service URL variable names.
+   Supply values privately. Never copy secrets into logs or public evidence.
+   Check whether `ci:local` includes these settings; a script name does not prove that it does.
+3. Record the working directory, lockfile, tool versions, and browser installation.
+   Check which binaries `PATH` and `bunx` actually select. Setup action versions alone do not prove command resolution.
+4. Match CPU, available memory, heap limits, disk space, and test worker counts to the CI job.
+   An 8 GB Box does not reproduce a 16 GB runner.
+   A 2 GB Node heap does not match a CI step that sets `NODE_OPTIONS=--max-old-space-size=4096`.
+5. Start the declared services with matching versions, ports, and local credentials.
+   Confirm readiness with a positive control, such as a successful database query from the test context, before running dependent checks.
+   A missing PostgreSQL service or test URL cannot establish a source regression.
+
+Preserve the first failure logs, tested revision, command, resource readings, and non-secret configuration evidence.
+Correct missing local conditions before changing source code or workflow limits.
+Retry only the affected checks to diagnose the mismatch. Keep their results beside the original failure evidence.
+Then run the complete required local gate with matching conditions before every push.
+Report unresolved differences. Attribute a failure to source only after the relevant execution conditions match.
+
 ## Diagnose in this order
 
 Do not skip a step. Each one stops you from optimising a job that does not matter.
