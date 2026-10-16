@@ -6,7 +6,7 @@ This page records one phone on 2026-10-15. The frame was 500 by 1080.
 
 ## Where it sits
 
-A horizontal drag on empty wallpaper, above Search, moved to the next Home Screen page. That page showed a gear labeled Settings. Mail was on the same page. Camera was not on that page.
+A horizontal drag on empty wallpaper, above Search, moved to the next Home Screen page. That page showed a gear labeled Settings. Mail was on the same page. Camera was not on that page. See [Camera](camera.md).
 
 ## Open
 

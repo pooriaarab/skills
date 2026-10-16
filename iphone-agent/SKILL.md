@@ -19,19 +19,23 @@ Read the file that fits the task:
 - [Messages](references/messages.md) — open the list, then leave.
 - [Safari](references/safari.md) — open the browser, then leave.
 - [Phone](references/phone.md) — open Calls, then leave.
-- [Dock folder](references/t3.md) — the dark dock icon holds T3 Code and Muse.
+- [Dock folder](references/t3.md) — the Productivity folder holds T3 Code and Muse.
 - [Settings](references/settings.md) — open Settings, then leave.
 - [Mail](references/mail.md) — open Mail, then leave.
 - [Notifications](references/notifications.md) — open Notification Centre, then leave.
 - [Facebook](references/facebook.md) — open Facebook, then leave.
 - [Instagram](references/instagram.md) — open Instagram, then leave.
-- [TikTok](references/tiktok.md) — open TikTok. Leave is not verified.
+- [TikTok](references/tiktok.md) — open TikTok, then leave.
+- [X](references/x.md) — open the Chat screen, then leave.
+- [LinkedIn](references/linkedin.md) — open LinkedIn, then leave.
+- [Camera](references/camera.md) — open Camera from App Library. Do not press the shutter.
 
 ## Gates
 
 - Do one named action.
 - Stop before send, post, comment, like, share, follow, call, pay, delete, sign-in, password, erase, or a permission grant.
-- Read the frame after every gesture.
+- Read the frame after every gesture. The first frame can still show the old screen. Wait, then save again, before you call the gesture a miss.
+- A click in the dark area leaves the app switcher onto the screen behind it. That screen can be the home screen, an open folder, or App Library.
 - Do not loop a feed.
 - The pointer is AssistiveTouch and apps can see it.
 - Do not restart the server.
