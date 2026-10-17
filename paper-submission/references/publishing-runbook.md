@@ -14,7 +14,7 @@ Inputs you need: the PDF, the arXiv tarball with a `.bbl` (see [`arxiv-independe
 paper-publish check meta.json --pdf paper.pdf --cff CITATION.cff
 ```
 
-The command exits 1 and lists every problem. Fix them all. It checks:
+The command exits 1 and lists every problem. Fix them all. Run it on the final abstract, never on a draft. On its first real use it found an abstract of 1954 characters, over the arXiv limit of 1920, before the arXiv form did. It checks:
 
 - The title is the same in `meta.json`, on page 1 of the PDF, and in `CITATION.cff`.
 - The abstract has 100 to 1920 characters. arXiv rejects a longer one.
@@ -48,11 +48,12 @@ Zenodo gives a DOI at once. It does not put the paper in Google Scholar (see [`g
    paper-publish zenodo-draft --pdf paper.pdf --tarball arxiv.tar.gz --meta meta.json
    ```
 
-   It prints the draft id and the preview URL. The record is a draft. Nothing is public.
-4. A person opens the preview and reads it. A person clicks Publish in the Zenodo page. The tool can publish too, but only with `--publish --i-confirm-permanent`. A published record stays. A withdrawal is an exceptional act that leaves a tombstone page and keeps the DOI (https://about.zenodo.org/policies/).
+   It prints the draft id and the preview URL. The record is a draft. Nothing is public. A live run on 2026-10-17 worked: create, upload, metadata and preview.
+   Name the local files with their final names first. Zenodo keeps the local file name, and the first draft said `paper.pdf`.
+4. A person opens the preview and reads it. A person clicks Publish in the Zenodo page. Publish through the web page or through the API. The tool never publishes without both `--publish` and `--i-confirm-permanent`. A published record cannot be deleted, so decide the title first. A draft can be deleted: `DELETE /deposit/depositions/<id>` returned 204 in the live run (the API page lists 201). A withdrawal is an exceptional act that leaves a tombstone page and keeps the DOI (https://about.zenodo.org/policies/).
 5. Save the concept id. It is the DOI of all versions. Cite it in the README.
 
-The tool adds the code repo (`code_url`) and the data records (`data_concept_dois`) as related identifiers. A new version of an existing record uses `--new-version-of CONCEPT_ID`. Zenodo accepts `publication-preprint` as a `resource_type` in a related identifier: a public record carried it on 2026-10-16. That closes the open item in [`citation-and-discovery.md`](citation-and-discovery.md) section E3 for the read side. A deposit that writes it is UNVERIFIED.
+The tool adds the code repo (`code_url`) and the data records (`data_concept_dois`) as related identifiers. Do not also list the repo URL in `related_identifiers` when `code_url` is set: Zenodo then shows it twice. Adding the 23 concept DOIs through `data_concept_dois` made the paper record link every package. A new version of an existing record uses `--new-version-of CONCEPT_ID`. Zenodo accepts `publication-preprint` as a `resource_type` in a related identifier: a public record carried it on 2026-10-16. That closes the open item in [`citation-and-discovery.md`](citation-and-discovery.md) section E3 for the read side. A deposit that writes it is UNVERIFIED.
 
 ### 2.2 Software Heritage
 
@@ -62,7 +63,7 @@ Free. No login. It archives the source and gives each repo a SWHID.
 paper-publish swh-save https://github.com/pooriaarab/benchmark-core https://github.com/pooriaarab/benchmark-family-paper
 ```
 
-Each line is `URL`, `status`, `SWHID`. The tool waits when the service says 429. The anonymous API answered `X-Ratelimit-Limit: 120` on 2026-10-16. The period is UNVERIFIED. Add the SWHID to `CITATION.cff` as an `identifiers` entry with `type: swh` (the CFF schema guide lists that type).
+Each line is `URL`, `status`, `SWHID`. The tool waits when the service says 429. A large repo can time out on the first call. Run the command again: it succeeded on the second try. The anonymous API answered `X-Ratelimit-Limit: 120` on 2026-10-16. The period is UNVERIFIED. Add the SWHID to `CITATION.cff` as an `identifiers` entry with `type: swh` (the CFF schema guide lists that type).
 
 ### 2.3 Hugging Face dataset repos
 
