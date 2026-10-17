@@ -1,6 +1,6 @@
 ---
 name: ci-selective-evidence
-description: "Use when someone proposes running only affected tests in CI, reading a test report to select tests, raising browser workers instead of sharding, or reusing a relocated build across jobs."
+description: "Use when someone proposes running only affected tests in CI, reading a test report to select tests, or reusing a relocated build across jobs."
 ---
 
 # ci-selective-evidence
@@ -14,8 +14,8 @@ Qualify each against known test identities and observed outcomes before use.
 ## When to use this
 
 - **Triggers:** 'run only the affected tests', 'read the test report to skip
-  suites', 'raise Playwright workers instead of sharding', 'share the build
-  across jobs', 'relocate the build output', 'the report says nothing failed'.
+  suites', 'share the build across jobs', 'relocate the build output',
+  'the report says nothing failed'.
 - **Use this skill** before you enable a report reader, an affected-test
   executor, isolated browser workers, or a reused build on the pull-request
   path.
@@ -81,8 +81,9 @@ half parses observed outcomes from reports. The planner half maps changed
 code, through a qualified dependency graph, to the test identities that
 should run. A correct reader with a wrong map still skips affected tests.
 
-Require all four controls, all recorded, before a report reader or
-affected-test executor gates anything.
+Require every control below, all recorded, before a report reader or
+affected-test executor gates anything. Map controls alone never enable
+selection. Reader controls must pass beside them.
 
 - **Positive control.** A change with a known affected test must include
   that test. Record any additional coverage. A missed dependent test exposes
@@ -98,11 +99,25 @@ affected-test executor gates anything.
 - **Unresolved-graph fallback.** An unresolved dynamic import or import-graph
   gap falls back to the full suite. A map with holes cannot prove affected
   coverage.
+- **Bound-outcome control.** Record the reader parsing one bound pass and
+  one bound failure. Both records carry the input binding above.
+- **Non-pass control.** Record that cancellation, timeout, skip, missing,
+  incomplete, malformed, and mismatched-binding records never become
+  passes. A binding mismatch falls back to full coverage.
+- **Synthetic-failure control.** Pass the synthetic failure check in
+  [Keep the refusal reason and a synthetic failure](#keep-the-refusal-reason-and-a-synthetic-failure)
+  before cutover. A reader never seen to report failure is a reader never
+  tested.
 
-Keep selection disabled until all controls pass on the pull-request path.
+Keep selection disabled until map and reader controls all pass on the
+pull-request path.
 Keep comparing selected runs against full runs on a schedule after cutover:
-each comparison re-proves the map. One comparison never pays for all future
-changes.
+each comparison re-proves the map and the reader. A comparison that misses
+a dependent test, or that cannot bind the report, disables selection at
+once. Return to full coverage until the map and the reader pass again.
+Record unrelated baseline failures beside the map, never inside it. They
+stay visible and still block a clean qualification result. One comparison
+never pays for all future changes.
 
 ## Guard proof paths through the nearest existing ancestor
 
@@ -209,8 +224,9 @@ release gates in force. Never cut over with failing proof.
    a bound test outcome falls back to full coverage.
 2. **Bind the report** to source inputs, runtime versions, selected
    identities, and artifact hashes.
-3. **Run all four controls.** Keep selection disabled until each passes, and
-   keep scheduled full comparisons after cutover.
+3. **Run map and reader controls.** Keep selection disabled until each
+   passes. Disable selection again on any later comparison miss, until
+   the map and the reader pass again.
 4. **Guard the proof paths** through the nearest existing ancestor, into fresh
    directories, keeping earlier receipts.
 5. **Retain refusal reasons and a synthetic failure** from CI before diagnosing
