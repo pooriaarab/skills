@@ -63,7 +63,8 @@ Isolated workers are the one exception: a count above one is acceptable only wit
 independent mutable resources — separate databases, sessions, ports, homes, and resource
 ownership where each applies. See
 [ci-selective-evidence](../ci-selective-evidence/SKILL.md#workers-are-isolation-claims-not-speed-claims)
-for the qualification. Ordinary shared-server workers remain unsafe.
+for the qualification. Workers that share a mutable resource stay unsafe; a
+shared server alone, with no shared mutable state, does not make them unsafe.
 
 **Verify the test count is identical before and after.** One split ran 33 + 32 = 65 tests, against
 65 before. A shard flag that silently drops tests reports faster and proves less.
