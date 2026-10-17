@@ -24,6 +24,7 @@ levers. Route by what you already know:
 | nothing yet — CI is just slow | stay here, and run the steps below |
 | the pipeline has no caching at all | [ci-build-speed](../ci-build-speed/SKILL.md) |
 | the long pole is a browser E2E job | [e2e-ci-economics](../e2e-ci-economics/SKILL.md) |
+| the proposal is affected-test selection, report reading, or a relocated build | [ci-selective-evidence](../ci-selective-evidence/SKILL.md) |
 | jobs are on the wrong runner tier, or queueing behind each other | [high-volume-ci-optimization](../high-volume-ci-optimization/SKILL.md) |
 | the problem is spend, and agents open most of the pull requests | [ci-cost-at-agent-scale](../ci-cost-at-agent-scale/SKILL.md) |
 | you are setting up the host itself | [self-hosted-runner-fleet](../self-hosted-runner-fleet/SKILL.md) |
@@ -82,7 +83,8 @@ Do not skip a step. Each one stops you from optimising a job that does not matte
    usually is.
 5. **Only now add a lever.** Spend on the critical path, in the sibling that owns it:
    `ci-build-speed` for the build, `e2e-ci-economics` for a browser suite,
-   `high-volume-ci-optimization` for job placement.
+   `high-volume-ci-optimization` for job placement, `ci-selective-evidence`
+   for affected-test selection, report reading, and relocated builds.
 
 ## Compare cache cost with a clean install
 

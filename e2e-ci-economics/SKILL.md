@@ -51,13 +51,20 @@ real class of defect, but a narrow one. So gate on the minimal set on every pull
 engines is a normal answer — and run the full matrix nightly, with an alert on failure. This is the
 same trade as the table above. Cut the browser you would have marked non-gating.
 
-## Shard the suite. Do not raise `workers`.
+## Shard the suite. Do not raise `workers` on shared state.
 
 A suite pinned to `workers: 1` on CI looks like free speed waiting to be claimed. It is not.
 
 Raising `workers` puts two workers on **one dev server and one local database**. That is the
 contamination the per-browser job layout already prevents. Sharding into separate jobs keeps
 one server and one database per shard.
+
+Isolated workers are the one exception: a count above one is acceptable only with proved
+independent mutable resources — separate databases, sessions, ports, homes, and resource
+ownership where each applies. See
+[ci-selective-evidence](../ci-selective-evidence/SKILL.md#workers-are-isolation-claims-not-speed-claims)
+for the qualification. Workers that share a mutable resource stay unsafe; a
+shared server alone, with no shared mutable state, does not make them unsafe.
 
 **Verify the test count is identical before and after.** One split ran 33 + 32 = 65 tests, against
 65 before. A shard flag that silently drops tests reports faster and proves less.
@@ -160,8 +167,9 @@ you control, an index is fine.
 
 > Never add `continue-on-error: true` to a job that runs on every push. Either remove the flag and
 > let the job gate, or move the job to `schedule` / `workflow_dispatch`. Never add a browser to a
-> pull-request matrix; add it to the nightly matrix. Never raise the E2E worker count to make a
-> shard faster. Never assert on a collection member by index; look it up by a stable key. When a
+> pull-request matrix; add it to the nightly matrix. Never raise the E2E worker count on shared
+> state to make a shard faster — isolated workers need proved independent mutable state first.
+> Never assert on a collection member by index; look it up by a stable key. When a
 > test fails after a shape change, establish which side moved before you change either.
 
 **Not enforceable by a workflow linter.** `actionlint` has a fixed rule set and no custom-rule
