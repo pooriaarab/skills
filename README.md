@@ -86,7 +86,7 @@ A coordinated suite for organizing across every digital surface — files, notes
 
 ### CI and runners
 
-One family, six questions. **Start at `ci-speed-diagnosis`** — it names the constraint and routes
+One family, seven questions. **Start at `ci-speed-diagnosis`** — it names the constraint and routes
 to the skill that holds the lever. The others assume you already know which job matters.
 
 | Skill | Answers |
@@ -96,6 +96,7 @@ to the skill that holds the lever. The others assume you already know which job 
 | [e2e-ci-economics](e2e-ci-economics/SKILL.md) | Place and gate a browser end-to-end suite so it earns its cost. Why a job with `continue-on-error: true` on every push is the worst of the three states — it was the longest job in two pipelines and gated nothing — plus gating on a minimal browser set and running the full matrix nightly, why you shard instead of raising `workers` (two workers share one dev server and one database), the fixed per-shard cost that sets the floor, why an E2E result must never enter a task-runner cache, the default-branch alert that catches the suite everyone stopped reading, how to report a retry-pass, and why you address a collection member by a stable key rather than by index — an indexed assertion silently retargets the first time anything is prepended. Ends with what a linter can enforce here and what it cannot. |
 | [high-volume-ci-optimization](high-volume-ci-optimization/SKILL.md) | Job placement and cost for CI on repos where agents open many PRs per hour. A warm Boat JIT pool for private Linux CI, collapsing job fan-out, host-local caches outside the workspace, parallelism caps, fixed-port services routing, duplicate-work filters, affected-only builds, a shared remote cache, cache-masking hazards, and cost comparison. Cross-references `self-hosted-runner-fleet` for host setup. |
 | [ci-cost-at-agent-scale](ci-cost-at-agent-scale/SKILL.md) | Fix CI cost and CI queueing on a repo where agents open most of the pull requests. Audits where the runs come from first, then fixes in cost order: delete workflows whose steps are all ref-gated (they install and exit green), add concurrency groups, path-filter the heavy suites, share the build cache, change runners last. Explains why the real ceiling is concurrent-job limits rather than minutes, why a review bot's fix commits multiply every other workflow, and why agent sandboxes cannot replace a CI runner. |
+| [ci-selective-evidence](ci-selective-evidence/SKILL.md) | Qualify test reports before selective CI. Why exit code, test outcome, cancellation, timeout, skip, retry, and missing evidence are distinct results, why missing evidence falls back to full coverage, the positive and negative controls a report reader must pass before it gates anything, how to guard proof paths and keep refusal reasons, when isolated browser workers qualify, and how to prove a relocated build still runs with the producer absent. |
 | [self-hosted-runner-fleet](self-hosted-runner-fleet/SKILL.md) | Use a warm Boat JIT runner pool for private Linux CI. Covers labels, the broker and agent split, caches, one job per Box, pool wall-time costs, and the retired desktop procedure for hosts that need special hardware. |
 
 ### iPhone agent
