@@ -182,5 +182,7 @@ All in `pooriaarab/scripts`: `box-work`, `box-session`, `box-guard`,
 `box-repo-audit`, plus the launchd plists. Background and measurements are in
 `box-warm-start.md` and `box-cost-discipline.md`.
 
+Which worker CLIs sign in on a Box, and the traps: `worker-logins.md`.
+
 Related: `ascii-box` for the Box platform itself, `crabbox-worktree` for the
 per-worktree attach path, `superset-fanout` for choosing a parallelism model.
