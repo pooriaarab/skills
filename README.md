@@ -86,7 +86,7 @@ A coordinated suite for organizing across every digital surface — files, notes
 
 ### CI and runners
 
-One family, seven questions. **Start at `ci-speed-diagnosis`** — it names the constraint and routes
+**Start at `ci-speed-diagnosis`** — it names the constraint and routes
 to the skill that holds the lever. The others assume you already know which job matters.
 
 | Skill | Answers |

@@ -8,10 +8,8 @@ description: "Use when someone proposes running only affected tests in CI, readi
 Keep test selection disabled until the evidence proves coverage. A report reader
 that cannot prove what it skipped is a coverage cut, not an optimization.
 
-Selective CI has two halves, and each half needs its own proof. The reader half
-must prove it sees every affected test. The execution half must prove the
-isolated run means the same as the full run. Enable neither half on argument.
-Enable each half on controls.
+Selective CI needs a dependency map, a report reader, and an executor.
+Qualify each against known test identities and observed outcomes before use.
 
 ## When to use this
 
@@ -86,15 +84,17 @@ should run. A correct reader with a wrong map still skips affected tests.
 Require all four controls, all recorded, before a report reader or
 affected-test executor gates anything.
 
-- **Positive control.** A change with a known affected test must select
-  exactly that test. If the reader misses a test you know is affected, the
-  reader is wrong, not the test.
-- **Unrelated-change control.** A change with no covered effect must select
-  nothing — or you must prove the no-test path — and the full suite still runs
-  beside the candidate until this control passes.
+- **Positive control.** A change with a known affected test must include
+  that test. Record any additional coverage. A missed dependent test exposes
+  a mapping defect.
+- **Unrelated-change control.** Use full coverage unless the dependency map
+  proves a no-test path. Keep the full suite beside that candidate path
+  during qualification.
 - **Seeded-failure control.** Seed a failure in an affected test and check
   the selected run catches it. Seed a failure outside the selected set and
-  check the process detects the miss: block cutover and fix the map.
+  check the full run catches it. If the omitted test depends on the change,
+  block cutover and fix the map. Record unrelated baseline failures separately;
+  they still block a clean qualification result.
 - **Unresolved-graph fallback.** An unresolved dynamic import or import-graph
   gap falls back to the full suite. A map with holes cannot prove affected
   coverage.
