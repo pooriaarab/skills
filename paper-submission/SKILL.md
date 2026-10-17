@@ -66,6 +66,13 @@ are open, use a rolling journal or arXiv and wait. Do not invent a date.
     hold the same paper in parallel. Never submit one manuscript to two
     peer-reviewed venues at once: that is dual submission.
 
+12. **The PDF is done and you want it published.** Follow
+    [`references/publishing-runbook.md`](references/publishing-runbook.md). It
+    orders the free same-day actions, the preprint servers, the one
+    peer-reviewed venue, and the steps after the arXiv id appears. The
+    `paper-publish` tool in `pooriaarab/scripts` checks the paper, drafts the
+    Zenodo record and writes one form file per venue.
+
 ## Steps
 
 1. **Pick the row.** Copy its deadline, archival flag, page limit, and review
@@ -136,6 +143,7 @@ login.
 - [`references/arxiv-independent-author.md`](references/arxiv-independent-author.md)
 - [`references/templates.md`](references/templates.md)
 - [`references/accounts-and-traps.md`](references/accounts-and-traps.md)
+- [`references/publishing-runbook.md`](references/publishing-runbook.md)
 - [`references/paper-quality.md`](references/paper-quality.md)
 - [`references/checklists.md`](references/checklists.md)
 - [`assets/arxiv-skeleton/`](assets/arxiv-skeleton/)
