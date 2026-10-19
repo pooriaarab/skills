@@ -170,10 +170,11 @@ repo from its current main, and skips units whose titles it already merged.
 
 Reset the fleet for a re-run in this order:
 
-1. Refresh the targets from Worker custom domains and from the zone list, so a
-   site served without a Worker still joins. Most new rows are `www` aliases.
-   Resolve each new host before you add it. A host with no DNS answer is not
-   live. A `www` host that resolves counts even when its apex does not.
+1. Refresh the targets from Worker custom domains and from each zone's DNS
+   records (`zones/$ZONE/dns_records`), so a host served without a Worker still
+   joins. Most new rows are `www` aliases. Resolve each new host and request
+   its home page before you add it. A DNS error is not proof of absence: retry
+   it. A `www` host that resolves counts even when its apex does not.
 2. Copy the state file to `state-<date>.json`.
 3. Raise each repo's round number. New unit IDs carry the round prefix, so the
    same round would overwrite last week's open units.
@@ -211,22 +212,30 @@ Reset the fleet for a re-run in this order:
 - **Do not stop CI Boxes.** Stop only the Boxes the sweep created. A busy runner
   Box can report `idle`.
 - **A fixer can revert an unrelated file.** A fixer on a stale base set a
-  package version back to match its branch, and `npm ci` broke main for the
-  whole repo. The reviewer must flag any file the finding does not explain.
+  package version back to match its branch. After the merge, `npm ci` failed
+  on main for the whole repo. The reviewer must flag any file the finding does not explain.
   Read `git diff --stat` against the unit's files before you approve.
-- **Reject the old ID format when you harden an ID.** A fix that switches
-  session IDs to random UUIDs still honors old guessable IDs in existing
-  cookies. Accept only the new format, and issue a fresh ID for any other value.
+- **Retire old IDs when you harden an ID.** A fix that switches session IDs
+  to random server-issued values can still honor old guessable IDs in existing
+  cookies. Accept only IDs the server issued under the new scheme. Give any
+  other cookie a fresh ID that has no access to data under the old ID. A format
+  check is the minimum, not the whole fix.
 - **gitleaks on a self-hosted runner can fail after a clean scan.** The log
   says `no leaks found`, then the SARIF upload fails with `rootDirectory ... is
-  not a parent directory`, because the runner works under a moved home. Re-run
-  the job. Do not read it as a leak.
+  not a parent directory`, because the runner works under a moved home. Do not
+  read it as a leak. A re-run passes only on a runner with the normal home.
+  Keep `gitleaks-action` jobs on GitHub-hosted runners, as
+  `self-hosted-runner-fleet` says.
 - **One `Assisted-by` line per contributor.** The checker rejects a comma
   list. A second agent that pushes to the PR adds its own line.
-- **Cloudflare allows 50 API tokens per user.** A mint fails at the cap. Check
-  whether a fleet token already holds `Zone Read` and `Zone Settings` first.
+- **Cloudflare allows 50 API tokens per user.** Token creation fails at the
+  cap. First check whether a fleet token already holds `Zone Read` and
+  `Zone Settings Write` on every target zone.
 - **Keep advisory checks per repo.** When one repo's Worker Preview fails on
-  main too, mark that job advisory for that repo only. A global list hides
-  real failures in other repos.
-- **Escalate a stalled unit.** When two cheap fixers each fail three review
-  rounds on one unit, give it to the strongest fixer before you call a human.
+  main for an infrastructure reason, such as missing Access apps, mark that job
+  advisory for that repo only, and open an issue to repair it. This applies only
+  to PRs with no user-visible surface. A PR a user can see still needs a working
+  Preview and the operator walk. A global list hides real failures elsewhere.
+- **Escalate a stalled unit once.** When a unit reaches the review-round cap
+  and goes to `needs-human`, give it once to the strongest fixer with a fresh
+  cap. Call a human only when that round also ends at the cap.
