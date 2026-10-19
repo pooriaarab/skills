@@ -229,7 +229,7 @@ Reset the fleet for a re-run in this order:
 - **One `Assisted-by` line per contributor.** The checker rejects a comma
   list. A second agent that pushes to the PR adds its own line.
 - **Cloudflare allows 50 API tokens per user.** Token creation fails at the
-  cap. First check whether a fleet token already holds `Zone Read` and
+  cap. First check whether a fleet token already holds `Zone Read`, `DNS Read` and
   `Zone Settings Write` on every target zone.
 - **Keep advisory checks per repo.** When one repo's Worker Preview fails on
   main for an infrastructure reason, such as missing Access apps, mark that job
