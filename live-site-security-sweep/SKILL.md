@@ -168,6 +168,21 @@ For each `ready` unit:
 Run the whole sweep weekly. The re-run diffs the live baseline, rescans each
 repo from its current main, and skips units whose titles it already merged.
 
+Reset the fleet for a re-run in this order:
+
+1. Refresh the targets from Worker custom domains. Most new rows are `www`
+   aliases. Resolve each new apex before you add it: a zone with no DNS answer
+   is not a live site.
+2. Copy the state file to `state-<date>.json`.
+3. Raise each repo's round number. New unit IDs carry the round prefix, so the
+   same round would overwrite last week's open units.
+4. Let open units advance in every phase. If units move only while the repo is
+   in the fixing phase, a rescan stalls every open PR until the scan ends.
+5. Expire jobs whose Box no longer exists, and return each unit to its queue:
+   `fixing` to `pending`, `refixing` to `changes`, `reviewing` to `pr`.
+6. Run `box extend <id> --hours 48` on each Box you keep. A Box from last week
+   can expire mid-job.
+
 ## Traps
 
 - **Box agent logins expire.** A Box environment can ship an agent login with an
@@ -193,3 +208,23 @@ repo from its current main, and skips units whose titles it already merged.
   injected token into the transcript.
 - **Do not stop CI Boxes.** Stop only the Boxes the sweep created. A busy runner
   Box can report `idle`.
+- **A fixer can revert an unrelated file.** A fixer on a stale base set a
+  package version back to match its branch, and `npm ci` broke main for the
+  whole repo. The reviewer must flag any file the finding does not explain.
+  Read `git diff --stat` against the unit's files before you approve.
+- **Reject the old ID format when you harden an ID.** A fix that switches
+  session IDs to random UUIDs still honors old guessable IDs in existing
+  cookies. Accept only the new format, and issue a fresh ID for any other value.
+- **gitleaks on a self-hosted runner can fail after a clean scan.** The log
+  says `no leaks found`, then the SARIF upload fails with `rootDirectory ... is
+  not a parent directory`, because the runner works under a moved home. Re-run
+  the job. Do not read it as a leak.
+- **One `Assisted-by` line per contributor.** The checker rejects a comma
+  list. A second agent that pushes to the PR adds its own line.
+- **Cloudflare allows 50 API tokens per user.** A mint fails at the cap. Check
+  whether a fleet token already holds `Zone Read` and `Zone Settings` first.
+- **Keep advisory checks per repo.** When one repo's Worker Preview fails on
+  main too, mark that job advisory for that repo only. A global list hides
+  real failures in other repos.
+- **Escalate a stalled unit.** When two cheap fixers each fail three review
+  rounds on one unit, give it to the strongest fixer before you call a human.
