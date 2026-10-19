@@ -20,7 +20,7 @@ This skill is the WDA and Appium path. For the ESP32 USB mouse path, use `iphone
 1. Use a **paid** Apple Developer team. The WDA profile lasted one year on the paid team here. The repo docs say a free team expires weekly and fits one device.
 2. Use a **throwaway** account. Automation breaks both platforms' terms. Read [detection](references/detection.md).
 3. Turn **Display Zoom off** and set **Auto-Lock to Never** on the phone before the first run.
-4. Store the phone passcode in the registration wizard if the phone can lock. Without it the farm cannot unlock.
+4. Prefer Auto-Lock set to Never on a dedicated test phone. If the phone must lock, the farm needs a stored passcode to unlock it. The repo stores it as plain text in `devices.json`. See [setup traps](references/setup-traps.md).
 
 ## Workflow
 

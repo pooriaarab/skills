@@ -58,4 +58,5 @@ Fix: turn Display Zoom off (Settings, Display & Brightness, Display Zoom, Standa
 
 - WDA signing needs the login keychain. Run `wda:prepare` from Terminal.app, not SSH.
 - Keep `mobile-mcp` and the farm off the same phone at the same time. A `mobile-mcp` screenshot failed with `failed to parse screenshot response` while the farm held WDA on port 8100.
-- Never put a real UDID, team ID or passcode in `.env` examples you share. The repo keeps the passcode in `devices.json`, which is git-ignored.
+- The repo keeps a stored passcode in `devices.json` as plain text. The file is git-ignored and mode `0600`. That does not stop a local reader or a backup. Prefer Auto-Lock set to Never on a dedicated test phone. Store a passcode only for a phone that holds nothing private.
+- Never put a real UDID, team ID or passcode in an issue, a PR or an `.env` example you share.
