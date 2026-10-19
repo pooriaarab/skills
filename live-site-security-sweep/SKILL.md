@@ -170,16 +170,18 @@ repo from its current main, and skips units whose titles it already merged.
 
 Reset the fleet for a re-run in this order:
 
-1. Refresh the targets from Worker custom domains. Most new rows are `www`
-   aliases. Resolve each new apex before you add it: a zone with no DNS answer
-   is not a live site.
+1. Refresh the targets from Worker custom domains and from the zone list, so a
+   site served without a Worker still joins. Most new rows are `www` aliases.
+   Resolve each new host before you add it. A host with no DNS answer is not
+   live. A `www` host that resolves counts even when its apex does not.
 2. Copy the state file to `state-<date>.json`.
 3. Raise each repo's round number. New unit IDs carry the round prefix, so the
    same round would overwrite last week's open units.
 4. Let open units advance in every phase. If units move only while the repo is
    in the fixing phase, a rescan stalls every open PR until the scan ends.
 5. Expire jobs whose Box no longer exists, and return each unit to its queue:
-   `fixing` to `pending`, `refixing` to `changes`, `reviewing` to `pr`.
+   `fixing` to `pending`, `refixing` to `changes`, `reviewing` to `pr`. A lost
+   scan job returns its repo to `new`, and a lost verify job to `scanned`.
 6. Run `box extend <id> --hours 48` on each Box you keep. A Box from last week
    can expire mid-job.
 
