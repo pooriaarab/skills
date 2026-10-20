@@ -61,3 +61,22 @@ Each item says how sure we are. "Seen" means it happened on the phone. "Not test
 - The wait after a swipe now follows a log-normal curve, not a flat 550 to 800 ms range.
 - Touch pressure is not set. XCTest touches carry no force on this phone.
 - Not tested: whether TikTok can tell the difference. Treat the change as less obvious, not as safe.
+
+## TikTok rail positions on a 428x926 phone (iPhone 12 Pro Max)
+
+The WDA screenshot crops the right rail, so find icons by tapping, not by eye.
+Tested with W3C touch actions (428x926 pt, TikTok For You feed):
+
+| Icon | Point (x, y) | Result |
+|---|---|---|
+| Search (top right) | 402, 69 | Search page opened, keyboard up |
+| Comment | 397, 585 | Comments sheet opened |
+| Share | 397, 722 | Share sheet opened |
+| Like | about 397, 518 | Not tested. Inferred from the 67 pt rail spacing |
+| Save | about 397, 654 | Not tested. Inferred from the same spacing |
+
+- The farm tap API refuses x above its profile width (390 for `iphone13`). Use
+  WDA actions directly, or add a 428x926 profile, for rail taps.
+- Close a sheet by relaunching with `devicectl`. Do not tap back links.
+- Have a Haiku subagent read the screenshots. It answers "which screen is
+  this" for a small token cost.
