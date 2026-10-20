@@ -11,7 +11,15 @@ Each item says how sure we are. "Seen" means it happened on the phone. "Not test
 - Proof: the Settings icon sits at x=326 points in the WDA element tree. It appears at about 329 points in the screenshot. So the scale is 3x, and the image is a crop.
 - A `UILaunchScreen` key in the runner `Info.plist` did **not** fix it. Do not repeat that.
 - The repo's `iphoneX` profile is 375x812. A phone in Zoomed mode matches it, and a screenshot is then whole. Not tested: Zoomed mode. On this iOS version the Display & Brightness page had no Display Zoom row.
-- Result: with Display Zoom at Default, the farm cannot read the screen. Do not use Default on a phone larger than 375x812 until the capture is fixed.
+- Result: without a fix, the farm cannot read the screen in Default mode.
+
+### Fix that worked (seen)
+
+- `getScreenshot` in `src/devices/wda-remote.ts` now pads the cropped image with black to the true screen size (1284x2778 px here). It does nothing for a full-size image.
+- With the padding, the tab-bar and SpringBoard checks see the proportions they expect. The "springboard" mistake went away.
+- The TikTok header on this phone has more tabs (LIVE, Community, Nearby, Following, For You). The old band for "For You" (58 to 74% of the width) covered "Following". `detectHomeFeedTab` now also checks 75 to 87%. A visible header tab now counts as proof of the feed.
+- The right-hand icon rail (like, comment, share) stays outside the capture. The farm uses fixed seeds for it. Not tested: whether those seeds hit the icons. Do not turn on likes, saves or comments until you check them by hand.
+- `phone-farm doctor <udid>` reports CROPPED or OK. `phone-farm apply-patch` applies all of these farm fixes.
 
 ## Launching TikTok (seen)
 
@@ -39,6 +47,12 @@ Each item says how sure we are. "Seen" means it happened on the phone. "Not test
 
 - Taps, swipes and screenshots work over Wi-Fi while WDA runs.
 - The WDA supervisor starts WDA only for a USB phone. After a crash, plug the cable in once.
+
+## Result of the first good run (seen)
+
+- 3-minute passive run: likes, saves and comments off. Outcome: `videosViewed=6 swipes=6 recoveries=0`. All 7 screen reads said "fyp".
+- Before the fixes, every run ended with "Could not recover to For You feed" and 0 videos.
+- This shows the farm works. It does not show that TikTok cannot detect it.
 
 ## Human-like input (done, not yet shown to help)
 
