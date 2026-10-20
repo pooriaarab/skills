@@ -96,3 +96,17 @@ Traps found on the way:
 - WDA `/screenshot` often returns a truncated body. Use the farm screenshot API.
 - The send button and the rail sit past x=375, so no screenshot shows them. Find them by tapping.
 - The comment sheet composer sits at y about 896, below the crop. Tap it blind.
+
+## Result with the 428x926 profile (iPhone 12 Pro Max)
+
+A 3-minute farm run with likes and saves on: 12 videos, 7 likes, 3 saves, 1 live
+skipped, 0 recoveries. Set `coordinateProfile` to `iphone12promax`.
+
+- The farm profile uses the tapped rail points: like (397, 518), comment (397, 585),
+  save (397, 654).
+- Saves landed. The profile Favorites tab (bookmark icon) shows 9+ videos. It can
+  hold older saves, so the count does not prove all 3.
+- Likes are not confirmed. The Liked tab (heart) sat under the AssistiveTouch button.
+- The bottom tab bar is at y=884, not the scaled y=911. Tap profile at (386, 884).
+- On the profile page the bookmark tab is at (264, 293) and the heart tab at (363, 293).
+- 7 likes in 12 videos is a 58 percent like rate. Use a low rate on a real account.
