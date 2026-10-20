@@ -47,6 +47,7 @@ This skill is the WDA and Appium path. For the ESP32 USB mouse path, use `iphone
 
 ## References
 
+- [Onboard a phone](references/onboarding.md) — one checklist for each new iPhone.
 - [Setup traps](references/setup-traps.md) — seven faults and their fixes.
 - [API](references/api.md) — registration flow, remote actions, task payload.
 - [Detection](references/detection.md) — what the platforms can see. Untested.
