@@ -19,7 +19,7 @@ This skill is the WDA and Appium path. For the ESP32 USB mouse path, use `iphone
 
 1. Use a **paid** Apple Developer team. The WDA profile lasted one year on the paid team here. The repo docs say a free team expires weekly and fits one device.
 2. Use a **throwaway** account. Automation breaks both platforms' terms. Read [detection](references/detection.md).
-3. Turn **Display Zoom off** and set **Auto-Lock to Never** on the phone before the first run.
+3. Set **Auto-Lock to Never** on the phone before the first run. Check the screenshot size first. A phone larger than 375x812 gives cropped screenshots in Default mode. See [live learnings](references/live-learnings.md).
 4. Prefer Auto-Lock set to Never on a dedicated test phone. If the phone must lock, the farm needs a stored passcode to unlock it. The repo stores it as plain text in `devices.json`. See [setup traps](references/setup-traps.md).
 
 ## Workflow
@@ -52,3 +52,4 @@ This skill is the WDA and Appium path. For the ESP32 USB mouse path, use `iphone
 - [Detection](references/detection.md) — what the platforms can see. Untested.
 - [More than one phone](references/multi-device.md) — hubs, ports, and an always-on Mac.
 - [Observed run](references/observed-run.md) — the first TikTok warmup and why it failed.
+- [Live learnings](references/live-learnings.md) — cropped screenshots, `devicectl` launch, human-like swipes.
