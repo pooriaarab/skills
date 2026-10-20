@@ -80,3 +80,19 @@ Tested with W3C touch actions (428x926 pt, TikTok For You feed):
 - Close a sheet by relaunching with `devicectl`. Do not tap back links.
 - Have a Haiku subagent read the screenshots. It answers "which screen is
   this" for a small token cost.
+
+## Tested action flows (`scripts/tiktok_actions.py`)
+
+| Flow | Steps that worked |
+|---|---|
+| Comment | tap comment (397, 585), tap composer (150, 896), type, tap send (402, 583). Comment showed first, 1 s old. |
+| Share | tap (397, 722). Share sheet opens. Close it with `launch`. |
+| Search | tap (402, 69). The search page opens with the keyboard. Type, then return. |
+| Next video | swipe up from (130, 700) to (136, 200), 380 ms, with the human gesture. |
+| Like, save | Taps sent. State cannot be seen: the rail is outside the screenshot. Double-tap on the video did not show a heart burst either. Check in the app by hand before you trust them. |
+
+Traps found on the way:
+- Python `urllib` calls to WDA get truncated bodies (`IncompleteRead`, `RemoteDisconnected`). Use `curl`.
+- WDA `/screenshot` often returns a truncated body. Use the farm screenshot API.
+- The send button and the rail sit past x=375, so no screenshot shows them. Find them by tapping.
+- The comment sheet composer sits at y about 896, below the crop. Tap it blind.
