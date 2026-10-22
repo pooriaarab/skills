@@ -1,6 +1,6 @@
 ---
 name: website-directory-submission
-description: "Submit a live website to free web directories for SEO backlinks, referral traffic, and GEO/AI visibility — the tiered directory table (launch platforms, startup directories, SaaS directories, review sites, AI-tool directories) with DR, link type, cost, and gate per directory, the one submission packet prepared once and pasted everywhere, the order of operations (tier-1 first, GitHub-based submissions as PRs, human-gated forms last), plus the MCP-directory path for sites that ship a hosted /mcp endpoint (remote-only registry publish, awesome-remote-mcp-servers, Glama, mcp.so). Use when a site is live and needs directory backlinks, when someone asks 'where should we list this', or after launch-seo/geo-aeo in the ship-a-product pipeline."
+description: "Submit a live website to free web directories for SEO backlinks, referral traffic, and GEO/AI visibility — the tiered directory table (launch platforms, startup directories, SaaS directories, review sites, AI-tool directories) with DR, link type, cost, and gate per directory, the one submission packet prepared once and pasted everywhere, the order of operations (tier-1 first, GitHub-based submissions as PRs, human-gated forms last), plus the MCP-directory path for sites that ship a hosted /mcp endpoint (remote-only registry publish, awesome-remote-mcp-servers, Glama, mcp.so), free launchpads, awesome lists, API catalogs, dataset hosts and profile sites, the method for finding niche backlinks per site (associations, awesome lists, dataset hosts, resource-page curators), and the per-site submission ledger. Use when a site is live and needs directory backlinks, when someone asks 'where should we list this', or after launch-seo/geo-aeo in the ship-a-product pipeline."
 ---
 
 # website-directory-submission
@@ -104,6 +104,8 @@ burns the account.
 | [TopApps.ai](https://topapps.ai) | 30 | dofollow | Free | AI app index. |
 | [aitools.fyi](https://aitools.fyi) | 27 | dofollow | Free | Long tail, fast listing. |
 | [Easy With AI](https://easywithai.com) | 27 | dofollow | Free | Long tail, fast listing. |
+| [altern.ai](https://altern.ai) | unverified | unverified | Free | Sign in with GitHub or Google, then submit at `/maker/submit/start`. Fees not shown on the page we read. |
+| [AI Tools Directory](https://aitoolsdirectory.com) | unverified | unverified | Free + paid fast track | No account. A person reviews every tool, with no promise to publish. End-user AI tools only, clear pricing, no crypto. Not the same site as aitoolsdirectory.net. |
 
 ## 3. Long tail — batch second (dofollow, free)
 
@@ -144,6 +146,33 @@ SaaS: [GoodFirms](https://www.goodfirms.co) (DA 55) · [Serchen](https://www.ser
 (DA 49) · [SoftwareWorld](https://www.softwareworld.co) (DR 40) · [ToolSalad](https://toolsalad.com)
 (DR 35) · [Hive Index](https://thehiveindex.com) (DA 31).
 
+### Launchpads with a free queue (checked 2026-10-21)
+
+No form was submitted for this list. The link type is what the site states or
+what one sample page showed. Treat "unverified" as nofollow until you check
+the live listing. Most free queues ask for the launchpad's badge on your
+homepage, so add the badge to the page before you file. Skip every paid tier.
+
+| Launchpad | Link | Gate / note |
+|---|---|---|
+| [Startup Dope](https://startupdope.com) | dofollow (site-stated) | No account. Review takes 7-14 business days. Product only. |
+| [Neeed Directory](https://neeed.directory) | dofollow after badge check | Live at once after an automatic check. Sample link was plain `noopener`. |
+| [LaunchIt](https://launchit.fast) | dofollow (site-stated) | Free page with no end date. Earliest free slot was about two months out. |
+| [ScrollLaunch](https://www.scrolllaunch.com) | dofollow while the badge stays | Up to 25 free listings a week. Also runs a ranked list of 1,000+ directories. |
+| [Dofollow.Tools](https://dofollow.tools) | dofollow while the badge stays | Five free slots a day for the whole site. 7-day queue. |
+| [Turbo0](https://turbo0.com) | dofollow (site-stated) | Login needed. Asks for DR above 10 on your site and a backlink to Turbo0. |
+| [SaaSCity](https://saascity.io) | dofollow after badge check | Free queue shown as about 329 days. A sample page without the badge was nofollow. |
+| [LaunchIgniter](https://launchigniter.com) | dofollow for top 3 only | Badge required. Other links on the page are `sponsored`. |
+| [Startup Fame](https://startupfa.me) | unverified | Badge required, review about 7 days. A sample page showed `nofollow`. |
+| [Solo Launches](https://sololaunches.com) | dofollow for top 3 only | Up to five launches a day. |
+| [OpenHunts](https://openhunts.com) | dofollow for top 3 only | Queue shown as about 60 weeks. A badge skips the queue. |
+| [Shipstry](https://shipstry.com) | nofollow | One free submission a month. A badge unlocks dofollow. |
+| [LaunchKoala](https://launchkoala.com) | nofollow | Value is traffic and a citation, not link equity. |
+| [bunny.directory](https://bunny.directory) | unverified | A person reviews in about 2 working days. A sample link was nofollow. |
+| [Tiny Startups](https://www.tinystartups.com) | unverified | Hand-approved. The page does not state a free-only path. Decline every upgrade. |
+| [Forg.to](https://forg.to) | unverified | Builder network with a launchpad. No pricing page. |
+| [DevHunt](https://devhunt.org) | mixed | Weekly dev-tool launches. Submit needs a login. Free launch not stated. |
+
 ## 4. MCP directories — for sites with a hosted /mcp endpoint
 
 A directory site that ships a Streamable HTTP MCP endpoint (like the
@@ -172,6 +201,9 @@ endpoint is worse than none.
 | [MCPCentral](https://mcpcentral.io) | `npx mcp-submit` | The CLI also files mcp.so issues and awesome-list PRs for local stdio servers; remote endpoints file the API rows directly. |
 | [Docker MCP Registry](https://github.com/docker/mcp-registry) | GitHub PR | Needs a Dockerfile — only worth it for packaged servers. |
 | [appcypher/awesome-mcp-servers](https://github.com/appcypher/awesome-mcp-servers) | GitHub PR | One PR per suggestion, added at the bottom of the category; installable servers, not remote-only. |
+| [MCP Market](https://mcpmarket.com) | Paste the GitHub repo URL | Free tier lists in 4-6 weeks. Skip the $29 tier. Login need not stated. |
+| [TensorBlock awesome-mcp-servers](https://github.com/TensorBlock/awesome-mcp-servers) | GitHub PR or the "Add MCP server" issue form | One bullet in `docs/<category>.md`. Needs a repo URL. Merged daily as of 2026-10-21. |
+| [awesome-mcp-devtools](https://github.com/punkpeye/awesome-mcp-devtools) | GitHub PR | Tools for building MCP only (inspectors, SDKs, testing). Not for a site with a `/mcp` endpoint. |
 
 Full per-directory mechanics (manifest schemas, CLI login quirks, the
 `mcpName`/100-char traps for packaged servers) live in
@@ -195,6 +227,8 @@ the order. A remote-only server skips every npm/`mcpName`/MCPB step there.
    session never will.
 7. **Channels outside the tier tables (§7)** wherever they fit — cheap to
    file, disproportionately GEO-friendly.
+8. **Lists, API catalogs, datasets and profiles (§8, §9)**, then the
+   per-niche targets (§10). Record every result in the ledger (§11).
 
 ## 6. Gotchas
 
@@ -240,7 +274,11 @@ disproportionately GEO-friendly, so file them on every launch.
   Turnstile auto-passes in a real browser profile — the result is "You're on
   the waitlist!", so list it as pending), and
   [llmstxt.site](https://llmstxt.site/submit) (form + contact email). GEO
-  surface, not backlinks.
+  surface, not backlinks. Three more: [Awesome-llms-txt](https://github.com/SecretiveShell/Awesome-llms-txt)
+  (PR with one bullet, `[domain](https://domain/llms.txt)`),
+  [llms-text.com](https://llms-text.com/directory) (free form; the
+  `llms.txt` must be live), and [llmstxt.studio](https://llmstxt.studio/registry)
+  (no form: it crawls domains, so publish a valid `/llms.txt` and wait).
 - **Indie search engines.** [Mojeek](https://www.mojeek.com),
   [Wiby](https://wiby.me/submit/) (image captcha — securimage distortion is
   heavy; about 1 in 12 screenshot reads land, so budget real retry time.
@@ -251,6 +289,16 @@ disproportionately GEO-friendly, so file them on every launch.
   and [Entireweb](https://www.entireweb.com/free_submission/) are independent
   crawl paths, not Google. `GET https://web.archive.org/save/<url>` snapshots
   the site into the largest public archive with no account (a 302 is success).
+  Four more, checked 2026-10-21: [Yandex Webmaster](https://webmaster.yandex.com/welcome/)
+  and [Naver Search Advisor](https://searchadvisor.naver.com/) (verify the
+  site, then submit the sitemap; Naver has a Korean-only UI and matters only
+  for a Korean audience), [ExactSeek](https://www.exactseek.com) (free form
+  that opts you into a newsletter and replies with a verification email), and
+  [Search My Site](https://searchmysite.net) (independent sites only; the
+  free tier is a 30-day trial, so check what it reverts to). [Kagi Small
+  Web](https://github.com/kagisearch/smallweb) takes a personal blog feed by
+  PR: add two unlisted sites with your own, English only, no ads, no
+  LLM-written posts. It links your feed, so it is not a backlink.
 - **Agent-submittable APIs.** [submitby.ai](https://submitby.ai) (MCP tool or
   `POST /api/v1/submissions`; free with their badge on the site or $4.99.
   The `Idempotency-Key` goes in an HTTP header, not the body; the platform
@@ -263,7 +311,10 @@ disproportionately GEO-friendly, so file them on every launch.
   [justlaunch](https://justlaunch.org) (paid REST API across ~35 platforms),
   [Launch Llama](https://tools.launchllama.co) (MCP opens drafts; the founder
   finishes the submit), [AI Directories](https://www.aidirectori.es) (partner
-  key and fee, AI tools only).
+  key and fee, AI tools only), [A2A Registry](https://a2aregistry.org)
+  (publish an agent card at `/.well-known/agent-card.json`, then `POST
+  {wellKnownURI}` to `/api/agents/register`; live agents only, checked every
+  30 minutes).
 - **Agent & bot platform directories.** If the site ships a hosted `/mcp`,
   these put it inside the assistants themselves — the highest-GEO surface on
   this list. Each needs an account on the platform (a paid plan for two of
@@ -366,7 +417,258 @@ with a `method` field per entry — lives in `pooriaarab/scripts` at
 `scripts/directory-submission/directories.json`. `check.mjs` next to it
 lists entries, probes their liveness, and prints a per-domain plan. New
 directories go there first; the template's `data/directories.json` is a
-synced copy.
+synced copy. The fleet's directory repo keeps the working catalog and the
+per-site ledger (§11).
+
+## 8. GitHub lists, API catalogs and datasets
+
+Checked 2026-10-21. GitHub lists give a nofollow link by platform default, so
+the value is the human and agent traffic that reads the list, plus a citation
+that answer engines pick up. Read the list's contributing rules first. Several
+lists auto-close a PR that breaks the format.
+
+### Awesome lists
+
+| List | Gate / note |
+|---|---|
+| [kyrolabs/awesome-agents](https://github.com/kyrolabs/awesome-agents) | PR at the bottom of `readme.md`. Open source, English, agent-related, active. New GitHub accounts are auto-closed. |
+| [Jenqyang/Awesome-AI-Agents](https://github.com/Jenqyang/Awesome-AI-Agents) | One entry per PR. Needs a visible OSI licence and a full README. No hype words. |
+| [steven2358/awesome-generative-ai](https://github.com/steven2358/awesome-generative-ai) | Main list wants about 1,000 followers. Otherwise use the Discoveries list. Reviewed in order of arrival. |
+| [steel-dev/awesome-web-agents](https://github.com/steel-dev/awesome-web-agents) | PR titled `Add: name`. Fill the PR template, including affiliation. Web-agent tools only. |
+| [hesreallyhim/awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code) | Web issue form only, so a human submits. Resource must be 14 days old with active work, or have 100 stars. |
+| [VoltAgent/awesome-agent-skills](https://github.com/VoltAgent/awesome-agent-skills) | PR titled `Add skill: author/skill-name`. Public repo with a `SKILL.md` and real use. |
+| [xpaysh/awesome-x402](https://github.com/xpaysh/awesome-x402) | One resource per PR. x402 only. Automated link check. Last merge was 2026-07-28. |
+| [ai-boost/awesome-a2a](https://github.com/ai-boost/awesome-a2a) | PR must edit `README.md` and `README_zh.md`. A2A protocol resources only. |
+| [restyler/awesome-sandbox](https://github.com/restyler/awesome-sandbox) | Code sandboxes for AI. Issue or PR, no format rules. |
+| [zhuima/awesome-cloudflare](https://github.com/zhuima/awesome-cloudflare) | Projects built on Cloudflare. Chinese README. Intro says open source. |
+| [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data) | PR adds `software/<name>.yml`. Needs a FOSS licence and a release older than 4 months. LLM-written PRs are banned. |
+| [serpapi/awesome-seo-tools](https://github.com/serpapi/awesome-seo-tools) | Must be an SEO tool, extension or API. One sentence, at the bottom of a category. |
+| [markodenic/web-development-resources](https://github.com/markodenic/web-development-resources) | One resource per PR. Fully free or a free tier. Skips categories with 10 or more items. |
+| [sacridini/Awesome-Geospatial](https://github.com/sacridini/Awesome-Geospatial) | For map and mobility data. No contributing file. Has Data Sources sections. |
+
+### API catalogs
+
+| Catalog | Gate / note |
+|---|---|
+| [public-apis](https://github.com/public-apis/public-apis) | PR with one table row. Free public API only. Description 100 characters or fewer. Has an MCP section. Merged daily. |
+| [public-api-lists](https://github.com/public-api-lists/public-api-lists) | Five-column row, alphabetical, five entries per PR at most. Automated format check. |
+| [APIs.guru](https://apis.guru/add-api/) | Anonymous form. Needs a stable URL to an OpenAPI, Swagger or Postman definition. PRs are closed. |
+| [apis.io](https://apis.io) | Form or email. A person reviews. One company per submission. |
+| [API Tracker](https://www.apitracker.io) | Form builds an email to Apideck. Takes an API or an MCP server. |
+| [Postman API Network](https://learning.postman.com/docs/postman-api-network/overview/) | Make a workspace public with a collection. Needs a real callable API. |
+
+### Dataset hosts
+
+Use these only when the site publishes a cleaned extract of its public data.
+A directory page is not a dataset. Zenodo, Hugging Face and Mendeley are one
+workflow with three upload forms, not three separate wins.
+
+| Host | Gate / note |
+|---|---|
+| [Google Dataset Search](https://developers.google.com/search/docs/appearance/structured-data/dataset) | No form. Add schema.org `Dataset` JSON-LD: `name`, `description` of 50-5000 characters, `distribution.contentUrl`. Check it in the Rich Results Test. Keep the page crawlable and in the sitemap. Indexing takes days. |
+| [Zenodo](https://about.zenodo.org/policies/) | Free account (GitHub or ORCID login). Up to 50 GB a record. Gives a DOI. Out-of-scope content is removed later. |
+| [Hugging Face Datasets](https://huggingface.co/docs/hub/datasets-adding) | Free account. Public dataset repo with a dataset card where the site link goes. |
+| [Mendeley Data](https://data.mendeley.com/) | Free account. Research data focus. Gives a DOI. Size limit not stated. |
+| [awesome-public-datasets](https://github.com/awesomedata/apd-core) | The README is generated. Fork `apd-core`, add a file under `core/<Category>/`, run `tests/testing.sh`. Direct download with no login. |
+| [DataPortals.org](https://www.dataportals.org) | "Add a Portal" opens a GitHub issue. For open-data portal sites. |
+
+## 9. Profiles and communities
+
+Profiles earn entity signals more than link equity. Communities punish
+promotion, so read the rules page before you post.
+
+| Surface | Link | Gate / note |
+|---|---|---|
+| [about.me](https://about.me), [Gravatar](https://gravatar.com), [GitHub](https://github.com), [GitLab](https://gitlab.com), [sourcehut](https://sr.ht) | nofollow (sampled) | Free profile with a website field. Use `rel="me"` links to tie accounts to the site. |
+| [Open Collective](https://opencollective.com) | nofollow (sampled) | Needs a project that fits their rules. |
+| [WordPress.org profile](https://profiles.wordpress.org) | no `rel` on one sample | The link may be nofollow for new accounts. Check after you save. |
+| [Stack Overflow profile](https://stackoverflow.com), [Linktree](https://linktr.ee) | unverified | Result differs by account. Do not drop links in answers. |
+| [Show HN](https://news.ycombinator.com/showhn.html) | nofollow | Must be something people can try. No landing pages. Never ask for upvotes. |
+| [Lobsters](https://lobste.rs/about) | nofollow | Invite only. Self-promotion stays under about a quarter of your activity. |
+| [DEV Community](https://dev.to/terms), [Hashnode](https://hashnode.com) | dofollow (sampled) | Post useful articles in good faith. Disclose affiliate links and AI help. |
+| [HackerNoon](https://hackernoon.com/new) | unverified | Editorial review. Write about the niche, not an ad. |
+| [daily.dev](https://docs.daily.dev/how-to-get-featured/) | unverified | Squads, source suggestions (established publications only) or direct posts. |
+| [Showwcase](https://www.showwcase.com/) | unverified | Developer profile. Low priority. |
+
+Indie Hackers, Medium, Peerlist and Reddit returned 403 to our fetch tool.
+Read their rules in a logged-in browser before you plan anything there.
+
+## 10. Niche backlinks: how to find them per site
+
+A directory site for one niche (pet cremation, doulas, credit unions) needs
+links from places that already serve that niche. The general tables above do
+not do this. Build the list per site, by hand, with this method. The result
+for each site goes into the catalog (see section 11), not into this file.
+
+### The method
+
+1. **Industry associations and trade bodies.** Look for a "resources", "links"
+   or "partners" page. Many keep these for paying members. Skip those. Keep the
+   ones where a non-member can suggest a link by form or one email.
+2. **Awesome lists that take PRs.** Search GitHub for `awesome-<niche>` and
+   `awesome-<niche>-datasets`. Then run the merge-recency check before you
+   write anything:
+   ```sh
+   gh pr list -R <owner>/<repo> --state merged --limit 5 --json mergedAt,author
+   gh pr list -R <owner>/<repo> --state open --limit 20
+   ```
+   Keep the list only if an outside PR merged in the last three months. A list
+   with a pile of open PRs and no recent merge is dead. Read `CONTRIBUTING.md`:
+   some lists auto-close a PR for format, and some take tools only.
+3. **Dataset hosts.** If the site holds public data, publish a cleaned extract
+   on Zenodo (gets a DOI), Hugging Face or Mendeley, with the site link on the
+   dataset card. Add schema.org `Dataset` markup to the page that offers the
+   same data so Google Dataset Search finds it (section 8).
+4. **Resource-page curators.** University library guides, state and county
+   pages, nonprofits and public-health sites keep link lists. Find the page,
+   then send one plain note that names the page, says what the site adds, and
+   links one useful page. One note per page. No follow-ups, no template blast.
+5. **Suggest-a-resource forms.** A named form with no account is the best
+   route. Fill it with the packet from section 0, in the editor's words.
+6. **Re-check the date.** Every entry below was fetched on 2026-10-21. A merge
+   date, a form or a free listing can change in a month. Open the page again
+   before you file.
+
+### What to skip
+
+- **Paid or sponsored listings.** Fees, "featured" boxes, per-state fees, a
+  card hold for a free tier.
+- **Member-only directories.** An association locator that needs dues.
+- **Link sellers and lead-sale sites.** They sell the link you want to earn.
+- **Reddit self-promotion** without reading the subreddit rules first. Most
+  ban it. Read the rules in a browser, then decide.
+- **Dead or hijacked domains.** Two niche sites on our first pass had been
+  taken over by spam. Open the page before you trust the name.
+- **Awesome lists with no merge in months**, and lists that take tools only
+  when you are a directory.
+
+### Best verified targets by niche family
+
+The exact per-site lists live in the directory fleet's catalog. These are the
+strongest entries from that research. A "pitch" has no formal route, so send
+one polite note and expect a low hit rate.
+
+**Health and sensitive topics** (eating disorders, fertility, doulas, peptide
+clinics, psilocybin). Nearly every association directory is paid or
+member-only. Expect short lists.
+
+- Doulas: Chisholm Legacy Project resource hub (anonymous submit form), New
+  Mexico Doula Association directory ("Suggest a New Listing"), NASHP doula
+  Medicaid tracker (editorial, email).
+- Fertility: Northwestern Galter Library guide (email for additions), Inova
+  Library OB/GYN toolkit ("Suggest a New Resource" form, may be staff-only),
+  `geniusrise/awesome-healthcare-datasets` (merged PRs on 2026-10-07, dataset
+  only).
+- Peptide and longevity: `mafiaguy/awesome-biohacking` (merged PRs on
+  2026-10-21), `seeker89/awesome-biohacking`, Curlie (volunteer editor).
+- Psilocybin: Psychedelic Alpha law and policy tracker (email corrections),
+  Berkeley Center for the Science of Psychedelics (contact form, no reply
+  promised), Chacruna and Zendo Project (one note each).
+- Eating disorders: the Western Washington University body image resource list
+  (plain email), Intuitive Eating resources page (contact form). MedlinePlus
+  rejects sites whose main purpose is selling, so do not pitch it.
+
+**Finance** (credit unions, fintech, payments).
+
+- Credit unions: `ashishb/personal-finance-awesome` (merged daily), the League
+  of Credit Unions financial education guide (editorial review), the NCUA
+  website feedback form (no account), `andenick/bank-data-dictionary` (issue).
+- Payments and fintech: `jplock/awesome-fintech` (active, company list).
+
+**Legal, immigration and housing** (immigration help, foreclosure listings,
+French for PR).
+
+- Immigration help: law library guides at Illinois, Minnesota, New Mexico, USC
+  and Nova Southeastern (one email each to the reference desk), Immigration
+  Advocates Network (pitch).
+- Foreclosure: PALawHELP (feedback form), Texas State Law Library (question
+  form), LLRX (editor form), `etewiah/awesome-real-estate` (PR), Civic Tech Field Guide
+  (submit form, moderation unconfirmed).
+- French for PR: `gbroques/awesome-french` (PR, but seven PRs sat open), MERLOT
+  (free account), Lexilogos (contact form, welcomes suggestions), Le Point du
+  FLE (email to the editor).
+
+**AI and agents** (agent sandboxes, agent wallets, x402, robotic services).
+
+- `Haustorium12/gold-402` (best odds: external PRs merged 2026-10-22, one
+  entry per PR), `Merit-Systems/awesome-agentic-commerce`,
+  `solana-foundation/awesome-solana-ai`, `xpaysh/awesome-x402`.
+- Sandboxes: `ianwieds/awesome-agent-sandboxes` (new list, strict automated
+  rules), `webcoyote/awesome-AI-sandbox`, `arjan/awesome-agent-sandboxes`.
+- Skip `awesome-account-abstraction` (weak fit) and the archived Base
+  ecosystem form.
+
+**Consumer services** (pet cremation, sober bars, dating coaches, driving
+schools, auctions).
+
+- Pet cremation: Love, Baxter Pet End-of-Life Directory ($0 to join), Pet-Loss.net
+  (basic listing is free, skip the $25 box), Green Pet-Burial Society, RedRover,
+  The Ralph Site.
+- Sober bars: Zero Proof Nation global map (form, needs a short blurb), The
+  Sober Curator rolodex (free, bot check). OpenStreetMap for each venue.
+- Dating coaches: IMCB Find a Matchmaker, SwipeStats services catalog (editor
+  approves each entry), Trusted Matchmakers. Life Coach Hub lists you but gives
+  no website link on the free tier, so skip it for backlinks.
+- Driving schools: DSAA resources page (email), Road Safety Knowledge Centre
+  (self-assess, then submit). Others are pitches with low odds.
+- Auctions: NAA and NALLOA resource pages, state surplus-property pages, and
+  public library "government auctions" pages (all pitches).
+
+**Civic and open data** (robotaxis, auctions, public records).
+
+- Robotaxis: CCAM-TAC invites website suggestions by email, ITS America
+  automated vehicle resources (one email), the EU connected driving knowledge
+  base (email, not the Turnstile form).
+- Maps and data: `osmlab/awesome-openstreetmap`, the OSM wiki service lists
+  (free account), Civic Tech Field Guide, DataPortals.org, awesome-public-datasets.
+
+## 11. Working with the ledger
+
+Each site used to keep its own `submissions.csv`. The fleet now keeps one
+ledger, because the cost is per channel (one login, one rate limit, one
+repository), not per site. The runner lives in the fleet's directory repo.
+
+- **One catalog row per target.** A target is one directory, in
+  `sites/_shared/data/directories.json`. The row has a name, a tier and a
+  `method` (`api`, `github-pr`, `github-issue`, `form-anon`, `form-account`,
+  `form-oauth`, `form-captcha`, `pitch`, `crawl` and a few more). Never list a
+  target twice. Add a `skip` of `paid` or `human` when an agent must not run it.
+- **Scope a niche target to its own site.** A pet cremation list must not go
+  to the other sites. The catalog row carries a `sites` allowlist naming the
+  sites that may receive it. The runner on `main` does not read that field
+  yet, so also pass `--sites a,b,c` on every run of a niche target.
+- **A pair with no ledger row is todo.** The ledger is `submissions/ledger.csv`
+  with the columns `target, site, status, date, proof, retry_after, reason`.
+- **Four statuses:** `submitted` (filed, waiting), `live` (listed in public),
+  `blocked` (needs a reason, may carry a `retry_after` date) and `skipped`
+  (needs a reason). Put a URL or a note in `proof`.
+
+```sh
+bun scripts/submissions.ts report              # per target: done, blocked, skipped, todo, why
+bun scripts/submissions.ts run "<target name>" # one driver call for every pending site
+bun scripts/submissions.ts import-csv <site> <old submissions.csv>
+```
+
+`run` calls the target's driver once with all pending sites, so one login or
+one PR serves all of them. A second run never files a pair that already has a
+row, except a blocked row whose `retry_after` date has passed.
+
+Rules that each came from a real failure:
+
+- **Do not solve captchas.** Record the pair as `blocked` with the reason, and
+  hand it to a person.
+- **No paid placements.** Mark the target `skip: paid`. Do not enter a card.
+- **No outreach campaigns.** One plain suggestion per page. No follow-up
+  sequences, no bulk email.
+- **A human clicks the GitHub OAuth authorize button.** Cloudflare and
+  claude.ai logins also need a human. Prepare every field, then hand off.
+- **One browser driver at a time.** Two drivers on one Chrome profile or one
+  debug port fight over the same tabs and sessions.
+- **Verify on the application's own list.** A loop that prints "submitted"
+  proves nothing, and a click on a disabled button also prints success. After a
+  run, open the directory's own list or status page, or read the network
+  response, and compare before and after. A "pending review" email counts as
+  proof. A static "in the queue" message does not.
 
 ## Checklist
 
@@ -380,6 +682,8 @@ synced copy.
   Grok template dirs (needs the `x.ai/bot` link first), Poe bot.
 - [ ] AI/GEO directories submitted (if the product has a real AI surface).
 - [ ] Long tail batched in DR order.
+- [ ] Niche targets found per site (§10) and added to the catalog with a
+  `sites` allowlist. Every result recorded in the ledger (§11).
 - [ ] `submissions.csv` tracks every directory, date, and status. Use honest
   status words: `listed` (publicly visible), `pending` (filed, awaiting
   review), `draft` (needs one more step — e.g. site verification), `blocked`
