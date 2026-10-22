@@ -84,6 +84,17 @@ Bind cleanup to verified resource ownership. Preserve active environments and sh
 Measure retained resource cost separately from historical usage.
 Removing a database does not reverse its earlier charges.
 
+For container changes, prove actual running-to-stopped state through the provider API.
+A skipped cron log proves skipped dispatch, not sleep or lower billed usage.
+Record the installed SDK version and the last observed reset before timing inactivity.
+A reset can renew an in-memory timer without changing the deployed Worker version.
+Keep setup, reset observation, positive wake tests, and cleanup inside one fixed experiment budget.
+Keep Preview app checks separate from isolated lifecycle timing and production savings measurements.
+
+For temporary resources, follow the
+[bounded cleanup contract](https://github.com/pooriaarab/scripts/blob/main/docs/cloudflare-cleanup-deadlines.md).
+Complete the experiment only after exact owned resources are absent or cleanup remains explicitly incomplete.
+
 Use the repository's PR review, local CI, preview walk, and release procedure.
 Report measured savings after equivalent observation intervals.
 Include remaining gaps and costs that the change cannot affect.
