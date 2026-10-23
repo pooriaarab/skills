@@ -916,6 +916,50 @@ What the run showed:
   `target,url,submit_url,sites,method,notes`. Put form-anon rows first, then
   dofollow rows, then account and OAuth rows.
 
+## 12b. Round 5 results and how to change the method
+
+Round 5 ran on 2026-10-22 with six research workers, then three retry workers
+for the thin niche sites, then five second-read workers. Round 5 searched by
+mining. It did not use WebSearch or GitHub search, because both quotas were
+empty. 238 candidates came back. After the domain dedupe and a `curl` recheck,
+219 stayed. After dropping 36 local-business directories and a second read of
+every submit page, 130 targets stayed. 126 went into the catalog. Three are
+pitch routes. One was already in the catalog. No form was submitted.
+
+| Result | Count |
+|---|---|
+| Form, no account | 54 |
+| Form with email, account or OAuth sign-in | 71 |
+| GitHub PR or API | 2 |
+| Dofollow stated on the page | 38 |
+| Free route needs a badge | 44 |
+
+What the run showed:
+
+- **One meta-list gave most of the yield.** A public README of 653 startup
+  directories and a directory-of-directories JSON file gave most of the 219
+  candidates. Fetch the raw file and filter the domains with
+  `comm -23` against `known-domains.txt` before you fetch any page.
+- **The second read removed 53 targets.** A first-pass worker quoted page
+  text that was not a clear free route. A second worker read each submit page
+  again and dropped sites that were paid only, AI-only, or for a narrow type
+  such as clinics, apps or one state. Keep this step. A first pass alone
+  overstates the count.
+- **Scope AI-only boards with a `sites` allowlist.** About 40 verified boards
+  list AI tools only. Give them `agentsandboxes`, `agentwalletindex` and
+  `aibenchmarkindex`. Do not give them to the other sites.
+- **Local-business directories are not a fit.** Yellow Pages, Gelbe Seiten and
+  MisterWhat clones need a local business and address. Round 5 dropped 36.
+- **The thin niches stay thin.** Eleven niche sites got 18 site-scoped targets
+  after two passes, and several are weak fits. Search through
+  `curl -sL "https://r.jina.ai/https://html.duckduckgo.com/html/?q=..."`
+  works for unquoted queries when direct search engines show captchas. It is
+  rate limited, so run it one query at a time.
+- **Wayback and Common Crawl indexes were slow or down.** Do not plan a run
+  that depends on them.
+- **Split the catalog change by section and by site group.** 126 rows are
+  about 1,300 lines. Four pull requests keep each one under 500 lines.
+
 ## 13. What failed or blocked
 
 Skip these dead ends, or hand them to a person. The dates come from the
