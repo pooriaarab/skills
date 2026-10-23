@@ -162,3 +162,11 @@ worker that silently returns "audit complete" with no findings costs more than i
 saves. Delegate the bounded text edits (a README notice, a docs rewrite) where a
 wrong answer is visible in a diff, and **verify the files rather than the
 worker's summary**.
+
+## Related
+
+Once the branches are right and the deploys still take too long, look at how
+much each push deploys. See `multi-site-deploy-optimization` for the
+fleet version of that problem: a deploy-ignore list, canary-only staging,
+side-worker change detection, and migrate-only-when-pending D1 checks, all on
+the `main`/`release` convention above.
