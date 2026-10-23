@@ -8,6 +8,16 @@ skill names, or claims.
 Read `.agents/design.md` before changing the README, documentation structure,
 or the presentation of a skill.
 
+## Directory & product UI (pooriaarab/directory)
+
+When the task touches directory branding, `/design`, or public kit components:
+
+1. [directory-fleet-ui](directory-fleet-ui/SKILL.md) — presets, variants, fleet brand pass
+2. [design-taste](design-taste/SKILL.md) — anti-slop; install upstream pack; use `corporate-trust` + civic for reference sites
+3. [better-design](better-design/SKILL.md) — MCP review; map catalog systems to presets, never vendor shadcn into `apps/web`
+
+Install upstream once per machine: `design-taste` `./scripts/install.sh`; `better-design` `npx skills add marvkr/better-design`.
+
 <!-- pr-standards:start -->
 
 ## Pull requests
