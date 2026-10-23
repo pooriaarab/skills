@@ -898,14 +898,14 @@ pitch routes and stay in the outreach queue. No form was submitted.
 What the run showed:
 
 - **General boards still pay. Niche lists do not.** Launch boards, tool
-  directories and awesome lists gave about 140 targets. Twelve niche-specific
-  searches for the six thinnest sites gave about 20. Trade bodies keep member
+  directories and awesome lists gave about 140 targets. Two waves of niche
+  workers for all 17 sites gave about 25. Trade bodies keep member
   lists behind a fee. Do not spend more workers on petcremation, doulas,
   peptideclinic or soberbars until a new kind of source appears.
 - **Dedupe by domain, not only by URL.** A second wave found the same domain
   under a different path. Keep one `known-domains.txt` and check it first.
 - **Recheck every URL after the worker reports.** Workers read pages with a
-  fetch tool. A plain `curl -L` with a browser user agent dropped four more
+  fetch tool. A plain `curl -L` with a browser user agent dropped seven more
   targets that answered 403 or 405.
 - **Pitch is not a catalog row.** Eight library and blog pages had only an
   email or suggestion route. They stay in the JSON and out of the catalog.
