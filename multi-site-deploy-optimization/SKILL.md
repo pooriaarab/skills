@@ -174,3 +174,9 @@ waived the gate for those PRs.
 - Never let a resolver return an empty list on error.
 - Green CI is not evidence a deploy ran. A job can succeed while skipping the
   deploy step.
+
+## Related skills
+
+- `ci-build-speed`, `ci-speed-diagnosis` and `high-volume-ci-optimization` cover CI pipeline speed and cost. This skill covers deploy fan-out across many sites.
+- `branch-deploy-convention` covers the `main` and `release` branch rules these deploys follow.
+- `cloud-agent-execution` covers the worker boxes that built these changes.
