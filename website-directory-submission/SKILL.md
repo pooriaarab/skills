@@ -1074,7 +1074,7 @@ which ones block, and when to look again.
 Tags in `requirements`: `account`, `email-verify` (a confirm link in the
 inbox), `email-field`, `email-pitch`, `badge` (your site must show its badge),
 `reciprocal-link`, `rate-limit`, `captcha`, `oauth`, `human-only`,
-`paid-gate`, `needs-repo` (a public repo), `needs-package`, `needs-dataset`,
+`paid-gate`, `needs-repo` (a public repo), `needs-dataset`,
 `personal-data` (phone, photo or X Premium), `ai-restricted` and
 `product-domain-email`. A row with no tag is an open form.
 
