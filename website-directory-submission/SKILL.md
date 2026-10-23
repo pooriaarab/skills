@@ -881,6 +881,41 @@ so nobody read the rules, and the rules differ by community and change. A
 person reads the current rules in a browser, then decides. Qwoted and similar
 platforms were not verified either.
 
+## 12a. Round 4 results and how to repeat them
+
+Round 4 ran on 2026-10-22 with eleven research workers. They read 202 candidate
+pages. After a dedupe against the catalog, the ledger and rounds 1 to 3, and a
+second `curl` check, 168 targets stayed. 160 went into the catalog. Eight are
+pitch routes and stay in the outreach queue. No form was submitted.
+
+| Result | Count |
+|---|---|
+| Form, no account | 29 |
+| Form with email or account sign-in | 93 |
+| GitHub PR or issue | 37 |
+| Dofollow stated on the page | 40 |
+
+What the run showed:
+
+- **General boards still pay. Niche lists do not.** Launch boards, tool
+  directories and awesome lists gave about 140 targets. Twelve niche-specific
+  searches for the six thinnest sites gave about 20. Trade bodies keep member
+  lists behind a fee. Do not spend more workers on petcremation, doulas,
+  peptideclinic or soberbars until a new kind of source appears.
+- **Dedupe by domain, not only by URL.** A second wave found the same domain
+  under a different path. Keep one `known-domains.txt` and check it first.
+- **Recheck every URL after the worker reports.** Workers read pages with a
+  fetch tool. A plain `curl -L` with a browser user agent dropped four more
+  targets that answered 403 or 405.
+- **Pitch is not a catalog row.** Eight library and blog pages had only an
+  email or suggestion route. They stay in the JSON and out of the catalog.
+- **Split a catalog change by section.** 160 rows are about 1,500 lines. The
+  500 line cap needs four pull requests, one per group of catalog sections, so
+  the pull requests do not touch the same hunk.
+- **Hand browser work over as a queue.** Write a CSV with the columns
+  `target,url,submit_url,sites,method,notes`. Put form-anon rows first, then
+  dofollow rows, then account and OAuth rows.
+
 ## 13. What failed or blocked
 
 Skip these dead ends, or hand them to a person. The dates come from the
