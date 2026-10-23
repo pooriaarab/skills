@@ -16,7 +16,8 @@ A change to shared code (`apps/`, `packages/`, `workers/`) deployed all 29
 sites. Each site ran a full OpenNext build of identical code, then D1
 migrations, then 4 worker deploys — on `main` (staging) and again on `release`
 (production). One full release deploy took about 40 minutes — one measured run
-on 2026-10-23, not an average.
+(pooriaarab/directory Actions run 39980107532, 2026-10-23, 15:39 to 16:19 UTC),
+not an average.
 
 ## What landed, in order
 
@@ -100,14 +101,16 @@ A single Worker serving all 29 sites was rejected (codex-personal review,
 2026-10-23). It needs:
 
 - A Host-to-site registry.
-- Per-site bindings — about 217 resource bindings across the sites.
+- Per-site bindings. The app worker config declares 7 per site (2 D1, 2 KV, 2 R2, 1 queue producer), so 217 for 31 sites.
 - Tenant identity inside the OpenNext KV/D1 cache.
 - Per-tenant secrets (Stripe, auth, Turnstile) against the 128-variable
   per-Worker limit.
 - A shared failure and rollback scope across every site.
 
-The 217-binding and 128-variable numbers come from a Codex review of
-Cloudflare docs on 2026-10-23.
+The 128-variable limit is on the Cloudflare Workers limits page
+(https://developers.cloudflare.com/workers/platform/limits/); check it again
+before you rely on it. The binding count is the 7 per site above, read from
+`apps/web/cloudflare/app-worker/wrangler.jsonc`.
 
 Workers for Platforms does not remove build-time site selection. Revisit after
 build-once ships and isolation tests pass.
@@ -147,7 +150,7 @@ gh run list --workflow deploy.yml --limit 50 \
 ```
 
 - Time a full release deploy end to end. The baseline is about 40 minutes,
-  from one measured run on 2026-10-23.
+  from Actions run 39980107532 (2026-10-23).
 - Count staging deploys per shared-code push to `main`. Target: 1, the canary.
 - Count worker deploys per site. Target: the site worker plus only the side
   workers whose inputs changed.
