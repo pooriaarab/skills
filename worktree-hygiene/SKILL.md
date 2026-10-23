@@ -31,6 +31,11 @@ Treat a branch as merged when any test passes:
   branch's current tip (or the tip is an ancestor of that merge commit).
 - Its PR shows a merge timestamp, with the same tip check.
 
+Always pass `--repo <owner/name>`, taken from `origin`, to every `gh` call.
+Without it, `gh` uses its own default repo. On 2026-10-21 that was
+`directory-template` while the checkout was `dishdirectory`, so the lookup read
+the wrong repo's PRs.
+
 A PR closed without merging is not merge evidence. Treat "closed" alone as no
 evidence, the same as no PR at all. A merged PR whose head SHA predates the
 branch's current tip is also not evidence for the current tip: commits pushed
@@ -50,7 +55,20 @@ Treat empty status output as clean.
 Treat status with only scratch files as clean.
 Scratch files are WORKER_BRIEF.md, CONTINUE.md, BRIEF.md, and
 WORKER_RESULT.md.
-Treat any other uncommitted or ignored file as real.
+Treat any other uncommitted file as real.
+
+Treat an ignored file as real too, except these regenerable paths:
+`node_modules`, `.next`, `.open-next`, `.turbo`, `.wrangler`, `.cache`,
+`.parcel-cache`, `.pytest_cache`, `.venv`, `__pycache__`, `dist`, `build`,
+`target`, `coverage`, `.DS_Store`. A strict "any ignored file is real" rule sends
+every JS worktree to needs-review, because every one holds `node_modules`. A
+`.env.local`, `.dev.vars` or key file is never regenerable.
+
+## Check for a live process
+
+Before removal, list the working directory of every running process
+(`lsof -d cwd -Fn`). Skip a worktree when any process runs in it or below it. An
+agent session may be working there with a clean tree. Report it under skipped.
 
 ## Remove safe worktrees
 
@@ -99,4 +117,31 @@ List each path under its count.
 ## Implementation
 
 The script `prune-merged-worktrees.sh` in `pooriaarab/scripts` implements this
-workflow. It runs dry-run by default. Pass `--apply` to remove.
+workflow for one repo. It runs dry-run by default. Pass `--apply` to remove.
+
+## Run it on a schedule
+
+Do not rely on remembering. `disk-hygiene` in `pooriaarab/scripts` runs the
+prune script on every repo under `$DISK_HYGIENE_ROOTS` (default
+`~/Documents/Personal`). When free space is under `$DISK_HYGIENE_THRESHOLD_GIB`
+(default 200), it also clears caches that rebuild: npm, bun, pnpm, Homebrew,
+Xcode DerivedData and iOS DeviceSupport, Playwright browsers. It logs free space
+before and after to `~/.local/state/disk-hygiene/log`, and exits 3 when space is
+still short.
+
+Install the launchd agent once with `disk-hygiene-install`. It runs
+`disk-hygiene --apply` every 6 hours. launchd cannot read `~/Documents` until
+`/bin/bash` has Full Disk Access (System Settings > Privacy & Security > Full
+Disk Access). The installer detects the block and says so.
+
+Read the log after a run. Every worktree under needs-review waits for a human.
+
+## What frees space
+
+Measured on 2026-10-21, on one Mac with 222 GiB free:
+
+- Removing 112 merged worktrees freed about 78 GiB.
+- Deleting 426 idle `node_modules` directories freed about 3 GiB. APFS shares
+  blocks between copies, so `du` overstates the gain. Do not spend effort here.
+- The rest of the disk was apps, Homebrew, model folders and personal data. No
+  script should delete those. Ask first.
