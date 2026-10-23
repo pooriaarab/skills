@@ -82,6 +82,42 @@ first-party ones with provider-managed auth. Other CLIs run as on-box tools and
 need their own auth AND funding on the box. A key being present is not proof it is
 funded — preflight loudly and report which providers are ready.
 
+## Box-reap and auto-stop traps
+
+Worker boxes on ascii.dev (`box`, now called Boat) died mid-job twice while
+Devin and Cursor jobs ran detached.
+
+**The laptop reaper reads "waiting" as "idle".** A launchd job
+`com.pooriaarab.box-reap` runs `box-reap`, which stops boxes that look quiet:
+CPU under 20 percent and low load. An agent blocked on a model API call is
+quiet. Before starting a detached job, touch the keep-file on the box:
+
+```sh
+box exec <id> touch /home/user/.box-reap-keep
+```
+
+`/home/user/.box-reap-keep` is the default keep-file path.
+
+**`box extend --no-auto-stop` takes no other flags.** Combined with `--hours`
+it fails with "use --no-auto-stop by itself".
+
+**Recover a stopped box from its disk.** A stopped box loses the running job
+but keeps the disk. `box resume <id>` brings it back; then check `git status`
+and `git diff` in the repo and write a CONTINUE brief. Judge the job by the
+diff, never the exit code.
+
+**`box exec` does not forward stdin.** Pass scripts as base64 inside the
+command and decode on the box. For a background job the flag order is
+`box exec --detach <id> bash script.sh` — `--detach` goes before the id.
+
+**Worker auth on a box** (roster box, as of 2026-10-23):
+
+- Devin works with its stored login; unset `DEVIN_API_KEY`, `DEVIN_TOKEN` and
+  `WINDSURF_API_KEY` first.
+- `cursor-agent` needs `CURSOR_API_KEY` passed in.
+- Claude had an expired OAuth token (401).
+- Grok is not installed.
+
 ## Guards
 
 - Personal or non-sensitive repos only on a third-party box.
