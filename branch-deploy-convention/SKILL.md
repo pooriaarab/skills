@@ -165,8 +165,8 @@ worker's summary**.
 
 ## Related
 
-Once the branches are right and the deploys still take too long, the next lever
-is how much each push deploys. See `multi-site-deploy-optimization` for the
+Once the branches are right and the deploys still take too long, look at how
+much each push deploys. See `multi-site-deploy-optimization` for the
 fleet version of that problem: a deploy-ignore list, canary-only staging,
 side-worker change detection, and migrate-only-when-pending D1 checks, all on
 the `main`/`release` convention above.
