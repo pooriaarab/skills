@@ -85,7 +85,7 @@ funded — preflight loudly and report which providers are ready.
 ## Box-reap and auto-stop traps
 
 Worker boxes on ascii.dev (`box`, now called Boat) died mid-job twice while
-Devin and Cursor jobs ran detached. Two causes, and the fixes that held.
+Devin and Cursor jobs ran detached.
 
 **The laptop reaper reads "waiting" as "idle".** A launchd job
 `com.pooriaarab.box-reap` runs `box-reap`, which stops boxes that look quiet:
@@ -99,8 +99,7 @@ box exec <id> touch /home/user/.box-reap-keep
 `/home/user/.box-reap-keep` is the default keep-file path.
 
 **`box extend --no-auto-stop` takes no other flags.** Combined with `--hours`
-it fails with "use --no-auto-stop by itself". The wrong fix here cost a full
-round.
+it fails with "use --no-auto-stop by itself".
 
 **Recover a stopped box from its disk.** A stopped box loses the running job
 but keeps the disk. `box resume <id>` brings it back; then check `git status`
@@ -111,13 +110,13 @@ diff, never the exit code.
 command and decode on the box. For a background job the flag order is
 `box exec --detach <id> bash script.sh` — `--detach` goes before the id.
 
-**Worker auth on a box:**
+**Worker auth on a box** (roster box, as of 2026-10-23):
 
 - Devin works with its stored login; unset `DEVIN_API_KEY`, `DEVIN_TOKEN` and
   `WINDSURF_API_KEY` first.
 - `cursor-agent` needs `CURSOR_API_KEY` passed in.
-- Claude on the roster box had an expired OAuth token (401).
-- Grok is not installed on the roster box.
+- Claude had an expired OAuth token (401).
+- Grok is not installed.
 
 ## Guards
 
