@@ -1,6 +1,6 @@
 ---
 name: website-directory-submission
-description: "Submit a live website to free web directories for SEO backlinks, referral traffic, and GEO/AI visibility — the tiered directory table (launch platforms, startup directories, SaaS directories, review sites, AI-tool directories) with DR, link type, cost, and gate per directory, the one submission packet prepared once and pasted everywhere, the order of operations (tier-1 first, GitHub-based submissions as PRs, human-gated forms last), plus the MCP-directory path for sites that ship a hosted /mcp endpoint (remote-only registry publish, awesome-remote-mcp-servers, Glama, mcp.so), free launchpads, awesome lists, API catalogs, dataset hosts and profile sites, the method for finding niche backlinks per site (associations, awesome lists, dataset hosts, resource-page curators), verified per-niche free sources by site category, a table of what failed or blocked, listed-on badges, A2A registry registration, the outreach policy pointer, and the per-site submission ledger. Use when a site is live and needs directory backlinks, when someone asks 'where should we list this', or after launch-seo/geo-aeo in the ship-a-product pipeline."
+description: "Submit a live website to free web directories for SEO backlinks, referral traffic, and GEO/AI visibility — the tiered directory table (launch platforms, startup directories, SaaS directories, review sites, AI-tool directories) with DR, link type, cost, and gate per directory, the one submission packet prepared once and pasted everywhere, the order of operations (tier-1 first, GitHub-based submissions as PRs, human-gated forms last), plus the MCP-directory path for sites that ship a hosted /mcp endpoint (remote-only registry publish, awesome-remote-mcp-servers, Glama, mcp.so), free launchpads, awesome lists, API catalogs, dataset hosts and profile sites, the method for finding niche backlinks per site (associations, awesome lists, dataset hosts, resource-page curators), verified per-niche free sources by site category, a table of what failed or blocked, listed-on badges, A2A registry registration, the outreach policy pointer, the per-site submission ledger, and a registry CSV of every directory tried with a fast run recipe. Use when a site is live and needs directory backlinks, when someone asks 'where should we list this', or after launch-seo/geo-aeo in the ship-a-product pipeline."
 ---
 
 # website-directory-submission
@@ -1048,6 +1048,130 @@ queue instead:
 Mark pitch rows `skip: human` in the catalog so `run` never picks them up
 (section 11).
 
+## 16. The directory registry and the fast run
+
+`directories.csv` in this folder holds one row for every directory that
+rounds 1 to 3 looked at. It is a snapshot of the fleet catalog and ledger from
+2026-10-22. Read it before you open a browser. It tells you which boards work,
+which ones block, and when to look again.
+
+| Column | What it holds |
+|---|---|
+| `name`, `url`, `submit_url` | The directory and where its form, PR or API lives. |
+| `type` | `launch-board`, `startup-directory`, `saas-directory`, `review-site`, `ai-tool-directory`, `awesome-list`, `mcp-registry`, `agent-platform`, `llms-txt-directory`, `search-engine`, `api-directory`, `dataset-catalog`, `library-guide`, `association`, `forum`, `newsletter` and a few more. |
+| `method` | How a run files it: `api`, `github-pr`, `github-issue`, `form-anon`, `form-email`, `form-account`, `form-oauth`, `form-captcha`, `pitch`. |
+| `free_tier` | `free`, `freemium` or `paid-only`. Never enter a card. |
+| `requirements` | Tags, separated by `;`. See the list below. |
+| `rate_limit` | The limit we hit or read. Empty means none seen. |
+| `link_rel` | `dofollow`, `nofollow`, `dofollow-after-badge` or `unknown`. |
+| `review_time` | How long the board takes. |
+| `fit`, `sites` | Which kind of site suits it. `all` means every site. Else a list of sites. |
+| `outcome` | `live`, `under-review`, `blocked`, `skipped` or `todo` (never tried). It is the best result over all sites. |
+| `outcome_sites` | The count for each status, for example `live:14;under-review:3`. |
+| `outcome_date`, `recheck_date` | When the last result came in, and when to look again. |
+| `outcome_note`, `notes` | Proof URL or the reason, then the rules the board states. |
+
+Tags in `requirements`: `account`, `email-verify` (a confirm link in the
+inbox), `email-field`, `email-pitch`, `badge` (your site must show its badge),
+`reciprocal-link`, `rate-limit`, `captcha`, `oauth`, `human-only`,
+`paid-gate`, `needs-repo` (a public repo), `needs-package`, `needs-dataset`,
+`personal-data` (phone, photo or X Premium), `ai-restricted` and
+`product-domain-email`. A row with no tag is an open form.
+
+Pick the open rows with a short script. This one lists boards never tried that
+need no human, captcha, OAuth, badge or payment:
+
+```sh
+python3 -I - <<'PY'
+import csv
+bad = {"human-only", "captcha", "oauth", "badge", "paid-gate", "needs-repo",
+       "personal-data", "email-pitch", "ai-restricted"}
+for r in csv.DictReader(open("directories.csv")):
+    if r["outcome"] == "todo" and not bad & set(r["requirements"].split(";")):
+        print(r["name"], r["method"], r["submit_url"])
+PY
+```
+
+### What rounds 1 to 3 taught us
+
+- **Rate limits count per network.** Unloc Tools stops after about 6
+  submissions in 90 minutes. BuildVoyage returns HTTP 429 after about 9 in 70
+  minutes. Neeed allows about 10 actions an hour. cursor.directory allows about
+  5 plugins an hour. The A2A Registry allows 10 an hour. Uneed returns 429 on
+  fast joins. Stop at the first limit and retry the next day. Do not rotate
+  networks or accounts. That risks a ban on the one account you keep.
+- **Weekly caps count per account.** Clapstorm allows 3 launches a week.
+  TinyLaunch allows one launch per date. Uneed allows one scheduled launch for
+  each free account. Plan the sites across weeks.
+- **Badge-first boards.** EarlyHunt, InventList, LaunchIgniter, LaunchKoala,
+  LaunchIt, ScrollLaunch, bunny.directory, Startup Fame, AIToolzDir and
+  ThatsMy AI need a badge or partner link on the live site first. Ship the
+  badge (section 14), then file. Neeed lists a site at once but keeps the link
+  `nofollow` until the badge is verified.
+- **OAuth-only boards.** Lifto, SaaSPA.ge, StrictSeal, VoteKicker,
+  Indie-Builds, ToolsNoCode, WebCatalog, Resource.fyi, PitchWall and
+  StartupBase accept only Google or GitHub sign-in. That signs in the owner's
+  personal identity. Mark them `blocked`. Do not click authorize for the owner.
+- **Captcha boards.** SaaSHub and AlternativeTo (hCaptcha). SideProjectors,
+  PromoteProject, Entireweb, TechDirectory.io and Startup Europe (reCAPTCHA).
+  Never solve one. Managed Turnstile (Unloc) passes by itself in the owner's
+  own Chrome profile. That is not a solve.
+- **Boards that refuse AI submissions.** awesome-selfhosted bans LLM-generated
+  PRs. awesome-osint says an LLM or agent cannot open the PR, and it closes the
+  PR. Kagi Small Web bars LLM-generated content. VoteKicker asks if the
+  text is AI-generated. DEV Community wants AI help disclosed. kyrolabs
+  auto-closes PRs from new GitHub accounts. Mark these `skipped` or hand them
+  to a person. Answer honestly when a form asks.
+- **Needs a public repo.** punkpeye, MobinX, ToolSDK, best-of-mcp-servers,
+  kyrolabs and the healthcare MCP lists need a public source repo. A private
+  repo means skip.
+- **Human only.** Curlie needs a volunteer editor. Lobsters is invite-only.
+  Startup Dope wants a founder phone number. IndieHacker.Tools wants a personal
+  photo. The Colorado Natural Medicine form records the signed-in Google
+  address. Forums, Stack Exchange and Reddit need a person who writes a real
+  answer and discloses the tie.
+- **Email at the product domain.** BuildVoyage asks for a maker email at the
+  product's own domain. Use `hello@<site-domain>`. It lands in the same inbox.
+  Confirm each submission with the emailed link.
+- **Browser traps.** Take a screenshot to wake the tab before a click. Take a
+  `snapshot` before every `fill`, because refs bind only then. Custom radios
+  and checkboxes ignore `click`: use `check`. A calendar day may be missing from
+  the snapshot: click the enabled day with `eval`. A fill or click on a
+  disabled button also prints "Done". Read the result on the destination site.
+- **Mail reads.** The Gmail API returns `rateLimitExceeded` when agents read
+  together. Wait about 10 seconds and retry.
+
+### The fast run
+
+1. **Check the site first.** The production URL answers 200 with real
+   content. The packet (section 0) is complete. Badges are live if you
+   want badge boards.
+2. **Select rows.** Open `directories.csv`. Keep rows where `outcome` is `todo`
+   or `recheck_date` is today or older. Drop rows tagged `human-only`,
+   `captcha`, `oauth`, `paid-gate`, `needs-repo` or `ai-restricted`. Drop rows
+   whose `sites` or `fit` do not match the site. Drop `email-pitch` rows: they
+   go to the outreach queue (section 15).
+3. **Order the work.** First `api` and `form-anon` rows (no account). Next
+   `github-pr` and `github-issue` rows, done by a worker with `gh` only. Then
+   `form-account` boards on the one shared account. Then `email-verify` boards,
+   which need the inbox. Badge boards come after the badges deploy.
+4. **Batch by board, not by site.** One login serves every site. Run one board
+   across all sites in one loop. Read `rate_limit` first and space the calls.
+   Stop the loop on the first 429 or "too many". Write `blocked` with a
+   `retry_after` date and move to the next board.
+5. **Use one browser driver.** Run one driver at a time on one Chrome profile.
+   The helpers in `scripts/directory-submit` (pooriaarab/scripts) read the
+   packet JSON for each site, run one driver per board, and write the ledger.
+6. **Verify on the destination.** Open the board's own list or status page.
+   Read the product page, the search API or the "pending review" email. A
+   printed "submitted" proves nothing.
+7. **Record.** Write one ledger row for each target and site with a proof URL or
+   a reason (section 11). Then update the registry row: `outcome`,
+   `outcome_sites`, `outcome_date`, `recheck_date` and `outcome_note`. Add any
+   new rate limit or trap to `rate_limit` and `notes`.
+8. **Set re-checks.** Under review: look again in 7 days. Rate limited: the
+   next day. Weekly cap: the next week. Review queues longer than 60 days: skip.
+
 ## Checklist
 
 - [ ] Packet written from real copy (§0), stored in the repo, no placeholders.
@@ -1066,6 +1190,7 @@ Mark pitch rows `skip: human` in the catalog so `run` never picks them up
   verify (§14). A2A endpoint answers `message/send` before you register.
 - [ ] No cold pitch sent from the pipeline. Pitch rows go to the outreach
   queue (§15).
+- [ ] The registry row in `directories.csv` is updated after each run (§16).
 - [ ] `submissions.csv` tracks every directory, date, and status. Use honest
   status words: `listed` (publicly visible), `pending` (filed, awaiting
   review), `draft` (needs one more step — e.g. site verification), `blocked`
