@@ -109,7 +109,7 @@ Then change only these three parts:
 |---|---|
 | Config | ID, name, domain, niche, the entity name (singular and plural, plus its schema.org type), geography, typed attributes, filter facets, completeness rules, tiers, SEO and FAQ copy templates, free tools, and data sources. Turn off the demo flag. |
 | Data | The category taxonomy and the listings file. |
-| Brand | Theme tokens, logo, OG image, and a `DESIGN.md`. See [design-context](../design-context/SKILL.md). |
+| Brand | Theme tokens, logo, OG image, and a `DESIGN.md`. See [design-context](../design-context/SKILL.md) and [directory-fleet-ui](../directory-fleet-ui/SKILL.md) for preset + `/design` workflow. |
 
 Keep the app code free of niche words and brand values. Read them from the
 config. Build every public URL from the template's path helper, not from string
