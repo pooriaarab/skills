@@ -5,21 +5,27 @@ description: "Cut deploy time on a fleet of sites that share one codebase and ea
 
 # Multi-site deploy optimization
 
-`pooriaarab/directory` runs 31 sites from one codebase. Each site is its own
-Cloudflare Worker with its own D1 and KV. Site config, theme and brand are baked
-in at build time by `site:use`.
+`pooriaarab/directory` runs 29 deployable sites from one codebase — 31 folders
+under `sites/` minus the `_starter` and `_shared` dirs (`ls sites` in the repo).
+Each site is its own Cloudflare Worker with its own D1 and KV. Site config,
+theme and brand are baked in at build time by `site:use`.
 
 ## The problem
 
-A change to shared code (`apps/`, `packages/`, `workers/`) deployed all 31
+A change to shared code (`apps/`, `packages/`, `workers/`) deployed all 29
 sites. Each site ran a full OpenNext build of identical code, then D1
 migrations, then 4 worker deploys — on `main` (staging) and again on `release`
-(production). One full release deploy took about 40 minutes.
+(production). One full release deploy took about 40 minutes — one measured run
+on 2026-10-23, not an average.
 
 ## What landed, in order
 
 Work through the fixes in this order: ignore list, canary-only staging, side
 workers, migrations, then build once.
+
+Merged: #1322, #1324, #1326, the #1323 design doc, and #1336 (council review on
+docs PRs). Pending: #1325 (side workers) and its wiring PR — #1325 is still in
+review and has not merged.
 
 ### 1. Deploy-ignore list (directory #1322, issue #1317)
 
@@ -44,7 +50,7 @@ One shared function decides whether a diff widens to the full site set. The
 ignore list and the stage rule both call it. Two copies existed in review and
 disagreed.
 
-### 3. Side workers only when their inputs changed (directory #1325, issue #1319)
+### 3. Side workers only when their inputs changed (directory #1325, issue #1319 — in review, not merged)
 
 Deploy the cron, queue-consumer and inbound-mail workers only when one of these
 changed: their own directory, a package they import, the renderer, or the site
@@ -55,7 +61,7 @@ real deploy step ran — not the last push and not job success. A job can succee
 while skipping the deploy step when the Cloudflare config is missing. No
 deploy evidence means deploy all.
 
-A resolver failure must fail loudly:
+A resolver failure must fail the job with a clear error:
 
 - Set `pipefail` wherever the resolver pipes. Without it a failed producer
   still exits 0 through the last pipe stage.
@@ -90,14 +96,18 @@ This is a design doc with follow-up implementation PRs, not shipped behavior.
 
 ## Rejected: one multi-tenant Worker
 
-A single Worker serving all 31 sites was rejected (codex-personal review,
+A single Worker serving all 29 sites was rejected (codex-personal review,
 2026-10-23). It needs:
 
 - A Host-to-site registry.
-- Per-site bindings — about 217 resource bindings for 31 sites.
+- Per-site bindings — about 217 resource bindings across the sites.
 - Tenant identity inside the OpenNext KV/D1 cache.
-- Per-tenant secrets (Stripe, auth, Turnstile) against the 128-variable limit.
+- Per-tenant secrets (Stripe, auth, Turnstile) against the 128-variable
+  per-Worker limit.
 - A shared failure and rollback scope across every site.
+
+The 217-binding and 128-variable numbers come from a Codex review of
+Cloudflare docs on 2026-10-23.
 
 Workers for Platforms does not remove build-time site selection. Revisit after
 build-once ships and isolation tests pass.
@@ -107,10 +117,10 @@ build-once ships and isolation tests pass.
 | Change | Saving | Risk |
 |---|---|---|
 | Deploy-ignore list | Docs-only diffs deploy nothing | Ignoring a path the build reads ships stale sites |
-| Canary-only staging | Shared-code push to `main` deploys 1 site, not 31 | A site-specific break escapes staging until `release` |
+| Canary-only staging | Shared-code push to `main` deploys 1 site, not 29 | A site-specific break escapes staging until `release` |
 | Side workers on input change | Up to 3 of 4 worker deploys skipped per unchanged site | A wrong diff base skips a needed deploy and stays green |
 | Migrate only when pending | `d1 migrations apply` skipped on most deploys | A wrong pending check never applies real migrations |
-| Build once, deploy many | 31 OpenNext builds become 1 | Artifact and wrangler render must stay in lockstep |
+| Build once, deploy many | 29 OpenNext builds become 1 | Artifact and wrangler render must stay in lockstep |
 
 ## Checklist for a new skip rule
 
@@ -118,8 +128,8 @@ build-once ships and isolation tests pass.
    the rule still deploys it.
 2. Reuse the one shared function that decides the affected set. Never add a
    second copy — two copies drift.
-3. Fail the job on resolver errors. An empty list, empty string, or malformed
-   JSON is never "nothing to do".
+3. Reject empty input, objects, unknown worker names and parse failures;
+   accept a valid `[]` — it means no workers need deployment.
 4. Set `pipefail` on every pipe in the resolver path.
 5. Diff against the last successful deploy, not the last push, not job
    success.
@@ -136,10 +146,22 @@ gh run list --workflow deploy.yml --limit 50 \
   --json conclusion,createdAt,updatedAt,displayTitle
 ```
 
-- Time a full release deploy end to end. The baseline was about 40 minutes.
+- Time a full release deploy end to end. The baseline is about 40 minutes,
+  from one measured run on 2026-10-23.
 - Count staging deploys per shared-code push to `main`. Target: 1, the canary.
 - Count worker deploys per site. Target: the site worker plus only the side
   workers whose inputs changed.
+
+## Docs-only PRs need a review workflow too
+
+A council review workflow that path-ignores `**.md` and `docs/` leaves
+docs-only PRs with no review at all. The premerge gate then blocks them with
+"none yet from any reviewer" — a dead end, because the filtered workflow can
+never fire on that diff. Directory issue #1335 / PR #1336 removed the filter.
+
+A review posted by `github-actions[bot]` — which happens when the chair runs
+without a `claude[bot]` seat — is ignored by premerge on purpose. The owner
+waived the gate for those PRs.
 
 ## Lessons from the reviews
 
