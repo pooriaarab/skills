@@ -21,9 +21,9 @@ Resource counts alone cannot explain a bill.
 
 ## Collect complete evidence
 
-Use [cloudflare-cost-audit](https://github.com/pooriaarab/scripts/blob/main/cloudflare-cost-audit)
-for D1 inventory, row analytics, and an optional raw current-period billing snapshot.
-Read its [command contract](https://github.com/pooriaarab/scripts/blob/main/docs/cloudflare-cost-audit.md) first.
+Use the installed `cloudflare-cost-audit` command for D1 inventory, row analytics,
+and an optional raw current-period billing snapshot.
+Run `cloudflare-cost-audit --help` and read the command contract supplied with the tool.
 It does not audit all Cloudflare services or calculate invoices.
 
 - Follow actual pagination metadata, including cursors and next-page fields.
@@ -52,6 +52,14 @@ Complete this stage when every inventory page and analytics limit has an explici
 4. Inspect repeated aggregate scans, broad updates, polling, imports, and cron jobs.
 5. Inspect indexes, triggers, FTS maintenance, and conflict updates for write amplification.
 6. Separate request overhead from database execution time before changing batching.
+7. Capture row counters for statements invoked through `.run()`, `.first()`, `.all()`, and each `.batch()` result.
+   Instrument execution when a return type does not expose metadata.
+8. Keep calls, reads, writes, R2 PUTs, and result correctness as separate measures.
+   Inspect actual query plans when fewer calls increase read work.
+9. Freeze source and workload, warm both arms, alternate paired runs, and retain every sample and failure.
+   Recheck source identity after collection and record timing interference.
+10. Report read-cost and latency tradeoffs separately.
+    Keep local service measurements distinct from HTTP latency, production observations, and invoice savings.
 
 Prefer bounded queries, selective indexes, fewer repeated scans, and writes that skip unchanged rows.
 Measure each proposal before broad schema changes.
@@ -91,8 +99,8 @@ A reset can renew an in-memory timer without changing the deployed Worker versio
 Keep setup, reset observation, positive wake tests, and cleanup inside one fixed experiment budget.
 Keep Preview app checks separate from isolated lifecycle timing and production savings measurements.
 
-For temporary resources, follow the
-[bounded cleanup contract](https://github.com/pooriaarab/scripts/blob/main/docs/cloudflare-cleanup-deadlines.md).
+For temporary resources, use the bounded cleanup procedure supplied with your audit tools.
+Require an independent deadline guard, durable ownership, and exact resource absence checks.
 Complete the experiment only after exact owned resources are absent or cleanup remains explicitly incomplete.
 
 Use the repository's PR review, local CI, preview walk, and release procedure.
