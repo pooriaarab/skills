@@ -49,3 +49,24 @@ matting, and alpha WebM adds risk in the render.
 - The voice stays on the avatar's `<video>` (`data-has-audio="true"`, volume 1).
 - Duck the music with its automation lane: 1.0 for the hook, down to 0.26 over 0.4 s as the voice starts, back to
   1.0 over 0.6 s as it ends. The voice renders at about −23 dB, so do not push the bed higher.
+
+## Selfie presenter (handheld, outdoors)
+
+A studio look reads as staged. A handheld selfie in a real place reads as the maker talking to you, and it
+needs no HeyGen photo look. First shipped: foxspace (Gothic Quarter) and foxprefs (Bunkers del Carmel), Barcelona.
+
+1. **Still.** Edit real photos, not text-to-image: WaveSpeed `google/nano-banana-2/edit` with four originals
+   from the `pooria-photo` skill's set, `aspect_ratio: "16:9"`, `resolution: "2k"`. Ask for one arm at
+   arm's length leaving the frame, framed from the hair to the waist, a slight horizon tilt, mouth closed,
+   and casual clothes. Reject any frame that shows the phone itself: the phone is the camera. A crop past the
+   phone fixed one, because the arm then leaves the frame edge like a real selfie arm.
+2. **Voice.** Reuse the cloned-voice audio from the HeyGen render, or make it with `POST /v3/voices/speech`.
+3. **Talk.** `wavespeed-ai/infinitetalk` at 720p with the still and the audio. The output keeps the audio
+   length exactly, adds handheld sway and moves people in the background. Prompt: "records a casual handheld
+   selfie video ... slight handheld camera sway, glasses stay fixed on his face, background stays still".
+4. **Cutout.** `scripts/personmask.swift` for the text-behind shots.
+
+Cost per 24 s video: about $0.09 per still and about $0.06 per second for the talk (list prices). The HeyGen
+Avatar V photo-look render it replaced cost about $0.12 per second (2026-10-23: $5.77 for 49 s).
+Upscaled 720p reads as phone footage, which suits the look. In edit, the full-frame selfie becomes the blurred
+background during each screen push; see `references/edit-effects.md`.
