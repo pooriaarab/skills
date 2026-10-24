@@ -290,6 +290,10 @@ composition drives the animation, and the CLI checks, snapshots and renders.
 
 ### A presenter in the corner
 
+For creator-style edits around a presenter (kinetic hook, gravity drop, text behind the speaker, screen push,
+crash zooms, prompt bar, icon strike, giant captions, title cards), use [edit-effects](references/edit-effects.md).
+For a handheld selfie presenter instead of a studio look, see the selfie section of [presenter](styles/presenter.md).
+
 A talking presenter in a corner card makes a demo personal. The script does not need to narrate the
 footage; a short founder intro over it works.
 
