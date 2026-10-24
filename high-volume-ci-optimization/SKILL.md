@@ -90,17 +90,39 @@ Use `paths-ignore` for docs-only changes so a markdown edit does not rebuild the
 
 Compare PR and merged-source verification before removing duplicate runs. A passing PR does not prove that concurrent changes compose. Keep coverage of the actual source that can reach deployment.
 
-Do not run the same suite on both `pull_request` and `push` for the same branch. Pick one event. `pull_request` is the PR gate. `push` on the default branch is the post-merge gate. Running both on `feature/*` doubles minutes for no extra signal.
+Do not run the same suite on both `pull_request` and `push` for the same branch. The fleet answer is two-step CI: the pull request stays cheap — the ~20-second secret scan stays on it, and lint, typecheck and unit tests run only on high-risk paths — while the full suite runs on `push` to `main` and `release`, against the commit that will actually ship. Running both on `feature/*` doubles minutes for no extra signal. The measured numbers and the keep/drop table are in [ci-cost-at-agent-scale](../ci-cost-at-agent-scale/SKILL.md).
 
 Choose a merge queue from measured contention and integration risk, not PR count alone.
 Use the [merge and Preview throughput procedure](merge-and-preview-throughput.md)
 before changing queues, publication locks, or Preview requirements.
+
+A private merge queue on this personal account needs a paid organization plan —
+rulesets and branch protection answer 403 "Upgrade to GitHub Pro". Until one
+exists, a busy repo collapses default-branch CI the way deploys already do:
+
+```yaml
+concurrency:
+  group: ci-main-${{ github.workflow }}
+  cancel-in-progress: false
+```
+
+The in-flight run completes; the newest pending run replaces the older pending
+one. Never cancel a long suite that would then never finish. The next step on
+a repo that lands faster than the suite is a real batch: test the stack once,
+bisect only on failure. A quiet repo only needs the `pull_request` trigger
+removed.
 
 ## Only run what changed
 
 Use the task runner's affected-only filter against the base branch so untouched packages never build. `turbo run build --filter=...[origin/main]`, `nx affected -t build`, and the equivalent, all need a fetch deep enough to see the merge base (`fetch-depth: 0` or a shallow fetch of the base ref).
 
 This is the monorepo counterpart of collapsing jobs. Fan-out tax is paying install eight times. Affected-only is paying compile for eight packages when one file changed. Do both.
+
+Affected-only is a later step behind two-step CI, and the full run on the
+default branch stays as its fail-safe — the qualification controls live in
+[ci-selective-evidence](../ci-selective-evidence/SKILL.md). The task runner
+already in the repo is enough; directory runs Wireit. Do not adopt Nx, Bazel,
+or Turborepo for this alone.
 
 Compare against the merge base, not against the moving tip of the default branch. A long-lived branch compared to `origin/main` looks like it touched everything main landed since it forked.
 

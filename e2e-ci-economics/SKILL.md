@@ -43,6 +43,25 @@ and 7 of 8 on the second. The slowest job in both pipelines gated nothing.
 **Decide, then act.** Do you trust the result? Remove the flag and let it gate. Do you not trust
 it? Move it to `schedule` or `workflow_dispatch`. Never leave it in the middle.
 
+## The expensive suite runs on the commit that ships, not the pull request
+
+Two-step CI is the fleet rule: the pull request stays cheap, and the full
+suite runs on `push` to `main` and `release` — against the code that will
+actually merge. A browser leg on the PR path needs a better reason than "it
+is the test we have". Measured 2026-10-24: private-repo-0a63's Worker preview on every
+pull request cost 243 wall-clock minutes across 33 runs in a 22.2-hour window
+— about 117 boat-hours a day at 1,000 pull requests, plus a preview database
+per branch. Its keep/drop table for every workflow lives in
+[ci-cost-at-agent-scale](../ci-cost-at-agent-scale/SKILL.md).
+
+The pattern already exists: directory's four-shard Playwright smoke runs only
+on `release` refs and on pull requests that target `release`. That is the
+shape to copy — the suite gates the ref that ships. Heavy browser suites that
+already run after Deploy on `main` stay there. **Never cancel a long suite to
+buy latency** — a run killed before it finishes is coverage that never lands.
+Collapse pending runs instead: the in-flight run completes and the newest
+pending run replaces the older one.
+
 ## Gate on a minimal browser set. Run the full matrix nightly.
 
 Browser matrix cost multiplies. Three browsers times a full suite is three full suites, and the
