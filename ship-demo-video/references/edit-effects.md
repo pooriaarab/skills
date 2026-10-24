@@ -94,6 +94,9 @@ in from the other side, in one 0.55 s `expo.inOut` move.
 - For a selfie, make the card 16:9 (470 × 264 px); for a square cutout, square.
 - Hide the card during full-screen graphics. A studio card has an opaque
   ground and shows as an empty box.
+- Fade the card's own ground in with the push (`opacity 0 → 1` over the same
+  0.55 s). A ground that is already opaque flashes as a dark box for a frame
+  before the speaker reaches it.
 
 ### Crash zoom on footage
 
@@ -147,6 +150,28 @@ An ink panel wipes up (0.26 s `expo.inOut`), a mono number and a giant title
 rise, a rule draws, and the panel wipes off the top. Hold at least 0.8 s, or
 `hyperframes check` reports the title as unread.
 
+### End card
+
+The product name, one line, and an install chip, on the ink ground. Hold it
+3 to 3.5 s with the music tail.
+
+- Show `npm install <name>` as the only call to action. Leave out the GitHub
+  URL line; the owner removed it from the foxspace cut. Close the gap by moving
+  the footer up under the chip.
+
+## Variants
+
+Ship two cuts of each product from one builder, with one edit list:
+
+| Variant | Presenter | Ground |
+| --- | --- | --- |
+| Selfie | Handheld talk in a real place, full frame, blurred behind pushes | The selfie itself |
+| Studio | Alpha cutout of the presenter | One solid brand colour |
+
+The owner preferred the selfie cut. Put it first in the delivery email. Send
+one email per product with compressed copies (`-crf 27`, 3 to 8 MB each) and
+keep the full files in the delivery folder.
+
 ## Traps
 
 | Trap | Rule |
@@ -157,3 +182,4 @@ rise, a rule draws, and the panel wipes off the top. Hold at least 0.8 s, or
 | `z-index` on main-timeline wrappers painted them over every sub-composition | Set paint order by DOM order only |
 | A contact sheet made a centered prompt bar look shifted | Check layout on the full-size still, not the sheet |
 | Words held for less than 0.5 s + 0.3 s per word | Accept it only for the kinetic hook; hold every label longer |
+| A right-side label or drop word ran off the frame at 1920 px | Right-align labels, and size drops so the widest word clears the edge |

@@ -55,18 +55,32 @@ matting, and alpha WebM adds risk in the render.
 A studio look reads as staged. A handheld selfie in a real place reads as the maker talking to you, and it
 needs no HeyGen photo look. First shipped: foxspace (Gothic Quarter) and foxprefs (Bunkers del Carmel), Barcelona.
 
-1. **Still.** Edit real photos, not text-to-image: WaveSpeed `google/nano-banana-2/edit` with four originals
-   from the `pooria-photo` skill's set, `aspect_ratio: "16:9"`, `resolution: "2k"`. Ask for one arm at
-   arm's length leaving the frame, framed from the hair to the waist, a slight horizon tilt, mouth closed,
-   and casual clothes. Reject any frame that shows the phone itself: the phone is the camera. A crop past the
-   phone fixed one, because the arm then leaves the frame edge like a real selfie arm.
+1. **Still.** Use the `character-studio` identity lock (`tools/character-studio` in the `pooriaarab` repo, pack
+   `characters/pooria`), not a hand-written face description. A nano-banana edit from four originals passed a
+   glance and failed the subject: "doesn't look like me" (dense full beard, wrong face). Character-studio's
+   `bytedance/seedream-v5.0-pro/edit` shot matched on its first attempt. Steps that worked on 2026-10-24:
+   - Copy the pack outside the repo and symlink `refs/`. Add one shot with `aspect_ratio: "16:9"`, `scope: "half"`.
+   - Run `refs <pack>` first. The CDN reference URLs expire, and a stale one fails the edit with HTTP 403.
+   - Set `useCasting: false` when the casting sheet file is missing.
+   - If the pack's Gemini key fails, verify with `--verifier openrouter://google/gemini-3.1-pro-preview`.
+   - Straight 5s from the verifier mean it did not look. Put the render beside two reference photos and check it yourself.
+   Ask for one arm at arm's length leaving the frame, framed from the hair to the waist, and casual clothes.
+   Reject any frame that shows the phone itself: the phone is the camera.
 2. **Voice.** Reuse the cloned-voice audio from the HeyGen render, or make it with `POST /v3/voices/speech`.
-3. **Talk.** `wavespeed-ai/infinitetalk` at 720p with the still and the audio. The output keeps the audio
-   length exactly, adds handheld sway and moves people in the background. Prompt: "records a casual handheld
-   selfie video ... slight handheld camera sway, glasses stay fixed on his face, background stays still".
-4. **Cutout.** `scripts/personmask.swift` for the text-behind shots.
+   Reusing the same file keeps every edit time from the word timestamps valid.
+3. **Talk.** HeyGen `POST /v3/videos` with `type: "image"`, the still and the audio uploaded as assets
+   (`image.asset_id`, `audio_asset_id`), `expressiveness: "high"` and a `motion_prompt`. Do not send `engine`
+   with `type: "image"`: the API answers `Extra inputs are not permitted`. Prompt that worked: "Handheld phone
+   selfie video. The arm holding the phone sways and bobs gently, so the frame drifts, tilts and reframes
+   slightly all the time. He talks naturally and casually, nods, turns his head a little toward the view and
+   back, and gestures briefly with his free hand. Wind moves his hair and shirt." It returned 1080p at 25 fps,
+   the audio length to 0.02 s, with hand gestures and a moving frame.
+   `wavespeed-ai/infinitetalk` also keeps the audio length, but its talk read as a still face with slight sway.
+4. **Cutout.** Run `scripts/personmask.swift` on the talk, and scale the masks to the talk's own size in the
+   merge (`scale=1920:1080` for HeyGen, `1280:720` for InfiniteTalk).
 
-Cost per 24 s video: about $0.09 per still and about $0.06 per second for the talk (list prices). The HeyGen
-Avatar V photo-look render it replaced cost about $0.12 per second (2026-10-23: $5.77 for 49 s).
-Upscaled 720p reads as phone footage, which suits the look. In edit, the full-frame selfie becomes the blurred
-background during each screen push; see `references/edit-effects.md`.
+Cost per 25 s video, 2026-10-24: one seedream edit and one verifier call for the still, and $0.96 of HeyGen wallet for the talk. The
+wallet auto-reloads $10 when it drops under $5, so a low wallet charges the card on the next render. The
+Avatar V photo-look render the selfie replaced cost about $0.12 per second ($5.77 for 49 s).
+In edit, the full-frame selfie becomes the blurred background during each screen push; see
+`references/edit-effects.md`.
