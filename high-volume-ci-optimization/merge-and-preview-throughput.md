@@ -69,6 +69,14 @@ and the measured queue cost remains acceptable.
 Measure rebase work, invalidated approvals, queue delay, and actual concurrent merge rate.
 A large PR count alone does not justify a queue or its removal.
 
+A private merge queue on this personal GitHub account needs a paid
+organization plan: rulesets and branch protection on the private repos answer
+403 "Upgrade to GitHub Pro". Until a real queue exists, a busy repo collapses
+default-branch CI instead: the in-flight run completes, and the newest
+pending run replaces the older pending one. Do not cancel a long suite that
+would then never finish. The next step on a repo that lands faster than the
+suite is a real batch — test the stack once, bisect only on failure.
+
 Pilot greater merge concurrency only after proving a replacement feedback path:
 
 - Post-merge tests identify the exact integrated source and detect injected regressions.
@@ -90,6 +98,13 @@ Read [Redesigning source control at Anthropic](https://www.anthropic.com/enginee
 published 2026-10-13 and updated 2026-10-15.
 
 The procedure above is our adaptation, not a claim that their system fits every repository.
+That post describes roughly 30,000 merges a day on a monorepo whose history is
+about 100 GB; this fleet is hundreds of repos and about 1,000 pull requests a
+day. The idea worth keeping is two-step CI: test the commit that is about to
+ship, and do not put the expensive suite on the pull request. The pull
+request stays cheap; the full suite runs on `push` to the branch the code
+will merge into. Keep GitHub pull requests for this — no Gitea or Forgejo
+move, and no new source-control engine.
 Keep Git while checkout and metadata costs remain small.
 Use metadata APIs without a checkout for jobs that need no source files.
 Use sparse checkouts only after declaring every required file and history input.

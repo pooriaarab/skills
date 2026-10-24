@@ -11,6 +11,13 @@ that cannot prove what it skipped is a coverage cut, not an optimization.
 Selective CI needs a dependency map, a report reader, and an executor.
 Qualify each against known test identities and observed outcomes before use.
 
+Selection is the second step, not the first. The first is taking the suite
+off `pull_request` entirely — the pull request stays cheap while the full run
+lands on `push` to the branch the code will merge into
+([ci-cost-at-agent-scale](../ci-cost-at-agent-scale/SKILL.md)). When selection
+does come, that full run on the default branch is the fail-safe it stands on.
+The controls below are what qualify it.
+
 ## When to use this
 
 - **Triggers:** 'run only the affected tests', 'read the test report to skip

@@ -44,6 +44,13 @@ Keep this distinction explicit for every lever below: *does it shorten the criti
 save runner-minutes?* Both are valid goals — but don't claim a wall-clock win when you bought a
 cost win.
 
+**The question before profiling, at agent scale: does the build run on the pull request at all?**
+In this fleet it does not — the pull request stays cheap (the ~20-second secret scan, plus lint,
+typecheck and unit tests on high-risk diffs only), and the full suite runs on `push` to `main` and
+`release`. Profile and speed up the build for the push path. Do not put it back on the PR to make
+the PR feel thorough. The keep/drop table is in
+[ci-cost-at-agent-scale](../ci-cost-at-agent-scale/SKILL.md).
+
 ## The levers, ranked by leverage
 
 ### 1. Cache everything (biggest safe win; near-zero risk)
@@ -147,7 +154,9 @@ build) so this saves CI minutes, not wall-clock — and `--changed` is fragile:
 - Needs `fetch-depth: 0` so the diff base is reachable — which itself costs time on repos with many
   branches. Add `--passWithNoTests` (empty shards are legitimate).
 - **Honest verdict:** marginal — small PRs win a little, large PRs win nothing and pay the
-  `fetch-depth: 0` tax. Ship only if CI-minute cost genuinely matters; otherwise skip.
+  `fetch-depth: 0` tax. Ship only if CI-minute cost genuinely matters; otherwise skip. And it is a
+  later step behind two-step CI, never the first move: the full run on `push` to the default
+  branch is the fail-safe it stands on.
 - **A browser E2E suite shards differently.** Do not raise the worker count to avoid a shard — two
   workers share one dev server and one database. See
   [e2e-ci-economics](../e2e-ci-economics/SKILL.md).
