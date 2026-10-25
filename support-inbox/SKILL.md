@@ -234,6 +234,17 @@ Do this before the first word of a draft. If a source is missing, say so. Do not
    an admin command or a runbook. Show that command to the owner. **Stop.** Do not change
    production until the owner confirms.
 
+**Verify every fix or code snippet against a live clone before sending.** This check is mandatory.
+Before the draft includes a code snippet, a CSS or HTML workaround, a DNS instruction, or a fix
+with more than one step, clone or fetch the customer's live page, such as `https://example.com/page`.
+If the bug is in rendered content, run that exact input through the product sanitizer or renderer.
+Test the change in a real browser, or with a DOM check, and confirm that it works. Do not send a
+fix you have not seen succeed.
+
+If a platform boundary stops a user-side workaround, such as an iframe sandbox or a parent
+stylesheet rule, tell the customer in plain words that the team is fixing it on the platform side.
+Do not send the untested workaround.
+
 A read-only check may show only the fields the reply needs. Do not copy secrets, full card numbers,
 or raw logs into the draft or the playbook.
 
@@ -265,7 +276,9 @@ The automatic acknowledgement in section 7 is the exception, and it must say tha
 
 Reply in the language of the customer's latest message. Do not answer a non-English message in English.
 
-When you know the answer, the first sentence is the answer or the fix. Do not repeat the question.
+When you know the answer, the first sentence is the answer or the fix. If that answer is a snippet,
+a workaround, a DNS change, or more than one step, the live check in section 9 must pass first.
+Do not repeat the question.
 Do not open with help-desk filler. “Thanks for reaching out”, “I hope this email finds you well”,
 and “Great question” are filler. The holding reply in section 2 is only for when you do not yet
 know the answer.
@@ -385,6 +398,8 @@ get a lesson. Apply the lessons on the next draft.
 - [ ] Another person's address is masked (`j***@example.com`) for an unverified sender.
 - [ ] The current thread and past mail from that sender and domain are read before a draft.
 - [ ] Claims come from `/support`, the code, or a read-only account, DNS, or billing check.
+- [ ] A snippet, workaround, DNS instruction, or multi-step fix is tested on the live page before sending.
+- [ ] A blocked user-side workaround is described as a platform fix and is not sent untested.
 - [ ] Production changes wait for the owner, including refunds and ownership transfer.
 - [ ] The reply is from the address the customer wrote to, with the support signature.
 - [ ] The owner approves the draft before it is sent.
