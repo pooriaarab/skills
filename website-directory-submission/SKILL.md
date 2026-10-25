@@ -509,6 +509,59 @@ lists auto-close a PR that breaks the format.
 | [ikaijua/Awesome-AITools](https://github.com/ikaijua/Awesome-AITools) | Issue, or a row in both `README.md` and `README-CN.md`. Niche tools may be refused. Merged 2026-10-21. |
 | [okhosting/awesome-open-data](https://github.com/okhosting/awesome-open-data) | MIT list of open datasets. No contributing file. Add one line under the right topic and check open PRs first. |
 
+### Lists the fleet filed to (2026-10-24)
+
+The fleet filed 78 PRs and issues to these lists in one run. The full records
+(entry format, PR title style, repo checks, links) are in
+`pooriaarab/scripts`, `scripts/directory-submit/specs/github-lists.jsonl`, with
+a how-to in `scripts/directory-submit/github-lists/README.md`. Look a list up
+with `python3 specs/lookup.py <name>`.
+
+| List | What it takes and what happened |
+|---|---|
+| [aiagenta2z/ai-agent-marketplace](https://github.com/aiagenta2z/ai-agent-marketplace) | PR edits `AGENT.md`. Filed 2 open. |
+| [AIAnytime/Awesome-MCP-Servers](https://github.com/AIAnytime/Awesome-MCP-Servers) | PR edits `README.md`, `servers/agentsandboxes.json`. One entry per PR. Filed 3 open. |
+| [Albertchamberlain/Awesome-MCP](https://github.com/Albertchamberlain/Awesome-MCP) | PR edits `README.md`, `data/catalog.yaml`. One entry per PR. Says AI helped. Filed 3 open. |
+| [cloudflare/templates](https://github.com/cloudflare/templates) | Prepared, not filed: weak fit. Read the repo's rules before you try. |
+| [RitualDev-Lab/DevShelf](https://github.com/RitualDev-Lab/DevShelf) | Issue with the form fields. One entry per PR. Filed 3 open. |
+| [auscaster/stompstart-startup-list](https://github.com/auscaster/stompstart-startup-list) | PR edits `startups/agentsandboxes.yaml`. One entry per PR. Filed 3 open. |
+| [joshephan/awesome-agent-apis](https://github.com/joshephan/awesome-agent-apis) | PR edits `README.md`. Filed 2 open. |
+| [backblaze-labs/awesome-agent-infrastructure](https://github.com/backblaze-labs/awesome-agent-infrastructure) | PR edits `entries.yaml`. Filed 1 open. |
+| [michielhdoteth/awesome-ai-agent-tools](https://github.com/michielhdoteth/awesome-ai-agent-tools) | PR edits `mcps/catalog.json`. Says AI helped. Filed 1 merged, 1 open. |
+| [rdmgator12/awesome-claude-connectors](https://github.com/rdmgator12/awesome-claude-connectors) | Not filed. Site is not in Anthropic's official Connectors Directory; the list only tracks official-directory connectors. |
+| [theoephraim/awesome-cloudflare-selfhosted](https://github.com/theoephraim/awesome-cloudflare-selfhosted) | Not filed. Issue form requires a public repo with a Cloudflare deploy config; the directory template repo |
+| [marceloboeira/awesome-expat](https://github.com/marceloboeira/awesome-expat) | PR edits `README.md`, `content/links/us/moving/driving-schools.yaml`. Filed 3 open. |
+| [blockrunai/awesome-finance-mcp](https://github.com/blockrunai/awesome-finance-mcp) | Not filed. List requires a public GitHub repo for the server; the site only publishes a hosted MCP endpoint. |
+| [Vaquill-AI/awesome-legaltech](https://github.com/Vaquill-AI/awesome-legaltech) | PR edits `README.md`. Says AI helped. Filed 1 open. |
+| [openstatusHQ/awesome-openapi](https://github.com/openstatusHQ/awesome-openapi) | PR edits `README.md`. One entry per PR. Filed 3 open. |
+| [jivoi/awesome-osint](https://github.com/jivoi/awesome-osint) | Not filed. CONTRIBUTING bans PRs from LLMs/agents; PR would be closed |
+| [dspinellis/awesome-rest-apis](https://github.com/dspinellis/awesome-rest-apis) | PR edits `README.md`. One entry per PR. Filed 3 open. |
+| [MobilityData/awesome-transit](https://github.com/MobilityData/awesome-transit) | PR edits `README.md`. Filed 1 open. |
+| [ahmet/awesome-web3](https://github.com/ahmet/awesome-web3) | PR edits `README.md`. Says AI helped. Filed 1 open. |
+| [brandonhimpfen/awesome-apis](https://github.com/brandonhimpfen/awesome-apis) | PR edits `README.md`. One entry per PR. Filed 3 closed. |
+| [brandonhimpfen/awesome-journalism](https://github.com/brandonhimpfen/awesome-journalism) | PR edits `README.md`. Filed 3 closed. |
+| [brandonhimpfen/awesome-open-governance](https://github.com/brandonhimpfen/awesome-open-governance) | PR edits `README.md`. Filed 1 closed. |
+| [npstorey/civic-ai-tools](https://github.com/npstorey/civic-ai-tools) | Issue with the form fields. One entry per PR. Filed 3 open. |
+| [collabnix/awesome-mcp-lists](https://github.com/collabnix/awesome-mcp-lists) | PR edits `README.md`. One entry per PR. Filed 3 open. |
+| [datenoio/dataportals-registry](https://github.com/datenoio/dataportals-registry) | Prepared, not filed: weak fit. Read the repo's rules before you try. |
+| [wdhdev/free-for-life](https://github.com/wdhdev/free-for-life) | PR edits `data/APIs_Data_and_ML.md`. One entry per PR. Says AI helped. Filed 3 open. |
+| [jentic/jentic-public-apis](https://github.com/jentic/jentic-public-apis) | Issue with the form fields. One entry per PR. Filed 3 open. |
+| [lobstercare/mcp-hub](https://github.com/lobstercare/mcp-hub) | PR edits `README.md`. One entry per PR. Says AI helped. Filed 3 open. |
+| [marcelscruz/public-apis](https://github.com/marcelscruz/public-apis) | PR edits `README.md`. One entry per PR. Filed 3 open. |
+| [mcpHQ/awesome-mcp-servers](https://github.com/mcpHQ/awesome-mcp-servers) | PR edits `README.md`, `data/servers.json`. One entry per PR. Filed 3 open. |
+| [mcpmux/mcp-servers](https://github.com/mcpmux/mcp-servers) | PR edits `servers/fyi.agentsandboxes.json`. One entry per PR. Filed 3 open. |
+| [ngongcm/public-api-list](https://github.com/ngongcm/public-api-list) | PR edits `README.md`. One entry per PR. Filed 3 open. |
+| [pab1it0/awesome-a2a](https://github.com/pab1it0/awesome-a2a) | PR edits `README.md`. One entry per PR. Filed 3 open. |
+| [soxoj/awesome-osint-mcp-servers](https://github.com/soxoj/awesome-osint-mcp-servers) | PR edits `README.md`. Filed 1 open. |
+| [sylviangth/awesome-remote-mcp-servers](https://github.com/sylviangth/awesome-remote-mcp-servers) | PR edits `README.md`. One entry per PR. Filed 3 open. |
+| [tools-collection/apis-collection](https://github.com/tools-collection/apis-collection) | Issue with the form fields. One entry per PR. Filed 3 open. |
+| [venelinkochev/apifinder](https://github.com/venelinkochev/apifinder) | PR edits `README.md`. One entry per PR. Says AI helped. Filed 3 open. |
+
+Lessons: one maintainer declined 7 of 7 entries and asked for proof of data
+freshness and independent adoption. One list bans PRs from agents in its
+`CONTRIBUTING`, so read that file before you file. A list that wants a public
+repo for the server does not take a hosted-only MCP endpoint.
+
 ### API catalogs
 
 | Catalog | Gate / note |
