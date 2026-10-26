@@ -47,8 +47,9 @@ claude-subs-resync            # Claude: re-read the Keychain, push to the hub st
 claude-oauth-to-cliproxy.sh   # copy the seats into ~/.cli-proxy-api
 ```
 
-If `claude-subs-resync --check` shows `refresh=NO` for every source, no repair works.
-Log in again, one seat at a time, on the hub Mac:
+If `claude-subs-resync --check` shows `refresh=NO` for a seat, resync cannot repair that
+seat. Other healthy seats do not change this. Log in again for each such seat, one at a
+time, on the hub Mac:
 
 ```sh
 cliproxyapi -claude-login -no-browser   # prints the URL
@@ -69,7 +70,7 @@ Every client host needs Tailscale on the same tailnet and a Claude Code or Codex
 2. Run:
 
 ```sh
-export HUB_URL=https://<mac>.<tailnet>.ts.net:8317
+export HUB_URL="https://<mac>.<tailnet>.ts.net:8317"
 export HUB_KEY_FILE=~/.hub-key
 cliproxy-hub verify
 cliproxy-hub client claude    # writes ~/.claude-hub/settings.json
