@@ -43,8 +43,8 @@ A client call to a dead seat returns `503 auth_unavailable`.
 A seat dies when its refresh token expires or is revoked. First try the cheap repair:
 
 ```sh
-claude-subs-resync            # Claude: re-read the Keychain, push to the hub stores
-claude-oauth-to-cliproxy.sh   # copy the seats into ~/.cli-proxy-api
+claude-subs-resync                                  # re-read the Keychain, refresh OffRouter and .secrets
+~/Documents/Personal/.secrets/claude-oauth-to-cliproxy.sh   # copy the seats into ~/.cli-proxy-api
 ```
 
 If `claude-subs-resync --check` shows `refresh=NO` for a seat, resync cannot repair that
