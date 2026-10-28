@@ -34,6 +34,7 @@ runs-on: ${{ vars.CI_RUNNER_LARGE || 'boat-8' }}  # heavy builds
 - macOS and Windows labels. Keep them for repositories that ship native apps.
 - `matrix` values, list values and existing expressions.
 - Lines inside `run: |` block scalars. A heredoc can contain the text `runs-on:`.
+- `-arm` labels such as `ubuntu-24.04-arm`. A variable default would drop the architecture.
 - Jobs that must stay hosted, for example a secret-heavy deploy or alert, or an action that
   resolves paths from the runner home. Put the hosted label back by hand.
 
@@ -44,14 +45,16 @@ It cannot see JSON-style keys such as `"runs-on": "boat"`. Search for them after
 - **Tests that assert the label.** An end-to-end spec or a Python check read `runs-on` and compared
   it to the literal string. The rewrite broke them. Search the tests for `runs-on` and update them
   to expect the expression.
-- **A stale branch after main moves.** A rebase can conflict in a spec that main changed. Take main's
-  side, then re-apply the rewrite instead of merging both by hand.
+- **A stale branch after main moves.** A rebase can conflict in a file that main changed. Read both
+  sides of each conflict. Keep main's change and re-apply only the label rewrite. Never take one side
+  of a whole file, because that drops unrelated edits.
 - **Policy labels.** A check may require a human-applied label for workflow edits. Do not apply a
   gate label to your own PR. Ask the owner.
 - **Old failures.** A check that already fails on the default branch is not caused by your PR.
   Prove it from the run history, then report it. Do not bypass the gate.
 - **A rate limit that looks like a verdict.** The GitHub API allows 5000 calls per hour per user,
-  shared across every tool. A rate-limited read returns empty lists. Treat that as "not measured".
+  shared across every tool. A limited call returns a 403 or 429 error. A tool that swallows the error
+  can show empty check lists. Treat that as "not measured" and wait for the reset.
 - **Reviews bind to a commit.** A fix push needs a new review at the new head commit.
 - **Concurrency cancels.** A cancelled `pr-standards` run after a quick second push is benign.
 
