@@ -243,3 +243,25 @@ release gates in force. Never cut over with failing proof.
 7. **Qualify a relocated build** with a runtime check run with the producer
    absent, after matching inputs.
 8. **Record observations apart from hypotheses.** Leave unknowns unknown.
+
+## Release evidence must identify every input
+
+A source commit alone cannot identify a tested release when jobs fetch another repository from a moving branch.
+Resolve external source revisions once. Pass the same immutable revisions to tests, builds, and deployments.
+Include lockfiles, rendered configuration, and relevant build inputs in the evidence identity.
+
+Do not narrow release tests merely because a path selector predicts a small change.
+First verify where the required full suite runs. A direct release push can be the first full test of that revision.
+Reuse evidence only when the required tests passed for the same complete input identity.
+Missing, stale, failed, or incomplete evidence must run the required tests or stop the release.
+
+Site selection and test selection are separate decisions.
+A site-specific input can justify one deployment only when the dependency map proves that scope.
+Shared code must retain every affected site. Unknown dependencies must expand the scope.
+For identical-artifact skipping, include external revisions, rendered worker configuration, and deployment variables in the identity.
+A matching source path list alone does not prove identical deployment artifacts.
+
+Uploads before the test gate must not send production traffic.
+Promote only an immutable version produced by the same release run after its gate passes.
+Keep required migrations before traffic promotion. Leave uploads from failed runs unused.
+Verify the provider supports this ordering before implementing it.

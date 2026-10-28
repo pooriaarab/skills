@@ -219,3 +219,31 @@ before.
 5. **Alert on default-branch and nightly failures.**
 6. **Surface retry-passes.**
 7. **Replace every indexed assertion with a key lookup.** Do it before the array grows.
+
+## Shared local database ownership
+
+Several local worker processes can open the same SQLite files while each believes it owns the database.
+Reads can then fail under mixed traffic, even when each server passes alone.
+Treat database-busy and session-token errors as evidence to investigate shared state before adding retries.
+
+1. Record which processes open each state directory. Include CLI helpers, seed scripts, import commands, and side workers.
+2. Compare one server alone, mixed traffic with shared files, and a controlled alternative with separate ownership.
+3. Keep request counts, status counts, durations, and database errors in repeatable artifacts.
+4. Prove the logger captures a deliberate error before drawing conclusions from empty logs.
+5. Preserve cross-host writes if tests depend on them. Separate state copies change that contract.
+6. Test one emulator runtime as an option when several server variants must share one logical database.
+7. Seed before the runtime opens the database. Route later helpers through that runtime instead of opening another SQLite owner.
+
+A single runtime is a design to validate, not a universal emulator feature.
+Verify the installed emulator's multi-port support, bindings, assets, environment variables, and self references.
+Preserve client-address headers when a test supplies them. Check default client identity when it does not.
+Keep any query helper test-only and bound to loopback. Never add it to the production bundle.
+Preserve SQL splitting, result shapes, and error propagation when replacing CLI helpers.
+
+Faster database calls can expose existing rate limits in authentication tests.
+Give independent simulated clients independent identities. Keep one identity where the test verifies a per-client limit.
+Measure send and verification calls separately before changing pacing.
+Do not weaken production limits or hide failures with retries to make the faster suite pass.
+
+Retest cross-host write visibility, mixed reads and writes, authentication, imports, and environment-specific behavior.
+Then measure the complete suite in CI. A helper benchmark does not establish release savings.

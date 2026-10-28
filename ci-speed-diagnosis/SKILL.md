@@ -186,3 +186,27 @@ new lever. It came from making the configured ones actually run.
 `ci-pr-latency`, `ci-job-timings`, `ci-cache-health` and `ci-runner-audit` in
 [pooriaarab/scripts](https://github.com/pooriaarab/scripts) cover steps 1 to 3 and job placement.
 Run them in that order.
+
+## Release pipelines share capacity
+
+Trace the release gate through the final deployment, including other workflows on the same runner pool.
+A fast deployment command can still wait behind unrelated test shards.
+
+- Record overlapping queue, pull-request, release, and deployment runs.
+- Separate dependency waits from scheduling delays. Do not label the entire pre-start interval as runner queue time.
+- Check actual concurrent jobs against available slots. A matrix limit does not create runner capacity.
+- Remove a job dependency only when the downstream job reads no upstream output or required side effect.
+- Preserve the final gate's dependencies when independent build and planning jobs start together.
+- Report the cost of queue caps. A permanent cap also slows merges when the pool is idle.
+- Compare merge latency and release latency together before keeping a capacity change.
+
+Parallel side-worker deployments need independent build directories and no ordering dependency.
+Wait for every child process, including siblings of a failed child. Name each failed worker and return failure.
+Prove this with an early failing child and a slower successful sibling.
+Do not start live smoke checks after a failed deployment.
+
+Check tests that inspect workflow text after shell changes, including quoting changes.
+A passing workflow parser does not prove those assertions still pass.
+
+Use the [release measurement runbook](https://github.com/pooriaarab/scripts/blob/main/ci-release-evidence.md)
+to record comparable runs. Keep estimates separate from observed release results.
