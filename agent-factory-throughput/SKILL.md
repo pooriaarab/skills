@@ -31,16 +31,16 @@ Each blocker below has four parts: Symptom, Cause, Fix, How to verify.
 
 **Fix.**
 
-1. Send agent reads through GitHub App installation tokens. Each App has its own budget. It is often 12,500 requests per hour.
-2. Create several Apps. Rotate across them for each call.
+1. Send agent reads through GitHub App installation tokens. Each App installation has its own budget. A new installation starts at 5,000 requests per hour. The budget grows with repo and user count, up to 12,500 on some plans.
+2. Use one App for each distinct job. Rotate across them for reads. Check the GitHub terms of service before you add Apps only to raise a limit.
 3. Keep the owner token for writes and merges.
 4. Read code with `git clone` or `git fetch`. Do not call the contents API for each file.
 5. Never poll CI in a loop. Read the checks once when you need a verdict.
-6. On a limit error, stop. Read the reset time once. Sleep until then. Do not retry blindly.
+6. On a limit error, stop. Read the `retry-after` header or the reset time once. Sleep until then. Do not retry blindly.
 
-Use `gh-app-read` from the `scripts` repo as the read wrapper. It caches each token for 50 minutes.
+A read wrapper helps here. It picks an App, caches the token for 50 minutes, and refuses any command that may write. The companion `gh-app-read` tool does this.
 
-**How to verify.** Run `gh-app-read api rate_limit --jq .rate`. The `limit` value belongs to the App, not to the owner. Run `gh api rate_limit` with the owner token before and after a fan-out. The owner `remaining` value must not fall.
+**How to verify.** Run `gh-app-read api rate_limit --jq .rate`. The `limit` value belongs to the installation, not to the owner. Run `gh api rate_limit` with the owner token before and after a fan-out. The owner `remaining` value must not fall.
 
 ## 2. A gate that wants a non-author review
 
@@ -50,16 +50,17 @@ Use `gh-app-read` from the `scripts` repo as the read wrapper. It caches each to
 
 **Fix.**
 
-1. Create a dedicated review GitHub App. It only POSTS verdicts. It never writes code.
+1. Create a dedicated review GitHub App. It only POSTS verdicts. It never writes code. Give it write access to pull requests, or its approval does not count toward the required reviews.
 2. Write each verdict in an independent reviewer run. Use a fresh session on a different model from the builder.
 3. Bind the verdict to the head SHA. Pass that SHA as `commit_id`.
 4. End the body with a trailer: `Reviewed-by: <agent>:<model>`.
-5. Refuse to post if the head moved since the review began.
-6. The post helper reads the PR head again and compares it before it sends.
+5. Make the post helper read the PR head again and compare it before it sends. Refuse to post if the head moved since the review began.
+
+**Caution.** The App belongs to the same operator as the agents. Use this only where the repo owner sets the gate and accepts an agent reviewer. The independence comes from the separate session and model, not from the account.
 
 **App manifest flow trap.** The manifest flow returns a one-time code in the browser redirect URL. The code stays valid for about one hour. A helper that crashes after the redirect has not lost the App. Copy the code from the URL. Exchange it for the App keys with the conversion endpoint, within the hour.
 
-**How to verify.** Open the PR. The newest review shows the App as author, state APPROVED, and the `commit_id` equals the head SHA. Push one more commit. The helper must refuse to post until a new review exists.
+**How to verify.** Open the PR. The newest review shows the App as author, state APPROVED, and the `commit_id` equals the head SHA. Push one more commit. The helper refuses to post the old verdict against the new head.
 
 ## 3. Third-party AI review bots as the gate
 
@@ -71,11 +72,11 @@ Use `gh-app-read` from the `scripts` repo as the read wrapper. It caches each to
 
 1. Do not make a bot the gate. Use blocker 2 for the gate.
 2. Still read the bot output. Bots find Major issues that your reviewer misses.
-3. Read every inline comment. The review verdict does not show the threads. Read the `pulls/N/reviews` and `pulls/N/comments` endpoints.
+3. Read every inline comment. The review verdict does not show the threads. Read the `pulls/N/reviews`, `pulls/N/comments` and `issues/N/comments` endpoints. Bots often put findings in a summary comment.
 4. Never auto-acknowledge a Major or Critical comment. Stop. Fix the code. Push. Reply with the fix SHA.
 5. Minor comments may go to one tracking issue. Reply to each comment with the issue number.
 
-`stack-merge ack` in the `scripts` repo does step 5. It stops with exit 2 on a Major or Critical comment.
+The companion `stack-merge ack` command does step 5. It stops with exit 2 on any unanswered comment that is not clearly Minor.
 
 **How to verify.** List top-level inline comments with no reply. The list must be empty before merge. Search the list for the words `major` and `critical`. Each hit must have a fix commit.
 
@@ -99,18 +100,18 @@ Use `gh-app-read` from the `scripts` repo as the read wrapper. It caches each to
 
 **Symptom.** An upper PR closes by itself. Or it loses its reviewed SHA. Or a merge is refused with a head-match error.
 
-**Cause.** A squash merge rewrites history. Deleting a base branch closes the PRs that target it. A short SHA does not match the head-match flag.
+**Cause.** A squash merge rewrites history. Deleting a base branch through the API or `git push --delete` closes the PRs that target it. The web button and the auto-delete setting retarget them instead. A short SHA does not match the head-match flag.
 
 **Fix.**
 
 1. Merge bottom-up. Use merge commits. The upper PRs keep the SHAs that were reviewed.
 2. Retarget the next PR to `main` BEFORE you delete the merged branch.
-3. If you deleted first, the PR is closed. Recover it: recreate the branch at its old SHA, reopen the PR, then retarget it.
+3. If you deleted first, the PR is closed. Recover it: recreate the deleted base branch at its old SHA, reopen the PR, then retarget it.
 4. Pass the FULL 40-character SHA to `gh pr merge --match-head-commit`.
-5. Name the repo literally in the command (`-R <owner>/<repo>`). A guard hook parses the command text. It cannot see a shell variable.
+5. If a guard hook parses the command text, name the repo literally (`-R <owner>/<repo>`). The hook cannot see a shell variable.
 6. Merge with a separate, explicit command. Do not merge inside a helper script.
 
-Use `stack-merge prep` from the `scripts` repo for step 2.
+The companion `stack-merge prep` command does step 2.
 
 **How to verify.** After each merge, `gh pr view <next> --json baseRefName,state` shows `main` and `OPEN`. After the last merge, `git log origin/main` contains every reviewed SHA.
 
@@ -129,11 +130,11 @@ Use `stack-merge prep` from the `scripts` repo for step 2.
 
 **How to verify.** The two audits agree within a small margin. The count of open PRs for each frozen repo goes to zero before the freeze lifts.
 
-## 7. Hooks that match command text
+## 7. Agent-harness hooks that match command text
 
-**Symptom.** A pre-push hook blocks a harmless command. Or it blocks `git commit && git push` before the commit exists, so it checks the old tree.
+**Symptom.** A pre-tool hook blocks a harmless command. Or it blocks `git commit && git push` because it checks the tree before the commit exists.
 
-**Cause.** The hook reads the command string. It sees words inside a heredoc body. It runs once for the whole line, before any part of the line runs.
+**Cause.** Git's own `pre-push` hook is not the problem. It runs at push time, after the commit. The problem is a hook in the agent harness that reads the command string. It sees words inside a heredoc body. It runs once for the whole line, before any part of the line runs.
 
 **Fix.**
 
@@ -154,7 +155,7 @@ Use `stack-merge prep` from the `scripts` repo for step 2.
 1. Scrub the body before you send it. Search it for every forbidden term.
 2. Tell reviewers to say "no forbidden terms found". They must not list the terms.
 3. Scrub reviews and comments too.
-4. Treat a leaked term in public history as leaked. Edit history keeps the old text. Delete the comment, or rotate the value if it is a secret.
+4. Treat a leaked term in public history as leaked. Edit history keeps the old text. Delete the comment, or delete the old revision if you have write access. Rotate the value if it is a secret.
 
 **How to verify.** Fetch the body, all reviews and all comments. Run a case-insensitive search for each forbidden term. Each count must be zero.
 
