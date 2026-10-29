@@ -160,7 +160,11 @@ Use `stack-merge prep` from the `scripts` repo for step 2.
 
 ## 9. Bug classes agents write again and again
 
-Put this list in the shared brief. New agents then avoid them.
+**Symptom.** Review after review finds the same defects in new code from new agents.
+
+**Cause.** Each agent starts with no memory. It repeats the common mistakes of the model.
+
+**Fix.** Put this list in the shared brief. New agents then avoid the classes.
 
 | Class | Rule |
 | --- | --- |
