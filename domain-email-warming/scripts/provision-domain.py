@@ -86,7 +86,48 @@ def norm(content):
     # normalized form or every rerun looks missing.
     return content.strip('"').rstrip(".").lower()
 
-def add_dns(zid, recs, rtype, name, content, priority=None):
+POLICY_TAGS = {
+    "_dmarc.": "v=DMARC1",
+    "_mta-sts.": "v=STSv1",
+    "_smtp._tls.": "v=TLSRPTv1",
+}
+
+def policy_tag(name, content):
+    for prefix, tag in POLICY_TAGS.items():
+        if name.startswith(prefix) and norm(content).startswith(tag.lower()):
+            return tag
+    return None
+
+def singleton_policy(zid, recs, name, content, preferred=None):
+    """Keep the preferred policy (otherwise the longest), deleting extras."""
+    tag = policy_tag(name, content)
+    matches = [r for r in recs if r["type"] == "TXT" and r["name"] == name
+               and policy_tag(name, r["content"]) == tag]
+    if not matches:
+        return False
+    keep = max(matches, key=lambda r: (r["content"] == preferred, len(r["content"])))
+    deleted = 0
+    for r in matches:
+        if r is not keep:
+            res = cf(f"/zones/{zid}/dns_records/{r['id']}", "DELETE")
+            if ok(res, f"merge TXT {name}"):
+                recs.remove(r)
+                deleted += 1
+    if deleted:
+        print(f"    ~ merged {deleted + 1} {name} records into one")
+    return True
+
+def dedupe_policies(zid, dmarc_before):
+    recs = existing_dns(zid)
+    policies = {(r["name"], policy_tag(r["name"], r["content"])): r["content"]
+                for r in recs if r["type"] == "TXT" and policy_tag(r["name"], r["content"])}
+    for (name, tag), content in policies.items():
+        singleton_policy(zid, recs, name, content, dmarc_before.get(name))
+
+def add_dns(zid, recs, rtype, name, content, priority=None, preferred=None):
+    if rtype == "TXT" and policy_tag(name, content):
+        if singleton_policy(zid, recs, name, content, preferred):
+            return
     if any(r["type"] == rtype and r["name"] == name and norm(r["content"]) == norm(content) for r in recs):
         return
     body = {"type": rtype, "name": name, "content": content, "ttl": 1}
@@ -94,7 +135,8 @@ def add_dns(zid, recs, rtype, name, content, priority=None):
         body["priority"] = priority
     res = cf(f"/zones/{zid}/dns_records", "POST", body)
     if ok(res, f"DNS {rtype} {name}"):
-        recs.append({"type": rtype, "name": name, "content": content})
+        if res.get("result"):
+            recs.append(res["result"])
         print(f"    + {rtype} {name} -> {content[:60]}")
 
 def provision(apex, zid, worker):
@@ -109,8 +151,12 @@ def provision(apex, zid, worker):
     foreign_mx = [r["content"] for r in recs if r["type"] == "MX" and r["name"] == apex
                   and "mx.cloudflare.net" not in r["content"]]
     # Snapshot _dmarc for every name registration will touch, before it does.
-    dmarc_before = {r["name"]: r["content"] for r in recs
-                    if r["type"] == "TXT" and r["name"].startswith("_dmarc.")}
+    dmarc_before = {}
+    for r in recs:
+        if r["type"] == "TXT" and policy_tag(r["name"], r["content"]) == "v=DMARC1":
+            previous = dmarc_before.get(r["name"], "")
+            if len(r["content"]) > len(previous):
+                dmarc_before[r["name"]] = r["content"]
 
     # 1. Register sending names (apex + subdomains).
     subs = cf(f"/zones/{zid}/email/sending/subdomains?per_page=100").get("result") or []
@@ -128,21 +174,15 @@ def provision(apex, zid, worker):
     # its record back; a fresh p=reject on a previously unprotected name is the
     # intended end state and stays.
     for name, content in dmarc_before.items():
-        cur = cf(f"/zones/{zid}/dns_records?type=TXT&name={name}").get("result") or []
+        cur = [r for r in (cf(f"/zones/{zid}/dns_records?type=TXT&name={name}").get("result") or [])
+               if policy_tag(name, r["content"]) == "v=DMARC1"]
         if not any(r["content"] == content for r in cur):
             for r in cur:
                 cf(f"/zones/{zid}/dns_records/{r['id']}", "PUT", {"type": "TXT", "name": name, "content": content, "ttl": 1})
             print(f"    ~ restored {name} (registration had overwritten it)")
-            cur = cf(f"/zones/{zid}/dns_records?type=TXT&name={name}").get("result") or []
-        # Registration sometimes ADDS a record instead of replacing: two DMARC
-        # records is invalid and receivers then apply no policy at all. Merge
-        # down to one, preferring the pre-existing record with its rua= intact.
-        if len(cur) > 1:
-            keep = next((r for r in cur if r["content"] == content), max(cur, key=lambda r: len(r["content"])))
-            for r in cur:
-                if r["id"] != keep["id"]:
-                    cf(f"/zones/{zid}/dns_records/{r['id']}", "DELETE")
-            print(f"    ~ merged {len(cur)} _dmarc records at {name} into one")
+            cur = [r for r in (cf(f"/zones/{zid}/dns_records?type=TXT&name={name}").get("result") or [])
+               if policy_tag(name, r["content"]) == "v=DMARC1"]
+        singleton_policy(zid, cur, name, content, content)
 
     # 2. DNS per sending name. Records are fetched AFTER registration because
     #    Cloudflare writes the cf-bounce MX set itself during step 1; a
@@ -155,12 +195,13 @@ def provision(apex, zid, worker):
             continue
         res = cf(f"/zones/{zid}/email/sending/subdomains/{sub['id']}/dns")
         for r in res.get("result") or []:
-            add_dns(zid, recs, r["type"], r["name"], r["content"].strip('"'), r.get("priority"))
+            add_dns(zid, recs, r["type"], r["name"], r["content"].strip('"'), r.get("priority"), dmarc_before.get(r["name"]))
 
     # 3. Inbound: apex MX + SPF. These make Email Routing accept mail for the
     #    whole zone - without them the domain sends but cannot receive.
     if foreign_mx:
         print(f"    SKIP inbound: apex already has non-Cloudflare MX {foreign_mx} - leaving existing mail flow alone")
+        dedupe_policies(zid, dmarc_before)
         return
     for prio, mx in [(6, "route2.mx.cloudflare.net"), (18, "route1.mx.cloudflare.net"), (91, "route3.mx.cloudflare.net")]:
         add_dns(zid, recs, "MX", apex, mx, prio)
@@ -212,6 +253,8 @@ def provision(apex, zid, worker):
             print(f"    + A mta-sts.{apex} -> worker (proxied)")
     add_dns(zid, recs, "TXT", f"_mta-sts.{apex}", "v=STSv1; id=20261009")
     add_dns(zid, recs, "TXT", f"_smtp._tls.{apex}", f"v=TLSRPTv1; rua=mailto:tlsrpt@{apex}")
+
+    dedupe_policies(zid, dmarc_before)
 
 def main():
     args = sys.argv[1:]
