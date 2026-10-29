@@ -627,7 +627,7 @@ per-second price. Use the standard tier only for the shots that make the final c
 
 ### 4. Pick a window per shot, then edit like an editor
 
-Each Veo clip runs 8 s, but a 30 s film wants about 3 s per shot. Tile one frame per second of
+This workflow asks Veo for 8 s clips (Veo 3.1 also offers 4 and 6 s), and a 30 s film wants about 3 s per shot. Tile one frame per second of
 every clip into a strip (`fps=1,scale=230:-1,tile=8x1`) and pick each shot's best window by eye.
 Veo often drifts late in a clip: text on a prop dissolves, or a creature grows out of a shadow.
 When a shot has no clean window, show the approved still with a slow push and keep the clip's
