@@ -87,6 +87,14 @@ class ProvisionTests(unittest.TestCase):
              contextlib.redirect_stdout(io.StringIO()):
             for _ in range(2):
                 provision.provision(self.apex, 'zone', 'test-worker')
+                dmarc_names = {'_dmarc.' + name for name in
+                              [self.apex] + [p + '.' + self.apex for p in provision.SUBDOMAIN_PREFIXES]}
+                dmarc_names.update(r['name'] for r in zone.records
+                                   if r['type'] == 'TXT' and r['name'].startswith('_dmarc.'))
+                for name in dmarc_names:
+                    self.assertEqual(sum(r['type'] == 'TXT' and r['name'] == name
+                                         and provision.policy_tag(name, r['content']) == 'v=DMARC1'
+                                         for r in zone.records), 1, name)
                 for prefix, tag in provision.POLICY_TAGS.items():
                     records = [r for r in zone.records if r['name'] == prefix + self.apex
                                and provision.policy_tag(r['name'], r['content']) == tag]
@@ -116,6 +124,50 @@ class ProvisionTests(unittest.TestCase):
 
     def test_fresh_zone(self):
         self.run_twice(FakeZone())
+
+    def test_shorter_reporting_dmarc_wins_snapshot_and_dedupe(self):
+        for registration in ('add', 'overwrite'):
+            with self.subTest(registration=registration):
+                zone = FakeZone(registration)
+                name = '_dmarc.' + self.apex
+                zone.add(name, 'v=DMARC1; p=none; ' + 'adkim=s; ' * 20)
+                zone.add(name, self.original)
+                self.assertEqual(self.run_twice(zone)[name], self.original)
+
+    def test_singleton_prefers_reporting_over_snapshot(self):
+        zone = FakeZone()
+        name = '_dmarc.' + self.apex
+        preferred = 'v=DMARC1; p=reject; ' + 'adkim=s; ' * 20
+        zone.add(name, preferred)
+        reporting = zone.add(name, self.original)
+        with patch.object(provision, 'cf', side_effect=zone.cf), contextlib.redirect_stdout(io.StringIO()):
+            provision.singleton_policy('zone', copy.deepcopy(zone.records), name, preferred, preferred)
+        self.assertEqual(zone.records, [reporting])
+
+    def test_foreign_mx_dedupes_without_changing_mx_or_spf(self):
+        zone = FakeZone()
+        zone.add(self.apex, 'mx.incumbent.test', 'MX')
+        zone.add(self.apex, 'v=spf1 include:incumbent.test -all')
+        before = copy.deepcopy(zone.records)
+        for prefix, tag in provision.POLICY_TAGS.items():
+            zone.add(prefix + self.apex, tag + '; p=none')
+            zone.add(prefix + self.apex, tag + '; p=none; rua=mailto:reports@example.test')
+        self.run_twice(zone)
+        self.assertEqual([r for r in zone.records if r['type'] == 'MX'
+                          or r['content'].startswith('v=spf1')], before)
+        self.assertEqual(zone.rules, [])
+
+    def test_spf_and_verification_txt_survive(self):
+        zone = FakeZone()
+        protected = [zone.add(self.apex, 'v=spf1 include:incumbent.test -all'),
+                     zone.add(self.apex, 'google-site-verification=apex-token'),
+                     zone.add('_dmarc.' + self.apex, 'google-site-verification=dmarc-token')]
+        before = copy.deepcopy(protected)
+        zone.add('_dmarc.' + self.apex, self.original)
+        zone.add('_dmarc.' + self.apex, 'v=DMARC1; p=reject')
+        self.run_twice(zone)
+        for record in before:
+            self.assertIn(record, zone.records)
 
     def test_final_pass_covers_all_zone_policy_names(self):
         zone = FakeZone()

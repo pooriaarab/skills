@@ -98,14 +98,18 @@ def policy_tag(name, content):
             return tag
     return None
 
+def policy_rank(name, content, preferred=None):
+    return (policy_tag(name, content) == "v=DMARC1" and "rua=" in content.lower(),
+            content == preferred, len(content))
+
 def singleton_policy(zid, recs, name, content, preferred=None):
-    """Keep the preferred policy (otherwise the longest), deleting extras."""
+    """Keep DMARC reporting, then the preferred content, then the longest."""
     tag = policy_tag(name, content)
     matches = [r for r in recs if r["type"] == "TXT" and r["name"] == name
                and policy_tag(name, r["content"]) == tag]
     if not matches:
         return False
-    keep = max(matches, key=lambda r: (r["content"] == preferred, len(r["content"])))
+    keep = max(matches, key=lambda r: policy_rank(name, r["content"], preferred))
     deleted = 0
     for r in matches:
         if r is not keep:
@@ -155,7 +159,7 @@ def provision(apex, zid, worker):
     for r in recs:
         if r["type"] == "TXT" and policy_tag(r["name"], r["content"]) == "v=DMARC1":
             previous = dmarc_before.get(r["name"], "")
-            if len(r["content"]) > len(previous):
+            if policy_rank(r["name"], r["content"]) > policy_rank(r["name"], previous):
                 dmarc_before[r["name"]] = r["content"]
 
     # 1. Register sending names (apex + subdomains).
