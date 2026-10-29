@@ -51,6 +51,8 @@ Check the private registry before creating an App.
 Reuse the target repository's existing App when its permissions fit.
 GitHub limits an organization to 100 registered Apps.
 Prefer one App per high-volume private repository within that limit.
+Wave 1 is live for three repositories; wave 2 uses the private manifest TSV and
+`batch-plan` / `batch-status` on `gh-app-per-repo-rollout` (see the scripts guide).
 Do not create a new App for each agent or token renewal.
 
 Replace `<short>` with the private registry value.
