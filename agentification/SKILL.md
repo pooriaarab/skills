@@ -1,6 +1,6 @@
 ---
 name: agentification
-description: Make a product agent-native — discoverable, evaluable, sign-up-able, payable, and usable by an autonomous AI agent with no human in the loop. The layer beyond geo-aeo (which gets you cited): this gets an agent all the way to a paid, working account. Orchestrates existing skills (geo-aeo, mcp-directory-submission, agentic-cli-npm-package, repo-standards, regional-pricing-stripe) for the mechanical rungs and fills the gaps they don't cover — AGENTS.md, agent self-serve onboarding (free tier + programmatic API key + sandbox), agent-commerce (ACP / x402 / AP2), the honest machine-readable offer, and signup attribution. Use when a repo or product should "be agentified", let an agent sign up / pay / use it, ship an MCP, or expose an agent surface. Triggers: "agentify", "agent-native", "make it agent-ready", "let agents sign up", "agent can pay for it", "agent commerce", "AGENTS.md", "MCP for our product", "what are we missing for agents".
+description: "Make a product agent-native — discoverable, evaluable, sign-up-able, payable, and usable by an autonomous AI agent with no human in the loop. The layer beyond geo-aeo (which gets you cited): this gets an agent all the way to a paid, working account. Orchestrates existing skills (geo-aeo, mcp-directory-submission, agentic-cli-npm-package, repo-standards, regional-pricing-stripe) for the mechanical rungs and fills the gaps they don't cover — AGENTS.md, agent self-serve onboarding (free tier + programmatic API key + sandbox), agent-commerce (ACP / x402 / AP2), the honest machine-readable offer, and signup attribution. Use when a repo or product should \"be agentified\", let an agent sign up / pay / use it, ship an MCP, or expose an agent surface. Triggers: \"agentify\", \"agent-native\", \"make it agent-ready\", \"let agents sign up\", \"agent can pay for it\", \"agent commerce\", \"AGENTS.md\", \"MCP for our product\", \"what are we missing for agents\"."
 ---
 
 # agentification
@@ -42,7 +42,7 @@ Ordered by impact. Do Tier 1 before Tier 2. Skip Tier 3 unless asked.
 
 ### Writing AGENTS.md
 
-Not a README copy. Write for the agent that will operate the product. Structure that works (see adscapi for a reference):
+Not a README copy. Write for the agent that will operate the product. Structure that works (see a published SDK + CLI + MCP package for a reference):
 
 - **Mental model** — the one-sentence "what goes in, what comes out."
 - **The three faces** — SDK (`import …`) / CLI (`npx …`) / MCP (`npx … mcp`), each one line.
@@ -58,10 +58,10 @@ The shippable 2026 baseline — not a branded "sign up with agent" flow:
 
 1. **Free tier that needs no human approval.** No sales gate, no manual review to start.
 2. **Programmatic API-key issuance** — a documented endpoint (`POST /v1/keys` or self-serve dashboard call) an agent can hit to mint a scoped key. Document it in AGENTS.md and the API docs.
-3. **A sandbox** — a realistic test mode with fake data / test tokens, so the agent can exercise the full flow before spending money. (adscapi's `dryRun: true` is this pattern for a library.)
+3. **A sandbox** — a realistic test mode with fake data / test tokens, so the agent can exercise the full flow before spending money. (A `dryRun: true` flag is this pattern for a library.)
 4. **Adapt to product type:**
    - **SaaS with accounts** (private-repo-3d96, private-repo-c4e6, private-repo-87f3, private-repo-c96c): real signup endpoint + email-less/agent-friendly verification + sandbox workspace.
-   - **Open-source lib / CLI** (adscapi, usegeoaeo, private-repo-4944, getvibe): "signup" = `npm i` + bring-your-own-key + a dry-run/sandbox mode. No paywall to add; the free tier *is* the package. Commerce here = optional hosted/pro tier or sponsorship, not a gate.
+   - **Open-source lib / CLI** (usegeoaeo, private-repo-4944, getvibe): "signup" = `npm i` + bring-your-own-key + a dry-run/sandbox mode. No paywall to add; the free tier *is* the package. Commerce here = optional hosted/pro tier or sponsorship, not a gate.
 
 ### Agent commerce (Tier 2 #5)
 
@@ -103,4 +103,4 @@ For each target repo:
 
 ## Reference implementation
 
-**adscapi** is the closest-to-done model: `AGENTS.md` (three faces + tool table + loop + rules), `.mcp.json`, `server.json`, CLI + SDK + MCP, `dryRun` sandbox. Read it before agentifying a sibling repo. Its remaining gap: llms.txt (dev-tool, low priority) and — if it ever charges — a commerce path.
+A published SDK + CLI + MCP package is the closest-to-done model: `AGENTS.md` (three faces + tool table + loop + rules), `.mcp.json`, `server.json`, CLI + SDK + MCP, `dryRun` sandbox. Read one before agentifying a sibling repo. Its remaining gap: llms.txt (dev-tool, low priority) and — if it ever charges — a commerce path.

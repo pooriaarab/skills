@@ -107,10 +107,10 @@ minutes, so the GitHub invoice does not move when these runs stop:
 
 | Repo, window | On `pull_request` | On `push` to `main`/`release` |
 |---|---|---|
-| directory, 16.9 h | CI 161 min / 22 runs (median ~129 s); jscpd ~10 min; vibecodereview 28 min / 23 runs | CI 88 min / 8 runs |
-| private-repo-0a63, 22.2 h | unit-tests 120 min / 23 runs (median 266 s); Worker Preview 243 min / 33 runs | unit-tests 46 min / 11 runs |
+| Multi-site monorepo, 16.9 h | CI 161 min / 22 runs (median ~129 s); jscpd ~10 min; vibecodereview 28 min / 23 runs | CI 88 min / 8 runs |
+| Single-app repo, 22.2 h | unit-tests 120 min / 23 runs (median 266 s); Worker Preview 243 min / 33 runs | unit-tests 46 min / 11 runs |
 
-At 1,000 pull requests a day, one private-repo-0a63-sized suite per PR is about 73–87
+At 1,000 pull requests a day, one single-app-sized suite per PR is about 73–87
 boat-hours; a 7-minute preview per PR is about 117 boat-hours plus a preview
 database per branch. The ratio was about two PR runs per main run, and the
 main run is still paid.
@@ -160,7 +160,7 @@ older pending runs. Never cancel an active production deployment for capacity.
 Affected-only test selection is a later step, not the first move. It needs a
 full reference run on matching inputs — the controls in
 [ci-selective-evidence](../ci-selective-evidence/SKILL.md) are what qualify
-it — and it does not require adopting Nx, Bazel, or Turborepo. Directory
+it — and it does not require adopting Nx, Bazel, or Turborepo. The example monorepo
 already runs Wireit.
 
 ## Ship first, verify after

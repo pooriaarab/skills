@@ -73,4 +73,4 @@ ship.
 ## Pairing
 
 Chains after `agentic-cli-npm-package` (which builds the CLI+npm+MCP) — that skill ships the
-code, this one ships the agent docs. Reference exemplar: the `adscapi` package.
+code, this one ships the agent docs. Reference exemplar: a published SDK + CLI + MCP package with a `dryRun` mode.

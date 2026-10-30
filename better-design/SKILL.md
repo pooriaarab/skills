@@ -1,13 +1,13 @@
 ---
 name: better-design
-description: "Better Design kits in pooriaarab/directory: defineBetterDesign(), 30 vendored themes, /design?kit=better. Pair with directory-fleet-ui. Upstream MCP: marvkr/better-design."
+description: "Better Design kits in a multi-site directory monorepo: defineBetterDesign(), 30 vendored themes, /design?kit=better. Pair with directory-fleet-ui. Upstream MCP: marvkr/better-design."
 ---
 
 # Better Design (directory template)
 
-Upstream catalog: [marvkr/better-design](https://github.com/marvkr/better-design). The **directory** repo vendors tokens and personalities — you do not `shadcn add` 31 kits into `apps/web`.
+Upstream catalog: [marvkr/better-design](https://github.com/marvkr/better-design). The **directory** monorepo vendors tokens and personalities — you do not `shadcn add` 31 kits into `apps/web`.
 
-## In `pooriaarab/directory`
+## In the multi-site directory monorepo
 
 | Piece | Path |
 | --- | --- |

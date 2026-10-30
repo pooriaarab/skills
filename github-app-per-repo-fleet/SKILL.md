@@ -27,7 +27,7 @@ Do not use `sec-fleet` as the default for sustained work on one repository.
 Keep merges on the personal account.
 Do not let unattended agents hold merge credentials.
 
-The private registry lives in `pooriaarab/agents-private` only.
+The private registry lives in your private operations repository only.
 Read it to find the target repository and its `<short>` name.
 Never publish that mapping or list other private repository names here.
 Never copy private registry content into this public skill.

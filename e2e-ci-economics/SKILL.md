@@ -54,7 +54,7 @@ pull request cost 243 wall-clock minutes across 33 runs in a 22.2-hour window
 per branch. Its keep/drop table for every workflow lives in
 [ci-cost-at-agent-scale](../ci-cost-at-agent-scale/SKILL.md).
 
-The pattern already exists: directory's four-shard Playwright smoke runs only
+The pattern already exists in a multi-site monorepo: its four-shard Playwright smoke runs only
 on `release` refs and on pull requests that target `release`. That is the
 shape to copy — the suite gates the ref that ships. Heavy browser suites that
 already run after Deploy on `main` stay there. **Never cancel a long suite to
