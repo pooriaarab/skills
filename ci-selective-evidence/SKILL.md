@@ -11,12 +11,13 @@ that cannot prove what it skipped is a coverage cut, not an optimization.
 Selective CI needs a dependency map, a report reader, and an executor.
 Qualify each against known test identities and observed outcomes before use.
 
-Selection is the second step, not the first. The first is taking the suite
-off `pull_request` entirely — the pull request stays cheap while the full run
-lands on `push` to the branch the code will merge into
-([ci-cost-at-agent-scale](../ci-cost-at-agent-scale/SKILL.md)). When selection
-does come, that full run on the default branch is the fail-safe it stands on.
-The controls below are what qualify it.
+Choose verification triggers before test selection. A qualified development
+path can use local proof and actual deployment checks, with broad checks on
+production candidates and manual runs. Follow [the shared policy](../high-volume-ci-optimization/references/development-and-release.md).
+
+That trigger change does not qualify selection. Keep a full reference run on
+matching inputs while qualifying the planner and reader. The controls below
+still apply before an affected-test executor can skip coverage.
 
 ## When to use this
 

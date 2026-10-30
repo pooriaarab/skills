@@ -15,10 +15,14 @@ runners. This skill covers job placement and cost. Pool setup lives in
 
 | Job | Runner |
 | --- | --- |
-| Private build, lint, typecheck, test, E2E, deploy and API waits | `boat` (4 vCPU, 8 GB) |
+| Private build, lint, typecheck, test, E2E and deploy | `boat` (4 vCPU, 8 GB) |
 | Private heavy production build | `boat-8` (8 vCPU, 16 GB) |
 | Public repo jobs | GitHub-hosted `ubuntu-latest` |
 | macOS and Windows jobs | Existing GitHub-hosted image |
+
+Choose verification triggers before adding capacity. For repeated main CI,
+paid waiting jobs, native integration fees, or review inference, use
+[the development and release policy](references/development-and-release.md).
 
 Run one JIT runner at a time on each always-on Box. Keep package caches,
 Playwright browsers and Docker images between jobs. The broker hands JIT
@@ -90,15 +94,24 @@ Use `paths-ignore` for docs-only changes so a markdown edit does not rebuild the
 
 Compare PR and merged-source verification before removing duplicate runs. A passing PR does not prove that concurrent changes compose. Keep coverage of the actual source that can reach deployment.
 
-Do not run the same suite on both `pull_request` and `push` for the same branch. The fleet answer is two-step CI: the pull request stays cheap — the ~20-second secret scan stays on it, and lint, typecheck and unit tests run only on high-risk paths — while the full suite runs on `push` to `main` and `release`, against the commit that will actually ship. Running both on `feature/*` doubles minutes for no extra signal. The measured numbers and the keep/drop table are in [ci-cost-at-agent-scale](../ci-cost-at-agent-scale/SKILL.md).
+For a qualified development path, run the local gate before push and build
+and smoke the actual deployment. Keep cheap PR policy checks. Broad remote CI
+can remain manual and required for production promotion or queue candidates.
+Bind production checks to their branch and exact revision. Preserve environment
+restrictions and integration coverage. Use [the shared policy](references/development-and-release.md)
+before removing a wait or changing skipped dependencies.
+
+Where this path is not qualified, retain the existing broad checks while
+measuring repeated work. The historical baseline and audit procedure live in
+[ci-cost-at-agent-scale](../ci-cost-at-agent-scale/SKILL.md).
 
 Choose a merge queue from measured contention and integration risk, not PR count alone.
 Use the [merge and Preview throughput procedure](merge-and-preview-throughput.md)
 before changing queues, publication locks, or Preview requirements.
 
 A private merge queue on this personal account needs a paid organization plan —
-rulesets and branch protection answer 403 "Upgrade to GitHub Pro". Until one
-exists, a busy repo collapses default-branch CI the way deploys already do:
+rulesets and branch protection answer 403 "Upgrade to GitHub Pro". Where broad default-branch CI remains required, a busy repo can collapse
+pending runs the way deployments do:
 
 ```yaml
 concurrency:
@@ -109,8 +122,7 @@ concurrency:
 The in-flight run completes; the newest pending run replaces the older pending
 one. Never cancel a long suite that would then never finish. The next step on
 a repo that lands faster than the suite is a real batch: test the stack once,
-bisect only on failure. A quiet repo only needs the `pull_request` trigger
-removed.
+bisect only on failure. A quiet repo still needs verification matched to its production inputs.
 
 ## Only run what changed
 
@@ -118,8 +130,8 @@ Use the task runner's affected-only filter against the base branch so untouched 
 
 This is the monorepo counterpart of collapsing jobs. Fan-out tax is paying install eight times. Affected-only is paying compile for eight packages when one file changed. Do both.
 
-Affected-only is a later step behind two-step CI, and the full run on the
-default branch stays as its fail-safe — the qualification controls live in
+Affected-only selection needs a full reference run on matching inputs.
+Trigger changes do not qualify selection. The coverage controls live in
 [ci-selective-evidence](../ci-selective-evidence/SKILL.md). The task runner
 already in the repo is enough; directory runs Wireit. Do not adopt Nx, Bazel,
 or Turborepo for this alone.
