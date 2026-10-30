@@ -1,6 +1,6 @@
 ---
 name: ci-cost-at-agent-scale
-description: "Use when CI spend, CI queueing, or CI wall-clock becomes a problem on a repo where agents open most of the pull requests — hundreds of workflow runs a day, review bots that push their own fix commits, or a fleet of parallel workers each blocking on its own checks. Audits where the runs actually come from before changing anything, then fixes in cost order: delete work that produces nothing, add concurrency groups so superseded runs cancel, path-filter the heavy suites, share a build cache, and only then move to a cheaper runner. Carries the two-step-CI policy: the pull request stays cheap (the ~20-second secret scan stays, lint/typecheck/unit run only on high-risk paths, the build does not run) while the full suite runs on push to the branch the code will ship to. Explains why a per-minute price cut is the wrong first move, why the real ceiling is usually concurrent-job limits rather than minutes, and why agent sandboxes need a runner control plane and how Boat uses one. Triggers: 'CI is too expensive', 'CI is queueing', 'switch off GitHub Actions', 'cheaper CI runners', 'Boat / Blacksmith / Depot / RunsOn', 'run CI in a sandbox', 'our agents are burning CI minutes', 'why is CI slow at scale'."
+description: "Use when agent-generated PRs make CI expensive or slow. Audit repeated jobs, qualify local and deployment proof, preserve production checks, drain idle capacity, and verify total cost. Covers scheduler versus compute placement and review proof without paid inference."
 ---
 
 # ci-cost-at-agent-scale
@@ -89,17 +89,18 @@ A new CI engine or scheduled post-merge suite must preserve those gates.
 Pilot one repository first. Report measured results before applying the change elsewhere.
 Do not present a target such as 5–10x as an achieved result.
 
-## The pull request stays cheap. Main carries the suite.
+## Match verification to the delivery path
 
-At this fleet's volume the `pull_request` trigger is the repeated cost, not any
-job inside the pipeline. The policy is two-step CI: the pull request runs
-almost nothing, and the full suite runs on `push` to `main` and `release` —
-against the code that will actually ship. That is the idea worth keeping from
-Anthropic's Scion post (Oct 2026). The scale that produced it is not the
-reason: theirs is roughly 30,000 merges a day on a monorepo whose history is
-about 100 GB. This fleet targets hundreds of repos and about 1,000 pull
-requests a day, and keeps GitHub pull requests — no Gitea or Forgejo move, no
-new version-control system.
+Qualify the local gate and actual deployment checks before removing repeated
+remote work. Keep PRs cheap. Broad remote suites can stay manual and required
+on production candidates or queue refs, rather than every main update.
+
+Use [the shared development and release policy](../high-volume-ci-optimization/references/development-and-release.md)
+for the cutover checks. It covers exact production inputs, skipped waits,
+cancellation, safe pool drains, review proof, and billing limits. Where the
+local and deployment path is not qualified, retain broad checks while measuring.
+
+### Historical baseline
 
 Measured 2026-10-24, wall-clock minutes on the `boat` runner label — not billed
 minutes, so the GitHub invoice does not move when these runs stop:
@@ -114,35 +115,26 @@ boat-hours; a 7-minute preview per PR is about 117 boat-hours plus a preview
 database per branch. The ratio was about two PR runs per main run, and the
 main run is still paid.
 
-What stays on the pull request, and what leaves:
+### Current placement decisions
 
-| Workflow | On the pull request? |
-|---|---|
-| Secret scan (gitleaks) | **Yes.** ~20 s. A secret that reaches `main` is stuck in history. The one PR wait to keep. |
-| lint + typecheck + unit tests | Only for high-risk diffs: auth, payments, database and migrations, Wrangler or Worker config, `bun.lock`, `.github/workflows`. Never the build. |
-| OpenNext build, Wrangler dry-run | No — `push` to `main`/`release` only. |
-| jscpd | No — `push` to `main`. It is not a ship gate. |
-| vibecodereview council | No — high-risk paths, or a PR carrying a review label. A copy change does not get a six-pass review. |
-| Browser smoke | Directory's four-shard Playwright smoke already runs only on `release` refs. Leave it. |
-| Worker preview | Label-gated; see below. |
+| Work | Placement after qualification |
+| --- | --- |
+| Secret scan and deterministic PR policy | Keep cheap checks on the PR |
+| Lint, typecheck, and existing tests | Local gate before push; broad remote runs on required production candidates or manual dispatch |
+| Generic build before a real deployment build | Remove the repeated development build after proving equivalent input coverage |
+| Paid review inference | Disable workflows and label callers; keep deterministic review proof |
+| Browser smoke | Keep actual deployment and production checks |
+| Worker preview | Run when required for the change; retain operator rules |
 
-The high-risk list lives in the workflow `paths:` filter, not in prose.
-
-**Worker previews are not a UI-only tool.** A preview boots the real Worker
-against a real preview database and probes `/api/v1/tenants`, the auth
-session, admin sign-in, and a Stripe test checkout. Directory builds one only
-when the PR has the `preview` label — keep that workflow, and do not turn it
-on by default. private-repo-0a63 still previews any change under `apps/web/**` or
-`packages/**`; cut it to match directory, plus an automatic run only for
-Worker/Wrangler config, D1 migrations, auth, Stripe or checkout, the API the
-Worker serves, and the specs the preview already runs
-(checkout-owner-session, nav-latency). The label still builds one when
-someone wants to look. A button or copy change does not need a preview
-database.
+**Retain required Worker previews.** Follow the repository's operator rules
+for visible changes and third-party behavior. A preview can verify authentication,
+API contracts, and integration behavior as well as pages. Keep that evidence
+bound to the current revision. Use labels or path gates only where they preserve
+those requirements. Metadata edits do not need a new application deployment.
 
 **Agents run the cheap loop locally.** Lint, typecheck, and unit tests run in
-the checkout the agent already has, before the pull request opens. GitHub is
-the safety net for `main`, not the test runner for the branch.
+the checkout the agent already has, before the pull request opens. The deployment checks the merged revision. Broad production checks verify the
+candidate that can ship.
 
 **Agents are not the referee.** An agent under pressure will skip a test or
 edit the workflow so the check looks green. Add a `pull_request_target` job
@@ -154,21 +146,19 @@ private repos return 403 "Upgrade to GitHub Pro", and a private merge queue
 needs a paid organization plan on top. The red check stops an honest agent.
 It does not stop an agent allowed to merge its own red pull request.
 
-**Staging waits for the green commit.** `main` is staging, `release` is
-production, canary first. A push to `main` must not start Deploy until CI for
-that exact commit is green — missing, failed, or cancelled is not green.
-Production stays a promotion of a commit `main` already accepted. A revert
-does not unsend email or undo a migration, so do not describe auto-revert as
-the safety net. On a busy repo, collapse main CI the way deploys already do:
-the in-flight run finishes and the newest pending run replaces the older
-pending one — never cancel a long suite that would then never finish
-(see [high-volume-ci-optimization](../high-volume-ci-optimization/SKILL.md)).
-A real batch — test the stack once, bisect on failure — is the next step when
-a hot repo lands faster than the suite. A quiet repo only needs the
-`pull_request` trigger removed.
+**Preserve production verification.** A qualified development deployment can
+skip its repeated CI wait. Production still needs a successful required suite
+on the production branch at the exact revision. A result from another branch
+is insufficient. Handle skipped dependencies and cancellation explicitly.
+Keep canary order, migrations, environment restrictions, smoke checks, and
+serialization. A revert cannot undo sent email or every migration.
+
+Keep queues where measured contention and integration risk justify them. For
+broad checks that remain required, let the in-flight run finish and supersede
+older pending runs. Never cancel an active production deployment for capacity.
 
 Affected-only test selection is a later step, not the first move. It needs a
-fail-safe full run behind it — the controls in
+full reference run on matching inputs — the controls in
 [ci-selective-evidence](../ci-selective-evidence/SKILL.md) are what qualify
 it — and it does not require adopting Nx, Bazel, or Turborepo. Directory
 already runs Wireit.
@@ -265,7 +255,8 @@ ambushing whoever pushes next.
 ### 5. Change runners — price decides this, not queue time
 
 Use the warm Boat JIT pool for private `pooriaarab/*` Linux CI. Use `boat`
-for build, lint, typecheck, test, E2E, deploy and API waits. Use `boat-8` for a
+for build, lint, typecheck, test, E2E, and deploy. Remove avoidable polling
+before adding capacity. Use `boat-8` for a
 heavy production build. Public repos and macOS/Windows jobs stay GitHub-hosted.
 
 ```yaml
