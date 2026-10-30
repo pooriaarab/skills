@@ -133,7 +133,7 @@ This is the monorepo counterpart of collapsing jobs. Fan-out tax is paying insta
 Affected-only selection needs a full reference run on matching inputs.
 Trigger changes do not qualify selection. The coverage controls live in
 [ci-selective-evidence](../ci-selective-evidence/SKILL.md). The task runner
-already in the repo is enough; directory runs Wireit. Do not adopt Nx, Bazel,
+already in the repo is enough; one example monorepo runs Wireit. Do not adopt Nx, Bazel,
 or Turborepo for this alone.
 
 Compare against the merge base, not against the moving tip of the default branch. A long-lived branch compared to `origin/main` looks like it touched everything main landed since it forked.

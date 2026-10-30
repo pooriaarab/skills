@@ -37,7 +37,7 @@ opens the page. Re-open the source URL before you act: pages change.
 
 | Item | Result |
 |---|---|
-| Public `benchmark-*` repos | 24: 22 task-set packages, `benchmark-core`, and `benchmark-family-paper`. `benchmark-template` is private. |
+| Public `benchmark-*` repos | 24: 22 task-set packages, `benchmark-core`, and `benchmark-family-paper`. The template repository is private. |
 | `CITATION.cff` | Missing in all 24. |
 | `.zenodo.json` | Missing in all 24. |
 | `package.json` fields | `repository`, `homepage`, `bugs`, `keywords`, `license`, `author` are set (checked on `benchmark-sycophancy`). `funding` is empty. |

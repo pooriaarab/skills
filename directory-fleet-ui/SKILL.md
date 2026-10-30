@@ -1,6 +1,6 @@
 ---
 name: directory-fleet-ui
-description: "Brand and UI pass for pooriaarab/directory fleet sites: pick @directory/ui presets, preview at /design, ship logo/OG/DESIGN.md, and apply elite UI patterns without breaking the one-template rule. Maps external design-agent repos (Superdesign, Better Design, motion kits) to what the template actually supports. Use when upgrading directory landing UX, running a fleet brand pass, or asking whether to install a random shadcn kit."
+description: "Brand and UI pass for multi-site directory fleet sites: pick @directory/ui presets, preview at /design, ship logo/OG/DESIGN.md, and apply elite UI patterns without breaking the one-template rule. Maps external design-agent repos (Superdesign, Better Design, motion kits) to what the template actually supports. Use when upgrading directory landing UX, running a fleet brand pass, or asking whether to install a random shadcn kit."
 ---
 
 # Directory fleet UI
@@ -52,7 +52,7 @@ Use these for **ideas and review**, not as npm installs on every site.
 
 ## Fleet brand + UI pass (one site)
 
-1. `bun run site:use <site>` in `pooriaarab/directory`.
+1. `bun run site:use <site>` in the multi-site directory monorepo.
 2. Open `/design` and `/design?preset=<id>&matrix=1&scheme=dark`.
 3. Pick preset + seed; set `variants` if header/hero/card/footer need a non-default combo.
 4. `bun run brand:fonts` && `bun run brand:check`.

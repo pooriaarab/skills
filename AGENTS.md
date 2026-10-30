@@ -8,7 +8,7 @@ skill names, or claims.
 Read `.agents/design.md` before changing the README, documentation structure,
 or the presentation of a skill.
 
-## Directory & product UI (pooriaarab/directory)
+## Directory & product UI (multi-site directory monorepos)
 
 When the task touches directory branding, `/design`, or public kit components:
 
@@ -17,6 +17,14 @@ When the task touches directory branding, `/design`, or public kit components:
 3. [better-design](better-design/SKILL.md) — MCP review; map catalog systems to presets, never vendor shadcn into `apps/web`
 
 Install upstream once per machine: `design-taste` `./scripts/install.sh`; `better-design` `npx skills add marvkr/better-design`.
+
+## Public naming boundary
+
+This repository is public. A public skill never identifies a private project:
+no private repository name, package name, domain, pull request number, run ID
+or private measurement. Use a generic example instead, such as
+`<your-package>` or "a multi-site monorepo". Put named fleet reports in the
+private operations repository.
 
 <!-- pr-standards:start -->
 

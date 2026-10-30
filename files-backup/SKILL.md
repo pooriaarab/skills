@@ -5,7 +5,7 @@ description: "Use when the user wants to back up text-based files from local, iC
 
 # Files Backup
 
-Sets up `~/Documents/pooriaarab/files/` as a git repo tracking text-based documents (no binaries), backed up nightly to `pooriaarab/files` (private GitHub).
+Sets up `~/Documents/files/` as a git repo tracking text-based documents (no binaries), backed up nightly to a private GitHub repository.
 
 ## What Gets Backed Up
 
@@ -16,13 +16,13 @@ Sets up `~/Documents/pooriaarab/files/` as a git repo tracking text-based docume
 ## Structure
 
 ```
-~/Documents/pooriaarab/files/
+~/Documents/files/
 ├── finance/        ← bank statements, taxes, invoices
 ├── legal/          ← contracts, permits, visas
 ├── health/         ← medical docs
 ├── work/
-│   ├── mozilla/    ← Mozilla work docs
-│   └── solo/       ← solo product docs
+│   ├── employer/   ← employer docs
+│   └── product/    ← product docs
 ├── education/      ← university, courses
 └── _exports/       ← auto-synced from iCloud (cron, text files only)
 ```
@@ -30,7 +30,7 @@ Sets up `~/Documents/pooriaarab/files/` as a git repo tracking text-based docume
 ## Rule
 
 **files/ = received/stored from external sources.**
-Content created/curated by Pooria lives in `pooriaarab/brain`, not here.
+Content you create or curate lives in your personal notes repository, not here.
 
 ## Setup
 

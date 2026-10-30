@@ -5,7 +5,7 @@ description: "Cut deploy time on a fleet of sites that share one codebase and ea
 
 # Multi-site deploy optimization
 
-`pooriaarab/directory` runs 29 deployable sites from one codebase — 31 folders
+One example fleet runs 29 deployable sites from one codebase — 31 folders
 under `sites/` minus the `_starter` and `_shared` dirs (`ls sites` in the repo).
 Each site is its own Cloudflare Worker with its own D1 and KV. Site config,
 theme and brand are baked in at build time by `site:use`.
@@ -16,19 +16,18 @@ A change to shared code (`apps/`, `packages/`, `workers/`) deployed all 29
 sites. Each site ran a full OpenNext build of identical code, then D1
 migrations, then 4 worker deploys — on `main` (staging) and again on `release`
 (production). One full release deploy took about 40 minutes — one measured run
-(pooriaarab/directory Actions run 39980107532, 2026-10-23, 15:39 to 16:19 UTC),
-not an average.
+(one Actions run on 2026-10-23, 15:39 to 16:19 UTC), not an average.
 
 ## What landed, in order
 
 Work through the fixes in this order: ignore list, canary-only staging, side
 workers, migrations, then build once.
 
-Merged: #1322, #1324, #1326, the #1323 design doc, and #1336 (council review on
-docs PRs). Pending: #1325 (side workers) and its wiring PR — #1325 is still in
-review and has not merged.
+Merged: the ignore list, canary-only staging, migrate-only-when-pending, the
+build-once design doc, and council review on docs PRs. Pending: side workers
+and their wiring PR — side workers are still in review and have not merged.
 
-### 1. Deploy-ignore list (directory #1322, issue #1317)
+### 1. Deploy-ignore list
 
 `scripts/affected-sites.ts` holds a list of paths that cannot change runtime
 output: docs, markdown, E2E specs, unrelated workflows. A diff that only touches
@@ -38,7 +37,7 @@ all sites.
 Check the build does not read a path before ignoring it. A file the bundler
 inlines is not ignorable, whatever its extension.
 
-### 2. Canary-only staging (directory #1324, issue #1318)
+### 2. Canary-only staging
 
 On a shared-code push to `main`, deploy only `CANARY_SITE` to staging. On
 `release`, all affected sites deploy.
@@ -51,7 +50,7 @@ One shared function decides whether a diff widens to the full site set. The
 ignore list and the stage rule both call it. Two copies existed in review and
 disagreed.
 
-### 3. Side workers only when their inputs changed (directory #1325, issue #1319 — in review, not merged)
+### 3. Side workers only when their inputs changed (in review, not merged)
 
 Deploy the cron, queue-consumer and inbound-mail workers only when one of these
 changed: their own directory, a package they import, the renderer, or the site
@@ -69,7 +68,7 @@ A resolver failure must fail the job with a clear error:
 - Validate the resolved value as a JSON array of known worker names. An empty
   string or `{"a":{}}` must not parse as "skip everything".
 
-### 4. Migrate only when pending (directory #1326, issue #1320)
+### 4. Migrate only when pending
 
 Run `wrangler d1 migrations apply` only when `scripts/d1-pending-check.ts`
 reports pending migrations. Exit 0 means skip, exit 4 means apply, anything
@@ -86,7 +85,7 @@ wrangler d1 execute DB_NAME --remote \
 A local baseline rehearsal can report zero pending while canonical names are
 missing remotely. Compare against the remote table, not local state.
 
-### 5. Build once, deploy many (design: directory docs/ops/build-once.md, #1323, issue #1321)
+### 5. Build once, deploy many (design doc)
 
 Read the site from a runtime `SITE_ID` instead of build-time `site:use`. One
 build job uploads a single artifact. Each per-site job only renders the
@@ -160,7 +159,7 @@ gh run list --workflow deploy.yml --limit 50 \
 A council review workflow that path-ignores `**.md` and `docs/` leaves
 docs-only PRs with no review at all. The premerge gate then blocks them with
 "none yet from any reviewer" — a dead end, because the filtered workflow can
-never fire on that diff. Directory issue #1335 / PR #1336 removed the filter.
+never fire on that diff. A later fix removed the filter.
 
 A review posted by `github-actions[bot]` — which happens when the chair runs
 without a `claude[bot]` seat — is ignored by premerge on purpose. The owner

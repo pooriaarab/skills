@@ -207,8 +207,8 @@ what it is. Real senders write to many recipient domains, and that spread is
 itself part of what a receiver sees.
 
 When a fleet shares an account, each domain can mail the others. Point a share
-of every domain's daily volume at mailboxes on its peers — `hello@adscapi.com`
-writing to `team@private-repo-5073.com` — and each domain's outbound history gains
+of every domain's daily volume at mailboxes on its peers — `hello@example-a.com`
+writing to `team@example-b.com` — and each domain's outbound history gains
 genuine recipient variety without inventing a single new recipient.
 
 It also exercises the half of the setup that otherwise goes untested. Sending is
@@ -218,7 +218,7 @@ time it runs.
 
 **Placement stays measurable, which is the part that makes this worth doing.**
 Because each domain forwards to the seed inbox, a message sent to
-`team@private-repo-5073.com` still lands somewhere readable, and the same
+`team@example-b.com` still lands somewhere readable, and the same
 `rfc822msgid:` lookup finds it. Configure peer seeds with the seed mailbox as
 their `gogAccount`, not the peer address, or the lookup searches a mailbox no
 one can open.

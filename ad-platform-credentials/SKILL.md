@@ -5,7 +5,7 @@ description: "Obtain, verify, and store server-side conversion credentials for M
 
 # ad-platform-credentials
 
-`adscapi` fans one conversion out to many platforms. Each platform needs its
+A conversion hub (see `ad-conversion-hub`) fans one conversion out to many platforms. Each platform needs its
 own credential from its own console. This skill covers the four platforms with
 verified first-hand paths: Meta, GA4, Google Ads, and LinkedIn. Do not write
 steps for a platform nobody has logged into.

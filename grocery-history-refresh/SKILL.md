@@ -1,12 +1,12 @@
 ---
 name: grocery-history-refresh
-description: Refresh the HBI grocery order history dataset from Walmart Canada and Costco accounts — new orders, recurring staples, watch list — and push the update to pooriaarab/brain via PR. Trigger on "refresh grocery history", "update order history", or the weekly grocery cron.
+description: Refresh the HBI grocery order history dataset from Walmart Canada and Costco accounts — new orders, recurring staples, watch list — and push the update to your private notes repository via PR. Trigger on "refresh grocery history", "update order history", or the weekly grocery cron.
 ---
 
 # Grocery History Refresh
 
 ## Purpose
-Keep `groceries/order-history.md` in `pooriaarab/brain` current: pull new Walmart
+Keep `groceries/order-history.md` in your private notes repository current: pull new Walmart
 Canada and Costco orders, normalize items, refresh the recurring staples table,
 and push via PR. Feeds the household inventory loop (fridge photos) and recall
 awareness.
@@ -26,11 +26,11 @@ awareness.
    refresh, reconcile staples against it and note what is running low.
 4. **Publish** — edit `groceries/order-history.md` on a branch
    (e.g. `hbi/grocery-history`), commit with a clear message, open or update the
-   PR in `pooriaarab/brain`. Never merge without explicit approval.
+   PR in your private notes repository. Never merge without explicit approval.
 
 ## Output Contract
 - Dataset file updated, new orders appended in the existing per-order format.
-- PR opened/updated on `pooriaarab/brain`; report the PR URL and a summary of
+- PR opened/updated on the notes repository; report the PR URL and a summary of
   what changed (orders added, staples changed, flags).
 - Short chat summary: new orders, staples drift, anything to flag (recalls,
   frequent substitutions, price jumps).

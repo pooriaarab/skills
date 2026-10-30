@@ -12,7 +12,7 @@ git clone https://github.com/madebymustafa/design-taste.git /tmp/design-taste
 /tmp/design-taste/scripts/install.sh   # copies into ~/.cursor/skills, ~/.claude/skills, etc.
 ```
 
-## Directory fleet (`pooriaarab/directory`)
+## Directory fleet (multi-site directory monorepo)
 
 1. Start with [directory-fleet-ui](../directory-fleet-ui/SKILL.md) — `/design`, presets, `brand/`.
 2. **Genre for reference directories (MRI, permits, gov data):** upstream skill `corporate-trust` — maps to **`civic`** preset + steel blue seed. Not indigo gradients, not three feature cards.

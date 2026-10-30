@@ -244,13 +244,13 @@ Use `ad-experiments` for hypothesis design, seed sizing, and budget control.
 Use `ads-google`, `ads-meta`, and `ads-reddit` as detailed examples of adapter
 pitfalls and server-side verification.
 
-## Shipped as a package: adscapi
+## Shipped as a package
 
-This hub is productized as the `adscapi` npm package (`pooriaarab/adscapi`) — the SDK +
-CLI + MCP form of this skill, so a consumer runs `npm i adscapi` instead of re-implementing
+Productize this hub as an npm package — the SDK +
+CLI + MCP form of this skill, so a consumer runs `npm i <your-package>` instead of re-implementing
 the flow. Learnings from the extraction, reusable here:
 
-- **Namespaced client surface** (Stripe/Segment shape): `createAdscapi()` reads secrets from
+- **Namespaced client surface** (Stripe/Segment shape): `createClient()` reads secrets from
   env → `ads.conversions.track(event)` returns a per-destination result array `{ platform,
   ok, error }[]`; `ads.destinations.list()` / `.verify()`.
 - **Adapters throw, the client isolates.** Each dispatcher throws on non-2xx; the client

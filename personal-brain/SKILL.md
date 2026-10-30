@@ -5,12 +5,12 @@ description: "Use when the user wants to set up a personal knowledge base, secon
 
 # Personal Brain
 
-Sets up `~/Documents/pooriaarab/brain/` as an Obsidian vault with PARA-inspired structure, git-tracked to `pooriaarab/brain` (private), with Apple Notes as iPhone capture inbox.
+Sets up `~/Documents/brain/` as an Obsidian vault with PARA-inspired structure, git-tracked to a private GitHub repository, with Apple Notes as iPhone capture inbox.
 
 ## What It Creates
 
 ```
-~/Documents/pooriaarab/brain/
+~/Documents/brain/
 ├── inbox/          ← everything lands here (Apple Notes sync + manual)
 ├── journal/        ← daily notes (YYYY-MM-DD.md)
 ├── meetings/       ← AI necklace transcripts → processed notes
@@ -38,7 +38,7 @@ Sets up `~/Documents/pooriaarab/brain/` as an Obsidian vault with PARA-inspired 
 ## Setup Steps
 
 1. Run the personal-os implementation plan: `docs/plans/2026-05-07-personal-os.md` (Tasks 1–2)
-2. Install Obsidian → open `~/Documents/pooriaarab/brain/` as vault
+2. Install Obsidian → open `~/Documents/brain/` as vault
 3. Install community plugins: Templater, Obsidian Git, Dataview
 4. Set default new note location to `inbox/`
 5. Create "Inbox" folder in Apple Notes app

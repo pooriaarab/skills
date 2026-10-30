@@ -667,7 +667,7 @@ for each site goes into the catalog (see section 11), not into this file.
 
 ### Best verified targets by niche family
 
-The exact per-site lists live in the directory fleet's catalog. These are the
+The exact per-site lists live in your own fleet's catalog. These are the
 strongest entries from round 1. Round 2 added more in section 12. A "pitch" has no formal route, so send
 one polite note and expect a low hit rate.
 
