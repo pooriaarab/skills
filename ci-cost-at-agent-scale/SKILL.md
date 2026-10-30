@@ -163,6 +163,57 @@ full reference run on matching inputs — the controls in
 it — and it does not require adopting Nx, Bazel, or Turborepo. Directory
 already runs Wireit.
 
+## Ship first, verify after
+
+When a deploy pipeline sees hundreds of merges a day and many deployable units, a gate in front of
+every deploy costs more than the bad changes it stops. Move the checks behind the deploy and give
+the deploy a way back. One pilot used this shape. Report your own measured numbers before you roll
+it to more repos. Do not quote the pilot's numbers as yours.
+
+**Measure first. Two findings changed the plan.**
+- **Wait beat run time.** In the last gated release run, test shards ran 6 to 10 minutes and each
+  waited 20 to 48 minutes for a runner. The release path took 59 minutes. A busy account queues
+  every job behind every other job, so the first fix is fewer jobs, not faster jobs.
+- **Cost followed job count.** A median 15-second job bills about what a one-minute job bills,
+  because the box start dominates. Merge steps into one job. Do not add a job to save a minute.
+- Group by workflow and event before you decide. In the pilot, scheduled probes were 46% of all
+  jobs. Check the default branch first: another agent had already moved them to a one-core hosted
+  runner.
+
+**The shape that worked.**
+1. The agent proves the change on its own machine. The pre-push gate is the only blocking check.
+2. A push to the trunk deploys production. No staging stage, no release branch, no CI wait.
+3. Diff from the last *successful* deploy run, not from the previous push. A deploy run that a newer
+   push replaced while it waited deploys nothing, and a previous-push base then loses its changes.
+4. Deploy a canary first. Run a live smoke and a read-only browser smoke on its real host. Fan out
+   to the rest only when both pass.
+5. Roll back by itself. A failed live check after the app went live calls the platform's version
+   rollback, re-checks health, and opens an issue. Add a manual rollback workflow that builds
+   nothing and takes one unit per run.
+6. CI becomes a net. Run the cheap checks on every trunk push, batched: a concurrency group that
+   does not cancel keeps one run going and one waiting, and a newer push replaces an older waiting
+   one. Run the full end-to-end suite on a schedule. A red result opens an issue.
+7. Write migrations in two pushes: expand, then contract. A rollback restores code and leaves the
+   schema, so old code must run on the new schema.
+8. Keep staging as a manual dispatch input and write a "bring staging back" note. Removal is then a
+   switch, not a loss.
+
+**What went wrong, so you can skip it.**
+- **Gating to save pennies.** Two reviews each found that a small saving removed real coverage:
+  cleaning up previews only for labelled pull requests (about 17 small jobs saved in two days, and a
+  race that left a preview live), and dropping the push secret scan (direct pushes become the main
+  path, so the push scan matters more). Both were reverted. Cut a gate only when the saving is large
+  and no live window is left.
+- **One concurrency group for two event types.** A scheduled run and a push share a ref. Put the
+  event name in the group key, or the long scheduled suite blocks the push checks.
+- **An unproved rollback.** The rollback step cannot be tested without a real deploy. Run a rollback
+  drill on a low-traffic unit before you rely on it.
+- **A reviewer that never says done.** An adversarial review keeps finding narrower windows. Set the
+  bar first: a Major needs a realistic sequence that leaves harm and no recovery path.
+- **Local tooling traps.** A symlinked sibling dependency folder sits outside the bundler's root, so
+  copy it. Build caches survive a reinstall, so clear them. A guard hook that matches command text
+  can fire on a heredoc that only *mentions* a push, so write documents with an editor tool.
+
 ## Fix in this order
 
 Each rung is cheaper and lower-risk than the one below it. Stop when the pain stops.
