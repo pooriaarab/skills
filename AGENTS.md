@@ -20,11 +20,11 @@ Install upstream once per machine: `design-taste` `./scripts/install.sh`; `bette
 
 ## Public naming boundary
 
-This repository is public. A public skill never identifies a private project:
-no private repository name, package name, domain, pull request number, run ID
-or private measurement. Use a generic example instead, such as
-`<your-package>` or "a multi-site monorepo". Put named fleet reports in the
-private operations repository.
+This repository is public. Keep private repository names, project domains,
+private links, and identifying pull request or run numbers out of skills.
+Use generic examples, such as `<your-package>` or "a multi-site monorepo".
+Public dependencies keep their published package identifiers so instructions work.
+Put named fleet reports in the private operations repository.
 
 <!-- pr-standards:start -->
 
