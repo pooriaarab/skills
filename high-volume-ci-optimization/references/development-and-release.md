@@ -47,6 +47,27 @@ Keep queue candidate verification where a queue exists. Choose a queue from
 measured contention and integration risk. Use an event-driven handoff when it
 preserves the same production checks without holding a runner for polling.
 
+## Isolate deployment work in shared pools
+
+Broker claim order does not reserve a GitHub job. GitHub can assign another
+matching job to a JIT runner in the same repository. Use an exclusive job label
+when deployments must avoid browser work. Issue the runner with only that label.
+
+Keep pool request labels separate from job queue labels. Reject mixed labels
+that the issued runner cannot satisfy. Bound priority so ordinary jobs continue
+to progress. Preserve FIFO order within each class, retry backoff, active leases,
+private-repository checks, and completed-parent checks.
+
+Verify the actual registered runner labels and useful job result. A successful
+code deployment does not prove that a live Durable Object uses the new version.
+Check a positive behavior before activating workflows that require the change.
+The [broker runbook](https://github.com/pooriaarab/scripts/tree/main/workers/boat-runners)
+describes one implementation. It does not establish capacity for another fleet.
+
+Retire obsolete checks after verifying their revision is included in the current
+candidate and they no longer gate delivery. Inspect active jobs before cancelling
+a run. Preserve required candidate checks and active deployments.
+
 ## Keep proof without paid review calls
 
 Disable inference workflows and their label triggers when paid review is not
