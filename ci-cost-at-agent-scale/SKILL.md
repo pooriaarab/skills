@@ -165,10 +165,14 @@ already runs Wireit.
 
 ## Ship first, verify after
 
-When a deploy pipeline sees hundreds of merges a day and many deployable units, a gate in front of
-every deploy costs more than the bad changes it stops. Move the checks behind the deploy and give
-the deploy a way back. One pilot used this shape. Report your own measured numbers before you roll
-it to more repos. Do not quote the pilot's numbers as yours.
+This section is an opt-in alternative to the "Preserve production verification" rule above. It
+replaces a required suite at the production revision with checks after the deploy. Use it only when
+all of these hold: the owner chose it; code rollback is a complete undo (no sent email, payment, or
+destructive migration); the agent's own pre-push gate is enforced; and the pipeline has a canary,
+live smoke checks, and automatic rollback. Measured contention must show that the gate cost more
+than the bad changes it caught. Merge volume alone does not show that. When any condition fails,
+keep the gate. One pilot used this shape. Report your own measured numbers before you roll it to
+more repos. Do not quote the pilot's numbers as yours.
 
 **Measure first. Two findings changed the plan.**
 - **Wait beat run time.** In the last gated release run, test shards ran 6 to 10 minutes and each
@@ -193,8 +197,10 @@ it to more repos. Do not quote the pilot's numbers as yours.
 6. CI becomes a net. Run the cheap checks on every trunk push, batched: a concurrency group that
    does not cancel keeps one run going and one waiting, and a newer push replaces an older waiting
    one. Run the full end-to-end suite on a schedule. A red result opens an issue.
-7. Write migrations in two pushes: expand, then contract. A rollback restores code and leaves the
-   schema, so old code must run on the new schema.
+7. Write migrations as expand, then contract. A rollback restores code and leaves the schema, so
+   old code must run on the new schema. Two pushes are not two deploys: a newer push can replace a
+   pending run. Contract only after the compatible code reached every target, and keep every
+   version you could roll back to compatible with the contracted schema.
 8. Keep staging as a manual dispatch input and write a "bring staging back" note. Removal is then a
    switch, not a loss.
 
@@ -206,6 +212,9 @@ it to more repos. Do not quote the pilot's numbers as yours.
   and no live window is left.
 - **One concurrency group for two event types.** A scheduled run and a push share a ref. Put the
   event name in the group key, or the long scheduled suite blocks the push checks.
+- **An unrun deploy command.** Run each deploy step's real command against its real target before
+  you ship it. The pilot's first deploy failed because a tool rejected a flag, so every deploy failed
+  at the same step until the command was fixed. The rollback worked, and that was luck, not a check.
 - **An unproved rollback.** The rollback step cannot be tested without a real deploy. Run a rollback
   drill on a low-traffic unit before you rely on it.
 - **A reviewer that never says done.** An adversarial review keeps finding narrower windows. Set the
