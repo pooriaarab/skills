@@ -185,8 +185,11 @@ more repos. Do not quote the pilot's numbers as yours.
   runner.
 
 **The shape that worked.**
-1. The agent proves the change on its own machine. The pre-push gate is the only blocking check.
-2. A push to the trunk deploys production. No staging stage, no release branch, no CI wait.
+1. The agent proves the change on its own machine. The pre-push gate is the only blocking *CI* check.
+   Keep every other rule that applies before merge: required reviews, secret scans, and Worker
+   preview walks for user-visible changes. Drop one only if the owner replaces that rule in writing.
+2. A push to the trunk deploys production. No staging stage, no release branch, no CI wait. The
+   review and preview rules above still run before that push lands.
 3. Diff from the last *successful* deploy run, not from the previous push. A deploy run that a newer
    push replaced while it waited deploys nothing, and a previous-push base then loses its changes.
 4. Deploy a canary first. Run a live smoke and a read-only browser smoke on its real host. Fan out
